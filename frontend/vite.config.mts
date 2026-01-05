@@ -73,7 +73,7 @@ export default defineConfig({
   // This allows for a dynamic <base> tag in index.html
   base: "./",
   server: {
-    host: "localhost",
+    host: "0.0.0.0",
     port: 3000,
     headers: isPyodide
       ? {

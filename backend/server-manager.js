@@ -12,8 +12,9 @@ const __dirname = path.dirname(__filename);
  * ServerManager manages the Python backend server process
  */
 export class ServerManager {
-  constructor(appRoot) {
+  constructor(appRoot, isElectronPackaged = undefined) {
     this.appRoot = appRoot;
+    this.isElectronPackaged = isElectronPackaged;
     this.serverProcess = null;
     this.status = { status: "stopped", url: null };
     this.statusCallbacks = [];
@@ -54,7 +55,11 @@ export class ServerManager {
    * Check if we're in packaged mode
    */
   isPackaged() {
-    // Check if PyInstaller executable exists
+    // Electronのパッケージ状態を優先
+    if (this.isElectronPackaged !== undefined) {
+      return this.isElectronPackaged;
+    }
+    // フォールバック: PyInstaller executable exists
     try {
       const exePath = this.getServerExecutablePath();
       return fs.existsSync(exePath);

@@ -3,7 +3,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { initLogger, logInfo, logError, logWarn } from "./utils/logger.js";
+import { initLogger, logInfo, logError } from "./utils/logger.js";
 import { getAppRoot } from "./utils/paths.js";
 import { ServerManager } from "../backend/server-manager.js";
 
@@ -62,7 +62,7 @@ async function initServerManager() {
   logInfo("Initializing server manager...");
   try {
     const appRoot = getAppRoot();
-    serverManager = new ServerManager(appRoot);
+    serverManager = new ServerManager(appRoot, app.isPackaged);
 
     // Register status change callback to notify renderer
     serverManager.onStatusChange((status) => {
@@ -159,7 +159,7 @@ process.on("uncaughtException", (error) => {
   logError("Uncaught exception", error);
 });
 
-process.on("unhandledRejection", (reason, promise) => {
+process.on("unhandledRejection", (reason) => {
   logError("Unhandled rejection", new Error(String(reason)));
 });
 
