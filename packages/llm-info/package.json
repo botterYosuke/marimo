@@ -5,21 +5,24 @@
   "type": "module",
   "sideEffects": false,
   "files": [
-    "data/generated/*.json"
+    "data/generated"
   ],
   "exports": {
     ".": "./src/index.ts",
     "./icons/*": "./icons/*",
     "./models.json": "./data/generated/models.json",
-    "./providers.json": "./data/generated/providers.json"
+    "./providers.json": "./data/generated/providers.json",
+    "./models.ts": "./data/generated/models.ts",
+    "./providers.ts": "./data/generated/providers.ts"
   },
   "scripts": {
-    "codegen": "node --experimental-transform-types src/generate.ts",
+    "codegen": "tsx src/generate.ts",
     "test": "vitest",
     "build": "echo 'No build step'"
   },
   "devDependencies": {
-    "@marimo-team/tsconfig": "workspace:*",
+    "@marimo-team/tsconfig": "file:../tsconfig",
+    "tsx": "^4.8.1",
     "yaml": "^2.8.1",
     "vitest": "^3.2.4",
     "zod": "^4.1.13"

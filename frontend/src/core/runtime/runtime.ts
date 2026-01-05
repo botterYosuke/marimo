@@ -103,7 +103,8 @@ export class RuntimeManager {
     });
 
     searchParams.set(KnownQueryParams.sessionId, sessionId);
-    return this.formatWsURL("/ws", searchParams);
+    const wsURL = this.formatWsURL("/ws", searchParams);
+    return wsURL;
   }
 
   /**
@@ -163,8 +164,9 @@ export class RuntimeManager {
       return true;
     }
 
+    const healthURL = this.healthURL().toString();
     try {
-      const response = await fetch(this.healthURL().toString());
+      const response = await fetch(healthURL);
       // If there is a redirect, update the URL in the config
       if (response.redirected) {
         // strip /health from the URL
@@ -177,7 +179,7 @@ export class RuntimeManager {
         this.setDOMBaseUri(this.config.url);
       }
       return success;
-    } catch {
+    } catch (error) {
       return false;
     }
   }

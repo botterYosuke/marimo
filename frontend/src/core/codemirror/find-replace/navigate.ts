@@ -37,6 +37,9 @@ function searchCommand<T>(
 const findInDirection = (direction: "next" | "prev") =>
   searchCommand(({ query }) => {
     const views = getAllEditorViews();
+    if (views.length === 0) {
+      return false;
+    }
     // Get starting view from the store
     const currentView = store.get(findReplaceAtom).currentView || {
       view: views[0],
@@ -56,7 +59,7 @@ const findInDirection = (direction: "next" | "prev") =>
       startingViewIndex = 0;
     }
 
-    const viewsToSearch = [...views, ...views].slice(startingViewIndex);
+    const viewsToSearch = [...views, ...views].slice(startingViewIndex).filter((v): v is NonNullable<typeof v> => v != null);
 
     for (const view of viewsToSearch) {
       const next =
@@ -113,7 +116,7 @@ export const replaceAll = searchCommand(({ query }) => {
   const views = getAllEditorViews();
   const undoHandlers: (() => void)[] = [];
   for (const view of views) {
-    if (view.state.readOnly) {
+    if (!view || view.state.readOnly) {
       continue;
     }
 
@@ -128,9 +131,11 @@ export const replaceAll = searchCommand(({ query }) => {
 
     const prevDoc = view.state.doc.toString();
     undoHandlers.push(() => {
-      replaceEditorContent(view, prevDoc, {
-        userEvent: "input.replace.all",
-      });
+      if (view) {
+        replaceEditorContent(view, prevDoc, {
+          userEvent: "input.replace.all",
+        });
+      }
     });
 
     view.dispatch({
@@ -169,6 +174,10 @@ export const replaceNext = searchCommand(({ query }) => {
   const viewsToSearch = [...views, ...views].slice(startingViewIndex);
 
   for (const view of viewsToSearch) {
+    if (!view) {
+      continue;
+    }
+
     const next = query.nextMatch(view.state, 0, startingPosition ?? 0);
 
     if (!next) {
@@ -205,6 +214,10 @@ export const getMatches = searchCommand(({ query }) => {
   // Position in the document, keyed by view and then by to:from
   const position = new Map<EditorView, Map<string, number>>();
   for (const view of views) {
+    if (!view) {
+      continue;
+    }
+
     const matches = query.matchAll(view.state, 1e9) || [];
     for (const match of matches) {
       const { from, to } = match;

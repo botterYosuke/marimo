@@ -5,8 +5,8 @@ import type {
   AiProvider,
   Role,
 } from "@marimo-team/llm-info";
-import { models } from "@marimo-team/llm-info/models.json";
-import { providers } from "@marimo-team/llm-info/providers.json";
+import { models } from "@marimo-team/llm-info/models.ts";
+import { providers } from "@marimo-team/llm-info/providers.ts";
 import { Logger } from "@/utils/Logger";
 import { MultiMap } from "@/utils/multi-map";
 import { once } from "@/utils/once";
@@ -29,7 +29,7 @@ const getKnownModelMap = once((): ReadonlyMap<QualifiedModelId, AiModel> => {
       ...model,
       model: model.model as ShortModelId,
       roles: model.roles.map((role) => role as Role),
-      providers: model.providers as ProviderId[],
+      providers: [...model.providers] as ProviderId[],
       custom: false,
     };
 

@@ -24,3 +24,29 @@ interface JSON {
 interface Array<T> {
   filter(predicate: BooleanConstructor): NonNullable<T>[];
 }
+
+// Electron API type definitions
+interface ServerStatus {
+  status: "stopped" | "starting" | "running" | "error";
+  url: string | null;
+  port?: number | null;
+}
+
+interface ElectronAPI {
+  isElectron: boolean;
+  getServerURL: () => Promise<string | null>;
+  getServerStatus: () => Promise<ServerStatus>;
+  restartServer: () => Promise<{ success: boolean; message: string }>;
+  onServerStatusChange: (
+    callback: (status: ServerStatus) => void,
+  ) => () => void;
+  getServerLogs: () => Promise<string[]>;
+}
+
+declare global {
+  interface Window {
+    electronAPI?: ElectronAPI;
+  }
+}
+
+export {};

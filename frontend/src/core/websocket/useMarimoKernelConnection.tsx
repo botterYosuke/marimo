@@ -305,7 +305,10 @@ export function useMarimoKernelConnection(opts: {
     /**
      * Unique URL for this session.
      */
-    url: () => runtimeManager.getWsURL(sessionId).toString(),
+    url: () => {
+      const wsURL = runtimeManager.getWsURL(sessionId).toString();
+      return wsURL;
+    },
 
     /**
      * Open callback. Set the connection status to open.
@@ -359,7 +362,32 @@ export function useMarimoKernelConnection(opts: {
      */
     onClose: (e) => {
       Logger.warn("WebSocket closed", e.code, e.reason);
-      switch (e.reason) {
+      
+      // Extract reason string from CloseEvent
+      // CloseEvent.reason can be a string or undefined
+      const reasonString = typeof e.reason === "string" ? e.reason : "";
+      
+      // Check for timeout
+      // e.code is always a number in CloseEvent
+      // e.reason is always a string in CloseEvent
+      const closeCode = e.code;
+      const timeoutReason = reasonString;
+      
+      const isTimeout = closeCode === 1000 && (
+        timeoutReason === "timeout" || reasonString === "timeout"
+      );
+      
+      if (isTimeout) {
+        setConnection({
+          state: WebSocketState.CLOSED,
+          code: WebSocketClosedReason.KERNEL_DISCONNECTED,
+          reason: "Connection timeout: unable to connect to the kernel. Please ensure the server is running and accessible.",
+        });
+        ws.close(); // close to prevent reconnecting
+        return;
+      }
+      
+      switch (reasonString) {
         case "MARIMO_ALREADY_CONNECTED":
           setConnection({
             state: WebSocketState.CLOSED,
@@ -399,7 +427,7 @@ export function useMarimoKernelConnection(opts: {
           //
           // so try reconnecting.
           setConnection({ state: WebSocketState.CONNECTING });
-          tryReconnecting(e.code, e.reason);
+          tryReconnecting(e.code, reasonString);
       }
     },
 
@@ -408,12 +436,9 @@ export function useMarimoKernelConnection(opts: {
      */
     onError: (e) => {
       Logger.warn("WebSocket error", e);
-      setConnection({
-        state: WebSocketState.CLOSED,
-        code: WebSocketClosedReason.KERNEL_DISCONNECTED,
-        reason: "kernel not found",
-      });
-      tryReconnecting();
+      // Don't set connection state here - let onClose handle it
+      // This allows onClose to properly handle the error with the correct close code and reason
+      // onError is typically followed by onClose, so we let onClose handle the state update
     },
   });
 

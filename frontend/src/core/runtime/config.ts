@@ -6,10 +6,19 @@ import { RuntimeManager } from "./runtime";
 import type { RuntimeConfig } from "./types";
 
 function getBaseURI(): string {
+  // In development, use the backend server URL from environment variable or default
+  // The backend server runs on http://127.0.0.1:2718 by default (see server/run.py)
+  if (import.meta.env.DEV) {
+    const backendURL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:2718";
+    return backendURL;
+  }
+  
+  // In production, use the current page's base URI
   const url = new URL(document.baseURI);
   url.search = "";
   url.hash = "";
-  return url.toString();
+  const baseURI = url.toString();
+  return baseURI;
 }
 
 export const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
