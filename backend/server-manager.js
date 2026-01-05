@@ -28,11 +28,11 @@ export class ServerManager {
   getServerExecutablePath() {
     // PyInstallerでビルドした実行可能ファイルのパス
     if (process.platform === "win32") {
-      return path.join(this.appRoot, "server", "dist", "backcast-server", "backcast-server.exe");
+      return path.join(this.appRoot, "backend", "dist", "backcast-server.exe");
     } else if (process.platform === "darwin") {
-      return path.join(this.appRoot, "server", "dist", "backcast-server", "backcast-server");
+      return path.join(this.appRoot, "backend", "dist", "backcast-server");
     } else {
-      return path.join(this.appRoot, "server", "dist", "backcast-server", "backcast-server");
+      return path.join(this.appRoot, "backend", "dist", "backcast-server");
     }
   }
 

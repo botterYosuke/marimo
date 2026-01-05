@@ -340,7 +340,7 @@ backcast/
 │   ├── marimo-api/        # API型定義
 │   ├── smart-cells/       # スマートセル
 │   └── tsconfig/          # TypeScript設定
-├── server/                # Pythonサーバー
+├── backend/               # Pythonサーバー
 │   ├── run.py             # サーバースタートアップスクリプト
 │   ├── backcast.py        # ノートブックファイル
 │   ├── server-manager.js  # サーバー管理（Node.js）

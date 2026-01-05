@@ -9,9 +9,9 @@ directories:
 files:
   - dist/**
   - electron/**
-  - server/dist/**
-  - server/backcast.py
-  - server/server-manager.js
+  - backend/dist/**
+  - backend/backcast.py
+  - backend/server-manager.js
   - package.json
   - "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}"
   - "!.editorconfig"
@@ -20,10 +20,10 @@ files:
   - "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}"
   - "!**/{appveyor.yml,.travis.yml,circle.yml}"
   - "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
-  - "!server/run.py"
-  - "!server/backcast-server.spec"
-  - "!server/build/**"
-  - "!server/*.spec"
+  - "!backend/run.py"
+  - "!backend/backcast-server.spec"
+  - "!backend/build/**"
+  - "!backend/*.spec"
 
 win:
   target:

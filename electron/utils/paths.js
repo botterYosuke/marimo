@@ -23,7 +23,7 @@ export function getAppRoot() {
  * Get the server directory path
  */
 export function getServerDir() {
-  return path.join(getAppRoot(), "server");
+  return path.join(getAppRoot(), "backend");
 }
 
 /**

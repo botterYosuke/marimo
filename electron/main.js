@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { initLogger, logInfo, logError, logWarn } from "./utils/logger.js";
 import { getAppRoot } from "./utils/paths.js";
-import { ServerManager } from "../server/server-manager.js";
+import { ServerManager } from "../backend/server-manager.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
