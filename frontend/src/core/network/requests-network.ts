@@ -127,9 +127,17 @@ export function createNetworkRequests(): EditRequests & RunRequests {
         .then(handleResponseReturnNull);
     },
     saveUserConfig: (request) => {
+      // Python側のSetUserConfigRequestにはmcpフィールドが含まれていないため、
+      // 送信前にmcpフィールドを除外する
+      const { config, ...rest } = request;
+      const { mcp, ...configWithoutMcp } = config ?? {};
+      
       return getClient()
         .POST("/api/kernel/save_user_config", {
-          body: request,
+          body: {
+            ...rest,
+            config: configWithoutMcp,
+          },
         })
         .then(handleResponseReturnNull);
     },

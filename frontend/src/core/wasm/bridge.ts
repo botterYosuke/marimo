@@ -315,14 +315,20 @@ export class PyodideBridge implements RunRequests, EditRequests {
   };
 
   saveUserConfig: EditRequests["saveUserConfig"] = async (request) => {
+    // Python側のSetUserConfigRequestにはmcpフィールドが含まれていないため、
+    // 送信前にmcpフィールドを除外する
+    const { config, ...rest } = request;
+    const { mcp, ...configWithoutMcp } = config ?? {};
+    const requestWithoutMcp = { ...rest, config: configWithoutMcp };
+    
     await this.rpc.proxy.request.bridge({
       functionName: "save_user_config",
-      payload: request,
+      payload: requestWithoutMcp,
     });
 
     return API.post<SaveUserConfigurationRequest>(
       "/kernel/save_user_config",
-      request,
+      requestWithoutMcp,
       { baseUrl: "/" },
     ).catch((error) => {
       // Just log to the console. It is likely a user who hosts their own web-assembly

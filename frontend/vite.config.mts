@@ -69,6 +69,10 @@ const pyodideHtmlPlugin = (): Plugin => {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  test: {
+    globals: true,
+    environment: "jsdom",
+  },
   root: __dirname,
   // This allows for a dynamic <base> tag in index.html
   base: "./",
