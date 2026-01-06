@@ -1,12 +1,11 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { execSync } from "node:child_process";
 import { codecovVitePlugin } from "@codecov/vite-plugin";
 import react from "@vitejs/plugin-react";
-import { JSDOM } from "jsdom";
 import { defineConfig, type Plugin } from "vite";
 import topLevelAwait from "vite-plugin-top-level-await";
 import wasm from "vite-plugin-wasm";
+import path from "node:path";
 
 const SERVER_PORT = process.env.SERVER_PORT || 2718;
 const HOST = process.env.HOST || "127.0.0.1";
@@ -17,194 +16,25 @@ const isPyodide = process.env.PYODIDE === "true";
 
 console.log("Building environment:", process.env.NODE_ENV);
 
-const htmlDevPlugin = (): Plugin => {
+const devHtmlPlugin = (): Plugin => {
   return {
-    apply: "serve",
-    name: "html-transform",
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        if (req.method === "GET" && req.url?.startsWith("/.well-known/")) {
-          res.statusCode = 404;
-          res.end("Not Found");
-          return;
-        }
-        next();
-      });
-    },
-    transformIndexHtml: async (html, ctx) => {
-      if (isStorybook) {
-        return html;
-      }
-
-      // Add react-scan in dev mode
-      if (isDev) {
+    name: "dev-html-plugin",
+    transformIndexHtml(html) {
+      // Add react-scan in dev mode (excluding Storybook)
+      if (isDev && !isStorybook) {
         html = html.replace(
           "<head>",
           '<head>\n<script src="https://unpkg.com/react-scan/dist/auto.global.js"></script>',
         );
       }
-
+      // Pyodide mode support (if needed)
       if (isPyodide) {
-        const marimoVersion = execSync("uv run marimo --version")
-          .toString()
-          .trim();
-        const modeFromUrl = ctx.originalUrl?.includes("mode=read")
-          ? "read"
-          : "edit";
-        html = html.replace("{{ base_url }}", "");
-        html = html.replace("{{ title }}", "marimo");
         html = html.replace(
-          "'{{ mount_config }}'",
-          JSON.stringify({
-            filename: "notebook.py",
-            mode: modeFromUrl,
-            // If VITE_MARIMO_VERSION is defined, pull the local version of marimo
-            // Otherwise, pull the latest version of marimo from PyPI
-            version: process.env.VITE_MARIMO_VERSION ?? marimoVersion,
-            config: {
-              // Add/remove user config here while developing
-              // runtime: {
-              //   auto_instantiate: false,
-              // },
-            },
-            configOverrides: {},
-            appConfig: {},
-            serverToken: "",
-          }),
+          /(<marimo-server-token[^>]*>)/,
+          `$1\n    <marimo-wasm hidden></marimo-wasm>`,
         );
-        html = html.replace(/<\/head>/, "<marimo-wasm></marimo-wasm></head>");
-        return html;
       }
-
-      // fetch html from server
-      let serverHtml: string;
-      try {
-        const serverHtmlResponse = await fetch(TARGET + ctx.originalUrl);
-        if (!serverHtmlResponse.ok) {
-          throw new Error("Failed to fetch");
-        }
-        serverHtml = await serverHtmlResponse.text();
-      } catch {
-        console.error(
-          `Failed to connect to a marimo server at ${TARGET + ctx.originalUrl}`,
-        );
-        console.log(`
-A marimo server may not be running.
-Run \x1b[32mmarimo edit --no-token --headless\x1b[0m in another terminal to start the server.
-
-If the server is already running, make sure it is using port ${SERVER_PORT} with \x1b[1m--port=${SERVER_PORT}\x1b[0m.
-        `);
-        return `
-        <html>
-          <body style="padding: 2rem; font-family: system-ui, sans-serif; line-height: 1.5;">
-            <div style="max-width: 500px; margin: 0 auto;">
-              <h2 style="color: #e53e3e">Server Connection Error</h2>
-
-              <p>
-                Could not connect to marimo server at:<br/>
-                <code style="background: #f7f7f7; padding: 0.2rem 0.4rem; border-radius: 4px;">
-                  ${TARGET + ctx.originalUrl}
-                </code>
-              </p>
-
-              <div style="background: #f7f7f7; padding: 1.5rem; border-radius: 8px;">
-                <div>To start the server, run:</div>
-                <code style="color: #32CD32; font-weight: 600;">
-                  marimo edit --no-token --headless
-                </code>
-              </div>
-
-              <p>
-                If the server is already running, make sure it is using port
-                <code style="font-weight: 600;">${SERVER_PORT}</code>
-                with the flag
-                <code style="font-weight: 600;">--port=${SERVER_PORT}</code>
-              </p>
-            </div>
-          </body>
-        </html>
-        `;
-      }
-
-      const serverDoc = new JSDOM(serverHtml).window.document;
-      const devDoc = new JSDOM(html).window.document;
-
-      if (ctx.originalUrl?.startsWith("/health")) {
-        return serverHtml;
-      }
-
-      // Login page
-      if (!serverHtml.includes("marimo-mode") && serverHtml.includes("login")) {
-        return `
-        <html>
-          <body style="padding: 2rem; font-family: system-ui, sans-serif; line-height: 1.5;">
-            <div style="max-width: 500px; margin: 0 auto;">
-              <h2 style="color: #e53e3e">Authentication Not Supported</h2>
-
-              <p>
-                In development mode, please run the server without authentication:
-              </p>
-
-              <div style="background: #f7f7f7; padding: 1.5rem; border-radius: 8px;">
-                <code style="color: #32CD32; font-weight: 600;">
-                  marimo edit --no-token
-                </code>
-              </div>
-            </div>
-          </body>
-        </html>
-        `;
-      }
-
-      // copies these elements from server to dev
-      const copyElements = ["title", "marimo-filename"];
-
-      // remove from dev
-      copyElements.forEach((id) => {
-        const element = devDoc.querySelector(id);
-        if (!element) {
-          console.warn(`Element ${id} not found.`);
-          return;
-        }
-        element.remove();
-      });
-      // Remove script that contains __MARIMO_MOUNT_CONFIG__
-      const scriptsDev = devDoc.querySelectorAll("script");
-      scriptsDev.forEach((script) => {
-        if (script.innerHTML.includes("__MARIMO_MOUNT_CONFIG__")) {
-          script.remove();
-        }
-      });
-
-      // copy from server
-      copyElements.forEach((id) => {
-        const element = serverDoc.querySelector(id);
-        if (!element) {
-          console.warn(`Element ${id} not found.`);
-          return;
-        }
-        devDoc.head.append(element);
-      });
-
-      // Copy styles
-      const styles = serverDoc.querySelectorAll("style");
-      styles.forEach((style) => {
-        devDoc.head.append(style);
-      });
-
-      // Copy scripts
-      const scripts = serverDoc.querySelectorAll("script");
-      scripts.forEach((script) => {
-        const src = script.getAttribute("src");
-
-        if (src?.startsWith("./assets/")) {
-          return;
-        }
-
-        devDoc.head.append(script);
-      });
-
-      return `<!DOCTYPE html>\n${devDoc.documentElement.outerHTML}`;
+      return html;
     },
   };
 };
@@ -288,6 +118,18 @@ export default defineConfig({
     sourcemap: isDev,
   },
   resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      "@marimo-team/llm-info/icons": path.resolve(__dirname, "../packages/llm-info/icons"),
+      "@marimo-team/llm-info/models.json": path.resolve(
+        __dirname,
+        "../packages/llm-info/data/generated/models.json",
+      ),
+      "@marimo-team/llm-info/providers.json": path.resolve(
+        __dirname,
+        "../packages/llm-info/data/generated/providers.json",
+      ),
+    },
     tsconfigPaths: true,
     dedupe: [
       "react",
@@ -305,7 +147,7 @@ export default defineConfig({
     format: "es",
   },
   plugins: [
-    htmlDevPlugin(),
+    devHtmlPlugin(),
     react({
       babel: {
         presets: ["@babel/preset-typescript"],
