@@ -36,16 +36,8 @@ def main():
         host = os.getenv("HOST", "127.0.0.1")
         
         # Notebook file path
-        notebook_file = server_dir / "backcast.py"
-        
-        # Ensure notebook file exists
-        if not notebook_file.exists():
-            print(f"Creating default notebook file: {notebook_file}")
-            notebook_file.parent.mkdir(parents=True, exist_ok=True)
-            notebook_file.write_text(
-                "# Backcast Notebook\n\nimport marimo\n\n__generated_with = \"0.18.4\"\napp = marimo.App()\n\n\n@app.cell\ndef _():\n    # Backcast Notebook\n    return\n\n\nif __name__ == \"__main__\":\n    app.run()\n",
-                encoding="utf-8"
-            )
+        # Use wasm-intro.py from frontend/public/files/ directory
+        notebook_file = server_dir.parent / "frontend" / "public" / "files" / "wasm-intro.py"
         
         # Create file router
         file_router = AppFileRouter.infer(str(notebook_file))

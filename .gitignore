@@ -36,10 +36,12 @@ lerna-debug.log*
 node_modules/.tmp
 
 *.log
-backend/__marimo__/
-backend/backcast.py
 backend/layouts/backcast.slides.json
 backend/layouts/backcast.grid.json
 release/
 docs_org/
 .cursor/plans/
+.playwright-mcp/
+
+__marimo__/
+__tests__/
