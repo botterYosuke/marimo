@@ -6,11 +6,27 @@ import type { WasmController } from "./types";
 // Falls back to the default controller
 export async function getController(version: string): Promise<WasmController> {
   try {
-    const controller = await import(
+    const controllerModule = await import(
       /* @vite-ignore */ `/wasm/controller.js?version=${version}`
     );
-    return controller;
+    // Check if the module exports a valid controller
+    // It should export a class that implements WasmController interface
+    // If it's an empty module or doesn't export a controller, fall back to default
+    if (
+      controllerModule &&
+      typeof controllerModule === "object" &&
+      ("default" in controllerModule || "WasmController" in controllerModule)
+    ) {
+      const ControllerClass =
+        controllerModule.default || controllerModule.WasmController;
+      if (ControllerClass && typeof ControllerClass === "function") {
+        return new ControllerClass();
+      }
+    }
+    // If no valid controller found, fall back to default
+    return new DefaultWasmController();
   } catch {
+    // If import fails (404, network error, etc.), fall back to default
     return new DefaultWasmController();
   }
 }
