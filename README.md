@@ -3,25 +3,25 @@
 </p>
 
 <p align="center">
-  <em>A reactive Python notebook that's reproducible, git-friendly, and deployable as scripts or apps.</em>
+  <em>再現性が高く、Git に優しく、スクリプトやアプリとして展開できるリアクティブな Python ノートブック。</em>
 </p>
 
 <p align="center">
-  <a href="https://docs.marimo.io" target="_blank"><strong>Docs</strong></a> ·
+  <a href="https://docs.marimo.io" target="_blank"><strong>ドキュメント</strong></a> ·
   <a href="https://marimo.io/discord?ref=readme" target="_blank"><strong>Discord</strong></a> ·
-  <a href="https://docs.marimo.io/examples/" target="_blank"><strong>Examples</strong></a> ·
-  <a href="https://marimo.io/gallery/" target="_blank"><strong>Gallery</strong></a> ·
+  <a href="https://docs.marimo.io/examples/" target="_blank"><strong>サンプル</strong></a> ·
+  <a href="https://marimo.io/gallery/" target="_blank"><strong>ギャラリー</strong></a> ·
   <a href="https://www.youtube.com/@marimo-team/" target="_blank"><strong>YouTube</strong></a>
 </p>
 
 <p align="center">
-  <b>English</b>
+  <a href="https://github.com/marimo-team/marimo/blob/main/README.md" target="_blank"><b>English</b></a>
   <b> | </b>
   <a href="https://github.com/marimo-team/marimo/blob/main/README_Traditional_Chinese.md" target="_blank"><b>繁體中文</b></a>
   <b> | </b>
   <a href="https://github.com/marimo-team/marimo/blob/main/README_Chinese.md" target="_blank"><b>简体中文</b></a>
   <b> | </b>
-  <a href="https://github.com/marimo-team/marimo/blob/main/README_Japanese.md" target="_blank"><b>日本語</b></a>
+  <b>日本語</b>
   <b> | </b>
   <a href="https://github.com/marimo-team/marimo/blob/main/README_Spanish.md" target="_blank"><b>Español</b></a>
 </p>
@@ -35,127 +35,83 @@
   <a href="https://github.com/marimo-team/marimo/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/marimo"/></a>
 </p>
 
-**marimo** is a reactive Python notebook: run a cell or interact with a UI
-element, and marimo automatically runs dependent cells (or <a href="#expensive-notebooks">marks them as stale</a>), keeping code and outputs
-consistent. marimo notebooks are stored as pure Python (with first-class SQL support), executable as scripts,
-and deployable as apps.
+**marimo** はリアクティブな Python ノートブックです。セルを実行したり UI 要素を操作すると、marimo は依存するセルを自動的に実行する（または<a name="expensive-notebooks"></a><a href="#expensive-notebooks">影響を受けるセルを古いものとしてマークする</a>）ことで、コードと出力の一貫性を保ちます。marimo のノートブックは純粋な Python として保存され、スクリプトとして実行でき、アプリとしてデプロイできます。
 
-**Highlights**.
+**Highlights（主な特徴）**
 
-- 🚀 **batteries-included:** replaces `jupyter`, `streamlit`, `jupytext`, `ipywidgets`, `papermill`, and more
-- ⚡️ **reactive**: run a cell, and marimo reactively [runs all dependent cells](https://docs.marimo.io/guides/reactivity.html) or <a href="#expensive-notebooks">marks them as stale</a>
-- 🖐️ **interactive:** [bind sliders, tables, plots, and more](https://docs.marimo.io/guides/interactivity.html) to Python — no callbacks required
-- 🐍 **git-friendly:** stored as `.py` files
-- 🛢️ **designed for data**: query dataframes, databases, warehouses, or lakehouses [with SQL](https://docs.marimo.io/guides/working_with_data/sql.html), filter and search [dataframes](https://docs.marimo.io/guides/working_with_data/dataframes.html)
-- 🤖 **AI-native**: [generate cells with AI](https://docs.marimo.io/guides/generate_with_ai/) tailored for data work
-- 🔬 **reproducible:** [no hidden state](https://docs.marimo.io/guides/reactivity.html#no-hidden-state), deterministic execution, [built-in package management](https://docs.marimo.io/guides/package_management/)
-- 🏃 **executable:** [execute as a Python script](https://docs.marimo.io/guides/scripts.html), parameterized by CLI args
-- 🛜 **shareable**: [deploy as an interactive web app](https://docs.marimo.io/guides/apps.html) or [slides](https://docs.marimo.io/guides/apps.html#slides-layout), [run in the browser via WASM](https://docs.marimo.io/guides/wasm.html)
-- 🧩 **reusable:** [import functions and classes](https://docs.marimo.io/guides/reusing_functions/) from one notebook to another
-- 🧪 **testable:** [run pytest](https://docs.marimo.io/guides/testing/) on notebooks
-- ⌨️ **a modern editor**: [GitHub Copilot](https://docs.marimo.io/guides/editor_features/ai_completion.html#github-copilot), [AI assistants](https://docs.marimo.io/guides/editor_features/ai_completion.html), vim keybindings, variable explorer, and [more](https://docs.marimo.io/guides/editor_features/index.html)
-- 🧑‍💻 **use your favorite editor**: run in [VS Code or Cursor](https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo), or edit in neovim, Zed, [or any other text editor](https://docs.marimo.io/guides/editor_features/watching/)
+- 🚀 **batteries-included:** `jupyter`、`streamlit`、`jupytext`、`ipywidgets`、`papermill` などの代替を目指します。
+- ⚡️ **reactive:** セルを実行すると marimo はリアクティブに[すべての依存セルを実行](https://docs.marimo.io/guides/reactivity.html)するか、影響を受けるセルを古いものとしてマークします。
+- 🖐️ **interactive:** [スライダー、テーブル、プロットなど](https://docs.marimo.io/guides/interactivity.html)を Python にバインドできます（コールバック不要）。
+- 🐍 **git-friendly:** ノートブックは `.py` ファイルとして保存されます。
+- 🛢️ **designed for data:** データフレーム、データベース、ウェアハウス、レイクハウスを [SQL でクエリ](https://docs.marimo.io/guides/working_with_data/sql.html)したり、[データフレームをフィルタ・検索](https://docs.marimo.io/guides/working_with_data/dataframes.html)できます。
+- 🤖 **AI-native:** データ作業に特化した AI でセルを[生成](https://docs.marimo.io/guides/generate_with_ai/)できます。
+- 🔬 **reproducible:** [隠れた状態なし](https://docs.marimo.io/guides/reactivity.html#no-hidden-state)、決定論的な実行、[組み込みパッケージ管理](https://docs.marimo.io/guides/package_management/)を備えています。
+- 🏃 **executable:** ノートブックを [Python スクリプトとして実行](https://docs.marimo.io/guides/scripts.html)でき、CLI 引数でパラメータ化できます。
+- 🛜 **shareable:** インタラクティブな Web アプリとしてデプロイしたり、[スライド](https://docs.marimo.io/guides/apps.html#slides-layout)に変換したり、[WASM でブラウザ実行](https://docs.marimo.io/guides/wasm.html)できます。
+- 🧩 **reusable:** ノートブック間で関数やクラスを[インポートして再利用](https://docs.marimo.io/guides/reusing_functions/)できます。
+- 🧪 **testable:** ノートブックに対して [pytest を実行](https://docs.marimo.io/guides/testing/)できます。
+- ⌨️ **a modern editor:** GitHub Copilot、AI アシスタント、Ruff によるコード整形、高速補完、[VS Code 拡張](https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo) などのエディタ機能を備えています。
+- 🧑‍💻 **use your favorite editor:** VS Code や Cursor、neovim、Zed、その他のテキストエディタで編集できます。
 
 ```python
 pip install marimo && marimo tutorial intro
 ```
 
-_Try marimo at [our online playground](https://marimo.app/l/c7h6pz), which runs entirely in the browser!_
+_ブラウザのみで動作するオンラインプレイグラウンドでも marimo を試すことができます: https://marimo.app/l/c7h6pz_
 
-_Jump to the [quickstart](#quickstart) for a primer on our CLI._
+_クイックスタートは次のセクションを参照してください。_
 
 ## A reactive programming environment
 
-marimo guarantees your notebook code, outputs, and program state are consistent. This [solves many problems](https://docs.marimo.io/faq.html#faq-problems) associated with traditional notebooks like Jupyter.
+marimo はノートブックのコード、出力、プログラム状態の一貫性を保証します。これにより Jupyter のような従来のノートブックに関連する多くの問題が解決されます（詳細は [FAQ](https://docs.marimo.io/faq.html#faq-problems) を参照）。
 
 **A reactive programming environment.**
-Run a cell and marimo _reacts_ by automatically running the cells that
-reference its variables, eliminating the error-prone task of manually
-re-running cells. Delete a cell and marimo scrubs its variables from program
-memory, eliminating hidden state.
+セルを実行すると marimo は _反応_ し、その変数を参照するセルを自動的に再実行することで、手動でセルを再実行することに起因するミスを防ぎます。セルを削除すると、marimo はその変数をメモリから削除し、隠れた状態を排除します。
 
 <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/reactive.gif" width="700px" />
 
-<a name="expensive-notebooks"></a>
+**Compatible with expensive notebooks.** marimo はランタイムを遅延評価に設定でき、影響を受けるセルを自動実行する代わりに古いものとしてマークできます。これにより、高コストなセルの誤実行を防ぎつつプログラム状態の保証を提供します。
 
-**Compatible with expensive notebooks.** marimo lets you [configure the runtime
-to be
-lazy](https://docs.marimo.io/guides/configuration/runtime_configuration.html),
-marking affected cells as stale instead of automatically running them. This
-gives you guarantees on program state while preventing accidental execution of
-expensive cells.
-
-**Synchronized UI elements.** Interact with [UI
-elements](https://docs.marimo.io/guides/interactivity.html) like [sliders](https://docs.marimo.io/api/inputs/slider.html#slider),
-[dropdowns](https://docs.marimo.io/api/inputs/dropdown.html), [dataframe
-transformers](https://docs.marimo.io/api/inputs/dataframe.html), and [chat
-interfaces](https://docs.marimo.io/api/inputs/chat.html), and the cells that
-use them are automatically re-run with their latest values.
+**Synchronized UI elements.** [スライダーやドロップダウン、データフレーム変換、チャットインターフェースなどの UI 要素](https://docs.marimo.io/guides/interactivity.html)を操作すると、それらを使うセルが自動的に最新の値で再実行されます。
 
 <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/readme-ui.gif" width="700px" />
 
-**Interactive dataframes.** [Page through, search, filter, and
-sort](https://docs.marimo.io/guides/working_with_data/dataframes.html)
-millions of rows blazingly fast, no code required.
+**Interactive dataframes.** 数百万行のデータをコード不要でページング、検索、フィルタ、ソートできます。
 
 <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/docs-df.gif" width="700px" />
 
-**Generate cells with data-aware AI.** [Generate code with an AI
-assistant](https://docs.marimo.io/guides/editor_features/ai_completion/) that is highly
-specialized for working with data, with context about your variables in memory;
-[zero-shot entire notebooks](https://docs.marimo.io/guides/generate_with_ai/text_to_notebook/).
-Customize the system prompt, bring your own API keys, or use local models.
+**Generate cells with data-aware AI.** データに文脈を持った AI アシスタントでコードを生成したり、ノートブック全体をゼロショットで生成できます。システムプロンプトのカスタマイズや独自 API キーの利用、ローカルモデルの使用にも対応します。
 
 <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/readme-generate-with-ai.gif" width="700px" />
 
-**Query data with SQL.** Build [SQL](https://docs.marimo.io/guides/working_with_data/sql.html) queries
-that depend on Python values and execute them against dataframes, databases, lakehouses,
-CSVs, Google Sheets, or anything else using our built-in SQL engine, which
-returns the result as a Python dataframe.
+**Query data with SQL.** Python 値に依存する SQL クエリを組み立て、データフレーム、データベース、CSV、Google Sheets などに対して実行できます。組み込みの SQL エンジンは結果を Python のデータフレームとして返します。
 
 <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/readme-sql-cell.png" width="700px" />
 
-Your notebooks are still pure Python, even if they use SQL.
+ノートブックは SQL を使っていても純粋な Python のままです。
 
-**Dynamic markdown.** Use markdown parametrized by Python variables to tell
-dynamic stories that depend on Python data.
+**Dynamic markdown.** Python 変数でパラメタライズされた Markdown を使って動的なストーリーを作成できます。
 
-**Built-in package management.** marimo has built-in support for all major
-package managers, letting you [install packages on import](https://docs.marimo.io/guides/editor_features/package_management.html). marimo can even
-[serialize package
-requirements](https://docs.marimo.io/guides/package_management/inlining_dependencies/)
-in notebook files, and auto install them in
-isolated venv sandboxes.
+**Built-in package management.** marimo は主要なパッケージマネージャをサポートし、インポート時にパッケージをインストールしたり、ノートブック内に依存関係を埋め込んで再現可能な環境を構築できます。
 
-**Deterministic execution order.** Notebooks are executed in a deterministic
-order, based on variable references instead of cells' positions on the page.
-Organize your notebooks to best fit the stories you'd like to tell.
+**Deterministic execution order.** ノートブックの実行順序はセルのページ上の位置ではなく、変数参照に基づいて決定されます。
 
-**Performant runtime.** marimo runs only those cells that need to be run by
-statically analyzing your code.
+**Performant runtime.** 静的解析により、実行が必要なセルのみを効率的に実行します。
 
-**Batteries-included.** marimo comes with GitHub Copilot, AI assistants, Ruff
-code formatting, HTML export, fast code completion, a [VS Code
-extension](https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo),
-an interactive dataframe viewer, and [many more](https://docs.marimo.io/guides/editor_features/index.html)
-quality-of-life features.
+**Batteries-included.** GitHub Copilot、AI アシスタント、Ruff による整形、HTML 出力、インタラクティブなデータフレームビューア、そして [VS Code 拡張](https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo) など、多数の便利機能が含まれています。
 
 ## Quickstart
 
-_The [marimo concepts
-playlist](https://www.youtube.com/watch?v=3N6lInzq5MI&list=PLNJXGo8e1XT9jP7gPbRdm1XwloZVFvLEq)
-on our [YouTube channel](https://www.youtube.com/@marimo-team) gives an
-overview of many features._
+_[marimo の基本的な概念を説明するプレイリスト](https://www.youtube.com/watch?v=3N6lInzq5MI&list=PLNJXGo8e1XT9jP7gPbRdm1XwloZVFvLEq) が公式 YouTube にあります。_
 
-**Installation.** In a terminal, run
+**Installation.** ターミナルで次を実行します。
 
 ```bash
-pip install marimo  # or conda install -c conda-forge marimo
+pip install marimo  # または conda install -c conda-forge marimo
 marimo tutorial intro
 ```
 
-To install with additional dependencies that unlock SQL cells, AI completion, and more,
-run
+SQL セルや AI 補完などの追加機能を含めてインストールするには、次を実行します。
 
 ```bash
 pip install "marimo[recommended]"
@@ -163,14 +119,13 @@ pip install "marimo[recommended]"
 
 **Create notebooks.**
 
-Create or edit notebooks with
+ノートブックを作成または編集するには:
 
 ```bash
 marimo edit
 ```
 
-**Run apps.** Run your notebook as a web app, with Python
-code hidden and uneditable:
+**Run apps.** ノートブックを Web アプリとして実行し、Python コードを非表示にして編集不可にできます:
 
 ```bash
 marimo run your_notebook.py
@@ -178,47 +133,43 @@ marimo run your_notebook.py
 
 <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/docs-model-comparison.gif" style="border-radius: 8px" width="450px" />
 
-**Execute as scripts.** Execute a notebook as a script at the
-command line:
+**Execute as scripts.** ノートブックをスクリプトとしてコマンドラインから実行できます:
 
 ```bash
 python your_notebook.py
 ```
 
-**Automatically convert Jupyter notebooks.** Automatically convert Jupyter
-notebooks to marimo notebooks with the CLI
+**Automatically convert Jupyter notebooks.** CLI で Jupyter ノートブックを marimo ノートブックに変換できます:
 
 ```bash
 marimo convert your_notebook.ipynb > your_notebook.py
 ```
 
-or use our [web interface](https://marimo.io/convert).
+または [ウェブインターフェース](https://marimo.io/convert) を使えます。
 
 **Tutorials.**
-List all tutorials:
+
+すべてのチュートリアルを一覧表示するには:
 
 ```bash
 marimo tutorial --help
 ```
 
-**Share cloud-based notebooks.** Use
-[molab](https://molab.marimo.io/notebooks), a cloud-based marimo notebook
-service similar to Google Colab, to create and share notebook links.
+**Share cloud-based notebooks.**
+
+[molab](https://molab.marimo.io/notebooks) は marimo のクラウドサービスで、ノートブックの共有や実行が可能です。
 
 ## Questions?
 
-See the [FAQ](https://docs.marimo.io/faq.html) at our docs.
+詳細はドキュメントの [FAQ](https://docs.marimo.io/faq.html) を参照してください。
 
 ## Learn more
 
-marimo is easy to get started with, with lots of room for power users.
-For example, here's an embedding visualizer made in marimo
-([video](https://marimo.io/videos/landing/full.mp4)):
+marimo は導入が簡単で、パワーユーザーにも多くの機能を提供します。例えば、marimo で作られた埋め込み可視化ツールの例があります（[動画](https://marimo.io/videos/landing/full.mp4)）。
 
 <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/embedding.gif" width="700px" />
 
-Check out our [docs](https://docs.marimo.io),
-[usage examples](https://docs.marimo.io/examples/), and our [gallery](https://marimo.io/gallery) to learn more.
+詳細は [ドキュメント](https://docs.marimo.io)、[使用例](https://docs.marimo.io/examples/) や [ギャラリー](https://marimo.io/gallery) をご覧ください。
 
 <table border="0">
   <tr>
@@ -283,55 +234,33 @@ Check out our [docs](https://docs.marimo.io),
 
 ## Contributing
 
-We appreciate all contributions! You don't need to be an expert to help out.
-Please see [CONTRIBUTING.md](https://github.com/marimo-team/marimo/blob/main/CONTRIBUTING.md) for more details on how to get
-started.
+貢献を歓迎します。詳しい開始方法は [CONTRIBUTING.md](https://github.com/marimo-team/marimo/blob/main/CONTRIBUTING.md) を参照してください。
 
-> Questions? Reach out to us [on Discord](https://marimo.io/discord?ref=readme).
+> 質問がありますか？[Discord](https://marimo.io/discord?ref=readme) でお問い合わせください。
 
 ## Community
 
-We're building a community. Come hang out with us!
+コミュニティに参加してください！
 
-- 🌟 [Star us on GitHub](https://github.com/marimo-team/marimo)
-- 💬 [Chat with us on Discord](https://marimo.io/discord?ref=readme)
-- 📧 [Subscribe to our Newsletter](https://marimo.io/newsletter)
-- ☁️ [Join our Cloud Waitlist](https://marimo.io/cloud)
-- ✏️ [Start a GitHub Discussion](https://github.com/marimo-team/marimo/discussions)
-- 🦋 [Follow us on Bluesky](https://bsky.app/profile/marimo.io)
-- 🐦 [Follow us on Twitter](https://twitter.com/marimo_io)
-- 🎥 [Subscribe on YouTube](https://www.youtube.com/@marimo-team)
-- 🕴️ [Follow us on LinkedIn](https://www.linkedin.com/company/marimo-io)
+- 🌟 [GitHub でスターをつける](https://github.com/marimo-team/marimo)
+- 💬 [Discord でチャット](https://marimo.io/discord?ref=readme)
+- 📧 [ニュースレターを購読](https://marimo.io/newsletter)
+- ☁️ [クラウドウェイトリストに参加](https://marimo.io/cloud)
+- ✏️ [GitHub でディスカッションを開始](https://github.com/marimo-team/marimo/discussions)
+- 🦋 [Bluesky でフォロー](https://bsky.app/profile/marimo.io)
+- 🐦 [Twitter でフォロー](https://twitter.com/marimo_io)
+- 🎥 [YouTube で購読](https://www.youtube.com/@marimo-team)
+- 🕴️ [LinkedIn でフォロー](https://www.linkedin.com/company/marimo-io)
 
-**A NumFOCUS affiliated project.** marimo is a core part of the broader Python
-ecosystem and is a member of the NumFOCUS community, which includes projects
-such as NumPy, SciPy, and Matplotlib.
+**A NumFOCUS affiliated project.** marimo は NumFOCUS コミュニティに所属しています。
 
-<img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/numfocus_affiliated_project.png" height="40px" />
+## インスピレーション ✨
 
+marimo は、エラーが発生しやすい JSON のスクラッチパッドではなく、再現性が高く、インタラクティブで、共有可能な Python プログラムとしての Python ノートブックの**再発明**です。
 
-## Inspiration ✨
+私たちは、使用するツールが思考のあり方を形作ると信じています — より良いツールは、より良い思考を促します。marimo を通じて、研究とその伝達、コードの実験と共有、計算科学の学習と教育に適した、より良いプログラミング環境を Python コミュニティに提供したいと考えています。
 
-marimo is a **reinvention** of the Python notebook as a reproducible, interactive,
-and shareable Python program, instead of an error-prone JSON scratchpad.
-
-We believe that the tools we use shape the way we think — better tools, for
-better minds. With marimo, we hope to provide the Python community with a
-better programming environment to do research and communicate it; to experiment
-with code and share it; to learn computational science and teach it.
-
-Our inspiration comes from many places and projects, especially
-[Pluto.jl](https://github.com/fonsp/Pluto.jl),
-[ObservableHQ](https://observablehq.com/tutorials), and
-[Bret Victor's essays](http://worrydream.com/). marimo is part of
-a greater movement toward reactive dataflow programming. From
-[IPyflow](https://github.com/ipyflow/ipyflow), [streamlit](https://github.com/streamlit/streamlit),
-[TensorFlow](https://github.com/tensorflow/tensorflow),
-[PyTorch](https://github.com/pytorch/pytorch/tree/main),
-[JAX](https://github.com/google/jax), and
-[React](https://github.com/facebook/react), the ideas of functional,
-declarative, and reactive programming are transforming a broad range of tools
-for the better.
+私たちのインスピレーションは多くの場所やプロジェクトから来ています。特に [Pluto.jl](https://github.com/fonsp/Pluto.jl)、[ObservableHQ](https://observablehq.com/tutorials)、および [Bret Victor のエッセイ](http://worrydream.com/) から多くを学びました。marimo はリアクティブなデータフロープログラミングへの大きなムーブメントの一部です。IPyflow、streamlit、TensorFlow、PyTorch、JAX、React といったプロジェクトから、関数型・宣言型・リアクティブプログラミングの考え方が多くのツールをより良く変えているのを見ています。
 
 <p align="right">
   <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/marimo-logotype-horizontal.png" height="200px">

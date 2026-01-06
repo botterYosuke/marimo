@@ -21,6 +21,12 @@
         ]
       }
     ],
+    "redirects": [
+      {
+        "source": "/wasm/**",
+        "type": 404
+      }
+    ],
     "rewrites": [
       {
         "source": "**",
