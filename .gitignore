@@ -45,3 +45,4 @@ docs_org/
 
 __marimo__/
 __tests__/
+__pycache__

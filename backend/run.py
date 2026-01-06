@@ -13,7 +13,7 @@ import traceback
 from pathlib import Path
 
 from marimo._server.file_router import AppFileRouter
-from marimo._server.model import SessionMode
+from marimo._session.model import SessionMode
 from marimo._server.start import start
 from marimo._server.tokens import AuthToken
 

@@ -28,12 +28,14 @@ import { useAutoExport } from "../export/hooks";
 import { getSerializedLayout, layoutStateAtom } from "../layout/layout";
 import { kioskModeAtom } from "../mode";
 import { connectionAtom } from "../network/connection";
+import { getSessionId } from "../kernel/session";
 import { useRequestClient } from "../network/requests";
 import { WebSocketState } from "../websocket/types";
 import { filenameAtom } from "./file-state";
 import { useFilename, useUpdateFilename } from "./filename";
 import { lastSavedNotebookAtom, needsSaveAtom } from "./state";
 import { useAutoSave } from "./useAutoSave";
+
 
 interface SaveNotebookProps {
   kioskMode: boolean;
@@ -89,7 +91,7 @@ export const SaveComponent = ({ kioskMode }: SaveNotebookProps) => {
 };
 
 export function useSaveNotebook() {
-  const { sendSave } = useRequestClient();
+  const { sendSave, getRunningNotebooks } = useRequestClient();
   const { openModal, closeModal, openAlert } = useImperativeModal();
   const setLastSavedNotebook = useSetAtom(lastSavedNotebookAtom);
   const updateFilename = useUpdateFilename();
@@ -133,11 +135,68 @@ export function useSaveNotebook() {
         return;
       }
 
+      // プラン3: バックエンドから現在のファイル名（絶対パス）を取得
+      let actualFilename = filename;
+      try {
+        const currentSessionId = getSessionId();
+        const runningNotebooksResponse = await getRunningNotebooks();
+
+        // files が存在し、配列であることを確認
+        if (
+          runningNotebooksResponse?.files &&
+          Array.isArray(runningNotebooksResponse.files)
+        ) {
+          const currentSessionFile = runningNotebooksResponse.files.find(
+            (f) => f?.sessionId === currentSessionId
+          );
+
+          if (currentSessionFile?.path) {
+            // バックエンドから取得した絶対パスを使用
+            actualFilename = currentSessionFile.path;
+            Logger.log("Using absolute path from backend", {
+              original: filename,
+              absolute: actualFilename,
+            });
+          } else {
+            // 新規ファイル作成時など、セッションファイルが見つからない場合
+            Logger.warn(
+              "Current session file not found in running notebooks, using filename from atom",
+              {
+                sessionId: currentSessionId,
+                filename,
+                availableFiles: runningNotebooksResponse.files.map((f) => ({
+                  sessionId: f?.sessionId,
+                  path: f?.path,
+                })),
+              }
+            );
+          }
+        } else {
+          Logger.warn(
+            "Running notebooks response has invalid structure, using filename from atom",
+            {
+              sessionId: currentSessionId,
+              filename,
+              response: runningNotebooksResponse,
+            }
+          );
+        }
+      } catch (e) {
+        // エラーが発生した場合は、元のfilenameを使用
+        Logger.warn(
+          "Failed to get filename from backend, using filename from atom",
+          {
+            error: e,
+            filename,
+          }
+        );
+      }
+
       await sendSave({
         cellIds: cellIds,
         codes,
         names: cellNames,
-        filename,
+        filename: actualFilename,
         configs,
         layout: getSerializedLayout(),
         persist: true,
@@ -165,8 +224,11 @@ export function useSaveNotebook() {
   });
 
   const handleSaveDialog = (pythonFilename: string) => {
+    // 新規ファイル作成時: updateFilename でバックエンドにファイル名を設定してから保存
     updateFilename(pythonFilename).then((name) => {
       if (name !== null) {
+        // updateFilename 完了後、バックエンドにファイル情報が反映されている可能性がある
+        // saveNotebook 内で getRunningNotebooks() を呼び出すことで、最新のファイル情報を取得
         saveNotebook(name, true);
       }
     });

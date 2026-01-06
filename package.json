@@ -9,7 +9,7 @@
   ],
   "main": "electron/main.js",
   "scripts": {
-    "vite": "vite --config frontend/vite.config.mts",
+    "vite": "cd frontend && vite",
     "server": "cross-env ENV=development python -u backend/run.py",
     "dev": "concurrently --names \"server,vite\" --prefix-colors \"blue,green\" --kill-others-on-fail false \"pnpm run server\" \"pnpm vite\"",
     "dev:pyodide": "cross-env PYODIDE=true pnpm vite",
