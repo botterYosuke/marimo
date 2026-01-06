@@ -41,3 +41,5 @@ backend/backcast.py
 backend/layouts/backcast.slides.json
 backend/layouts/backcast.grid.json
 release/
+docs_org/
+.cursor/plans/

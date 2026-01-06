@@ -1,22 +1,22 @@
 # Jupyterからの移行
 
-Jupyterから移行する場合、marimoノートブックに適応するためのヒントをいくつか紹介します。
+Jupyterから移行する場合、Backcastノートブックに適応するためのヒントをいくつか紹介します。
 
-## marimoがセルを実行する方法
+## Backcastがセルを実行する方法
 
-marimoとJupyterの最大の違いは[実行モデル](../reactivity.md)です。
+BackcastとJupyterの最大の違いは[実行モデル](../reactivity.md)です。
 
 **Jupyter**ノートブックは**REPL**です：コードブロックを1つずつ実行し、Jupyterは異なるブロックが互いにどのように関連しているかを理解しません。その結果、Jupyterノートブックは簡単に**「隠れた状態」**（および隠れたバグ）を蓄積する可能性があります—セルを誤って順序外で実行したり、セルを実行（または削除）しても、その変数に依存していたセルを再実行するのを忘れたりする可能性があります。このため、Jupyterノートブックは[再現性の問題](../../faq.md#faq-problems)に悩まされており、GitHub上のJupyterノートブックの3分の1以上が再現できません。
 
-Jupyterとは異なり、**marimo**ノートブックは異なるコードブロックが互いにどのように関連しているかを理解し、変数宣言と参照に基づいてコードをセルのグラフとしてモデル化します。これにより隠れた状態が排除され、marimoノートブックをアプリやスクリプトとして再利用できる理由でもあります。
+Jupyterとは異なり、**Backcast**ノートブックは異なるコードブロックが互いにどのように関連しているかを理解し、変数宣言と参照に基づいてコードをセルのグラフとしてモデル化します。これにより隠れた状態が排除され、Backcastノートブックをアプリやスクリプトとして再利用できる理由でもあります。
 
-**デフォルトでは、marimoでセルを実行すると、その変数を読み取る他のすべてのセルが自動的に実行されます。** これによりコードと出力が同期されますが、慣れるまでに時間がかかる場合があります。**marimoの実行モデルに適応するためのヒントとツールをいくつか紹介します。**
+**デフォルトでは、Backcastでセルを実行すると、その変数を読み取る他のすべてのセルが自動的に実行されます。** これによりコードと出力が同期されますが、慣れるまでに時間がかかる場合があります。**Backcastの実行モデルに適応するためのヒントとツールをいくつか紹介します。**
 
-### marimoのランタイムを設定する
+### Backcastのランタイムを設定する
 
-[marimoのランタイムを設定](../configuration/runtime_configuration.md)して、起動時またはセル実行時に自動実行しないようにします。
+[Backcastのランタイムを設定](../configuration/runtime_configuration.md)して、起動時またはセル実行時に自動実行しないようにします。
 
-自動実行が無効になっている場合でも、marimoはセル間の依存関係を追跡し、セルを実行するとその依存セルを古いものとしてマークします。単一のボタンをクリックして、すべての古いセルを実行し、ノートブックを最新の状態に戻すことができます。
+自動実行が無効になっている場合でも、Backcastはセル間の依存関係を追跡し、セルを実行するとその依存セルを古いものとしてマークします。単一のボタンをクリックして、すべての古いセルを実行し、ノートブックを最新の状態に戻すことができます。
 
 ### `mo.stop`で実行を停止する
 
@@ -52,11 +52,11 @@ def __():
 
 ### 高コストなノートブックでの作業
 
-marimoの実行モデルに適応するための追加のヒントについては、[高コストなノートブックでの作業](../expensive_notebooks.md)ガイドをご覧ください。
+Backcastの実行モデルに適応するための追加のヒントについては、[高コストなノートブックでの作業](../expensive_notebooks.md)ガイドをご覧ください。
 
 ## 変数の再定義
 
-marimoはノートブックセルを変数宣言と参照によってリンクされたセルの有向グラフに「コンパイル」し、このグラフを再利用してノートブックをスクリプトやアプリとして実行します。marimoのコンパイルが機能するためには、同じ変数を複数のセルで定義することはできません。そうしないと、marimoはセルを実行する順序がわからなくなります。
+Backcastはノートブックセルを変数宣言と参照によってリンクされたセルの有向グラフに「コンパイル」し、このグラフを再利用してノートブックをスクリプトやアプリとして実行します。Backcastのコンパイルが機能するためには、同じ変数を複数のセルで定義することはできません。そうしないと、Backcastはセルを実行する順序がわからなくなります。
 
 この制限に適応するために、以下を推奨します：
 
@@ -64,7 +64,7 @@ marimoはノートブックセルを変数宣言と参照によってリンク�
 2. 一時変数にアンダースコア（`_my_temporary`）を付けて、変数をセルに**ローカル**にする
 3. 変数を定義するセルで変数を変更する
 
-**データフレーム**を扱う場合、複数のセルで同じ`df`変数を再定義することに慣れているかもしれません。これはmarimoでは機能しません。代わりに、セルを1つのセルにマージしてみてください：
+**データフレーム**を扱う場合、複数のセルで同じ`df`変数を再定義することに慣れているかもしれません。これはBackcastでは機能しません。代わりに、セルを1つのセルにマージしてみてください：
 
 _これをしないでください：_
 
@@ -94,53 +94,21 @@ augmented_df = df
 augmented_df["another_column"] = [3, 4]
 ```
 
-marimoの実行モデルにより適した関数型スタイルでPandas/Polarsコードを記述する方法を学ぶには、[このYouTube動画](https://youtu.be/J0PJpdU7c4g)をご覧ください。
+Backcastの実行モデルにより適した関数型スタイルでPandas/Polarsコードを記述する方法を学ぶには、[このYouTube動画](https://youtu.be/J0PJpdU7c4g)をご覧ください。
 
-## marimoのファイル形式
+## Backcastのファイル形式
 
-marimoはノートブックをJSONではなくPythonとして保存します。これにより、gitでノートブックをバージョン管理し、[スクリプトとして実行](../scripts.md)し、名前付きセルを他のPythonファイルにインポートできます。ただし、ノートブックの出力（例：プロット）がファイルに保存されないことを意味します。
+BackcastはノートブックをJSONではなくPythonとして保存します。これにより、gitでノートブックをバージョン管理し、[スクリプトとして実行](../scripts.md)し、名前付きセルを他のPythonファイルにインポートできます。ただし、ノートブックの出力（例：プロット）がファイルに保存されないことを意味します。
 
 ノートブック作業の視覚的な記録を保持したい場合は、["Auto-download as HTML/IPYNB"設定](../configuration/index.md)を有効にします。これにより、ノートブックが定期的にHTMLまたはIPYNBとしてノートブックディレクトリ内の`__marimo__`フォルダにスナップショットされます。
 
-### Jupyterノートブックをmarimoノートブックに変換する
+### ノートブックの変換
 
-コマンドラインでJupyterノートブックをmarimoノートブックに変換します：
-
-```bash
-marimo convert your_notebook.ipynb -o your_notebook.py
-```
-
-### Pythonスクリプトをmarimoノートブックに変換する
-
-marimoは通常のPythonスクリプトをmarimoノートブックに変換することもできます：
-
-```bash
-marimo convert your_script.py -o your_notebook.py
-```
-
-これにより以下がサポートされます：
-- **py:percent形式**：スクリプトが`# %%`セルマーカーを使用している場合、marimoはそれをマルチセルノートブックに変換します（jupytextが必要）
-- **通常のPythonスクリプト**：セルマーカーがないスクリプトは単一セルノートブックに変換されます
-
-uvでpy:percent変換を行う場合：
-
-```bash
-uvx --with=jupytext marimo convert your_script.py -o your_notebook.py
-```
-
-### marimoノートブックをJupyterノートブックにエクスポートする
-
-`ipynb`ファイルにエクスポートします：
-
-```bash
-marimo export ipynb notebook.py -o notebook.ipynb
-```
-
-UI要素を含む一部のmarimoライブラリ関数は、Jupyterノートブックでは機能しないことに注意してください。
+Backcastはmarimoベースのため、ノートブックの変換機能については、marimoの公式ドキュメントを参照してください。
 
 ## マジックコマンド
 
-marimoノートブックは単なるPython（保守性を向上）であるため、marimoはIPythonマジックコマンドや`!`で始まるコンソールコマンドをサポートしていません。代替方法をいくつか紹介します。
+Backcastノートブックは単なるPython（保守性を向上）であるため、BackcastはIPythonマジックコマンドや`!`で始まるコンソールコマンドをサポートしていません。代替方法をいくつか紹介します。
 
 ### subprocess.runでコンソールコマンドを実行する
 
@@ -163,10 +131,10 @@ subprocess.run(["ls", "-l"])
 | %env          | `os.environ`                                                                                   |
 | %load         | N/A - Pythonインポートを使用                                                                       |
 | %load_ext     | N/A                                                                                            |
-| %autoreload   | marimoの[モジュール自動再読み込み](../editor_features/module_autoreloading.md)                     |
-| %matplotlib   | marimoは自動的にプロットを表示                                                                     |
+| %autoreload   | Backcastの[モジュール自動再読み込み](../editor_features/module_autoreloading.md)                     |
+| %matplotlib   | Backcastは自動的にプロットを表示                                                                     |
 | %pwd          | `os.getcwd()`                                                                                  |
-| %pip          | marimoの[組み込みパッケージ管理](../editor_features/package_management.md)を使用           |
+| %pip          | Backcastの[組み込みパッケージ管理](../editor_features/package_management.md)を使用           |
 | %who_ls       | `dir()`、`globals()`、[`mo.refs()`][marimo.refs]、[`mo.defs()`][marimo.defs]                   |
 | %system       | `subprocess.run()`                                                                             |
 | %%time        | `time.perf_counter()`またはPythonのtimeitモジュール                                                |
@@ -176,13 +144,13 @@ subprocess.run(["ls", "-l"])
 | %%html        | [`mo.Html()`][marimo.Html]または[`mo.md()`][marimo.md]                                           |
 | %%latex       | [`mo.md(r'$$...$$')`][marimo.md]                                                               |
 
-### marimoのパッケージマネージャーでパッケージをインストールする
+### Backcastのパッケージマネージャーでパッケージをインストールする
 
-marimoのパッケージ管理サイドバーパネルを使用して、現在の環境にパッケージをインストールします。詳細は[パッケージ管理ガイド](../editor_features/package_management.md)をご覧ください。
+Backcastのパッケージ管理サイドバーパネルを使用して、現在の環境にパッケージをインストールします。詳細は[パッケージ管理ガイド](../editor_features/package_management.md)をご覧ください。
 
 ## インタラクティブガイド
 
-このガイドには、marimoに適応するための追加のヒントが含まれています。面白い事実：このガイド自体がmarimoノートブックです！
+このガイドには、Backcastに適応するための追加のヒントが含まれています。
 
 <iframe src="https://marimo.app/l/z0aerp?embed=true" class="demo xxlarge" frameBorder="0">
 </iframe>
