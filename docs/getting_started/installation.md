@@ -13,8 +13,9 @@ BackcastはElectronアプリケーションとして動作します。開発環�
 ### 1. リポジトリのクローン
 
 ```powershell
+# 注意: 以下のリポジトリURLは例です。実際のBackcastリポジトリのURLに置き換えてください
 git clone <repository-url>
-cd marimo
+cd backcast
 ```
 
 ### 2. 依存関係のインストール
@@ -70,7 +71,7 @@ Backcastはmarimoベースのバックエンドサーバーを使用します。
 /// admonition | インストールの問題？
     type: note
 
-インストールに問題がありますか？[GitHub Issues](https://github.com/your-org/backcast/issues)でお問い合わせください。
+インストールに問題がありますか？プロジェクトのGitHub Issuesでお問い合わせください。
 ///
 
 ## ビルド済みアプリ（将来の機能）

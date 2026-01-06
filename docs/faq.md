@@ -30,7 +30,7 @@ Jupyterノートブックでは、表示されるコードがページ上の出�
 
 対照的に、Backcastはコード、出力、プログラム状態が一貫していることを保証し、隠れた状態を排除してノートブックを再現可能にします。Backcastは、コードをインテリジェントに分析し、セル間の関係を理解し、必要に応じてセルを自動的に再実行することでこれを実現します。
 
-さらに、Backcastノートブックはパッケージ要件をインラインでシリアル化できます。Backcastはこれらの「サンドボックス化された」ノートブックを一時的な仮想環境で実行し、[パッケージまで再現可能](guides/editor_features/package_management.md)にします。
+さらに、Backcastノートブックはパッケージ要件をインラインでシリアル化できます。Backcastはこれらの「サンドボックス化された」ノートブックを一時的な仮想環境で実行し、パッケージまで再現可能にします（将来の機能として拡張予定）。
 
 **保守性。**
 Backcastノートブックは純粋なPythonプログラム（`.py`ファイル）として保存されます。これにより、Gitでバージョン管理できます。対照的に、JupyterノートブックはJSONとして保存され、バージョン管理には追加の手順が必要です。
@@ -109,13 +109,13 @@ _高コストなセルの誤った実行を避けるためのヒント：_
 - [`mo.stop`][marimo.stop]を使用して、セルとその子孫の実行を条件付きで停止します。
 - 高コストな中間計算をキャッシュするために、Backcastの[`mo.cache`][marimo.cache]で関数をデコレートします。
 - [`mo.persistent_cache`][marimo.persistent_cache]を使用して変数をディスクにキャッシュします。再実行時、Backcastはセルが古くない限り、再計算する代わりにディスクから値を読み取ります。
-- [ランタイム設定](guides/configuration/runtime_configuration.md)で自動実行を無効にします。
+- ランタイム設定で自動実行を無効にします（将来の機能として拡張予定）。
 
 <a name="faq-lazy"></a>
 
 ### 自動実行を無効にするにはどうすればよいですか？
 
-ノートブックのランタイム設定から自動実行を無効にできます。詳細は[ランタイム設定ガイド](guides/configuration/runtime_configuration.md)をご覧ください。
+ノートブックのランタイム設定から自動実行を無効にできます（将来の機能として拡張予定）。
 
 自動実行が無効になっている場合でも、Backcastはノートブック状態について保証を提供し、適切な場合にセルを自動的に古いものとしてマークします。
 
@@ -151,7 +151,7 @@ form = marimo.ui.text_area().form()
 
 ### markdownをどのように記述しますか？
 
-ノートブックで`marimo`（`mo`として）をインポートし、`mo.md`関数を使用します。詳細は[出力ガイド](guides/outputs.md#markdown)をご覧ください。
+ノートブックで`marimo`（`mo`として）をインポートし、`mo.md`関数を使用します。
 
 <a name="faq-plots"></a>
 
@@ -159,7 +159,7 @@ form = marimo.ui.text_area().form()
 
 他のすべての出力と同様に、セルの最後の式にプロットを含めて表示します。matplotlibを使用している場合、`Figure`オブジェクトを表示できます（`plt.gcf()`で現在の図を取得）。
 
-[プロットAPIリファレンス](api/plotting.md)もご覧ください。
+プロットの詳細については、[APIリファレンス](./api/index.md)をご覧ください。
 
 <a name="faq-mpl-cutoff"></a>
 
@@ -208,7 +208,7 @@ mo.mpl.interactive(ax)
 
 カスタムフォーマットが必要な場合は[`mo.ui.batch`][marimo.ui.batch]を使用し、それ以外の場合は[`mo.ui.array`][marimo.ui.array]または[`mo.ui.dictionary`][marimo.ui.dictionary]を使用します。
 
-使用例については、[UI要素をグループ化するレシピ](recipes.md#grouping-ui-elements-together)をご覧ください。
+使用例については、[インタラクティビティガイド](guides/interactivity.md)をご覧ください。
 
 <a name="faq-restart"></a>
 

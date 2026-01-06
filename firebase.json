@@ -21,16 +21,9 @@
         ]
       }
     ],
-    "redirects": [
-      {
-        "source": "/wasm/**",
-        "destination": "/404",
-        "type": 404
-      }
-    ],
     "rewrites": [
       {
-        "source": "**",
+        "source": "!/wasm/**",
         "destination": "/index.html"
       }
     ]
