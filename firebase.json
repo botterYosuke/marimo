@@ -24,6 +24,7 @@
     "redirects": [
       {
         "source": "/wasm/**",
+        "destination": "/404",
         "type": 404
       }
     ],

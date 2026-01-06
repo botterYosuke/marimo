@@ -1,6 +1,6 @@
 # APIリファレンス
 
-marimoノートブックでmarimoライブラリ（`import marimo as mo`）を使用して：
+Backcastノートブックでmarimoライブラリ（`import marimo as mo`）を使用して（注：Backcastはmarimoベースのため、バックエンドAPIは`marimo`として提供されます）：
 
 - スライダー、ドロップダウン、テーブルなどのインタラクティブな入力をPythonに接続
 - 動的に作成されたmarkdownで表現
