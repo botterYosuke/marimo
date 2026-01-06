@@ -1,0 +1,231 @@
+# エディタ概要
+
+このガイドでは、marimoエディタの機能の一部を紹介します。これには、変数パネル、依存グラフビューア、目次、HTMLエクスポート、[GitHub copilot](ai_completion.md#github-copilot)、コードフォーマット、フィードバックフォームなどが含まれます。
+
+## 設定
+
+エディタは、現在のノートブックの設定と、すべてのノートブックに適用されるユーザー全体の設定を公開します。これらの設定には、現在のノートブックを全幅で表示するオプション、[vimキーバインディング](#vim-keybindings)を使用するオプション、[GitHub copilot](ai_completion.md#github-copilot)を有効にするオプションなどが含まれます。
+
+これらの設定にアクセスするには、エディタの右上の歯車アイコンをクリックします：
+
+<div align="center">
+<img src="../../_static/docs-user-config.png"  />
+</div>
+
+設定の非網羅的なリスト：
+
+- [コマンドモード](#command-mode)
+- コードセルの上または下に出力
+- [自動実行の無効化/有効化](../reactivity.md#configuring-how-marimo-runs-cells)
+- パッケージインストール
+- [Vimキーバインディング](#vim-keybindings)
+- ダークモード
+- 自動保存
+- 自動補完
+- エディタフォントサイズ
+- ruff/blackによるコードフォーマット
+- [GitHub Copilot](ai_completion.md#github-copilot)
+- [LLMコーディングアシスタント](ai_completion.md)
+- [モジュール自動再読み込み](../configuration/runtime_configuration.md#on-module-change)
+- [リアクティブ参照ハイライト](dataflow.md#reactive-reference-highlighting)
+
+## コマンドモード
+
+marimoは、セル内容の編集と、ノートブックレベルでのセルの操作を区別します。
+
+**コマンドモード**では、内容を編集するのではなく、_セル_をナビゲート、選択、操作できます。
+
+**入る/出る：**
+
+- コマンドモードに入る：`Esc`（セルエディタから）または`Ctrl+Esc`/`Cmd+Esc`（[vimキーバインディング](#vim-keybindings)が有効な場合、Windowsでは`Shift+Esc`）
+- コマンドモードを出る：`Enter`またはセルをクリック
+
+**ショートカット：**
+
+- `↓`/`↑` - セルをナビゲート
+- `Shift+↓`/`Shift+↑` - セルを複数選択
+- `Enter` - 選択したセルを編集
+- `a`/`b` - 上/下に新しいセル
+- `c`/`v` - セルをコピー/貼り付け
+- `s` - ノートブックを保存
+- `Shift+Enter` - セルを実行して次に移動
+- `Ctrl/Cmd+↑` / `Ctrl/Cmd+↓` - ノートブックの上部/下部にジャンプ
+
+[vimキーバインディング](#vim-keybindings)が有効な場合、追加のショートカットが利用できます。
+
+### Vimキーバインディング
+
+marimoはノートブック編集に拡張されたvimキーバインディングをサポートしています。セル内では、標準のvimモードを使用します。ノーマルモードから`Ctrl+Esc`（またはmacOSでは`Cmd+Esc`、Windowsでは`Shift+Esc`）を押して、ノートブックナビゲーション用の[コマンドモード](#command-mode)に入ります。
+
+**セル編集の追加：**
+
+- `gd` - 定義に移動
+- `dd` - 空のセルを削除
+- `:w` - ノートブックを保存
+
+**カスタムvimrc：**
+
+ユーザー設定またはpyproject.tomlに`.vimrc`設定を追加することで、vimエクスペリエンスをカスタマイズできます。
+
+/// tab | ユーザー設定
+
+```toml title="marimo.toml"
+[keymap]
+vimrc = /User/absolute/path/to/.vimrc
+```
+
+///
+
+/// tab | pyproject.toml
+
+```toml title="pyproject.toml"
+[tool.marimo.keymap]
+vimrc = relative/path/.vimrc
+```
+
+///
+
+**コマンドモードの追加：**
+
+vimキーバインディングが有効な場合、ノーマルモードから`Ctrl+Esc`（またはmacOSでは`Cmd+Esc`、Windowsでは`Shift+Esc`）を押して、追加のvim固有のキーバインディングで[コマンドモード](#command-mode)に入ります：
+
+- `j`/`k` - セルをナビゲート
+- `gg`/`G` - 最初/最後のセル
+- `Shift+j`/`k` - 選択を拡張
+- `dd` - セルを削除
+- `yy` - セルをコピー
+- `p`/`P` - 下/上に貼り付け
+- `o`/`O` - 下/上に新しいセル
+- `u` - 削除を元に戻す
+- `i` - セルを編集（つまり、ノーマルモードに戻る）
+
+`i`または`Enter`を押してセル編集に戻ります。
+
+## 概要パネル
+
+marimoには、ノートブックの概要を提供するIDEパネルが付属しています：
+
+- **ファイルエクスプローラー**：ファイルツリーを表示し、他のノートブックを開く
+- **変数**：変数値を探索し、定義と使用場所を確認し、定義への移動が可能
+- **データエクスプローラー**：データフレームとテーブルスキーマを一目で確認
+- **データフローツール**：ノートブック構造とセルの依存関係を視覚化してナビゲート（[データフローの理解](dataflow.md)を参照）
+- **パッケージマネージャー**：パッケージを追加・削除し、現在の環境を表示
+- **目次**：markdownに対応
+- **ドキュメント** - テキストカーソルをシンボルに移動してドキュメントを表示
+- **ログ**：stdoutとstderrの継続的なストリーム
+- **スクラッチパッド**：一時的なコードを実行できるスクラッチパッドセル
+- **スニペット** - ノートブックに直接コピーできる検索可能なスニペット
+- **フィードバック** - フィードバックを共有！
+
+これらのパネルは、エディタの左側のボタンで切り替えることができます。
+
+## セルアクション
+
+セルの右上の3つの点をクリックしてコンテキストメニューを表示し、コードのフォーマット、コードの非表示、セルをノートブックの上部または下部に送信、セルに名前を付けるなどを行うことができます。
+
+セルの右側の縦の点を使用してセルをドラッグします。
+
+## 右クリックメニュー
+
+marimoは、エディタのさまざまな場所でコンテキストに応じた右クリックメニューをサポートしています。セルを右クリックしてコンテキストに応じたメニューを開きます。セル作成ボタン（プラスアイコン）を右クリックして、作成するセルタイプのオプションを取得します。
+
+## 定義への移動
+
+- エディタ内の変数をクリックして、定義と使用場所を確認
+- 変数に`Cmd/Ctrl-Click`して定義にジャンプ
+- 変数を右クリックして、定義にジャンプするオプションを含むコンテキストメニューを表示
+
+## シグネチャヒント
+
+シグネチャヒントは、入力時にコードの上に関数のdocstringを表示し、引数と使用方法を簡単に思い出すことができます。この機能は、設定パネルの**エディタ**セクションで有効にできます。
+
+<div align="center">
+<figure>
+<img src="../../_static/docs-signature-hint.png" width="600px" />
+</figure>
+</div>
+
+
+## キーボードショートカット
+
+ノートブック用のよく知られた[キーボードショートカット](hotkeys.md)（`Ctrl-Enter`、`Shift-Enter`）をいくつか保持し、他のものを削除し、独自のものを追加しました。`Ctrl/Cmd-Shift-H`を押してショートカットを表示します。
+
+キーボードショートカットは非常に個人的なものですが、設定で再マッピングできます。
+
+_ショートカットが見つからない場合？[GitHub issue](https://github.com/marimo-team/marimo/issues)を提出してください。_
+
+
+## コマンドパレット
+
+`Cmd/Ctrl+K`を押してコマンドパレットを開きます。
+
+<div align="center">
+<figure>
+<img src="../../_static/docs-command-palette.png"/>
+<figcaption>コマンドパレットで一般的なコマンドにすばやくアクセスします。</figcaption>
+</figure>
+</div>
+
+_コマンドが見つからない場合？[GitHub issue](https://github.com/marimo-team/marimo/issues)を提出してください。_
+
+## エディタ幅
+
+ノートブック設定でエディタの幅を設定できます：
+
+- **コンパクト**：余白が広い狭い幅、読み取りに最適
+- **ワイド**：コンテンツにより多くのスペースを与える広いレイアウト
+- **フル**：ブラウザウィンドウの全幅を使用、ダッシュボードスタイルのノートブックに最適
+- **マルチカラム**：ノートブックを複数の列に分割し、セルを並べて表示・編集できます。これは、marimoがノートブックを有向非巡回グラフ（DAG）としてモデル化し、[実行順序](../reactivity.md#execution-order)がページ上のセルの順序ではなく、セルとその変数間の関係によって決定されるためです。
+
+<div align="center">
+<figure>
+<img src="../../_static/docs-multi-column.png"/>
+<figcaption>マルチカラムノートブック</figcaption>
+</figure>
+</div>
+
+## オンラインプレイグラウンドで共有
+
+[オンラインプレイグラウンド](../wasm.md)を介してノートブックを共有するためのリンクを取得します：
+
+<div align="center">
+<figure>
+<video autoplay muted loop playsinline width="100%" height="100%" align="center">
+    <source src="../../_static/share-wasm-link.mp4" type="video/mp4">
+    <source src="../../_static/share-wasm-link.webm" type="video/webm">
+</video>
+</figure>
+</div>
+
+_オンラインプレイグラウンドはWebAssemblyを使用します。PyPI上のパッケージのほとんどがサポートされていますが、すべてではありません。ローカルファイルはプレイグラウンドに同期されません。_
+
+## 静的HTMLにエクスポート
+
+ノートブックメニューから、現在のビューを静的HTMLにエクスポートします：
+
+<div align="center">
+<figure>
+<img src="../../_static/docs-html-export.png"/>
+<figcaption>静的HTMLとしてダウンロードします。</figcaption>
+</figure>
+</div>
+
+コマンドラインからHTMLにエクスポートすることもできます：
+
+```bash
+marimo export html notebook.py -o notebook.html
+```
+
+## フィードバックを送信
+
+パネルトレイの疑問符アイコンをクリックして、匿名フィードバックを送信するダイアログを開きます。最も小さな不満から最大の青空の夢まで、すべてのフィードバックを歓迎します。
+
+<div align="center">
+<figure>
+<img src="../../_static/docs-feedback-form.png"/>
+<figcaption>フィードバックフォームで匿名フィードバックを送信します。</figcaption>
+</figure>
+</div>
+
+フィードバックを会話のきっかけにしたい場合（お話ししたいです！）、[GitHub issues](https://github.com/marimo-team/marimo/issues)または[Discord](https://marimo.io/discord?ref=docs)に投稿することを検討してください。ただし、フロー状態でコンテキストスイッチできない場合は、フィードバックフォームがバックアップします。
+
