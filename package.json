@@ -66,7 +66,7 @@
     "@marimo-team/codemirror-mcp": "^0.1.5",
     "@marimo-team/codemirror-sql": "^0.2.4",
     "@marimo-team/llm-info": "file:./packages/llm-info",
-    "@marimo-team/marimo-api": "file:./packages/marimo-api",
+    "@marimo-team/marimo-api": "file:./packages/openapi",
     "@marimo-team/react-slotz": "^0.2.0",
     "@marimo-team/smart-cells": "file:./packages/smart-cells",
     "@mui/material": "^6.5.0",
