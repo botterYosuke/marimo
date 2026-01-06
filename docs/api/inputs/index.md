@@ -1,50 +1,48 @@
-# Inputs
+# 入力
 
-marimo comes packaged with interactive UI elements that you can use to build
-powerful notebooks and apps. These elements are available in `marimo.ui`.
+Backcastには、強力なノートブックやアプリを構築するために使用できるインタラクティブなUI要素がパッケージ化されています。これらの要素はバックエンドAPI（`marimo.ui`）で利用できます。
 
-| Element | Description |
+| 要素 | 説明 |
 |---------|-------------|
-| [`marimo.ui.array`][marimo.ui.array] | Create array inputs |
-| [`marimo.ui.batch`][marimo.ui.batch] | Batch operations |
-| [`marimo.ui.button`][marimo.ui.button] | Create buttons |
-| [`marimo.ui.chat`][marimo.ui.chat] | Create chat interfaces |
-| [`marimo.ui.checkbox`][marimo.ui.checkbox] | Create checkboxes |
-| [`marimo.ui.code_editor`][marimo.ui.code_editor] | Create code editors |
-| [`marimo.ui.dataframe`][marimo.ui.dataframe] | Interactive dataframes |
-| [`marimo.ui.data_explorer`][marimo.ui.data_explorer] | Explore data |
-| [`marimo.ui.date`][marimo.ui.date] | Date picker |
-| [`marimo.ui.datetime`][marimo.ui.datetime] | Date and time picker |
-| [`marimo.ui.date_range`][marimo.ui.date_range] | Date range picker |
-| [`marimo.ui.dictionary`][marimo.ui.dictionary] | Dictionary inputs |
-| [`marimo.ui.dropdown`][marimo.ui.dropdown] | Create dropdowns |
-| [`marimo.ui.file`][marimo.ui.file] | File uploads |
-| [`marimo.ui.file_browser`][marimo.ui.file_browser] | Browse files |
-| [`marimo.ui.form`][marimo.ui.form] | Create forms |
-| [`marimo.ui.microphone`][marimo.ui.microphone] | Record audio |
-| [`marimo.ui.multiselect`][marimo.ui.multiselect] | Multiple selection |
-| [`marimo.ui.number`][marimo.ui.number] | Number inputs |
-| [`marimo.ui.radio`][marimo.ui.radio] | Radio buttons |
-| [`marimo.ui.range_slider`][marimo.ui.range_slider] | Range sliders |
-| [`marimo.ui.refresh`][marimo.ui.refresh] | Refresh buttons |
-| [`marimo.ui.run_button`][marimo.ui.run_button] | Run buttons |
-| [`marimo.ui.slider`][marimo.ui.slider] | Create sliders |
-| [`marimo.ui.switch`][marimo.ui.switch] | Toggle switches |
-| [`marimo.ui.tabs`][marimo.ui.tabs] | Tabbed interfaces |
-| [`marimo.ui.table`][marimo.ui.table] | Interactive tables |
-| [`marimo.ui.text`][marimo.ui.text] | Text inputs |
-| [`marimo.ui.text_area`][marimo.ui.text_area] | Multiline text inputs |
+| [`marimo.ui.array`][marimo.ui.array] | 配列入力を作成 |
+| [`marimo.ui.batch`][marimo.ui.batch] | バッチ操作 |
+| [`marimo.ui.button`][marimo.ui.button] | ボタンを作成 |
+| [`marimo.ui.chat`][marimo.ui.chat] | チャットインターフェースを作成 |
+| [`marimo.ui.checkbox`][marimo.ui.checkbox] | チェックボックスを作成 |
+| [`marimo.ui.code_editor`][marimo.ui.code_editor] | コードエディタを作成 |
+| [`marimo.ui.dataframe`][marimo.ui.dataframe] | インタラクティブなデータフレーム |
+| [`marimo.ui.data_explorer`][marimo.ui.data_explorer] | データを探索 |
+| [`marimo.ui.date`][marimo.ui.date] | 日付ピッカー |
+| [`marimo.ui.datetime`][marimo.ui.datetime] | 日時ピッカー |
+| [`marimo.ui.date_range`][marimo.ui.date_range] | 日付範囲ピッカー |
+| [`marimo.ui.dictionary`][marimo.ui.dictionary] | 辞書入力 |
+| [`marimo.ui.dropdown`][marimo.ui.dropdown] | ドロップダウンを作成 |
+| [`marimo.ui.file`][marimo.ui.file] | ファイルアップロード |
+| [`marimo.ui.file_browser`][marimo.ui.file_browser] | ファイルを閲覧 |
+| [`marimo.ui.form`][marimo.ui.form] | フォームを作成 |
+| [`marimo.ui.microphone`][marimo.ui.microphone] | オーディオを録音 |
+| [`marimo.ui.multiselect`][marimo.ui.multiselect] | 複数選択 |
+| [`marimo.ui.number`][marimo.ui.number] | 数値入力 |
+| [`marimo.ui.radio`][marimo.ui.radio] | ラジオボタン |
+| [`marimo.ui.range_slider`][marimo.ui.range_slider] | 範囲スライダー |
+| [`marimo.ui.refresh`][marimo.ui.refresh] | リフレッシュボタン |
+| [`marimo.ui.run_button`][marimo.ui.run_button] | 実行ボタン |
+| [`marimo.ui.slider`][marimo.ui.slider] | スライダーを作成 |
+| [`marimo.ui.switch`][marimo.ui.switch] | トグルスイッチ |
+| [`marimo.ui.tabs`][marimo.ui.tabs] | タブインターフェース |
+| [`marimo.ui.table`][marimo.ui.table] | インタラクティブなテーブル |
+| [`marimo.ui.text`][marimo.ui.text] | テキスト入力 |
+| [`marimo.ui.text_area`][marimo.ui.text_area] | 複数行テキスト入力 |
 
-To use a UI element, assign it to a global variable and output it in a cell.
-When you interact with the frontend element, the Python object's `value`
-attribute is automatically updated, and all cells referencing that object
-automatically run with the element's latest value.
+UI要素を使用するには、グローバル変数に割り当て、セルで出力します。
+フロントエンド要素と対話すると、Pythonオブジェクトの`value`属性が自動的に更新され、そのオブジェクトを参照するすべてのセルが要素の最新の値で自動的に実行されます。
 
-## Integrations
+## 統合
 
-| Integration | Description |
+| 統合 | 説明 |
 |-------------|-------------|
-| [`marimo.ui.altair_chart`][marimo.ui.altair_chart] | Interactive Altair charts |
-| [`marimo.ui.plotly`][marimo.ui.plotly] | Interactive Plotly charts |
-| [`marimo.mpl.interactive`][marimo.mpl.interactive] | Interactive Matplotlib plots |
-| [`marimo.ui.anywidget`][marimo.ui.anywidget] | Custom widgets |
+| [`marimo.ui.altair_chart`][marimo.ui.altair_chart] | インタラクティブなAltairチャート |
+| [`marimo.ui.plotly`][marimo.ui.plotly] | インタラクティブなPlotlyチャート |
+| [`marimo.mpl.interactive`][marimo.mpl.interactive] | インタラクティブなMatplotlibプロット |
+| [`marimo.ui.anywidget`][marimo.ui.anywidget] | カスタムウィジェット |
+

@@ -1,95 +1,81 @@
-# Troubleshooting
+# トラブルシューティング
 
-marimo understands the relationships between cells based on the variables they
-define and reference. When things don't work as expected, marimo provides
-[several tools](editor_features/dataflow.md) to help you understand both marimo's
-interpretation of your notebook and debug issues.
+Backcastは、セルが定義および参照する変数に基づいてセル間の関係を理解します。期待通りに動作しない場合、Backcastは、Backcastのノートブックの解釈と問題のデバッグの両方を理解するのに役立つ[いくつかのツール](editor_features/dataflow.md)を提供します。
 
-This guide covers common issues and unexpected behaviors you might encounter,
-along with ways to debug and resolve them. For interactive debugging techniques, 
-see our [debugging guide](debugging.md). If your issue isn't covered here,
-try checking our [FAQ](../faq.md).
+このガイドでは、遭遇する可能性のある一般的な問題と予期しない動作、およびそれらをデバッグして解決する方法について説明します。インタラクティブなデバッグ手法については、[デバッグガイド](debugging.md)をご覧ください。ここで問題がカバーされていない場合は、[FAQ](../faq.md)を確認してください。
 
-## Why aren't my cells running?
+## セルが実行されないのはなぜですか？
 
-If you're expecting cells to run in response to changes in other cells, but they're not, consider the following:
+他のセルの変更に応答してセルが実行されることを期待しているが、実行されない場合、以下を確認してください：
 
-### Check for mutations
+### 変更を確認する
 
-marimo doesn't track mutations to objects. If you're modifying an object in one cell and expecting another cell to react, this won't work as expected.
+Backcastはオブジェクトへの変更を追跡しません。1つのセルでオブジェクトを変更し、別のセルが反応することを期待している場合、これは期待通りに動作しません。
 
-Instead of mutating objects across cells, try creating new objects or performing all mutations within the same cell.
+セル間でオブジェクトを変更する代わりに、新しいオブジェクトを作成するか、同じセル内で変更をすべて実行してください。
 
-[Read more about reactivity](../guides/reactivity.md).
+[リアクティビティについて詳しく読む](../guides/reactivity.md)。
 
-### Verify cell connections
+### セル接続を確認する
 
-Use marimo's [dataflow tools](editor_features/dataflow.md) to check if your cells are actually
-connected as you expect.
+Backcastの[データフローツール](editor_features/dataflow.md)を使用して、セルが実際に期待通りに接続されているか確認します。
 
-Toggle the [minimap](editor_features/dataflow.md#minimap) to see the current cell's
-connections. You should see connections to cells you expect as inputs on the
-left and outgoing connections to other cells on the right. Here, the cell
-defining `f` depends on the two cells above and connects to the one below with
-`print(f)`.
+[ミニマップ](editor_features/dataflow.md#minimap)をトグルして、現在のセルの接続を確認します。左側に入力として期待するセルへの接続が表示され、右側に他のセルへの出力接続が表示されるはずです。ここでは、`f`を定義するセルが上の2つのセルに依存し、下のセルに`print(f)`で接続されています。
 
 <div align="center">
   <video autoplay muted loop playsinline style="max-width: 450px; width: 100%;">
-   <source src="/_static/docs-debugging-minimap.webm" type="video/webm">
-   <source src="/_static/docs-debugging-minimap.mp4" type="video/mp4">
+   <source src="../_static/docs-debugging-minimap.webm" type="video/webm">
+   <source src="../_static/docs-debugging-minimap.mp4" type="video/mp4">
   </video>
 </div>
 
 
-Alternatively, you can open the [dependency
-explorer](editor_features/dataflow.md#dependency-explorer) or [variables
-explorer](editor_features/dataflow.md#variables-explorer) in the left sidebar.
+または、左サイドバーで[依存関係エクスプローラー](editor_features/dataflow.md#dependency-explorer)または[変数エクスプローラー](editor_features/dataflow.md#variables-explorer)を開くことができます。
 
 <div align="center">
   <figure>
-    <img width="650" src="/_static/docs-dependency-graph.png"/>
+    <img width="650" src="../_static/docs-dependency-graph.png"/>
     <figcaption>
-    Dependency graph showing cell connections.
+    セル接続を示す依存グラフ。
     </figcaption>
   </figure>
 </div>
 
-If connections are missing, review your variable usage to ensure cells are
-properly referencing each other.
+接続が欠落している場合は、変数の使用を確認して、セルが適切に相互参照していることを確認してください。
 
-## Why is my cell running unexpectedly?
+## セルが予期せず実行されるのはなぜですか？
 
-If a cell is running more often than you anticipate:
+セルが予想以上に頻繁に実行される場合：
 
-### Check cell dependencies
+### セルの依存関係を確認する
 
-Use marimo's [dataflow tools](editor_features/dataflow.md) to see what's triggering your cell:
+Backcastの[データフローツール](editor_features/dataflow.md)を使用して、セルをトリガーしているものを確認します：
 
-1. Toggle the [minimap](editor_features/dataflow.md#minimap) (see [above](#verify-cell-connections)) - cells on the left are inputs that trigger your cell when they run.
-2. Check the [variables explorer](editor_features/dataflow.md#variables-explorer) to see which variables your cell uses and where they're defined.
-3. You might find unexpected dependencies that are causing the cell to run.
+1. [ミニマップ](editor_features/dataflow.md#minimap)をトグルします（[上記](#verify-cell-connections)を参照）- 左側のセルは、実行時にセルをトリガーする入力です。
+2. [変数エクスプローラー](editor_features/dataflow.md#variables-explorer)を確認して、セルが使用する変数とそれらが定義されている場所を確認します。
+3. セルの実行を引き起こしている予期しない依存関係が見つかる可能性があります。
 
-### Understand global vs local variables vs functions args
+### グローバル変数とローカル変数と関数引数を理解する
 
-Ensure you're not inadvertently using a global variables when intending to use a local variable or function argument:
+ローカル変数や関数引数を使用するつもりなのに、誤ってグローバル変数を使用していないことを確認してください：
 
-1. Check for any variables used in your cell that aren't defined within it.
-2. Consider using local variables (prefixed with `_`) for values that shouldn't be consumed by other cells.
+1. セル内で使用されているが、そのセル内で定義されていない変数を確認します。
+2. 他のセルによって消費されるべきでない値については、ローカル変数（`_`で始まる）を使用することを検討してください。
 
-## Why is my UI element's value being reset?
+## UI要素の値がリセットされるのはなぜですか？
 
-If a UI element's value keeps resetting:
+UI要素の値がリセットされ続ける場合：
 
-### Check that cell defining the UI element isn't rerunning
+### UI要素を定義するセルが再実行されていないことを確認する
 
-If the cell defining the UI element reruns, it will reset the element's value to its initial `value` argument. You may be able to avoid this by splitting the UI element definition into a separate cell.
+UI要素を定義するセルが再実行されると、要素の値が初期の`value`引数にリセットされます。UI要素の定義を別のセルに分割することで、これを回避できる場合があります。
 
-### Use state for persistence
+### 永続化のためにstateを使用する
 
-If you need to maintain UI element values across cell runs, consider using `mo.state`:
+セル実行をまたいでUI要素の値を維持する必要がある場合、`mo.state`の使用を検討してください：
 
 ```python
-# Declare state in a separate cell
+# 別のセルでstateを宣言
 get_value, set_value = mo.state(initial_value)
 ```
 
@@ -97,121 +83,100 @@ get_value, set_value = mo.state(initial_value)
 element = mo.ui.slider(0, 10, value=get_value(), on_change=set_value)
 ```
 
-This way, the value persists even if the cell defining the element reruns.
+この方法で、要素を定義するセルが再実行されても値が永続化されます。
 
-## How can I force one cell to run after another?
+## 1つのセルを別のセルの後に強制的に実行するにはどうすればよいですか？
 
-If you need to ensure a specific execution order:
+特定の実行順序を確保する必要がある場合：
 
-### Use explicit dependencies
+### 明示的な依存関係を使用する
 
-Create an explicit dependency by using a variable from the first cell in the second:
+最初のセルの変数を2番目のセルで使用して、明示的な依存関係を作成します：
 
 ```python
-# Cell 1
+# セル1
 result = some_computation()
 ```
 
 ```python
-# Cell 2
-_ = result  # This creates a dependency on Cell 1
+# セル2
+_ = result  # これによりセル1への依存関係が作成されます
 further_computation()
 ```
 
-### Consider refactoring
+### リファクタリングを検討する
 
-If you find yourself needing to force execution order often, it might be a sign that your notebook structure could be improved:
+実行順序を強制する必要が頻繁にある場合、ノートブック構造を改善できる兆候かもしれません：
 
-1. Try to organize your cells so that natural data flow creates the desired order.
-2. Consider combining related operations into single cells where appropriate.
+1. 自然なデータフローが希望の順序を作成するように、セルを整理してみてください。
+2. 適切な場合は、関連する操作を単一のセルに結合することを検討してください。
 
-## General debugging tips
+## 一般的なデバッグのヒント
 
-### Check for common issues with the linter
+### リンターで一般的な問題を確認する
 
-Before diving into manual debugging, try running marimo's built-in linter to catch common issues:
+手動デバッグに深く入る前に、Backcastの組み込みリンターを実行して、一般的な問題をキャッチしてみてください。
 
-```bash
-marimo check my_notebook.py
-```
+リンターは、次のような問題を特定できます：
+- セル間での複数の変数定義
+- セル間の循環依存関係
+- 実行を妨げる解析不可能なコード
+- その他のコード品質の問題
 
-The linter can identify problems like:
-- Multiple variable definitions across cells
-- Circular dependencies between cells
-- Unparsable code that prevents execution
-- Other code quality issues
+完全なチェックリストについては、[リントラールガイド](lint_rules/index.md)をご覧ください。
 
-See the [Lint Rules](lint_rules/index.md) guide for a complete list of checks.
+### 依存関係を理解する
 
-### Understanding dependencies
+- 変数パネルを使用して変数値を検査し、それらが定義および使用されている場所を確認します。
+- セル出力にデバッグ情報を出力するために、printステートメントを追加するか、`mo.md()`を使用します。
+- 問題を分離するために、一時的にセルを無効にします。
+- 「Lazy」ランタイム設定を使用して、自動的に実行することなく、どのセルが古いものとしてマークされているかを確認します。
 
-- Use the Variables Panel to inspect variable values and see where they're defined and used.
-- Add print statements or use `mo.md()` to output debug information in cell outputs.
-- Temporarily disable cells to isolate issues.
-- Use the "Lazy" runtime configuration to see which cells are being marked as stale without automatically running them.
+Backcastのリアクティビティはグローバル変数の定義と参照に基づいており、オブジェクトへの変更は追跡されないことを覚えておいてください。これを念頭に置くことで、ノートブックでの予期しない動作を理解し、デバッグするのに役立ちます。
 
-Remember, marimo's reactivity is based on global variable definitions and references, and mutations to objects aren't tracked. Keeping this in mind can help you understand and debug unexpected behaviors in your notebooks.
+## Backcastによって行われるパッチ
 
-## Patches made by marimo
+### ローカルライブラリをインポートできないのはなぜですか？
 
-### Why can't I import a local library?
-
-When using `marimo edit path/to/notebook.py` or `marimo run
-path/to/notebook.py`, marimo sets `sys.path` to match what you would get with
-`python path/to/notebook.py`. In particular, setting `sys.path[0]` to the notebook
-directory:
+Backcastは`sys.path`を`python path/to/notebook.py`で取得できるものと一致するように設定します。特に、ノートブックディレクトリに`sys.path[0]`を設定します：
 
 ```
 sys.path[0] == 'path/to/'
 ```
 
-You can add entries to `sys.path` in your pyproject.toml [runtime configuration](../guides/configuration/runtime_configuration.md).
+pyproject.tomlの[ランタイム設定](../guides/configuration/runtime_configuration.md)で`sys.path`にエントリを追加できます。
 
-### Other patches
+### その他のパッチ
 
-When running as a notebook, marimo makes the following changes to variables:
+ノートブックとして実行する場合、Backcastは変数に対して次の変更を行います：
 
-- marimo patches `pdb.Pdb` with a custom class to enable interactive debugging
-  with the `breakpoint()` function
-- marimo patches `sys.argv` when running as a notebook to match what you would
-  see when [running as a script](../guides/scripts.md).
-- local variables currently have their names mangled, meaning source code introspection
-  that uses local variables may not work; this behavior may change in the future.
+- Backcastは`pdb.Pdb`をカスタムクラスでパッチして、`breakpoint()`関数を使用したインタラクティブデバッグを有効にします
+- Backcastは、[スクリプトとして実行](../guides/scripts.md)する場合と一致するように、ノートブックとして実行する際に`sys.argv`をパッチします
+- ローカル変数は現在、名前がマングリングされているため、ローカル変数を使用するソースコードイントロスペクションが機能しない場合があります。この動作は将来的に変更される可能性があります。
 
-## Why is the notebook returning 404s on the web assets?
+## ノートブックがWebアセットで404を返すのはなぜですか？
 
-If you're seeing 404 errors for web assets like JS or CSS files, it may be due to symlink settings or proxy settings.
+JSやCSSファイルなどのWebアセットで404エラーが表示される場合、シンボリックリンク設定やプロキシ設定が原因である可能性があります。
 
-### Check symlink settings
+### シンボリックリンク設定を確認する
 
-If you are using `bazel` or `uv`'s [**link-mode: symlink**](https://docs.astral.sh/uv/reference/settings/#link-mode), you may need to adjust your symlink settings to ensure that web assets are correctly found. By default marimo does not follow symlinks, so you may need to turn this setting on.
-
-Locate your `marimo.toml` configuration file with `marimo config show`, and edit the `follow_symlink` flag:
+`bazel`や`uv`の[**link-mode: symlink**](https://docs.astral.sh/uv/reference/settings/#link-mode)を使用している場合、Webアセットが正しく見つかるようにシンボリックリンク設定を調整する必要がある場合があります。デフォルトでは、Backcastはシンボリックリンクをフォローしないため、この設定をオンにする必要がある場合があります。
 
 ```toml title="marimo.toml"
 [server]
 follow_symlink = true
 ```
 
-### Check proxy settings
+### プロキシ設定を確認する
 
-If you are using a proxy server, you need to include the `--proxy` flag when running marimo. The proxy will default to port 80 if no port is specified. For example, if your proxy is `example.com` and it uses port 8080, you would run:
+プロキシサーバーを使用している場合、Backcastの設定でプロキシを設定できます。
 
-```bash
-marimo edit --proxy example.com:8080
-# or
-marimo run --proxy example.com:8080
-```
+### ログを読む
 
-### Reading the logs
+Backcastはログを適切な場所に出力します。ログの確認方法については、開発環境の設定を参照してください。
 
-marimo will output logs to `$XDG_CACHE_HOME/marimo/logs/*`. To view the logs, run:
-
-```bash
-cat $XDG_CACHE_HOME/marimo/logs/github-copilot-lsp.log
-```
-
-Available logs are:
+利用可能なログは：
 
 - `github-copilot-lsp.log`
 - `pylsp.log`
+

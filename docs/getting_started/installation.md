@@ -1,147 +1,79 @@
-# Installation
+# インストール
 
-Before installing marimo, we recommend creating and activating a Python
-[virtual environment](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments).
+BackcastはElectronアプリケーションとして動作します。開発環境をセットアップするには、以下の手順に従ってください。
 
-??? note "Setting up a virtual environment"
+## 前提条件
 
-    Python uses virtual environments to minimize conflicts among packages.
-    Here's a quickstart for `pip` users. If you use `conda`, please use a [`conda`
-    environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands)
-    instead.
+- **Node.js 20+**: ランタイム環境
+- **pnpm 9+**: パッケージマネージャー
+- **Python 3.8+**: バックエンドサーバー用（marimoベース）
 
-    Run the following in the terminal:
+## 開発環境セットアップ
 
-    - create an environment with `python -m venv marimo-env`
-    - activate the environment:
-      - macOS/Unix: `source marimo-env/bin/activate`
-      - Windows: `marimo-env\Scripts\activate`
+### 1. リポジトリのクローン
 
-    _Make sure the environment is activated before installing marimo and when
-    using marimo._ Install other packages you may need, such as numpy, pandas, matplotlib,
-    and altair, in this environment. When you're done, deactivate the environment
-    with `deactivate` in the terminal.
-
-    Learn more from the [official Python tutorial](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments).
-
-/// admonition | Using uv?
-    type: tip
-
-[uv](https://docs.astral.sh/uv/) is a next-generation Python package
-installer and manager that is 10-100x faster than pip, and also makes it easy
-to install Python and manage projects. Create a [uv
-project](https://docs.astral.sh/uv/guides/projects/) with `uv init`; this
-creates and manages a virtual environment for you behind-the-scenes. For
-detailed information on using marimo with `uv`, see our [uv
-guide](../guides/package_management/using_uv.md).
-///
-
-/// admonition | Prefer VS Code/Cursor?
-    type: tip
-
-[Try our extension](https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo),
-which works in VS Code, Cursor, and other VS Code forks.
-///
-
-
-
-## Install with minimal dependencies
-
-To install marimo, run the following in a terminal:
-
-/// tab | install with pip
-
-```bash
-pip install marimo
+```powershell
+# 注意: 以下のリポジトリURLは例です。実際のBackcastリポジトリのURLに置き換えてください
+git clone <repository-url>
+cd backcast
 ```
 
-To check if the install worked, run
+### 2. 依存関係のインストール
 
-```bash
-marimo tutorial intro
+```powershell
+pnpm install
 ```
 
-///
+### 3. 開発サーバーの起動
 
-/// tab | install with uv
-
-```bash
-uv add marimo
+```powershell
+# フロントエンド + バックエンドサーバーを起動
+pnpm dev
 ```
 
-To check if the install worked, run
+これにより、フロントエンド（Vite）とバックエンド（Pythonサーバー）が同時に起動します。
 
-```bash
-uv run marimo tutorial intro
+### 4. Electronアプリとして起動（開発モード）
+
+```powershell
+# 開発サーバーが起動した後、Electronアプリを起動
+pnpm start
 ```
 
-///
+または、`pnpm dev`と`pnpm start`を同時に実行：
 
-/// tab | install with conda
-
-```bash
-conda install -c conda-forge marimo
+```powershell
+pnpm start
 ```
 
-To check if the install worked, run
+（内部的に`pnpm dev`と`pnpm start:electron`が同時に実行されます）
 
-```bash
-marimo tutorial intro
-```
+## バックエンドのPython環境
 
-///
+Backcastはmarimoベースのバックエンドサーバーを使用します。Pythonの仮想環境を作成してアクティブにすることをお勧めします。
 
-A tutorial notebook should open in your browser.
+??? note "仮想環境の設定"
 
-/// admonition | Installation issues?
+    Pythonは、パッケージ間の競合を最小限に抑えるために仮想環境を使用します。
+    以下は`pip`ユーザー向けのクイックスタートです。`conda`を使用する場合は、[`conda`環境](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands)を使用してください。
+
+    ターミナルで以下を実行します：
+
+    - `python -m venv venv`で環境を作成
+    - 環境をアクティブ化：
+      - macOS/Unix: `source venv/bin/activate`
+      - Windows: `venv\Scripts\activate`
+
+    _Backcastのバックエンドサーバーを使用する際は、環境がアクティブになっていることを確認してください。_ この環境で、numpy、pandas、matplotlib、altairなどの必要な他のパッケージをインストールします。作業が終わったら、ターミナルで`deactivate`を実行して環境を非アクティブ化します。
+
+    詳細は[公式Pythonチュートリアル](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments)をご覧ください。
+
+/// admonition | インストールの問題？
     type: note
 
-Having installation issues? Reach out to us [at GitHub](https://github.com/marimo-team/marimo/issues) or [on Discord](https://marimo.io/discord?ref=docs).
+インストールに問題がありますか？プロジェクトのGitHub Issuesでお問い合わせください。
 ///
 
-## Install with recommended dependencies
+## ビルド済みアプリ（将来の機能）
 
-marimo is lightweight, with few dependencies, to maximize compatibility with
-your own environments.
-
-To unlock additional features in the marimo editor, including SQL cells,
-AI completion, server-side plotting of dataframe columns, and more, we
-suggest installing `marimo[recommended]`:
-
-/// tab | install with pip
-
-```bash
-pip install "marimo[recommended]"
-```
-
-///
-
-/// tab | install with uv
-
-```bash
-uv add "marimo[recommended]"
-```
-
-///
-
-/// tab | install with conda
-
-```bash
-conda install -c conda-forge marimo "duckdb>=1.0.0" "altair>=5.4.0" pyarrow "polars>=1.9.0" "sqlglot[rs]>=23.4" "openai>=1.55.3" "ruff" "nbformat>=5.7.0" "vegafusion>=2.0.0" "vl-convert-python>=1.0.0"
-```
-
-///
-
-Installing marimo in this way installs the following additional dependencies and unlocks the following features:
-
-| Dependency                 | Feature                         |
-|----------------------------|---------------------------------|
-| duckdb>=1.0.0              | SQL cells                       |
-| altair>=5.4.0              | Plotting in datasource viewer   |
-| polars[pyarrow]>=1.9.0     | SQL output back in Python       |
-| sqlglot[rs]>=23.4          | SQL cells parsing               |
-| openai>=1.55.3             | AI features                     |
-| ruff                       | Formatting                      |
-| nbformat>=5.7.0            | Export as IPYNB                 |
-| vegafusion>=2.0.0          | Performant charting             |
-| vl-convert-python>=1.0.0   | Required by vegafusion          |
+将来的には、ビルド済みのElectronアプリを配布する予定です。現時点では、開発環境セットアップに焦点を当てています。

@@ -1,90 +1,69 @@
-# Understanding dataflow
+# データフローの理解
 
-Unlike traditional notebooks, marimo understands the relationships between
-cells and uses this information to keep your code and outputs consistent. These
-relationships are represented as a **dataflow graph**, which encodes how
-variables flow from one cell to another.
+従来のノートブックとは異なり、Backcastはセル間の関係を理解し、この情報を使用してコードと出力を一貫性のある状態に保ちます。これらの関係は**データフローグラフ**として表現され、変数が1つのセルから別のセルにどのように流れるかをエンコードします。
 
-The dataflow graph, which is inferred statically from variable definitions and
-references, is used to automatically run (or mark stale) cells in the correct
-sequence; it's also why cells can be arranged "out of order" on the page, or
-across columns.
+データフローグラフは、変数の定義と参照から静的に推論され、セルを正しい順序で自動的に実行（または古いものとしてマーク）するために使用されます。また、セルがページ上で「順序外」で配置できる、または列間で配置できる理由でもあります。
 
-marimo provides several tools to help you visualize and understand the
-relationships it identifies between cells.
+Backcastは、セル間で識別する関係を視覚化して理解するのに役立つツールをいくつか提供しています。Gridモードと3Dモードの両方で、データフローを視覚化できます。
 
-## Variables explorer
+## 変数エクスプローラー
 
-The **variables explorer panel** collects marimo's understanding of the
-variables in your notebook into a single searchable list. 
+**変数エクスプローラーパネル**は、Backcastのノートブック内の変数の理解を1つの検索可能なリストにまとめます。
 
 <div align="center">
 <picture>
-  <source srcset="/_static/docs-variables-panel.webp" type="image/webp">
-  <img src="/_static/docs-variables-panel.jpg" alt="Variables panel showing variable relationships" style="max-width: 700px; width: 100%;" />
+  <source srcset="../../_static/docs-variables-panel.webp" type="image/webp">
+  <img src="../../_static/docs-variables-panel.jpg" alt="変数の関係を示す変数パネル" style="max-width: 700px; width: 100%;" />
 </picture>
 </div>
 
-To open the panel, click the **variables icon** in the **left sidebar panel**.
-The variable explorer shows each variable's name, type, value, where it's
-defined, and where it's used.
+パネルを開くには、**左サイドバーパネル**の**変数アイコン**をクリックします。変数エクスプローラーは、各変数の名前、型、値、定義場所、使用場所を表示します。
 
-## Dependency explorer
+## 依存関係エクスプローラー
 
-The **dependency explorer panel** provides a _bird's-eye view_ of your
-notebook's dataflow, showing all cells as an interactive graph. It helps you
-understand high-level patterns, overall connectedness, and the broader
-structure of your notebook.
+**依存関係エクスプローラーパネル**は、ノートブックのデータフローの_鳥瞰図_を提供し、すべてのセルをインタラクティブなグラフとして表示します。高レベルのパターン、全体的な接続性、ノートブックのより広範な構造を理解するのに役立ちます。
 
 <div align="center">
 <picture>
-  <source srcset="/_static/docs-dependency-explorer.webp" type="image/webp">
-  <img src="/_static/docs-dependency-explorer.jpg" alt="Dependency explorer showing a graph view of cell connections" style="max-width: 700px; width: 100%;" />
+  <source srcset="../../_static/docs-dependency-explorer.webp" type="image/webp">
+  <img src="../../_static/docs-dependency-explorer.jpg" alt="セル接続のグラフビューを示す依存関係エクスプローラー" style="max-width: 700px; width: 100%;" />
 </picture>
 </div>
 
-To open the dependency explorer, click the **graph icon** in the **left sidebar
-panel**. You can choose between vertical or horizontal layouts.
+依存関係エクスプローラーを開くには、**左サイドバーパネル**の**グラフアイコン**をクリックします。垂直または水平のレイアウトを選択できます。
 
-## Minimap
+## ミニマップ
 
-The **minimap** provides a _focused slice_ of your notebook's dataflow, helping
-you understand the reactive context of a given cell and navigate related cells.
-You can toggle the minimap a _hotkey_ (`Cmd/Ctrl-Shift-i`), or select the **map
-icon** from the **footer toolbar**.
+<a name="minimap"></a>
 
-Click a cell in the minimap to jump to it:
+**ミニマップ**は、ノートブックのデータフローの_焦点を絞ったスライス_を提供し、特定のセルのリアクティブコンテキストを理解し、関連するセルをナビゲートするのに役立ちます。ミニマップは_ホットキー_（`Cmd/Ctrl-Shift-i`）でトグルするか、**フッターツールバー**から**マップアイコン**を選択できます。
+
+ミニマップ内のセルをクリックしてジャンプします：
 
 <div align="center">
 <video autoplay muted loop playsinline style="max-width: 700px; width: 100%;">
-  <source src="/_static/docs-minimap.webm" type="video/webm">
-  <source src="/_static/docs-minimap.mp4" type="video/mp4">
+  <source src="../../_static/docs-minimap.webm" type="video/webm">
+  <source src="../../_static/docs-minimap.mp4" type="video/mp4">
 </video>
 </div>
 
-Connections are read **left to right**:
+接続は**左から右**に読み取られます：
 
-- Connections to the **left** are _direct inputs_ — cells the current cell reads from
-- Connections to the **right** are _direct outputs_ — cells that read from the current cell
-- Cells positioned left or right but not directly connected are _transitive
-dependencies_ — cells that influence or are influenced by the current cell, but
-only through one or more intermediate cells
+- **左側**への接続は_直接入力_—現在のセルが読み取るセル
+- **右側**への接続は_直接出力_—現在のセルから読み取るセル
+- 左または右に配置されているが直接接続されていないセルは_推移的依存関係_—現在のセルに影響を与える、または影響を受けるセルですが、1つ以上の中間セルを介してのみ
 
-The minimap can take some getting used to, but it's an effective representation
-for understanding how data flows around the current cell. It's meant to show
-_just enough_ local context to help you debug, trace relationships, and
-navigate complex notebooks. For a high level overview, use the [dependency
-explorer](#dependency-explorer).
+ミニマップには慣れる必要がありますが、現在のセル周辺のデータフローを理解するための効果的な表現です。デバッグ、関係のトレース、複雑なノートブックのナビゲートに役立つ_十分な_ローカルコンテキストを表示することを目的としています。高レベルの概要については、[依存関係エクスプローラー](#dependency-explorer)を使用してください。
 
-### Cell symbols
+### セルシンボル
 
-The minimap uses visual indicators to show the status and connectivity of each cell:
+ミニマップは、各セルのステータスと接続性を示す視覚的インジケーターを使用します：
 
 <table tabindex="0">
   <thead>
     <tr>
-      <th>Symbol</th>
-      <th>Meaning</th>
+      <th>シンボル</th>
+      <th>意味</th>
     </tr>
   </thead>
   <tbody>
@@ -96,7 +75,7 @@ The minimap uses visual indicators to show the status and connectivity of each c
           </path>
         </svg>
       </td>
-      <td>Cell uses variables from other cells</td>
+      <td>セルは他のセルから変数を使用します</td>
     </tr>
     <tr>
       <td>
@@ -106,7 +85,7 @@ The minimap uses visual indicators to show the status and connectivity of each c
           </path>
         </svg>
       </td>
-      <td>Cell defines variables used by other cells</td>
+      <td>セルは他のセルで使用される変数を定義します</td>
     </tr>
     <tr>
       <td>
@@ -119,7 +98,7 @@ The minimap uses visual indicators to show the status and connectivity of each c
         </svg>
       </td>
       <td>
-        Cell uses variables <i>and</i> defines variables used by others
+        セルは変数を使用し、かつ他のセルで使用される変数を定義します
       </td>
     </tr>
     <tr>
@@ -129,7 +108,7 @@ The minimap uses visual indicators to show the status and connectivity of each c
         </svg>
       </td>
       <td>
-        Cell defines variables but isn't connected to anything (safe to delete)
+        セルは変数を定義しますが、何にも接続されていません（安全に削除可能）
       </td>
     </tr>
     <tr>
@@ -139,7 +118,7 @@ The minimap uses visual indicators to show the status and connectivity of each c
         </svg>
       </td>
       <td>
-        Cell doesn't define or use variables from other cells (often markdown)
+        セルは他のセルから変数を定義または使用しません（多くの場合markdown）
       </td>
     </tr>
     <tr>
@@ -148,146 +127,30 @@ The minimap uses visual indicators to show the status and connectivity of each c
           <circle r="3" fill="#ff6565"></circle>
         </svg>
       </td>
-      <td>Cell has an error</td>
+      <td>セルにエラーがあります</td>
     </tr>
   </tbody>
 </table>
 
 
-### Reading cell connections
+### セル接続の読み取り
 
-When you select a cell, the minimap draws lines showing how data flows between
-cells. Since marimo cells can define multiple variables, downstream connections
-show all cells that reference any variable from your selected cell.
+セルを選択すると、ミニマップはデータがセル間でどのように流れるかを示す線を描画します。Backcastセルは複数の変数を定義できるため、下流の接続は、選択したセルからの任意の変数を参照するすべてのセルを表示します。Gridモードと3Dモードの両方で、データフローを視覚化できます。
 
-<table tabindex="0">
-  <thead>
-    <tr>
-      <th>Path</th>
-      <th>Interpretation</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <svg viewBox="-18 -8 36 32" width="36" style="color: #0780e9">
-          <circle r="3" fill="currentColor"></circle>
-          <path d="M 0 0 H 7 V 21 H 14" fill="none" stroke-width="2" stroke="currentColor"></path>
-          <circle r="3" cx="14" cy="21" fill="currentColor" ></circle>
-        </svg>
-      </td>
-      <td>
-        First cell defines variables used by the second cell. Second cell will
-        re-run when the first runs
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <svg viewBox="-18 -8 36 32" width="36" style="color: #0780e9">
-          <circle r="3" fill="currentColor"></circle>
-          <path d="M 0 0 H -7 V 21 H -14" fill="none" stroke-width="2" stroke="currentColor"></path>
-          <circle r="3" cx="-14" cy="21" fill="currentColor"></circle>
-        </svg>
-      </td>
-      <td>
-        First cell uses variables from the second cell. First cell will re-run
-        when the second runs
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <svg viewBox="-18 -8 36 56" width="36" style="color: #0780e9">
-          <circle r="3" fill="currentColor"></circle>
-          <path d="M 0 0 H 7 V 21 H 14" fill="none" stroke-width="2" stroke="currentColor"></path>
-          <circle r="3" cx="14" cy="21" fill="currentColor"></circle>
-          <circle r="3" cy="42" fill="#c4c4c4"></circle>
-        </svg>
-      </td>
-      <td>
-        Gray cell has no connection to the blue cells above
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <svg viewBox="-18 -8 36 56" width="36" style="color: #0780e9; overflow: visible">
-          <circle r="3" fill="currentColor"></circle>
-          <path d="M 0 0 H 7 V 21 H 20" fill="none" stroke-width="2" stroke="currentColor"></path>
-          <circle r="3" cx="14" cy="21" fill="currentColor"></circle>
-          <path d="M 14 42 H 8" fill="none" stroke-width="2" stroke="#c4c4c4"></path>
-          <circle r="3" cx="14" cy="42" fill="#c4c4c4"></circle>
-        </svg>
-      </td>
-      <td>
-        Gray cell indirectly uses variables from the first cell. Whiskers
-        indicate transitive dependencies
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <svg viewBox="-18 -8 36 56" width="36" style="color: #0780e9; overflow: visible">
-          <circle r="3" cx="-14" fill="currentColor"></circle>
-          <path d="M -20 0 H -7 V 21 H 0" fill="none" stroke-width="2" stroke="currentColor"></path>
-          <circle r="3" cy="21" fill="currentColor"></circle>
-          <path d="M -14 42 H -8" fill="none" stroke-width="2" stroke="#c4c4c4"></path>
-          <circle r="3" cx="-14" cy="42" fill="#c4c4c4"></circle>
-        </svg>
-      </td>
-      <td>
-        Gray cell's variables are indirectly used by the second cell. Whiskers
-        indicate transitive dependencies
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <svg viewBox="-18 -8 36 32" width="36" style="color: #ff6565">
-          <circle r="3" fill="currentColor"></circle>
-          <path d="M 0 0 H 7 V 21 H -7 V 0 Z" fill="none" stroke-width="2" stroke="currentColor"></path>
-          <circle r="3" cy="21" fill="currentColor"></circle>
-        </svg>
-      </td>
-      <td>
-        Cells have circular dependencies - each uses variables from the other
-        (error)
-      </td>
-    </tr>
-  </tbody>
-</table>
+## リアクティブ参照ハイライト
 
+<a name="reactive-reference-highlighting"></a>
 
-### Implementation notes
-
-The minimap was heavily inspired by [Observable's
-minimap](https://observablehq.com/documentation/debugging/minimap), a
-[thoughtfully
-designed](https://observablehq.com/@observablehq/introducing-visual-dataflow)
-dataflow visualization for their reactive JavaScript notebooks.
-
-We adapted Observable's visual design to marimo's execution model. A key
-difference: Observable cells are named (declaring one variable), while marimo
-cells can define multiple variables. This leads to asymmetric dataflow tracing.
-When tracing upstream, we can identify exactly which variables from a cell
-depends on. When tracing downstream, all variables in a dependent cell are
-considered affected. Our minimap also accounts for marimo's support for
-multi-column layouts.
-
-
-## Reactive reference highlighting
-
-marimo's **reactive reference highlighting** provides an _in-editor_ indicator
-when variables defined by other cells are used in the current cell. These
-"reactive references" are emphasized with an underline and lightly bolded text:
+Backcastの**リアクティブ参照ハイライト**は、他のセルによって定義された変数が現在のセルで使用されている場合に_エディタ内_インジケーターを提供します。これらの「リアクティブ参照」は下線と軽く太字のテキストで強調表示されます：
 
 <div align="center" style="margin-top: 20px">
 <picture>
-  <source srcset="/_static/docs-reactive-reference-highlighting.webp" type="image/webp">
-  <img src="/_static/docs-reactive-reference-highlighting.jpg" alt="Reactive reference highlighting showing variable usage across cells" style="max-width: 500px; width: 100%;" />
+  <source srcset="../../_static/docs-reactive-reference-highlighting.webp" type="image/webp">
+  <img src="../../_static/docs-reactive-reference-highlighting.jpg" alt="セル間の変数使用を示すリアクティブ参照ハイライト" style="max-width: 500px; width: 100%;" />
 </picture>
 </div>
 
-Hover over any underlined variable and `Cmd/Ctrl-Click` to jump to its
-definition.
+下線付きの変数にホバーして`Cmd/Ctrl-Click`して定義にジャンプします。
 
-This feature is currently **opt-in** and must be enabled via *Settings* > *User
-Settings* > *Display* > *Reference highlighting* or toggled via the command
-palette (`Cmd/Ctrl-K` > *Reference highlighting*).
+この機能は現在**オプトイン**であり、*設定* > *ユーザー設定* > *表示* > *参照ハイライト*で有効にするか、コマンドパレット（`Cmd/Ctrl-K` > *参照ハイライト*）でトグルする必要があります。
 

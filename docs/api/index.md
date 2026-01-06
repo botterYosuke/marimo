@@ -1,30 +1,31 @@
-# API Reference
+# APIリファレンス
 
-Use the marimo library in marimo notebooks (`import marimo as mo`) to
+Backcastノートブックでmarimoライブラリ（`import marimo as mo`）を使用して（注：Backcastはmarimoベースのため、バックエンドAPIは`marimo`として提供されます）：
 
-- connect interactive inputs like sliders, dropdowns, and tables to Python,
-- express yourself with dynamically created markdown,
-- layout information with tabs or grids,
-- output media like images and audio,
-- and more!
+- スライダー、ドロップダウン、テーブルなどのインタラクティブな入力をPythonに接続
+- 動的に作成されたmarkdownで表現
+- タブやグリッドで情報をレイアウト
+- 画像やオーディオなどのメディアを出力
+- その他多くのことができます！
 
 |                      |                                                           |
 | :------------------- | :-------------------------------------------------------- |
-| [markdown](markdown.md)      | Write markdown with `mo.md`                               |
-| [inputs](inputs/index.md)  | Connect sliders, dropdowns, tables, and more to Python    |
-| [layouts](layouts/index.md) | Customize outputs with accordions, tabs, stacks, and more |
-| [plotting](plotting.md)      | Output interactive plots                                  |
-| [media](media/index.md)   | Output media like images, audio, PDFs, and plain text     |
-| [diagrams](diagrams.md)      | Flow charts, graphs, statistic cards, and more            |
-| [status](status.md)        | Display progress indicators                               |
-| [outputs](outputs.md)       | Modify cell outputs, redirect console output              |
-| [control_flow](control_flow.md)  | Control how cells execute                                 |
-| [html](html.md)          | Manipulate HTML objects                                   |
-| [query_params](query_params.md)  | Access and set query parameters with `mo.query_params`    |
-| [cli_args](cli_args.md)      | Access command-line arguments with `mo.cli_args`          |
-| [caching](caching.md)       | Cache expensive computations in memory or on disk         |
-| [state](state.md)         | Synchronize multiple UI elements with `mo.state`          |
-| [app](app.md)           | Embed notebooks in other notebooks                        |
-| [cell](cell.md)          | Run cells defined in another notebook                     |
-| [watch](watch.md)         | Reactively respond to file changes on disk          |
-| [miscellaneous](miscellaneous.md) | Miscellaneous utilities                                   |
+| [markdown](markdown.md)      | `mo.md`でmarkdownを記述                               |
+| [inputs](inputs/index.md)  | スライダー、ドロップダウン、テーブルなどをPythonに接続    |
+| [layouts](layouts/index.md) | アコーディオン、タブ、スタックなどで出力をカスタマイズ |
+| [plotting](plotting.md)      | インタラクティブなプロットを出力                                  |
+| [media](media/index.md)   | 画像、オーディオ、PDF、プレーンテキストなどのメディアを出力     |
+| [diagrams](diagrams.md)      | フローチャート、グラフ、統計カードなど            |
+| [status](status.md)        | 進行インジケーターを表示                               |
+| [outputs](outputs.md)       | セル出力を変更し、コンソール出力をリダイレクト              |
+| [control_flow](control_flow.md)  | セルの実行方法を制御                                 |
+| [html](html.md)          | HTMLオブジェクトを操作                                   |
+| [query_params](query_params.md)  | `mo.query_params`でクエリパラメータにアクセスおよび設定    |
+| [cli_args](cli_args.md)      | `mo.cli_args`でコマンドライン引数にアクセス          |
+| [caching](caching.md)       | メモリまたはディスク上で高コストな計算をキャッシュ         |
+| [state](state.md)         | `mo.state`で複数のUI要素を同期          |
+| [app](app.md)           | 他のノートブックにノートブックを埋め込む                        |
+| [cell](cell.md)          | 他のノートブックで定義されたセルを実行                     |
+| [watch](watch.md)         | ディスク上のファイル変更にリアクティブに対応          |
+| [miscellaneous](miscellaneous.md) | その他のユーティリティ                                   |
+

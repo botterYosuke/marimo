@@ -3,263 +3,169 @@ hide:
   - navigation
 ---
 
-## Choosing marimo
+## Backcastを選ぶ理由
 
 <a name="faq-jupyter"></a>
 
-### How is marimo different from Jupyter?
+### BackcastはJupyterとどう違いますか？
 
-marimo is a reinvention of the Python notebook as a reproducible, interactive,
-and shareable Python program that can be executed as scripts or deployed as
-interactive web apps.
+Backcastは、スクリプトとして実行したり、インタラクティブなWebアプリとしてデプロイしたりできる、再現可能でインタラクティブで共有可能なPythonプログラムとして、Pythonノートブックを再発明したものです。
 
-**Consistent state.** In marimo, your notebook code, outputs, and program state
-are guaranteed to be consistent. Run a cell and marimo reacts by automatically
-running the cells that reference its variables. Delete a cell and marimo scrubs
-its variables from program memory, eliminating hidden state.
+**一貫した状態。** Backcastでは、ノートブックコード、出力、プログラム状態が一貫していることが保証されています。セルを実行すると、Backcastはその変数を参照するセルを自動的に実行することで反応します。セルを削除すると、Backcastはその変数をプログラムメモリから削除し、隠れた状態を排除します。
 
-**Built-in interactivity.** marimo also comes with [UI
-elements](guides/interactivity.md) like sliders, a dataframe transformer, and
-interactive plots that are automatically synchronized with Python. Interact
-with an element and the cells that use it are automatically re-run with its
-latest value.
+**組み込みのインタラクティビティ。** Backcastには、スライダー、データフレーム変換器、インタラクティブなプロットなどの[UI要素](guides/interactivity.md)も含まれており、これらはPythonと自動的に同期されます。要素と対話すると、それを使用するセルが最新の値で自動的に再実行されます。
 
-**Pure Python programs.** Unlike Jupyter notebooks, marimo notebooks are stored
-as pure Python files that can be executed as scripts, deployed as interactive
-web apps, and versioned easily with Git.
+**3DモードとGridモード。** Backcastの特徴的な機能として、**3Dモード**と**Gridモード**の切り替えが可能です。Gridモードではセルをグリッドレイアウトで配置・編集し、3Dモードではセルを3D空間に配置してインタラクティブに操作できます。ツールバーの`EditViewModeSelect`コンポーネントで、ドロップダウンから"vertical"（Gridモード）と"3d"（3Dモード）を選択して切り替えられます。
+
+**純粋なPythonプログラム。** Jupyterノートブックとは異なり、Backcastノートブックは純粋なPythonファイルとして保存されるため、スクリプトとして実行したり、インタラクティブなWebアプリとしてデプロイしたり、Gitで簡単にバージョン管理したりできます。
 
 <a name="faq-problems"></a>
 
-### What problems does marimo solve?
+### Backcastはどのような問題を解決しますか？
 
-marimo solves problems in reproducibility, maintainability, interactivity,
-reusability, and shareability of notebooks.
+Backcastは、ノートブックの再現性、保守性、インタラクティビティ、再利用性、共有可能性に関する問題を解決します。
 
-**Reproducibility.**
-In Jupyter notebooks, the code you see doesn't necessarily match the outputs on
-the page or the program state. If you
-delete a cell, its variables stay in memory, which other cells may still
-reference; users can execute cells in arbitrary order. This leads to
-widespread reproducibility issues. [One study](https://blog.jetbrains.com/datalore/2020/12/17/we-downloaded-10-000-000-jupyter-notebooks-from-github-this-is-what-we-learned/#consistency-of-notebooks) analyzed 10 million Jupyter
-notebooks and found that 36% of them weren't reproducible.
+**再現性。**
+Jupyterノートブックでは、表示されるコードがページ上の出力やプログラム状態と一致するとは限りません。セルを削除すると、その変数はメモリに残り、他のセルが引き続き参照する可能性があります。ユーザーは任意の順序でセルを実行できます。これにより、広範な再現性の問題が発生します。[ある研究](https://blog.jetbrains.com/datalore/2020/12/17/we-downloaded-10-000-000-jupyter-notebooks-from-github-this-is-what-we-learned/#consistency-of-notebooks)では、1000万のJupyterノートブックを分析し、その36%が再現可能ではないことを発見しました。
 
-In contrast, marimo guarantees that your code, outputs, and program state are
-consistent, eliminating hidden state and making your notebook reproducible.
-marimo achieves this by intelligently analyzing your code and understanding the
-relationships between cells, and automatically re-running cells as needed.
+対照的に、Backcastはコード、出力、プログラム状態が一貫していることを保証し、隠れた状態を排除してノートブックを再現可能にします。Backcastは、コードをインテリジェントに分析し、セル間の関係を理解し、必要に応じてセルを自動的に再実行することでこれを実現します。
 
-In addition, marimo notebooks can serialize package requirements inline;
-marimo runs these "sandboxed" notebooks in temporary virtual environments,
-making them [reproducible down to the packages](guides/editor_features/package_management.md).
+さらに、Backcastノートブックはパッケージ要件をインラインでシリアル化できます。Backcastはこれらの「サンドボックス化された」ノートブックを一時的な仮想環境で実行し、パッケージまで再現可能にします（将来の機能として拡張予定）。
 
-**Maintainability.**
-marimo notebooks are stored as pure Python programs (`.py` files). This lets you
-version them with Git; in contrast, Jupyter notebooks are stored as JSON and
-require extra steps to version.
+**保守性。**
+Backcastノートブックは純粋なPythonプログラム（`.py`ファイル）として保存されます。これにより、Gitでバージョン管理できます。対照的に、JupyterノートブックはJSONとして保存され、バージョン管理には追加の手順が必要です。
 
-**Interactivity.**
-marimo notebooks come with [UI elements](guides/interactivity.md) that are
-automatically synchronized with Python (like sliders, dropdowns); _eg_, scrub a
-slider and all cells that reference it are automatically re-run with the new
-value. This is difficult to get working in Jupyter notebooks.
+**インタラクティビティ。**
+Backcastノートブックには、Pythonと自動的に同期される[UI要素](guides/interactivity.md)（スライダー、ドロップダウンなど）が含まれています。例えば、スライダーを操作すると、それを参照するすべてのセルが新しい値で自動的に再実行されます。これはJupyterノートブックで動作させるのが困難です。
 
-**Reusability.**
-marimo notebooks can be executed as Python scripts from the command-line (since
-they're stored as `.py` files). In contrast, this requires extra steps to
-do for Jupyter, such as copying and pasting the code out or using external
-frameworks. We also let you import symbols (functions, classes) defined in a 
-marimo notebook into other Python programs/notebooks, something you can't 
-easily do with Jupyter.
+**再利用性。**
+BackcastノートブックはコマンドラインからPythonスクリプトとして実行できます（`.py`ファイルとして保存されるため）。対照的に、Jupyterではコードをコピー＆ペーストしたり、外部フレームワークを使用したりするなど、追加の手順が必要です。また、Backcastノートブックで定義されたシンボル（関数、クラス）を他のPythonプログラム/ノートブックにインポートすることもできます。これはJupyterでは簡単にはできません。
 
-**Shareability.**
-Every marimo notebook can double as an interactive web app, complete with UI
-elements, which you can serve using the `marimo run` command. This isn't
-possible in Jupyter without substantial extra effort.
+**共有可能性。**
+すべてのBackcastノートブックは、UI要素を備えたインタラクティブなWebアプリとしても機能します。これは、Jupyterでは大幅な追加作業なしには不可能です。
 
-_To learn more about problems with traditional notebooks,
-see these references
+_従来のノートブックの問題について詳しく知りたい場合は、これらの参考文献をご覧ください
 [[1]](https://austinhenley.com/pubs/Chattopadhyay2020CHI_NotebookPainpoints.pdf)
-[[2]](https://www.youtube.com/watch?v=7jiPeIFXb6U&t=1s)._
+[[2]](https://www.youtube.com/watch?v=7jiPeIFXb6U&t=1s)。_
 
 <a name="faq-widgets"></a>
 
-### How is `marimo.ui` different from Jupyter widgets?
+### `marimo.ui`はJupyterウィジェットとどう違いますか？
 
-Unlike Jupyter widgets, marimo's interactive elements are automatically
-synchronized with the Python kernel: no callbacks, no observers, no manually
-re-running cells.
+Jupyterウィジェットとは異なり、Backcastのインタラクティブ要素はPythonカーネルと自動的に同期されます：コールバックなし、オブザーバーなし、手動でのセル再実行なし。
 
 <p align="center">
 <video autoplay muted loop playsinline width="600px" align="center">
-    <source src="/_static/faq-marimo-ui.mp4" type="video/mp4">
-    <source src="/_static/faq-marimo-ui.webm" type="video/webm">
+    <source src="_static/faq-marimo-ui.mp4" type="video/mp4">
+    <source src="_static/faq-marimo-ui.webm" type="video/webm">
 </video>
 </p>
 
-## Using marimo
+## Backcastの使用
 
 <a name="faq-notebook-or-library"></a>
 
-### Is marimo a notebook or a library?
+### Backcastはノートブックですか、それともライブラリですか？
 
-marimo is both a notebook and a library.
+Backcastはノートブックとライブラリの両方です。
 
-- Create _marimo notebooks_ with the editor that opens in your
-  browser when you run `marimo edit`.
-- Use the _marimo library_ (`import marimo as mo`) in
-  marimo notebooks. Write markdown with `mo.md(...)`,
-  create stateful interactive elements with `mo.ui` (`mo.ui.slider(...)`), and
-  more. See the docs for an [API reference](./api/index.md).
+- Backcastエディタで_Backcastノートブック_を作成します。
+- Backcastノートブックで_marimoライブラリ_（`import marimo as mo`）を使用します。`mo.md(...)`でmarkdownを記述し、`mo.ui`（`mo.ui.slider(...)`）でステートフルなインタラクティブ要素を作成し、さらに多くのことができます。詳細は[APIリファレンス](./api/index.md)をご覧ください。
 
 <a name="faq-notebook-app"></a>
 
-### What's the difference between a marimo notebook and a marimo app?
+### BackcastノートブックとBackcastアプリの違いは何ですか？
 
-marimo programs are notebooks, apps, or both, depending on how you use them.
+Backcastプログラムは、使用方法に応じてノートブック、アプリ、またはその両方です。
 
-There are two ways to interact with a marimo program:
+Backcastノートブックはリアクティブで組み込みのインタラクティブ要素があるため、多くのノートブックは単純にノートブックコードを非表示にすることで、有用で美しいアプリに簡単に変換できます。
 
-1. open it as a computational _notebook_ with `marimo edit`
-2. run it as an interactive _app_ with `marimo run`
-
-All marimo programs start as notebooks, since they are created with `marimo
-edit`. Because marimo notebooks are reactive and have built-in interactive
-elements, many can easily be made into useful and beautiful apps by simply
-hiding the notebook code: this is what `marimo run` does.
-
-Not every notebook needs to be run as an app — marimo notebooks are useful in
-and of themselves for rapidly exploring data and doing reproducible science.
-And not every app is improved by interacting with the notebook. In some
-settings, such as collaborative research, education, and technical
-presentations, going back and forth between the notebook view and app view
-(which you can do from `marimo edit`) can be useful!
+すべてのノートブックがアプリとして実行される必要があるわけではありません。Backcastノートブック自体が、データを迅速に探索し、再現可能な科学を行うのに有用です。
 
 <a name="faq-reactivity"></a>
 
-### How does marimo know what cells to run?
+### Backcastはどのセルを実行するかどうやって知りますか？
 
-marimo reads each cell once to determine what global names it defines and what
-global names it reads. When a cell is run, marimo runs all other cells that
-read any of the global names it defines. A global name can refer to a variable,
-class, function, or import.
+Backcastは各セルを1回読み取り、定義するグローバル名と読み取るグローバル名を決定します。セルが実行されると、Backcastはそのセルが定義するグローバル名のいずれかを読み取る他のすべてのセルを実行します。グローバル名は、変数、クラス、関数、またはインポートを参照できます。
 
-In other words, marimo uses _static analysis_ to make a dataflow graph out of
-your cells. Each cell is a node in the graph across which global
-variables "flow". Whenever a cell is run, either because you changed its
-code or interacted with a UI element it reads, all its descendants run in turn.
+言い換えると、Backcastは_静的解析_を使用して、セルからデータフローグラフを作成します。各セルはグラフ内のノードで、グローバル変数が「流れる」ノードです。セルが実行されるたびに（コードを変更したか、読み取るUI要素と対話したため）、そのすべての子孫が順番に実行されます。
 
 <a name="faq-overhead"></a>
 
-### Does marimo slow my code down?
+### Backcastはコードを遅くしますか？
 
-No, marimo doesn't slow your code down. marimo determines the dependencies
-among cells by reading your code, not running or tracing it, so there's
-zero runtime overhead.
+いいえ、Backcastはコードを遅くしません。Backcastはコードを実行またはトレースするのではなく、コードを読み取ることでセル間の依存関係を決定するため、ランタイムオーバーヘッドはゼロです。
 
 <a name="faq-expensive"></a>
 
-### How do I prevent automatic execution from running expensive cells?
+### 高コストなセルの自動実行を防ぐにはどうすればよいですか？
 
-Reactive (automatic) execution ensures your code and outputs are always
-in sync, improving reproducibility by eliminating hidden state and
-out-of-order execution; marimo also takes care to run only the minimal set of
-cells needed to keep your notebook up to date. But when some cells take a long
-time to run, it's understandable to be concerned that automatic execution will
-kick off expensive cells before you're ready to run them.
+リアクティブ（自動）実行により、コードと出力が常に同期され、隠れた状態と順序外実行を排除することで再現性が向上します。Backcastは、ノートブックを最新の状態に保つために必要な最小限のセルセットのみを実行するように注意しています。しかし、一部のセルの実行に時間がかかる場合、自動実行が準備が整う前に高コストなセルを開始することについて懸念するのは理解できます。
 
-_Here are some tips to avoid accidental execution of expensive cells:_
+_高コストなセルの誤った実行を避けるためのヒント：_
 
-- [Disable expensive cells](guides/reactivity.md#disabling-cells). When a cell
-  is disabled, it and its descendants are blocked from running.
-- Wrap UI elements in a [form][marimo.ui.form].
-- Use [`mo.stop`][marimo.stop] to conditionally stop
-  execution of a cell and its descendants.
-- Decorate functions with marimo's [`mo.cache`][marimo.cache] to cache
-  expensive intermediate computations.
-- Use [`mo.persistent_cache`][marimo.persistent_cache] to cache variables to
-  disk; on re-run, marimo will read values from disk instead of recalculating
-  them as long as the cell is not stale.
-- Disable automatic execution in the [runtime configuration](guides/configuration/runtime_configuration.md).
+- [高コストなセルを無効化](guides/reactivity.md#disabling-cells)。セルが無効化されると、そのセルとその子孫の実行がブロックされます。
+- UI要素を[フォーム][marimo.ui.form]でラップします。
+- [`mo.stop`][marimo.stop]を使用して、セルとその子孫の実行を条件付きで停止します。
+- 高コストな中間計算をキャッシュするために、Backcastの[`mo.cache`][marimo.cache]で関数をデコレートします。
+- [`mo.persistent_cache`][marimo.persistent_cache]を使用して変数をディスクにキャッシュします。再実行時、Backcastはセルが古くない限り、再計算する代わりにディスクから値を読み取ります。
+- ランタイム設定で自動実行を無効にします（将来の機能として拡張予定）。
 
 <a name="faq-lazy"></a>
 
-### How do I disable automatic execution?
+### 自動実行を無効にするにはどうすればよいですか？
 
-You can disable automatic execution through the notebook runtime settings;
-see the [guide on runtime configuration](guides/configuration/runtime_configuration.md).
+ノートブックのランタイム設定から自動実行を無効にできます（将来の機能として拡張予定）。
 
-When automatic execution is disabled, marimo still gives you guarantees on
-your notebook state and automatically marks cells as stale when appropriate.
+自動実行が無効になっている場合でも、Backcastはノートブック状態について保証を提供し、適切な場合にセルを自動的に古いものとしてマークします。
 
 <a name="faq-interactivity"></a>
 
-### How do I use sliders and other interactive elements?
+### スライダーやその他のインタラクティブ要素をどのように使用しますか？
 
-Interactive UI elements like sliders are available in `marimo.ui`.
+スライダーのようなインタラクティブなUI要素は`marimo.ui`で利用できます。
 
-- Assign the UI element to a global variable (`slider = mo.ui.slider(0, 100)`)
-- Include it in the last expression of a cell to display it (`slider` or `mo.md(f"Choose a value: {slider}")`)
-- Read its current value in another cell via its `value` attribute (`slider.value`)
+- UI要素をグローバル変数に割り当てます（`slider = mo.ui.slider(0, 100)`）
+- 表示するためにセルの最後の式に含めます（`slider`または`mo.md(f"値を選択: {slider}")`）
+- 別のセルで`value`属性（`slider.value`）を介して現在の値を読み取ります
 
-_When a UI element bound to a global variable is interacted with, all cells
-referencing the global variable are run automatically_.
+_グローバル変数にバインドされたUI要素と対話すると、グローバル変数を参照するすべてのセルが自動的に実行されます_。
 
-If you have many UI elements or don't know the elements
-you'll create until runtime, use `marimo.ui.array` and `marimo.ui.dictionary`
-to create UI elements that wrap other UI elements (`sliders =
-mo.ui.array([slider(1, 100) for _ in range(n_sliders)])`).
+多くのUI要素がある場合、または実行時まで作成する要素が不明な場合は、`marimo.ui.array`と`marimo.ui.dictionary`を使用して、他のUI要素をラップするUI要素を作成します（`sliders = mo.ui.array([slider(1, 100) for _ in range(n_sliders)])`）。
 
-All this and more is explained in the UI tutorial. Run it with
-
-```bash
-marimo tutorial ui
-```
-
-at the command line.
+詳細は[インタラクティビティガイド](guides/interactivity.md)をご覧ください。
 
 <a name="faq-form"></a>
 
-### How do I add a submit button to UI elements?
+### UI要素に送信ボタンを追加するにはどうすればよいですか？
 
-Use the `form` method to add a submit button to a UI element. For
-example,
+`form`メソッドを使用してUI要素に送信ボタンを追加します。例えば：
 
 ```python
 form = marimo.ui.text_area().form()
 ```
 
-When wrapped in a form, the
-text area's value will only be sent to Python when you click the submit button.
-Access the last submitted value of the text area with `form.value`.
+フォームでラップされたテキスト領域の値は、送信ボタンをクリックしたときにのみPythonに送信されます。`form.value`でテキスト領域の最後に送信された値にアクセスします。
 
 <a name="faq-markdown"></a>
 
-### How do I write markdown?
+### markdownをどのように記述しますか？
 
-Import `marimo` (as `mo`) in a notebook, and use the `mo.md` function.
-Learn more in the [outputs guide](guides/outputs.md#markdown)
-or by running `marimo tutorial markdown`.
+ノートブックで`marimo`（`mo`として）をインポートし、`mo.md`関数を使用します。
 
 <a name="faq-plots"></a>
 
-### How do I display plots?
+### プロットをどのように表示しますか？
 
-Include plots in the last expression of a cell to display them, just like all
-other outputs. If you're using matplotlib, you can display the `Figure` object
-(get the current figure with `plt.gcf()`). For examples, run the plots tutorial:
+他のすべての出力と同様に、セルの最後の式にプロットを含めて表示します。matplotlibを使用している場合、`Figure`オブジェクトを表示できます（`plt.gcf()`で現在の図を取得）。
 
-```bash
-marimo tutorial plots
-```
-
-Also see the [plotting API reference](api/plotting.md).
+プロットの詳細については、[APIリファレンス](./api/index.md)をご覧ください。
 
 <a name="faq-mpl-cutoff"></a>
 
-### How do I prevent matplotlib plots from being cut off?
+### matplotlibプロットが切れないようにするにはどうすればよいですか？
 
-If your legend or axes labels are cut off, try calling `plt.tight_layout()`
-before outputting your plot:
+凡例や軸ラベルが切れている場合は、プロットを出力する前に`plt.tight_layout()`を呼び出してみてください：
 
 ```python
 import matplotlib.pyplot as plt
@@ -272,9 +178,9 @@ plt.gca()
 
 <a name="faq-interactive-plots"></a>
 
-### How do I display interactive matplotlib plots?
+### インタラクティブなmatplotlibプロットをどのように表示しますか？
 
-Use [`marimo.mpl.interactive`][marimo.mpl.interactive].
+[`marimo.mpl.interactive`][marimo.mpl.interactive]を使用します。
 
 ```bash
 fig, ax = plt.subplots()
@@ -284,81 +190,59 @@ mo.mpl.interactive(ax)
 
 <a name="faq-rows-columns"></a>
 
-### How do I display objects in rows and columns?
+### オブジェクトを行と列で表示するにはどうすればよいですか？
 
-Use `marimo.hstack` and `marimo.vstack`. See the layout tutorial for details:
-
-```bash
-marimo tutorial layout
-```
+`marimo.hstack`と`marimo.vstack`を使用します。詳細は[レイアウトAPIリファレンス](api/layouts/index.md)をご覧ください。
 
 <a name="faq-show-code"></a>
 
-### How do I show cell code in the app view?
+### アプリビューでセルコードを表示するにはどうすればよいですか？
 
-Use [`mo.show_code`][marimo.show_code].
+[`mo.show_code`][marimo.show_code]を使用します。
 
 <a name="faq-dynamic-ui-elements"></a>
 
-### How do I create an output with a dynamic number of UI elements?
+### 動的な数のUI要素を含む出力を作成するにはどうすればよいですか？
 
-Use [`mo.ui.array`][marimo.ui.array],
-[`mo.ui.dictionary`][marimo.ui.dictionary], or
-[`mo.ui.batch`][marimo.ui.batch] to create a UI element
-that wraps a dynamic number of other UI elements.
+[`mo.ui.array`][marimo.ui.array]、[`mo.ui.dictionary`][marimo.ui.dictionary]、または[`mo.ui.batch`][marimo.ui.batch]を使用して、動的な数の他のUI要素をラップするUI要素を作成します。
 
-If you need custom
-formatting, use [`mo.ui.batch`][marimo.ui.batch], otherwise
-use [`mo.ui.array`][marimo.ui.array] or
-[`mo.ui.dictionary`][marimo.ui.dictionary].
+カスタムフォーマットが必要な場合は[`mo.ui.batch`][marimo.ui.batch]を使用し、それ以外の場合は[`mo.ui.array`][marimo.ui.array]または[`mo.ui.dictionary`][marimo.ui.dictionary]を使用します。
 
-For usage examples, see the
-[recipes for grouping UI elements together](recipes.md#grouping-ui-elements-together).
+使用例については、[インタラクティビティガイド](guides/interactivity.md)をご覧ください。
 
 <a name="faq-restart"></a>
 
-### How do I restart a notebook?
+### ノートブックを再起動するにはどうすればよいですか？
 
-To clear all program memory and restart the notebook from scratch, open the
-notebook menu in the top right and click "Restart kernel".
+すべてのプログラムメモリをクリアし、最初からノートブックを再起動するには、右上のノートブックメニューを開き、「Restart kernel」をクリックします。
 
 <a name="faq-reload"></a>
 
-### How do I reload modules?
+### モジュールを再読み込みするにはどうすればよいですか？
 
-Enable automatic reloading of modules via the runtime settings in your
-marimo installation's user configuration. (Click the "gear" icon in the
-top right of a marimo notebook).
+Backcastの設定のランタイム設定から、モジュールの自動再読み込みを有効にします（Backcastノートブックの右上の「歯車」アイコンをクリック）。
 
-When enabled, marimo will automatically hot-reload modified modules
-before executing a cell.
+有効にすると、Backcastはセルを実行する前に変更されたモジュールを自動的にホットリロードします。
 
 <a name="faq-on-change-called"></a>
 
-### Why aren't my `on_change`/`on_click` handlers being called?
+### `on_change`/`on_click`ハンドラーが呼ばれないのはなぜですか？
 
-A UI Element's `on_change` (or for buttons, `on_click`) handlers are only
-called if the element is bound to a global variable. For example, this won't work
+UI要素の`on_change`（またはボタンの場合、`on_click`）ハンドラーは、要素がグローバル変数にバインドされている場合にのみ呼ばれます。例えば、これは動作しません：
 
 ```python
 mo.vstack([mo.ui.button(on_change=lambda _: print("I was called")) for _ in range(10)])
 ```
 
-In such cases (when you want to output a dynamic number of UI elements),
-you need to use
-[`mo.ui.array`][marimo.ui.array],
-[`mo.ui.dictionary`][marimo.ui.dictionary], or
-[`mo.ui.batch`][marimo.ui.batch].
+このような場合（動的な数のUI要素を出力したい場合）、[`mo.ui.array`][marimo.ui.array]、[`mo.ui.dictionary`][marimo.ui.dictionary]、または[`mo.ui.batch`][marimo.ui.batch]を使用する必要があります。
 
-See the
-[recipes for grouping UI elements together](recipes.md#grouping-ui-elements-together)
-for example code.
+例のコードについては、[UI要素をグループ化するレシピ](recipes.md#grouping-ui-elements-together)をご覧ください。
 
 <a name="faq-on-change-last"></a>
 
-### Why are my `on_change` handlers in an array all referencing the last element?
+### 配列内の`on_change`ハンドラーがすべて最後の要素を参照しているのはなぜですか？
 
-**Don't do this**: In the below snippet, every `on_change` will print `9`!.
+**これを行わないでください**：以下のスニペットでは、すべての`on_change`が`9`を出力します！
 
 ```python
 array = mo.ui.array(
@@ -366,7 +250,7 @@ array = mo.ui.array(
 ])
 ```
 
-**Instead, do this**: Explicitly bind `i` to the current loop value:
+**代わりに、これを行ってください**：`i`を現在のループ値に明示的にバインドします：
 
 ```python
 array = mo.ui.array(
@@ -375,15 +259,15 @@ array = mo.ui.array(
 array
 ```
 
-This is necessary because [in Python, closures are late-binding](https://docs.python-guide.org/writing/gotchas/#late-binding-closures).
+これは、[Pythonではクロージャが遅延バインディング](https://docs.python-guide.org/writing/gotchas/#late-binding-closures)であるために必要です。
 
 <a name="faq-sql-brackets"></a>
 
-### Why aren't my SQL brackets working?
+### SQLのブラケットが動作しないのはなぜですか？
 
-Our "SQL" cells are really just Python under the hood to keep notebooks as pure Python scripts. By default, we use `f-strings` for SQL strings, which allows for parameterized SQL like `SELECT * from table where value < {min}`.
+「SQL」セルは、ノートブックを純粋なPythonスクリプトとして保つために、実際には内部でPythonです。デフォルトでは、SQL文字列に`f-strings`を使用するため、`SELECT * from table where value < {min}`のようなパラメータ化されたSQLが可能です。
 
-To escape real `{` / `}` that you don't want parameterized, use double `\{\{...\}\}`:
+パラメータ化したくない実際の`{`/`}`をエスケープするには、二重`\{\{...\}\}`を使用します：
 
 ```sql
 SELECT unnest([\{\{'a': 42, 'b': 84\}\}, \{\{'a': 100, 'b': NULL\}\}]);
@@ -391,123 +275,73 @@ SELECT unnest([\{\{'a': 42, 'b': 84\}\}, \{\{'a': 100, 'b': NULL\}\}]);
 
 <a name="faq-annotations"></a>
 
-### How does marimo treat type annotations?
+### Backcastは型アノテーションをどのように扱いますか？
 
-Type annotations are registered as references of a cell, unless they
-are explicitly written as strings. This helps ensure correctness of code that
-depends on type annotations at runtime (_e.g._, Pydantic), while still
-providing a way to omit annotations from affecting dataflow graph.
+型アノテーションは、明示的に文字列として記述されていない限り、セルの参照として登録されます。これは、実行時に型アノテーションに依存するコード（例：Pydantic）の正確性を確保するのに役立ちますが、データフローグラフに影響を与えるアノテーションを省略する方法も提供します。
 
-For example, in
+例えば、以下では：
 
 ```python
 x: A = ...
 ```
 
-`A` is treated as a reference, used in determining the dataflow graph, but
-in
+`A`は参照として扱われ、データフローグラフの決定に使用されますが、以下では：
 
 ```python
 x: "A" = ...
 ```
 
-`A` isn't made a reference.
+`A`は参照として扱われません。
 
-For Python 3.12+, marimo additionally implements annotation scoping.
+Python 3.12+の場合、Backcastは追加でアノテーションスコープを実装しています。
 
 <a name="faq-dotenv"></a>
 
-### How do I use dotenv?
+### dotenvをどのように使用しますか？
 
-The package `dotenv`'s `loadenv()` function does not work out-of-the box in
-marimo. Instead, use `dotenv.load_dotenv(dotenv.find_dotenv(usecwd=True))`.
+パッケージ`dotenv`の`loadenv()`関数は、Backcastではそのまま動作しません。代わりに、`dotenv.load_dotenv(dotenv.find_dotenv(usecwd=True))`を使用してください。
 
 <a name="faq-packages"></a>
 
-### What packages can I use?
+### どのパッケージを使用できますか？
 
-You can use any Python package. marimo cells run arbitrary Python code.
+任意のPythonパッケージを使用できます。Backcastセルは任意のPythonコードを実行します。
 
 <a name="faq-remote"></a>
 
-### How do I use marimo on a remote server?
+### リモートサーバーでBackcastをどのように使用しますか？
 
-> We recorded a video tutorial on how to use marimo on a remote server. Check it out [here](https://youtu.be/pam9Hw8rbaA).
-
-Use SSH port-forwarding to run marimo on a remote server
-and connect to it from a browser on your local machine. Make sure
-to pass the `--headless` flag when starting marimo on remote; on the remote
-machine, we also recommend using a port other than marimo's default port, such
-as 8080:
-
-_On the remote machine, run:_
-
-```bash
-marimo edit --headless --port 8080
-```
-
-or, if you want to set a custom host:
-
-```bash
-marimo edit --headless --host 0.0.0.0 --port 8080
-```
-
-_On local, run:_
-
-```
-ssh -N -L 3718:127.0.0.1:8080 REMOTE_USER@REMOTE_HOST
-```
-
-Then open `localhost:3718` in your browser.
+BackcastはElectronアプリケーションとして動作するため、リモートサーバーでの使用は現在サポートされていません。将来的には、Web版の提供を検討しています。
 
 <a name="faq-interfaces"></a>
 
-### How do I make marimo accessible on all network interfaces?
+### Backcastをすべてのネットワークインターフェースでアクセス可能にするにはどうすればよいですか？
 
-Use `--host 0.0.0.0` with `marimo edit`, `marimo run`, or `marimo tutorial`:
-
-```bash
-marimo edit --host 0.0.0.0
-```
+BackcastはElectronアプリケーションとして動作するため、ネットワークインターフェースの設定は現在サポートされていません。
 
 <a name="faq-jupyter-hub"></a>
 
-### How do I use marimo behind JupyterHub?
+### JupyterHubの背後でBackcastをどのように使用しますか？
 
-JupyterHub can be configured to launch marimo using the [`jupyter-marimo-proxy`
-package](https://github.com/jyio/jupyter-marimo-proxy).
+BackcastはElectronアプリケーションとして動作するため、JupyterHubとの統合は現在サポートされていません。
 
 <a name="faq-jupyter-book"></a>
 
-### How do I use marimo with JupyterBook?
+### JupyterBookでBackcastをどのように使用しますか？
 
-[JupyterBook](https://jupyterbook.org/en/stable/intro.html) makes it easy
-to create static websites with markdown and Jupyter notebooks.
+[JupyterBook](https://jupyterbook.org/en/stable/intro.html)は、markdownとJupyterノートブックで静的Webサイトを簡単に作成できます。
 
-To include a marimo notebook in a JupyterBook, you can either export your
-notebook to an `ipynb` file, or export to `HTML`:
-
-1. export to ipynb: `marimo export ipynb my_notebook.py -o my_notebook.ipynb --include-outputs`
-2. export to HTML: `marimo export html my_notebook.py -o my_notebook.html`
+JupyterBookにBackcastノートブックを含めるには、ノートブックを`ipynb`ファイルにエクスポートするか、`HTML`にエクスポートできます。エクスポート機能は将来的に追加される予定です。
 
 <a name="faq-app-deploy"></a>
 
-### How do I deploy apps?
+### アプリをどのようにデプロイしますか？
 
-Use the marimo CLI's `run` command to serve a notebook as an app:
-
-```bash
-marimo run notebook.py
-```
-
-If you are running marimo inside a Docker container, you may want to run under a different host and port:
-
-```bash
-marimo run notebook.py --host 0.0.0.0 --port 8080
-```
+BackcastはElectronアプリケーションとして動作するため、アプリのデプロイ方法は将来的に追加される予定です。現時点では、開発環境での使用に焦点を当てています。
 
 <a name="faq-marimo-free"></a>
 
-### Is marimo free?
+### Backcastは無料ですか？
 
-Yes!
+はい！
+

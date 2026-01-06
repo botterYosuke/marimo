@@ -1,10 +1,10 @@
-# Hotkeys
+# ホットキー
 
-If you'd like to override the default hotkeys, you can do so in the hotkeys menu (`Ctrl/Cmd-Shift-h`), or modifying your `marimo.toml`.
+デフォルトのホットキーを上書きしたい場合は、ホットキーメニュー（`Ctrl/Cmd-Shift-h`）で行ってください。
 
-You can find a list of available hotkeys below:
+利用可能なホットキーのリストは以下のとおりです：
 
-| Hotkey                                        |
+| ホットキー                                        |
 | --------------------------------------------- |
 | `cell.aiCompletion`                           |
 | `cell.cellActions`                            |
@@ -60,3 +60,4 @@ You can find a list of available hotkeys below:
 | `markdown.link`                               |
 | `markdown.orderedList`                        |
 | `markdown.unorderedList`                      |
+

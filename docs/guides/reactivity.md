@@ -1,107 +1,72 @@
-# Running cells
+# セルの実行
 
-marimo _reacts_ to your code changes: run a cell, and all other cells that
-refer to the variables it defines are automatically run with the latest data.
-This keeps your code and outputs consistent, and eliminates bugs before they
-happen.
+Backcastはコードの変更に_反応_します：セルを実行すると、そのセルが定義する変数を参照する他のすべてのセルが最新のデータで自動的に実行されます。これにより、コードと出力が一貫性を保ち、バグが発生する前に排除されます。
 
-??? question "Why run cells reactively?"
-    marimo's "reactive" execution model makes your notebooks more reproducible
-    by eliminating hidden state and providing a deterministic execution order.
-    It also powers marimo's support for [interactive
-    elements](../guides/interactivity.md), for running as apps, and executing as
-    scripts.
+??? question "なぜセルをリアクティブに実行するのか？"
+    Backcastの「リアクティブ」実行モデルは、隠れた状態を排除し、決定論的な実行順序を提供することで、ノートブックをより再現可能にします。
+    また、Backcastの[インタラクティブ要素](../guides/interactivity.md)のサポート、アプリとしての実行、スクリプトとしての実行にも力を与えます。
 
-    How marimo runs cells is one of the biggest differences between marimo and
-    traditional notebooks like Jupyter. Learn more at our
-    [FAQ](../faq.md#faq-jupyter).
+    Backcastがセルを実行する方法は、BackcastとJupyterのような従来のノートブックの最大の違いの1つです。詳細は[FAQ](../faq.md#faq-jupyter)をご覧ください。
 
-!!! tip "Working with expensive notebooks"
-    marimo provides tools for working with expensive notebooks, in which cells
-    might take a long time to run or have side-effects.
+!!! tip "高コストなノートブックでの作業"
+    Backcastは、セルの実行に時間がかかる場合や副作用がある場合など、高コストなノートブックでの作業のためのツールを提供します。
 
-    *  The [runtime can be configured](configuration/runtime_configuration.md)
-       to be **lazy** instead of
-       automatic, marking cells as stale instead of running them.
-    *  Use [`mo.stop`][marimo.stop] to conditionally
-       stop execution at runtime.
+    *  [ランタイムを設定](configuration/runtime_configuration.md)して**レイジー**にし、自動的に実行する代わりに、セルを古いものとしてマークできます。
+    *  [`mo.stop`][marimo.stop]を使用して、実行時に条件付きで実行を停止します。
 
-    See [the expensive notebooks guide](expensive_notebooks.md) for more tips.
+    詳細は[高コストなノートブックガイド](expensive_notebooks.md)をご覧ください。
 
-## How marimo runs cells
+## Backcastがセルを実行する方法
 
-marimo statically analyzes each cell (i.e., without running it) to determine
-its
+Backcastは各セルを静的に解析（つまり、実行せずに）して、以下を決定します：
 
-- references, the global variables it reads but doesn't define;
-- definitions, the global variables it defines.
+- references（参照）：読み取るが定義しないグローバル変数
+- definitions（定義）：定義するグローバル変数
 
-It then forms a directed acyclic graph (DAG) on cells, with an edge from
-one cell to another if the latter references any of the definitions of the
-former. When a cell is run, its descendants are marked for execution.
+次に、セル上に有向非巡回グラフ（DAG）を形成します。あるセルから別のセルへのエッジは、後者が前者の定義のいずれかを参照する場合に存在します。セルが実行されると、その子孫が実行対象としてマークされます。
 
-!!! tip "Visualizing the DAG"
-    marimo provides several tools to help you visualize and navigate this dependency graph,
-    including a [dependency explorer](editor_features/dataflow.md#dependency-explorer), 
-    [minimap](editor_features/dataflow.md#minimap),
-    and [reactive reference highlighting](editor_features/dataflow.md#reactive-reference-highlighting).
+!!! tip "DAGの視覚化"
+    Backcastは、この依存グラフを視覚化してナビゲートするためのツールをいくつか提供しています。これには、[依存関係エクスプローラー](editor_features/dataflow.md#dependency-explorer)、[ミニマップ](editor_features/dataflow.md#minimap)、[リアクティブ参照ハイライト](editor_features/dataflow.md#reactive-reference-highlighting)が含まれます。
     
-    See the [understanding dataflow](editor_features/dataflow.md) guide for details.
+    詳細は[データフローの理解](editor_features/dataflow.md)ガイドをご覧ください。
 
-!!! important "Runtime Rule"
-    When a cell is run, marimo automatically runs all other cells that
-    **reference** any of the global variables it **defines**.
+!!! important "ランタイムルール"
+    セルが実行されると、Backcastはそのセルが**定義**するグローバル変数のいずれかを**参照**する他のすべてのセルを自動的に実行します。
 
-marimo [does not track mutations](#variable-mutations-are-not-tracked) to
-variables, nor assignments to attributes. That means that if you assign an
-attribute like `foo.bar = 10`, other cells referencing `foo.bar` will _not_ be
-run.
+Backcastは変数への[変更を追跡しません](#variable-mutations-are-not-tracked)し、属性への割り当ても追跡しません。つまり、`foo.bar = 10`のように属性を割り当てても、`foo.bar`を参照する他のセルは_実行されません_。
 
-### Execution order
+### 実行順序
 
-The order cells are executed in is determined by the relationships between
-cells and their variables, not by the order of cells on the page (similar
-to a spreadsheet). This lets you organize your code in whatever way makes the
-most sense to you. For example, you can put helper functions at the bottom of
-your notebook.
+セルが実行される順序は、セル間の関係とそれらの変数によって決まり、ページ上のセルの順序（スプレッドシートと同様）ではありません。これにより、コードを最も意味のある方法で整理できます。例えば、ヘルパー関数をノートブックの下部に配置できます。
 
-### Deleting a cell deletes its variables
+### セルを削除すると変数も削除される
 
-In marimo, _deleting a cell deletes its global variables from program memory_.
-Cells that previously referenced these variables are automatically re-run and
-invalidated (or marked as stale, depending on your [runtime
-configuration](configuration/runtime_configuration.md)). In this way, marimo
-eliminates a common cause of bugs in traditional notebooks like Jupyter.
+Backcastでは、_セルを削除すると、そのグローバル変数がプログラムメモリから削除されます_。
+以前にこれらの変数を参照していたセルは、自動的に再実行され、無効化（または[ランタイム設定](configuration/runtime_configuration.md)に応じて古いものとしてマーク）されます。このようにして、BackcastはJupyterのような従来のノートブックでよくあるバグの原因を排除します。
 
 <!-- <div align="center">
 <figure>
-<video autoplay muted loop playsinline width="100%" height="100%" align="center" src="/_static/docs-delete-cell.webm">
+<video autoplay muted loop playsinline width="100%" height="100%" align="center" src="../_static/docs-delete-cell.webm">
 </video>
-<figcaption>No hidden state: deleting a cell deletes its variables.</figcaption>
+<figcaption>隠れた状態なし：セルを削除すると変数も削除されます。</figcaption>
 </figure>
 </div> -->
 
 <a name="reactivity-mutations"></a>
 
-### Variable mutations are not tracked
+### 変数の変更は追跡されない
 
-marimo does not track mutations to objects, _e.g._, mutations like
-`my_list.append(42)` or `my_object.value = 42` don't trigger reactive re-runs of
-other cells. **Avoid defining a variable in one cell and
-mutating it in another**.
+Backcastはオブジェクトへの変更を追跡しません。例えば、`my_list.append(42)`や`my_object.value = 42`のような変更は、他のセルのリアクティブな再実行をトリガーしません。**1つのセルで変数を定義し、別のセルで変更することは避けてください**。
 
-??? note "Why not track mutations?"
+??? note "なぜ変更を追跡しないのか？"
 
-    Tracking mutations reliably is impossible in Python. Reacting to mutations
-    could result in surprising re-runs of notebook cells.
+    Pythonで変更を確実に追跡することは不可能です。変更に反応すると、ノートブックセルの予期しない再実行が発生する可能性があります。
 
-If you need to mutate a variable (such as adding a new column to a dataframe),
-you should perform the mutation in the same cell as the one that defines it,
-or try creating a new variable instead.
+変数を変更する必要がある場合（データフレームに新しい列を追加するなど）、その変数を定義するセルと同じセルで変更を実行するか、新しい変数を作成することをお勧めします。
 
-??? example "Create new variables, don't mutate existing ones"
+??? example "新しい変数を作成し、既存の変数を変更しない"
 
-    === "Do this ..."
+    === "これを行う ..."
 
         ```python
         l = [1]
@@ -111,7 +76,7 @@ or try creating a new variable instead.
         extended_list = l + [2]
         ```
 
-    === "... not this"
+    === "... これではない"
 
         ```python
         l = [1]
@@ -121,9 +86,9 @@ or try creating a new variable instead.
         l.append(2)
         ```
 
-??? example "Mutate variables in the cells that define them"
+??? example "変数を定義するセルで変数を変更する"
 
-    === "Do this ..."
+    === "これを行う ..."
 
         ```python
         df = pd.DataFrame({"my_column": [1, 2]})
@@ -131,7 +96,7 @@ or try creating a new variable instead.
         ```
 
 
-    === "... not this"
+    === "... これではない"
 
         ```python
         df = pd.DataFrame({"my_column": [1, 2]})
@@ -141,37 +106,29 @@ or try creating a new variable instead.
         df["another_column"] = [3, 4]
         ```
 
-## Global variable names must be unique
+## グローバル変数名は一意である必要がある
 
-**marimo requires that every global variable be defined by only one cell.**
-This lets marimo keep code and outputs consistent.
+**Backcastでは、すべてのグローバル変数が1つのセルによってのみ定義される必要があります。**
+これにより、Backcastはコードと出力を一貫性のある状態に保つことができます。
 
-!!! tip "Global variables"
-    A variable can refer to any Python object. Functions, classes, and imported
-    names are all variables.
+!!! tip "グローバル変数"
+    変数は任意のPythonオブジェクトを参照できます。関数、クラス、インポートされた名前はすべて変数です。
 
-This rule encourages you to keep the number of global variables in your
-program small, which is generally considered good practice.
+このルールは、プログラム内のグローバル変数の数を少なく保つことを推奨します。これは、一般的に良い実践と考えられています。
 
-### Creating temporary variables
+### 一時変数の作成
 
-marimo provides two ways to define temporary variables, which can
-help keep the number of global variables in your notebook small.
+Backcastは、一時変数を定義する2つの方法を提供します。これにより、ノートブック内のグローバル変数の数を少なく保つのに役立ちます。
 
-#### Creating local variables
+#### ローカル変数の作成
 
-Variables prefixed with an underscore (_e.g._, `_x`) are "local" to a
-cell: they can't be read by other cells. Multiple cells can reuse the same
-local variables names.
+アンダースコアで始まる変数（例：`_x`）は、セルに「ローカル」です：他のセルから読み取ることはできません。複数のセルで同じローカル変数名を再利用できます。
 
-#### Encapsulating code in functions
+#### 関数でコードをカプセル化する
 
-If you want most or all the variables in a cell to be temporary, prefixing each
-variable with an underscore to make it local may feel inconvenient. In these
-situations we recommend encapsulating the temporary variables in a function.
+セル内の変数のほとんどまたはすべてを一時的にしたい場合、各変数にアンダースコアを付けてローカルにするのは不便に感じるかもしれません。このような状況では、一時変数を関数内にカプセル化することをお勧めします。
 
-For example, if you find yourself copy-pasting the same plotting code across
-multiple cells and only tweaking a few parameters, try the following pattern:
+例えば、複数のセル間で同じプロットコードをコピー＆ペーストし、いくつかのパラメータのみを調整している場合は、次のパターンを試してください：
 
 ```python
 def _():
@@ -183,48 +140,37 @@ def _():
 _()
 ```
 
-Here, the variables `plt`, `fig`, and `ax` aren't added to the globals.
+ここでは、変数`plt`、`fig`、`ax`はグローバルに追加されません。
 
-### Managing memory
+### メモリの管理
 
-Because variable names must be unique, you cannot reassign variables as a means
-of freeing memory. Instead, manage memory by encapsulating code in functions or
-using the `del` operator. See our guide on [expensive
-notebooks](expensive_notebooks.md#manage-memory) to learn more.
+変数名は一意である必要があるため、メモリを解放する手段として変数を再割り当てすることはできません。代わりに、関数でコードをカプセル化するか、`del`演算子を使用してメモリを管理します。詳細は[高コストなノートブックガイド](expensive_notebooks.md#manage-memory)をご覧ください。
 
-## Configuring how marimo runs cells
+## Backcastがセルを実行する方法の設定
 
-Through the notebook settings menu, you can configure how and when marimo runs
-cells. In particular, you can disable autorun on startup, disable autorun
-on cell execution, and enable a module autoreloader. Read our
-[runtime configuration guide](configuration/runtime_configuration.md) to learn more.
+ノートブック設定メニューから、Backcastがセルを実行する方法とタイミングを設定できます。特に、起動時の自動実行を無効にしたり、セル実行時の自動実行を無効にしたり、モジュール自動リローダーを有効にしたりできます。詳細は[ランタイム設定ガイド](configuration/runtime_configuration.md)をご覧ください。
 
-## Disabling cells
+## セルの無効化
 
-Sometimes, you may want to edit one part of a notebook without triggering
-automatic execution of its dependent cells. For example, the dependent cells
-may take a long time to execute, and you only want to iterate on the first part
-of a multi-cell computation.
+ノートブックの一部を編集して、その依存セルの自動実行をトリガーしないようにしたい場合があります。例えば、依存セルの実行に時間がかかる場合、マルチセル計算の最初の部分のみを反復したい場合があります。
 
-For cases like this, marimo lets you **disable** cells: when a cell is
-disabled, it and its dependents are blocked from running.
+このような場合、Backcastではセルを**無効化**できます：セルが無効化されると、そのセルとその子孫の実行がブロックされます。
 
 <div align="center">
 <figure>
-<video autoplay muted loop playsinline width="100%" height="100%" align="center" src="/_static/docs-disable-cell.webm">
+<video autoplay muted loop playsinline width="100%" height="100%" align="center" src="../_static/docs-disable-cell.webm">
 </video>
-<figcaption>Disabling a cell blocks it from running.</figcaption>
+<figcaption>セルを無効化すると実行がブロックされます。</figcaption>
 </figure>
 </div>
 
-When you re-enable a cell, if any of the cell's ancestors ran while it was
-disabled, marimo will automatically run it.
+セルを再有効化すると、セルが無効化されている間にセルの祖先が実行された場合、Backcastは自動的にセルを実行します。
 
 <div align="center">
 <figure>
-<video autoplay muted loop playsinline width="100%" height="100%" align="center" src="/_static/docs-enable-cell.webm">
+<video autoplay muted loop playsinline width="100%" height="100%" align="center" src="../_static/docs-enable-cell.webm">
 </video>
-<figcaption>Enable a cell through the context menu. Stale cells run
-automatically.</figcaption>
+<figcaption>コンテキストメニューからセルを有効化します。古いセルは自動的に実行されます。</figcaption>
 </figure>
 </div>
+

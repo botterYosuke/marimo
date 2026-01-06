@@ -1,56 +1,35 @@
-# Coming from Jupyter
+# Jupyterからの移行
 
-If you're coming from Jupyter, here are a few tips to help you adapt to marimo
-notebooks.
+Jupyterから移行する場合、Backcastノートブックに適応するためのヒントをいくつか紹介します。
 
-## How marimo runs cells
+## Backcastがセルを実行する方法
 
-The biggest difference between marimo and Jupyter is the [execution model](../reactivity.md).
+BackcastとJupyterの最大の違いは[実行モデル](../reactivity.md)です。
 
-A **Jupyter** notebook is a **REPL**: you execute blocks of code one at a time,
-and Jupyter has no understanding of how different blocks are related to each
-other. As a result a Jupyter notebook can easily
-accumulate **"hidden state"** (and hidden bugs) --- you might accidentally execute
-cells out of order, or you might run (or delete) a cell but forget to re-run
-cells that depended on its variables. Because of this, Jupyter notebooks
-suffer from a [reproducibility crisis](../../faq.md#faq-problems), with over
-a third of Jupyter notebooks on GitHub failing to reproduce.
+**Jupyter**ノートブックは**REPL**です：コードブロックを1つずつ実行し、Jupyterは異なるブロックが互いにどのように関連しているかを理解しません。その結果、Jupyterノートブックは簡単に**「隠れた状態」**（および隠れたバグ）を蓄積する可能性があります—セルを誤って順序外で実行したり、セルを実行（または削除）しても、その変数に依存していたセルを再実行するのを忘れたりする可能性があります。このため、Jupyterノートブックは[再現性の問題](../../faq.md#faq-problems)に悩まされており、GitHub上のJupyterノートブックの3分の1以上が再現できません。
 
-Unlike Jupyter, **marimo** notebooks understand how different blocks of
-code are related to each other, modeling your code as a graph on cells
-based on variable declarations and references. This eliminates hidden
-state, and it's also what enables marimo notebooks to be reused as
-apps and scripts.
+Jupyterとは異なり、**Backcast**ノートブックは異なるコードブロックが互いにどのように関連しているかを理解し、変数宣言と参照に基づいてコードをセルのグラフとしてモデル化します。これにより隠れた状態が排除され、Backcastノートブックをアプリやスクリプトとして再利用できる理由でもあります。
 
-**By default, if you run a cell in marimo, all other cells that read its
-variables run automatically.** While this ensures that your code and outputs are
-in sync, it can take some time getting used to. **Here are some tips and tools to
-help you adapt to marimo's execution model.**
+**デフォルトでは、Backcastでセルを実行すると、その変数を読み取る他のすべてのセルが自動的に実行されます。** これによりコードと出力が同期されますが、慣れるまでに時間がかかる場合があります。**Backcastの実行モデルに適応するためのヒントとツールをいくつか紹介します。**
 
-### Configure marimo's runtime
+### Backcastのランタイムを設定する
 
-[Configure marimo's runtime](../configuration/runtime_configuration.md) to
-not autorun on startup or on cell execution.
+[Backcastのランタイムを設定](../configuration/runtime_configuration.md)して、起動時またはセル実行時に自動実行しないようにします。
 
-Even when autorun is disabled, marimo still tracks dependencies across cells,
-marking dependents of a cell as stale when you run it. You can click a single
-button to run all your stale cells and bring your notebook back up-to-date.
+自動実行が無効になっている場合でも、Backcastはセル間の依存関係を追跡し、セルを実行するとその依存セルを古いものとしてマークします。単一のボタンをクリックして、すべての古いセルを実行し、ノートブックを最新の状態に戻すことができます。
 
-### Stop execution with `mo.stop`
+### `mo.stop`で実行を停止する
 
-Use [`mo.stop`][marimo.stop] to stop a cell from executing if a condition
-is met:
+条件が満たされた場合にセルの実行を停止するには[`mo.stop`][marimo.stop]を使用します：
 
 ```python
-# if condition is True, the cell will stop executing after mo.stop() returns
+# 条件がTrueの場合、セルはmo.stop()が返された後に実行を停止します
 mo.stop(condition)
-# this won't be called if condition is True
+# 条件がTrueの場合、これは呼ばれません
 expensive_function_call()
 ```
 
-Use [`mo.stop()`][marimo.stop] in conjunction with
-[`mo.ui.run_button()`][marimo.ui.run_button] to require a button press for
-expensive cells:
+[`mo.stop()`][marimo.stop]を[`mo.ui.run_button()`][marimo.ui.run_button]と組み合わせて、高コストなセルにボタン押下を必要とします：
 
 /// marimo-embed
     size: medium
@@ -71,32 +50,23 @@ def __():
 
 ///
 
-### Working with expensive notebooks
+### 高コストなノートブックでの作業
 
-For more tips on adapting to marimo's execution model, see our guide
-on [working with expensive notebooks](../expensive_notebooks.md).
+Backcastの実行モデルに適応するための追加のヒントについては、[高コストなノートブックでの作業](../expensive_notebooks.md)ガイドをご覧ください。
 
-## Redefining variables
+## 変数の再定義
 
-marimo "compiles" your notebook cells into a directed graph on cells,
-linked by variable declarations and references, reusing this graph to
-run your notebook as a script or app. For marimo's compilation to work,
-the same variable cannot be defined in multiple cells; otherwise, marimo
-wouldn't know what order to run cells in.
+Backcastはノートブックセルを変数宣言と参照によってリンクされたセルの有向グラフに「コンパイル」し、このグラフを再利用してノートブックをスクリプトやアプリとして実行します。Backcastのコンパイルが機能するためには、同じ変数を複数のセルで定義することはできません。そうしないと、Backcastはセルを実行する順序がわからなくなります。
 
-To adapt to the restriction, we suggest:
+この制限に適応するために、以下を推奨します：
 
-1. Encapsulating code into functions when possible, to minimize the number
-   of global variables.
-2. Prefixing temporary variables with an underscore (`_my_temporary`), which
-   makes the variable **local** to a cell.
-3. Mutating variables in the cell that defines them.
+1. 可能な限りコードを関数にカプセル化して、グローバル変数の数を最小限に抑える
+2. 一時変数にアンダースコア（`_my_temporary`）を付けて、変数をセルに**ローカル**にする
+3. 変数を定義するセルで変数を変更する
 
-When working with **dataframes**, you might be used to redefining the same `df`
-variable in multiple cells. That won't work in marimo. Instead, try merging
-the cells into a single cell:
+**データフレーム**を扱う場合、複数のセルで同じ`df`変数を再定義することに慣れているかもしれません。これはBackcastでは機能しません。代わりに、セルを1つのセルにマージしてみてください：
 
-_Don't_ do this:
+_これをしないでください：_
 
 ```python
 df = pd.DataFrame({"my_column": [1, 2]})
@@ -106,15 +76,14 @@ df = pd.DataFrame({"my_column": [1, 2]})
 df["another_column"] = [3, 4]
 ```
 
-_Instead_, do this:
+_代わりに、これを行ってください：_
 
 ```python
 df = pd.DataFrame({"my_column": [1, 2]})
 df["another_column"] = [3, 4]
 ```
 
-If you do need to transform a dataframe across multiple cells, you can
-alias the dataframe:
+複数のセル間でデータフレームを変換する必要がある場合は、データフレームのエイリアスを使用できます：
 
 ```python
 df = pd.DataFrame({"my_column": [1, 2]})
@@ -125,109 +94,64 @@ augmented_df = df
 augmented_df["another_column"] = [3, 4]
 ```
 
-To learn how to write Pandas/Polars code in a functional style, 
-which is more amenable to marimo's execution model, check out 
-[this YouTube video](https://youtu.be/J0PJpdU7c4g).
+Backcastの実行モデルにより適した関数型スタイルでPandas/Polarsコードを記述する方法を学ぶには、[このYouTube動画](https://youtu.be/J0PJpdU7c4g)をご覧ください。
 
-## marimo's file format
+## Backcastのファイル形式
 
-marimo stores notebooks as Python, not JSON. This lets you version notebooks
-with git, [execute them as scripts](../scripts.md), and import named
-cells into other Python files. However, it does mean that your notebook outputs
-(e.g., plots) are not stored in the file.
+BackcastはノートブックをJSONではなくPythonとして保存します。これにより、gitでノートブックをバージョン管理し、[スクリプトとして実行](../scripts.md)し、名前付きセルを他のPythonファイルにインポートできます。ただし、ノートブックの出力（例：プロット）がファイルに保存されないことを意味します。
 
-If you'd like to keep a visual record of your notebook work, [enable
-the "Auto-download as HTML/IPYNB" setting](../configuration/index.md), which will
-periodically snapshot your notebook as HTML or IPYNB to a `__marimo__` folder in the
-notebook directory.
+ノートブック作業の視覚的な記録を保持したい場合は、["Auto-download as HTML/IPYNB"設定](../configuration/index.md)を有効にします。これにより、ノートブックが定期的にHTMLまたはIPYNBとしてノートブックディレクトリ内の`__marimo__`フォルダにスナップショットされます。
 
-### Converting Jupyter notebooks to marimo notebooks
+### ノートブックの変換
 
-Convert Jupyter notebooks to marimo notebooks at the command-line:
+Backcastはmarimoベースのため、ノートブックの変換機能については、marimoの公式ドキュメントを参照してください。
 
-```bash
-marimo convert your_notebook.ipynb -o your_notebook.py
-```
+## マジックコマンド
 
-### Converting Python scripts to marimo notebooks
+Backcastノートブックは単なるPython（保守性を向上）であるため、BackcastはIPythonマジックコマンドや`!`で始まるコンソールコマンドをサポートしていません。代替方法をいくつか紹介します。
 
-marimo can also convert regular Python scripts to marimo notebooks:
+### subprocess.runでコンソールコマンドを実行する
 
-```bash
-marimo convert your_script.py -o your_notebook.py
-```
-
-This supports:
-- **py:percent format**: If your script uses `# %%` cell markers, marimo will convert it to a multi-cell notebook (requires jupytext)
-- **Regular Python scripts**: Scripts without cell markers are converted to a single-cell notebook
-
-For py:percent conversion with uv:
-
-```bash
-uvx --with=jupytext marimo convert your_script.py -o your_notebook.py
-```
-
-### Exporting marimo notebooks to Jupyter notebooks
-
-Export to an `ipynb` file with
-
-```bash
-marimo export ipynb notebook.py -o notebook.ipynb
-```
-
-Note that some marimo library functions, including UI elements,
-won't work in Jupyter notebooks.
-
-## Magic commands
-
-Because marimo notebooks are just Python (improving maintainability), marimo
-doesn't support IPython magic commands or `!`-prefixed console commands. Here
-are some alternatives.
-
-### Run console commands with subprocess.run
-
-To run a console command, use Python's [subprocess.run](https://docs.python.org/3/library/subprocess.html#subprocess.run):
+コンソールコマンドを実行するには、Pythonの[subprocess.run](https://docs.python.org/3/library/subprocess.html#subprocess.run)を使用します：
 
 ```python
 import subprocess
 
-# run: "ls -l"
+# 実行: "ls -l"
 subprocess.run(["ls", "-l"])
 ```
 
-### Common magic commands replacements
+### 一般的なマジックコマンドの代替
 
-| Magic Command | Replacement                                                                                    |
+| マジックコマンド | 代替                                                                                    |
 | ------------- | ---------------------------------------------------------------------------------------------- |
-| %cd           | `os.chdir()`, see also [`mo.notebook_dir()`][marimo.notebook_dir]                              |
-| %clear        | Right-click or toggle the cell actions                                                         |
-| %debug        | Python's built-in debugger: `breakpoint()`                                                     |
+| %cd           | `os.chdir()`、[`mo.notebook_dir()`][marimo.notebook_dir]も参照                              |
+| %clear        | 右クリックまたはセルアクションをトグル                                                         |
+| %debug        | Pythonの組み込みデバッガー：`breakpoint()`                                                     |
 | %env          | `os.environ`                                                                                   |
-| %load         | N/A - use Python imports                                                                       |
+| %load         | N/A - Pythonインポートを使用                                                                       |
 | %load_ext     | N/A                                                                                            |
-| %autoreload   | marimo's [module autoreloader](../editor_features/module_autoreloading.md)                     |
-| %matplotlib   | marimo auto-displays plots                                                                     |
+| %autoreload   | Backcastの[モジュール自動再読み込み](../editor_features/module_autoreloading.md)                     |
+| %matplotlib   | Backcastは自動的にプロットを表示                                                                     |
 | %pwd          | `os.getcwd()`                                                                                  |
-| %pip          | Use marimo's [built-in package management](../editor_features/package_management.md)           |
-| %who_ls       | `dir()`, `globals()`, [`mo.refs()`][marimo.refs], [`mo.defs()`][marimo.defs]                   |
+| %pip          | Backcastの[組み込みパッケージ管理](../editor_features/package_management.md)を使用           |
+| %who_ls       | `dir()`、`globals()`、[`mo.refs()`][marimo.refs]、[`mo.defs()`][marimo.defs]                   |
 | %system       | `subprocess.run()`                                                                             |
-| %%time        | `time.perf_counter()` or Python's timeit module                                                |
-| %%timeit      | Python's timeit module                                                                         |
+| %%time        | `time.perf_counter()`またはPythonのtimeitモジュール                                                |
+| %%timeit      | Pythonのtimeitモジュール                                                                         |
 | %%writefile   | `with open("file.txt", "w") as f: f.write()`                                                   |
-| %%capture     | [`mo.capture_stdout()`][marimo.capture_stdout], [`mo.capture_stderr()`][marimo.capture_stderr] |
-| %%html        | [`mo.Html()`][marimo.Html] or [`mo.md()`][marimo.md]                                           |
+| %%capture     | [`mo.capture_stdout()`][marimo.capture_stdout]、[`mo.capture_stderr()`][marimo.capture_stderr] |
+| %%html        | [`mo.Html()`][marimo.Html]または[`mo.md()`][marimo.md]                                           |
 | %%latex       | [`mo.md(r'$$...$$')`][marimo.md]                                                               |
 
-### Installing packages with marimo's package manager
+### Backcastのパッケージマネージャーでパッケージをインストールする
 
-Use marimo's package management sidebar panel to install packages to your current
-environment. Learn more in our [package management
-guide](../editor_features/package_management.md).
+Backcastのパッケージ管理サイドバーパネルを使用して、現在の環境にパッケージをインストールします。詳細は[パッケージ管理ガイド](../editor_features/package_management.md)をご覧ください。
 
-## Interactive guide
+## インタラクティブガイド
 
-This guide contains additional tips to help you adapt to marimo. Fun fact: the
-guide is itself a marimo notebook!
+このガイドには、Backcastに適応するための追加のヒントが含まれています。
 
 <iframe src="https://marimo.app/l/z0aerp?embed=true" class="demo xxlarge" frameBorder="0">
 </iframe>
+

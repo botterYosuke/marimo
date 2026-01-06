@@ -136,13 +136,14 @@ def _():
 
 // URIエンコードしてクエリパラメータに設定
 const encodedCode = encodeURIComponent(notebookCode);
-const url = `https://marimo.app?code=${encodedCode}`;
+// 注意: 以下のURLは例です。実際のBackcastアプリケーションのURLに置き換えてください
+const url = `https://example.com?code=${encodedCode}`;
 ```
 
-#### 完全なURL例
+#### 完全なURL例（注意: 以下のURLは例です）
 
 ```
-https://marimo.app?code=import%20marimo%0Aapp%20%3D%20marimo.App()%0A%0A%40app.cell%0Adef%20_()%3A%0A%20%20%20%20import%20marimo%20as%20mo%0A%20%20%20%20mo.md(%22Hello%2C%20world!%22)%0A%20%20%20%20return
+https://example.com?code=import%20marimo%0Aapp%20%3D%20marimo.App()%0A%0A%40app.cell%0Adef%20_()%3A%0A%20%20%20%20import%20marimo%20as%20mo%0A%20%20%20%20mo.md(%22Hello%2C%20world!%22)%0A%20%20%20%20return
 ```
 
 ### 3.2 大容量ノートブック（14KB以上）
@@ -160,13 +161,14 @@ const notebookCode = `
 
 // 圧縮してURLハッシュに設定
 const compressed = compressToEncodedURIComponent(notebookCode);
-const url = `https://marimo.app/#code/${compressed}`;
+// 注意: 以下のURLは例です。実際のBackcastアプリケーションのURLに置き換えてください
+const url = `https://example.com/#code/${compressed}`;
 ```
 
-#### 完全なURL例
+#### 完全なURL例（注意: 以下のURLは例です）
 
 ```
-https://marimo.app/#code/N4IgdghgtgpiBcIDqA...
+https://example.com/#code/N4IgdghgtgpiBcIDqA...
 ```
 
 ### 3.3 共有リンクの生成
@@ -183,9 +185,10 @@ app = marimo.App()
 `;
 
 // 共有リンクを生成（自動的に圧縮される）
+// 注意: baseUrlは実際のBackcastアプリケーションのURLに置き換えてください
 const shareableUrl = createShareableLink({
   code: code,
-  baseUrl: "https://marimo.app"
+  baseUrl: "https://example.com"
 });
 ```
 
@@ -194,8 +197,9 @@ const shareableUrl = createShareableLink({
 #### iframeでの埋め込み
 
 ```html
+<!-- 注意: 以下のURLは例です。実際のBackcastアプリケーションのURLに置き換えてください -->
 <iframe
-  src="https://marimo.app?code=<encoded-uri-component>&embed=true&show-chrome=false"
+  src="https://example.com?code=<encoded-uri-component>&embed=true&show-chrome=false"
   width="100%"
   height="500"
   frameborder="0"
@@ -215,9 +219,10 @@ const NotebookEmbed = ({ code }: { code: string }) => {
     ? compressToEncodedURIComponent(code)
     : encodeURIComponent(code);
   
+  // 注意: 以下のURLは例です。実際のBackcastアプリケーションのURLに置き換えてください
   const url = isLarge
-    ? `https://marimo.app/#code/${encoded}`
-    : `https://marimo.app?code=${encoded}`;
+    ? `https://example.com/#code/${encoded}`
+    : `https://example.com?code=${encoded}`;
 
   return (
     <iframe
@@ -270,8 +275,9 @@ URLクエリパラメータからファイル名を取得することもでき�
 
 ```typescript
 const filename = PyodideRouter.getFilename();
-// URL: https://marimo.app?filename=my_notebook.py
+// URL: https://example.com?filename=my_notebook.py
 // filename = "my_notebook.py"
+// 注意: 上記のURLは例です。実際のBackcastアプリケーションのURLに置き換えてください
 ```
 
 ---

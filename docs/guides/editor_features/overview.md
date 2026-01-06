@@ -1,82 +1,99 @@
-# Editor overview
+# エディタ概要
 
-This guide introduces some of marimo editor's features, including
-a variables panel, dependency graph viewer, table of contents, HTML export,
-[GitHub copilot](ai_completion.md#github-copilot), code formatting, a feedback form, and more.
+このガイドでは、Backcastエディタの機能の一部を紹介します。これには、3DモードとGridモードの切り替え、変数パネル、依存グラフビューア、目次、HTMLエクスポート、[GitHub copilot](ai_completion.md#github-copilot)、コードフォーマット、フィードバックフォームなどが含まれます。
 
-## Configuration
+## 設定
 
-The editor exposes of a number of settings for the current notebook,
-as well as user-wide configuration that will apply to all your notebooks.
-These settings include the option to display the current notebook in
-full width, to use [vim keybindings](#vim-keybindings), to enable [GitHub copilot](ai_completion.md#github-copilot), and more.
+エディタは、現在のノートブックの設定と、すべてのノートブックに適用されるユーザー全体の設定を公開します。これらの設定には、現在のノートブックを全幅で表示するオプション、[vimキーバインディング](#vim-keybindings)を使用するオプション、[GitHub copilot](ai_completion.md#github-copilot)を有効にするオプションなどが含まれます。
 
-To access these settings, click the gear icon in the top-right of the editor:
+これらの設定にアクセスするには、エディタの右上の歯車アイコンをクリックします：
 
 <div align="center">
-<img src="/_static/docs-user-config.png"  />
+<img src="../../_static/docs-user-config.png"  />
 </div>
 
-A non-exhaustive list of settings:
+設定の非網羅的なリスト：
 
-- [Command mode](#command-mode)
-- Outputs above or below code cells
-- [Disable/enable autorun](../reactivity.md#configuring-how-marimo-runs-cells)
-- Package installation
-- [Vim keybindings](#vim-keybindings)
-- Dark mode
-- Auto-save
-- Auto-complete
-- Editor font-size
-- Code formatting with ruff/black
+- [コマンドモード](#command-mode)
+- コードセルの上または下に出力
+- [自動実行の無効化/有効化](../reactivity.md#configuring-how-marimo-runs-cells)
+- パッケージインストール
+- [Vimキーバインディング](#vim-keybindings)
+- ダークモード
+- 自動保存
+- 自動補完
+- エディタフォントサイズ
+- ruff/blackによるコードフォーマット
 - [GitHub Copilot](ai_completion.md#github-copilot)
-- [LLM coding assistant](ai_completion.md)
-- [Module autoreloading](../configuration/runtime_configuration.md#on-module-change)
-- [Reactive reference highlighting](dataflow.md#reactive-reference-highlighting)
+- [LLMコーディングアシスタント](ai_completion.md)
+- [モジュール自動再読み込み](../configuration/runtime_configuration.md#on-module-change)
+- [リアクティブ参照ハイライト](dataflow.md#reactive-reference-highlighting)
 
-## Command mode
+## 3DモードとGridモード
 
-marimo distinguishes between editing cell content and working with cells at the
-notebook level.
+Backcastの特徴的な機能として、**3Dモード**と**Gridモード**の切り替えが可能です。
 
-**Command mode** lets you navigate, select, and manipulate _cells_ rather than
-editing their contents.
+### モードの説明
 
-**Enter/Exit:**
+- **Gridモード（vertical）**: セルをグリッドレイアウトで配置・編集する従来の表示モード
+- **3Dモード（3d）**: セルを3D空間に配置し、インタラクティブに操作可能な新しい表示モード
+- **デフォルトモード**: デフォルトは3Dモードです
 
-- Enter command mode: `Esc` (from cell editor) or `Ctrl+Esc`/`Cmd+Esc` (when [vim keybindings](#vim-keybindings) are enabled, `Shift+Esc` on Windows)
-- Exit command mode: `Enter` or click on a cell
+### モードの切り替え方法
 
-**Shortcuts:**
+1. ツールバーの`EditViewModeSelect`コンポーネントを探します
+2. ドロップダウンをクリックして、"vertical"（Gridモード）または"3d"（3Dモード）を選択します
+3. 選択すると、即座に表示モードが切り替わり、セルの配置方法が変更されます
 
-- `↓`/`↑` - navigate cells
-- `Shift+↓`/`Shift+↑` - multi-select cells
-- `Enter` - edit selected cell
-- `a`/`b` - new cell above/below
-- `c`/`v` - copy/paste cells
-- `s` - save notebook
-- `Shift+Enter` - run cell and move to next
-- `Ctrl/Cmd+↑` / `Ctrl/Cmd+↓` - jump to top/bottom of notebook
+### 3Dモードの操作
 
-When [vim keybindings](#vim-keybindings) are enabled, additional shortcuts are available.
+3Dモードでは、以下の操作が可能です：
 
-### Vim keybindings
+- **セルの移動**: セルをドラッグ&ドロップで3D空間内に移動
+- **カメラ操作**: ズーム、回転、パンで3D空間を探索
+- **インタラクティブな探索**: セル間の関係を3D空間で視覚的に理解
 
-marimo supports vim keybindings that extend to notebook editing. Within cells,
-use standard vim modes. Press `Ctrl+Esc` (or `Cmd+Esc` on macOS, `Shift+Esc` on Windows) from normal mode to enter [command
-mode](#command-mode) for notebook navigation.
+3Dモードでのデータフロー可視化については、[データフローの理解](dataflow.md)ガイドを参照してください。
 
-**Cell editing additions:**
+## コマンドモード
 
-- `gd` - go to definition
-- `dd` - delete empty cell
-- `:w` - save notebook
+Backcastは、セル内容の編集と、ノートブックレベルでのセルの操作を区別します。
 
-**Custom vimrc:**
+**コマンドモード**では、内容を編集するのではなく、_セル_をナビゲート、選択、操作できます。
 
-You can customize your vim experience by adding a `.vimrc` configuration in the user settings or pyproject.toml
+**入る/出る：**
 
-/// tab | User config
+- コマンドモードに入る：`Esc`（セルエディタから）または`Ctrl+Esc`/`Cmd+Esc`（[vimキーバインディング](#vim-keybindings)が有効な場合、Windowsでは`Shift+Esc`）
+- コマンドモードを出る：`Enter`またはセルをクリック
+
+**ショートカット：**
+
+- `↓`/`↑` - セルをナビゲート
+- `Shift+↓`/`Shift+↑` - セルを複数選択
+- `Enter` - 選択したセルを編集
+- `a`/`b` - 上/下に新しいセル
+- `c`/`v` - セルをコピー/貼り付け
+- `s` - ノートブックを保存
+- `Shift+Enter` - セルを実行して次に移動
+- `Ctrl/Cmd+↑` / `Ctrl/Cmd+↓` - ノートブックの上部/下部にジャンプ
+
+[vimキーバインディング](#vim-keybindings)が有効な場合、追加のショートカットが利用できます。
+
+### Vimキーバインディング
+
+Backcastはノートブック編集に拡張されたvimキーバインディングをサポートしています。セル内では、標準のvimモードを使用します。ノーマルモードから`Ctrl+Esc`（またはmacOSでは`Cmd+Esc`、Windowsでは`Shift+Esc`）を押して、ノートブックナビゲーション用の[コマンドモード](#command-mode)に入ります。
+
+**セル編集の追加：**
+
+- `gd` - 定義に移動
+- `dd` - 空のセルを削除
+- `:w` - ノートブックを保存
+
+**カスタムvimrc：**
+
+ユーザー設定またはpyproject.tomlに`.vimrc`設定を追加することで、vimエクスペリエンスをカスタマイズできます。
+
+/// tab | ユーザー設定
 
 ```toml title="marimo.toml"
 [keymap]
@@ -94,166 +111,145 @@ vimrc = relative/path/.vimrc
 
 ///
 
-**Command mode additions:**
+**コマンドモードの追加：**
 
-When vim keybindings are enabled, press `Ctrl+Esc` (or `Cmd+Esc` on macOS, `Shift+Esc` on Windows) from normal mode to enter
-[command mode](#command-mode) with additional vim-specific keybindings:
+vimキーバインディングが有効な場合、ノーマルモードから`Ctrl+Esc`（またはmacOSでは`Cmd+Esc`、Windowsでは`Shift+Esc`）を押して、追加のvim固有のキーバインディングで[コマンドモード](#command-mode)に入ります：
 
-- `j`/`k` - navigate cells
-- `gg`/`G` - first/last cell
-- `Shift+j`/`k` - extend selection
-- `dd` - delete cell
-- `yy` - copy cell
-- `p`/`P` - paste below/above
-- `o`/`O` - new cell below/above
-- `u` - undo deletion
-- `i` - edit cell (i.e., return to normal mode)
+- `j`/`k` - セルをナビゲート
+- `gg`/`G` - 最初/最後のセル
+- `Shift+j`/`k` - 選択を拡張
+- `dd` - セルを削除
+- `yy` - セルをコピー
+- `p`/`P` - 下/上に貼り付け
+- `o`/`O` - 下/上に新しいセル
+- `u` - 削除を元に戻す
+- `i` - セルを編集（つまり、ノーマルモードに戻る）
 
-Press `i` or `Enter` to return to cell editing.
+`i`または`Enter`を押してセル編集に戻ります。
 
-## Overview panels
+## 概要パネル
 
-marimo ships with the IDE panels that provide an overview of your notebook
+Backcastには、ノートブックの概要を提供するIDEパネルが付属しています：
 
-- **file explorer**: view the file tree, open other notebooks
-- **variables**: explore variable values, see where they are defined and used, with go-to-definition
-- **data explorer**: see dataframe and table schemas at a glance
-- **dataflow tools**: visualize and navigate notebook structure and cell dependencies (see [Understanding dataflow](dataflow.md))
-- **package manager**: add and remove packages, and view your current environment
-- **table of contents**: corresponding to your markdown
-- **documentation** - move your text cursor over a symbol to see its documentation
-- **logs**: a continuous stream of stdout and stderr
-- **scratchpad**: a scratchpad cell where you can execute throwaway code
-- **snippets** - searchable snippets to copy directly into your notebook
-- **feedback** - share feedback!
+- **ファイルエクスプローラー**：ファイルツリーを表示し、他のノートブックを開く
+- **変数**：変数値を探索し、定義と使用場所を確認し、定義への移動が可能
+- **データエクスプローラー**：データフレームとテーブルスキーマを一目で確認
+- **データフローツール**：ノートブック構造とセルの依存関係を視覚化してナビゲート（[データフローの理解](dataflow.md)を参照）
+- **パッケージマネージャー**：パッケージを追加・削除し、現在の環境を表示
+- **目次**：markdownに対応
+- **ドキュメント** - テキストカーソルをシンボルに移動してドキュメントを表示
+- **ログ**：stdoutとstderrの継続的なストリーム
+- **スクラッチパッド**：一時的なコードを実行できるスクラッチパッドセル
+- **スニペット** - ノートブックに直接コピーできる検索可能なスニペット
+- **フィードバック** - フィードバックを共有！
 
-These panels can be toggled via the buttons in the left of the editor.
+これらのパネルは、エディタの左側のボタンで切り替えることができます。
 
-## Cell actions
+## セルアクション
 
-Click the three dots in the top right of a cell to pull up a context menu,
-letting you format code, hide code, send a cell to the top or bottom of the
-notebook, give the cell a name, and more.
+セルの右上の3つの点をクリックしてコンテキストメニューを表示し、コードのフォーマット、コードの非表示、セルをノートブックの上部または下部に送信、セルに名前を付けるなどを行うことができます。
 
-Drag a cell using the vertical dots to the right of the cell.
+セルの右側の縦の点を使用してセルをドラッグします。
 
-## Right-click menus
+## 右クリックメニュー
 
-marimo supports context-sensitive right-click menus in various locations of
-the editor. Right-click on a cell to open a context-sensitive menu; right click
-on the create-cell button (the plus icon) to get options for the cell type to
-create.
+Backcastは、エディタのさまざまな場所でコンテキストに応じた右クリックメニューをサポートしています。セルを右クリックしてコンテキストに応じたメニューを開きます。セル作成ボタン（プラスアイコン）を右クリックして、作成するセルタイプのオプションを取得します。
 
-## Go-to-definition
+## 定義への移動
 
-- Click on a variable in the editor to see where it's defined and used
-- `Cmd/Ctrl-Click` on a variable to jump to its definition
-- Right-click on a variable to see a context menu with options to jump to its definition
+- エディタ内の変数をクリックして、定義と使用場所を確認
+- 変数に`Cmd/Ctrl-Click`して定義にジャンプ
+- 変数を右クリックして、定義にジャンプするオプションを含むコンテキストメニューを表示
 
-## Signature hints
+## シグネチャヒント
 
-Signature hints show a function’s docstring above your code as you type, making it easy to recall its arguments and usage.
-Enable this feature under the **Editor** section in the Settings panel.
+シグネチャヒントは、入力時にコードの上に関数のdocstringを表示し、引数と使用方法を簡単に思い出すことができます。この機能は、設定パネルの**エディタ**セクションで有効にできます。
 
 <div align="center">
 <figure>
-<img src="/_static/docs-signature-hint.png" width="600px" />
+<img src="../../_static/docs-signature-hint.png" width="600px" />
 </figure>
 </div>
 
 
-## Keyboard shortcuts
+## キーボードショートカット
 
-We've kept some well-known [keyboard
-shortcuts](hotkeys.md) for notebooks (`Ctrl-Enter`, `Shift-Enter`), dropped others, and added a few of our own. Hit `Ctrl/Cmd-Shift-H` to pull up the shortcuts.
+ノートブック用のよく知られた[キーボードショートカット](hotkeys.md)（`Ctrl-Enter`、`Shift-Enter`）をいくつか保持し、他のものを削除し、独自のものを追加しました。`Ctrl/Cmd-Shift-H`を押してショートカットを表示します。
 
-We know keyboard shortcuts are very personal; you can remap them in the
-configuration.
+キーボードショートカットは非常に個人的なものですが、設定で再マッピングできます。
 
-_Missing a shortcut? File a
-[GitHub issue](https://github.com/marimo-team/marimo/issues)._
+_ショートカットが見つからない場合？プロジェクトのGitHub Issuesに投稿してください。_
 
 
-## Command palette
+## コマンドパレット
 
-Hit `Cmd/Ctrl+K` to open the command palette.
+`Cmd/Ctrl+K`を押してコマンドパレットを開きます。
 
 <div align="center">
 <figure>
-<img src="/_static/docs-command-palette.png"/>
-<figcaption>Quickly access common commands with the command palette.</figcaption>
+<img src="../../_static/docs-command-palette.png"/>
+<figcaption>コマンドパレットで一般的なコマンドにすばやくアクセスします。</figcaption>
 </figure>
 </div>
 
-_Missing a command? File a
-[GitHub issue](https://github.com/marimo-team/marimo/issues)._
+_コマンドが見つからない場合？プロジェクトのGitHub Issuesに投稿してください。_
 
-## Editor widths
+## エディタ幅
 
-You can set the width of the editor in the notebook settings:
+ノートブック設定でエディタの幅を設定できます：
 
-- **Compact**: A narrow width with generous margins, ideal for reading
-- **Wide**: A wider layout that gives more space for content
-- **Full**: Uses the full width of your browser window, ideal for dashboard-style notebooks
-- **Multi-column**: Splits your notebook into multiple columns, letting you view and edit cells side-by-side. This is only possible because marimo models your notebook as a directed acyclic graph (DAG) and the [execution order](../reactivity.md#execution-order) is determined by the relationships between
-cells and their variables, not by the order of cells on the page.
+- **コンパクト**：余白が広い狭い幅、読み取りに最適
+- **ワイド**：コンテンツにより多くのスペースを与える広いレイアウト
+- **フル**：ブラウザウィンドウの全幅を使用、ダッシュボードスタイルのノートブックに最適
+- **マルチカラム**：ノートブックを複数の列に分割し、セルを並べて表示・編集できます。これは、Backcastがノートブックを有向非巡回グラフ（DAG）としてモデル化し、[実行順序](../reactivity.md#execution-order)がページ上のセルの順序ではなく、セルとその変数間の関係によって決定されるためです。
 
 <div align="center">
 <figure>
-<img src="/_static/docs-multi-column.png"/>
-<figcaption>Multi-column notebook</figcaption>
+<img src="../../_static/docs-multi-column.png"/>
+<figcaption>マルチカラムノートブック</figcaption>
 </figure>
 </div>
 
-## Share on our online playground
+## オンラインプレイグラウンドで共有
 
-Get a link to share your notebook via our [online playground](../wasm.md):
+[オンラインプレイグラウンド](../wasm.md)を介してノートブックを共有するためのリンクを取得します：
 
 <div align="center">
 <figure>
 <video autoplay muted loop playsinline width="100%" height="100%" align="center">
-    <source src="/_static/share-wasm-link.mp4" type="video/mp4">
-    <source src="/_static/share-wasm-link.webm" type="video/webm">
+    <source src="../../_static/share-wasm-link.mp4" type="video/mp4">
+    <source src="../../_static/share-wasm-link.webm" type="video/webm">
 </video>
 </figure>
 </div>
 
-_Our online playground uses WebAssembly. Most but not all packages on PyPI
-are supported. Local files are not synchronized to our playground._
+_オンラインプレイグラウンドはWebAssemblyを使用します。PyPI上のパッケージのほとんどがサポートされていますが、すべてではありません。ローカルファイルはプレイグラウンドに同期されません。_
 
-## Export to static HTML
+## 静的HTMLにエクスポート
 
-Export the current view your notebook to static HTML via the notebook
-menu:
+ノートブックメニューから、現在のビューを静的HTMLにエクスポートします：
 
 <div align="center">
 <figure>
-<img src="/_static/docs-html-export.png"/>
-<figcaption>Download as static HTML.</figcaption>
+<img src="../../_static/docs-html-export.png"/>
+<figcaption>静的HTMLとしてダウンロードします。</figcaption>
 </figure>
 </div>
 
-You can also export to HTML at the command-line:
+コマンドラインからHTMLにエクスポートすることもできます：
 
-```bash
-marimo export html notebook.py -o notebook.html
-```
+ノートブックをHTMLにエクスポートする機能は、将来的に追加される予定です。
 
-## Send feedback
+## フィードバックを送信
 
-The question mark icon in the panel tray opens a
-dialog to send anonymous feedback. We welcome any and all feedback, from the
-tiniest quibbles to the biggest blue-sky dreams.
+パネルトレイの疑問符アイコンをクリックして、匿名フィードバックを送信するダイアログを開きます。最も小さな不満から最大の青空の夢まで、すべてのフィードバックを歓迎します。
 
 <div align="center">
 <figure>
-<img src="/_static/docs-feedback-form.png"/>
-<figcaption>Send anonymous feedback with our feedback form.</figcaption>
+<img src="../../_static/docs-feedback-form.png"/>
+<figcaption>フィードバックフォームで匿名フィードバックを送信します。</figcaption>
 </figure>
 </div>
 
-If you'd like your feedback to start a conversation (we'd love to talk with
-you!), please consider posting in our [GitHub
-issues](https://github.com/marimo-team/marimo/issues) or
-[Discord](https://marimo.io/discord?ref=docs). But if you're in a flow state and
-can't context switch out, the feedback form has your back.
+フィードバックを会話のきっかけにしたい場合、プロジェクトのGitHub Issuesに投稿することを検討してください。ただし、フロー状態でコンテキストスイッチできない場合は、フィードバックフォームがバックアップします。
+

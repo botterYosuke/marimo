@@ -1,29 +1,27 @@
-# Editor features
+# エディタ機能
 
-The **marimo editor** is the browser-based IDE in which you write marimo
-notebooks. We've taken a batteries-included approach to designing the editor:
-it comes _packed_ with features to make you productive when working
-with code and data.
+**Backcastエディタ**は、Backcastノートブックを記述するブラウザベースのIDEです。エディタの設計には包括的なアプローチを採用しています：コードやデータを扱う際の生産性を高める機能が_詰め込まれています_。
 
-| Guide                                       | Description                                      |
+| ガイド                                       | 説明                                      |
 | ------------------------------------------- | ------------------------------------------------ |
-| [Overview](overview.md)                     | An overview of editor features and configuration |
-| [Understanding dataflow](dataflow.md)       | Visualize and navigate cell dependencies         |
-| [Package Management](package_management.md) | Using package managers in marimo                 |
-| [AI Completion](ai_completion.md)           | Code with the help of a language model           |
-| [Language Server](language_server.md)       | Code intelligence via LSP                        |
-| [Hotkeys](hotkeys.md)                       | Our hotkeys                                      |
+| [概要](overview.md)                     | エディタ機能と設定の概要 |
+| [データフローの理解](dataflow.md)       | セルの依存関係を視覚化してナビゲート         |
+| [パッケージ管理](package_management.md) | Backcastでパッケージマネージャーを使用                 |
+| [AI補完](ai_completion.md)           | 言語モデルの支援でコードを記述           |
+| [言語サーバー](language_server.md)       | LSPによるコードインテリジェンス                        |
+| [ホットキー](hotkeys.md)                       | ホットキー                                      |
 
-Highlights include:
+主な機能：
 
-- [dataflow tools](dataflow.md) including a variables panel, dependency graph, and minimap for understanding notebook structure
-- a data explorer that lets you inspect dataframes and tables at a glance
-- smart module autoreloading that tells you which cells need to be rerun
-- code completion
+- [データフローツール](dataflow.md) - 変数パネル、依存グラフ、ミニマップを含むノートブック構造の理解ツール
+- データエクスプローラー - データフレームとテーブルを一目で検査
+- スマートモジュール自動再読み込み - どのセルを再実行する必要があるかを通知
+- コード補完
 - [GitHub Copilot](ai_completion.md#github-copilot)
-- language-model assisted coding
-- [language server protocol](language_server.md) (LSP) for diagnostics and code intelligence
-- [vim keybindings](overview.md#vim-keybindings)
-- live documentation preiews as you type
+- 言語モデル支援コーディング
+- 診断とコードインテリジェンスのための[言語サーバープロトコル](language_server.md)（LSP）
+- [vimキーバインディング](overview.md#vim-keybindings)
+- 入力時のライブドキュメントプレビュー
 
-and much more.
+その他多くの機能があります。
+

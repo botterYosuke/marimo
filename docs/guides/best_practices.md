@@ -1,44 +1,25 @@
-# Best practices
+# ベストプラクティス
 
-Here are best practices for writing marimo notebooks.
+Backcastノートブックを記述するためのベストプラクティスをいくつか紹介します。
 
-**Use global variables sparingly.** Keep the number of global variables in your
-program small to avoid name collisions. If you have intermediate variables,
-encapsulate them in functions or prefix them with an underscore (`_tmp = ...`) to
-make them local to a cell.
+**グローバル変数を控えめに使用する。** プログラム内のグローバル変数の数を少なくして、名前の衝突を避けます。中間変数がある場合は、関数にカプセル化するか、アンダースコア（`_tmp = ...`）を付けてセルにローカルにします。
 
-**Use descriptive names.** Use descriptive variable names, especially for
-global variables. This will help you minimize name clashes, and will also
-result in better code.
+**説明的な名前を使用する。** 特にグローバル変数には説明的な変数名を使用します。これにより名前の衝突を最小限に抑え、より良いコードにもなります。
 
-**Use functions.** Encapsulate logic into functions to avoid polluting the
-global namespace with
-temporary or intermediate variables, and to avoid code duplication.
+**関数を使用する。** ロジックを関数にカプセル化して、一時的または中間変数でグローバル名前空間を汚染することを避け、コードの重複を避けます。
 
-**Use [`mo.stop`][marimo.stop] to stop execution.** Use [`mo.stop`][marimo.stop]
-to stop a cell from running when a condition is true; this is helpful
-when working with expensive notebooks. For example, prevent a cell from running
-until a button is clicked using [`mo.ui.run_button`][marimo.ui.run_button] and
-[`mo.stop`][marimo.stop].
+**[`mo.stop`][marimo.stop]を使用して実行を停止する。** 条件が真の場合にセルの実行を停止するには[`mo.stop`][marimo.stop]を使用します。これは高コストなノートブックで作業する際に役立ちます。例えば、[`mo.ui.run_button`][marimo.ui.run_button]と[`mo.stop`][marimo.stop]を使用して、ボタンがクリックされるまでセルの実行を防ぎます。
 
-!!! caution "Expensive notebooks"
-    For more tips on working with expensive notebooks, see the
-    associated [guide](../guides/expensive_notebooks.md).
+!!! caution "高コストなノートブック"
+    高コストなノートブックでの作業の追加のヒントについては、[リアクティビティガイド](../guides/reactivity.md)をご覧ください。
 
-**Use Python modules.** If your notebook gets too long, split complex logic
-into helper Python modules and import them into your notebook. Use marimo's
-built-in [module
-reloading](../guides/configuration/runtime_configuration.md#on-module-change)
-to automatically bring changes from your modules into your notebook.
+**Pythonモジュールを使用する。** ノートブックが長すぎる場合は、複雑なロジックをヘルパーPythonモジュールに分割し、ノートブックにインポートします。モジュール自動再読み込み機能は将来の機能として拡張予定です。
 
-**Minimize mutations.** marimo does not track mutations to objects. Try to
-only mutate an object in the cell that creates it, or create new objects
-instead of mutating existing ones.
+**変更を最小限に抑える。** Backcastはオブジェクトへの変更を追跡しません。オブジェクトを作成するセルでのみ変更するか、既存のオブジェクトを変更する代わりに新しいオブジェクトを作成するようにしてください。
 
-??? example "Example"
+??? example "例"
 
-    _Don't_ split up declarations and mutations over multiple cells. For example, _don't
-    do this:_
+    _複数のセルにわたって宣言と変更を分割しないでください。例えば、_これをしないでください：_
 
     ```python
     l = [1, 2, 3]
@@ -48,7 +29,7 @@ instead of mutating existing ones.
     l.append(new_item())
     ```
 
-    Instead, _do_ **declare and mutate in the same cell**:
+    代わりに、_同じセルで宣言して変更します_：
 
     ```python
     l = [1, 2, 3]
@@ -56,8 +37,7 @@ instead of mutating existing ones.
     l.append(new_item())
     ```
 
-    or, if working in multiple cells, **declare a new variable based on the old
-    one**:
+    または、複数のセルで作業する場合、**古い変数に基づいて新しい変数を宣言します**：
 
     ```python
     l = [1, 2, 3]
@@ -66,11 +46,9 @@ instead of mutating existing ones.
     ```python
     extended_list = l + [new_item()]
     ```
-**Don't use state and `on_change` handlers.** Don't use `on_change` handlers
-to react to UI interactions. Instead, use marimo's built-in [reactive execution
-for interactive elements](../guides/interactivity.md).
 
-**Write idempotent cells.**
-Write cells whose outputs and behavior are the same
-when given the same inputs (references); such cells are called idempotent. This
-will help you avoid bugs and cache expensive intermediate computations.
+**stateと`on_change`ハンドラーを使用しない。** UI操作に反応するために`on_change`ハンドラーを使用しないでください。代わりに、Backcastの組み込み[インタラクティブ要素のリアクティブ実行](../guides/interactivity.md)を使用します。
+
+**べき等セルを記述する。**
+同じ入力（参照）が与えられた場合に出力と動作が同じセルを記述します。このようなセルはべき等と呼ばれます。これにより、バグを避け、高コストな中間計算をキャッシュできます。
+

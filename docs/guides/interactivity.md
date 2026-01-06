@@ -1,97 +1,72 @@
-# Interactive elements
+# インタラクティブ要素
 
-One of marimo's most powerful features is its first-class support for
-interactive user interface (UI) elements, or "widgets", created using
-[`marimo.ui`](../api/inputs/index.md). **Interacting with a UI element bound to a
-global variable automatically runs all cells that reference it.**
+Backcastの最も強力な機能の1つは、[`marimo.ui`](../api/inputs/index.md)を使用して作成されるインタラクティブなユーザーインターフェース（UI）要素、または「ウィジェット」のファーストクラスサポートです。**グローバル変数にバインドされたUI要素と対話すると、それを参照するすべてのセルが自動的に実行されます。**
 
 <div align="center">
 <figure>
 <video autoplay muted loop playsinline width="100%" height="100%" align="center">
-    <source src="/_static/readme-ui.mp4" type="video/mp4">
-    <source src="/_static/readme-ui.webm" type="video/webm">
+    <source src="../_static/readme-ui.mp4" type="video/mp4">
+    <source src="../_static/readme-ui.webm" type="video/webm">
 </video>
 </figure>
 </div>
 
-!!! example "Examples"
-    See the [API reference](../api/inputs/index.md) or our [GitHub
-    repo](https://github.com/marimo-team/marimo/tree/main/examples/ui) for
-    bite-sized examples on using input elements.
+!!! example "例"
+    [APIリファレンス](../api/inputs/index.md)で、入力要素の使用例をご覧ください。
 
-## How interactions run cells
+## 対話がセルを実行する方法
 
-Every UI element you make using [`marimo.ui`](../api/inputs/index.md) has a value, accessible via its
-`value` attribute. When you interact with a UI element bound to a global
-variable, its value is sent back to Python. A single rule determines what
-happens next:
+[`marimo.ui`](../api/inputs/index.md)を使用して作成するすべてのUI要素には、`value`属性でアクセスできる値があります。グローバル変数にバインドされたUI要素と対話すると、その値がPythonに送信されます。次の単一のルールが何が起こるかを決定します：
 
-!!! important "Interaction rule"
-    When a UI element assigned to a global variable is interacted with, marimo
-    automatically runs all cells that reference the variable (but don't define it).
+!!! important "対話ルール"
+    グローバル変数に割り当てられたUI要素と対話すると、Backcastはその変数を参照する（ただし定義しない）すべてのセルを自動的に実行します。
 
-In the clip at the top of this page, interacting with the slider in the
-second cell re-runs the third cell (which outputs markdown) because it
-references the slider variable `x`. It doesn't re-run the second cell, because
-that cell defines `x`.
+このページの上部にあるクリップでは、2番目のセル内のスライダーと対話すると、3番目のセル（markdownを出力）が再実行されます。これは、スライダー変数`x`を参照するためです。2番目のセルは再実行されません。これは、そのセルが`x`を定義するためです。
 
-**For interactions on a UI element to have any effect, the element must be
-assigned to a global variable.**
+**UI要素への対話が効果を持つには、要素をグローバル変数に割り当てる必要があります。**
 
-## Displaying UI elements
+## UI要素の表示
 
-Display UI elements in the output area above a cell by including them in the
-last expression, just like any other object. You can also embed elements
-in [markdown][marimo.md] using Python f-strings, like so:
+他のオブジェクトと同様に、最後の式に含めることで、セルの上の出力領域にUI要素を表示できます。Python f-stringを使用して、[markdown][marimo.md]に要素を埋め込むこともできます：
 
 ```python3
 slider = mo.ui.slider(1, 10)
-mo.md(f"Choose a value: {slider}")
+mo.md(f"値を選択: {slider}")
 ```
 
-## Composite elements
+## 複合要素
 
-Composite elements are advanced elements let you build UI elements out of other
-UI elements. The following composite elements are available:
+複合要素は、他のUI要素からUI要素を構築できる高度な要素です。以下の複合要素が利用可能です：
 
 - [`mo.ui.array`][marimo.ui.array]
 - [`mo.ui.dictionary`][marimo.ui.dictionary]
 - [`mo.ui.batch`][marimo.ui.batch]
 - [`mo.ui.form`][marimo.ui.form]
 
-**Arrays and dictionaries.**
-Use [`mo.ui.array`][marimo.ui.array] and
-[`mo.ui.dictionary`][marimo.ui.dictionary] to logically group together related
-elements. These elements are especially useful when a set of UI elements is
-only known at runtime (so you can't assign each to a global variable
-individually, but can assign them to an array or dictionary).
+**配列と辞書**。
+[`mo.ui.array`][marimo.ui.array]と[`mo.ui.dictionary`][marimo.ui.dictionary]を使用して、関連する要素を論理的にグループ化します。これらの要素は、UI要素のセットが実行時まで不明な場合（各要素を個別にグローバル変数に割り当てることはできませんが、配列や辞書に割り当てることはできます）に特に有用です。
 
-You can access the elements contained in an array or dictionary using
-Pythonic syntax, and embed these elements in other outputs. See their docstrings
-for code examples.
+Pythonicな構文を使用して、配列や辞書に含まれる要素にアクセスし、これらの要素を他の出力に埋め込むことができます。コード例については、docstringをご覧ください。
 
-**Batch and form.**
-Use these powerful elements to group together multiple UI elements into a
-single element with custom formatting, and gate the sending of an element's
-value on form submission.
+**バッチとフォーム**。
+これらの強力な要素を使用して、複数のUI要素をカスタムフォーマットの単一要素にグループ化し、フォーム送信時に要素の値の送信を制御します。
 
 <div align="center">
 <figure>
-<video autoplay muted loop playsinline width="100%" height="100%" align="center" src="/_static/readme-ui-form.webm">
+<video autoplay muted loop playsinline width="100%" height="100%" align="center" src="../_static/readme-ui-form.webm">
 </video>
-<figcaption>Use a form to gate value updates on submission</figcaption>
+<figcaption>フォームを使用して、送信時に値の更新を制御します</figcaption>
 </figure>
 </div>
 
 <div align="center">
 <figure>
-<img src="/_static/array.png" width="700px"/>
-<figcaption>Use an array to group together elements or create a collection of elements that is determined at runtime</figcaption>
+<img src="../_static/array.png" width="700px"/>
+<figcaption>配列を使用して要素をグループ化するか、実行時に決定される要素のコレクションを作成します</figcaption>
 </figure>
 </div>
 
-## Building custom UI elements using our plugin API
+## プラグインAPIを使用してカスタムUI要素を構築する
 
-You can build your own reactive and interactive UI elements using
-[anywidget](https://github.com/manzt/anywidget). See [our docs on
-building custom UI elements](../guides/integrating_with_marimo/custom_ui_plugins.md) to learn more.
+[anywidget](https://github.com/manzt/anywidget)を使用して、独自のリアクティブでインタラクティブなUI要素を構築できます。詳細は[カスタムUI要素の構築に関するドキュメント](../guides/integrating_with_marimo/custom_ui_plugins.md)をご覧ください。
+

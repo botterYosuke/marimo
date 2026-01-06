@@ -1,40 +1,37 @@
-# Layouts
+# レイアウト
 
-marimo has higher-order layout functions that you can use to arrange outputs
-in rows, columns, tables, tabs, and more.
+Backcastには、出力を行、列、テーブル、タブなどで配置するために使用できる高階レイアウト関数があります（バックエンドAPI（`marimo`）で提供されます）。
 
-## Stateless
+## ステートレス
 
-Unlike elements in `marimo.ui`, these don't have any values associated with
-them but just render their children in a certain way.
+`marimo.ui`の要素とは異なり、これらには関連する値がなく、子要素を特定の方法でレンダリングするだけです（注：`marimo.ui`はバックエンドAPIです）。
 
-| Function | Description |
+| 関数 | 説明 |
 |----------|-------------|
-| [`marimo.accordion`][marimo.accordion] | Create collapsible sections |
-| [`marimo.carousel`][marimo.carousel] | Create a slideshow |
-| [`marimo.callout`][marimo.callout] | Create highlighted sections |
-| [`marimo.center`][marimo.center] | Center content |
-| [`marimo.hstack`][marimo.hstack] | Stack elements horizontally |
-| [`marimo.lazy`][marimo.lazy] | Lazy load content |
-| [`marimo.left`][marimo.left] | Left-align content |
-| [`marimo.nav_menu`][marimo.nav_menu] | Create navigation menus |
-| [`marimo.outline`][marimo.outline] | Display table of contents outline |
-| [`marimo.plain`][marimo.plain] | Display content without styling |
-| [`marimo.right`][marimo.right] | Right-align content |
-| [`marimo.routes`][marimo.routes] | Create page routing |
-| [`marimo.stat`][marimo.stat] | Display statistics |
-| [`marimo.sidebar`][marimo.sidebar] | Create sidebars |
-| [`marimo.tree`][marimo.tree] | Create tree structures |
-| [`marimo.json`][marimo.json] | Create JSON structures |
-| [`marimo.vstack`][marimo.vstack] | Stack elements vertically |
+| [`marimo.accordion`][marimo.accordion] | 折りたたみ可能なセクションを作成 |
+| [`marimo.carousel`][marimo.carousel] | スライドショーを作成 |
+| [`marimo.callout`][marimo.callout] | 強調表示されたセクションを作成 |
+| [`marimo.center`][marimo.center] | コンテンツを中央揃え |
+| [`marimo.hstack`][marimo.hstack] | 要素を水平にスタック |
+| [`marimo.lazy`][marimo.lazy] | コンテンツをレイジーロード |
+| [`marimo.left`][marimo.left] | コンテンツを左揃え |
+| [`marimo.nav_menu`][marimo.nav_menu] | ナビゲーションメニューを作成 |
+| [`marimo.outline`][marimo.outline] | 目次のアウトラインを表示 |
+| [`marimo.plain`][marimo.plain] | スタイルなしでコンテンツを表示 |
+| [`marimo.right`][marimo.right] | コンテンツを右揃え |
+| [`marimo.routes`][marimo.routes] | ページルーティングを作成 |
+| [`marimo.stat`][marimo.stat] | 統計を表示 |
+| [`marimo.sidebar`][marimo.sidebar] | サイドバーを作成 |
+| [`marimo.tree`][marimo.tree] | ツリー構造を作成 |
+| [`marimo.json`][marimo.json] | JSON構造を作成 |
+| [`marimo.vstack`][marimo.vstack] | 要素を垂直にスタック |
 
-## Stateful
+## ステートフル
 
-Some elements in `marimo.ui` are also helpful for layout. These elements
-do have values associated with them: for example, `tabs` tracks the
-selected tab name, and `table` tracks the selected rows.
+`marimo.ui`の一部の要素もレイアウトに役立ちます（注：`marimo.ui`はバックエンドAPIです）。これらの要素には関連する値があります：例えば、`tabs`は選択されたタブ名を追跡し、`table`は選択された行を追跡します。
 
-| Function | Description |
+| 関数 | 説明 |
 |----------|-------------|
-| [`marimo.ui.tabs`][marimo.ui.tabs] | Create tabbed interfaces |
-| [`marimo.ui.table`][marimo.ui.table] | Create interactive tables |
+| [`marimo.ui.tabs`][marimo.ui.tabs] | タブインターフェースを作成 |
+| [`marimo.ui.table`][marimo.ui.table] | インタラクティブなテーブルを作成 |
+

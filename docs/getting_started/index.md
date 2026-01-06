@@ -1,9 +1,9 @@
-# Getting Started
+# はじめに
 
-These tutorials will help you get started with marimo
+これらのチュートリアルは、Backcastの使い始めに役立ちます。
 
-| Guide | Description |
+| ガイド | 説明 |
 |-------|-------------|
-| [Installation](installation.md) | Installing marimo |
-| [Quickstart](quickstart.md) | Create notebooks, run apps, and more from the marimo command-line |
-| [Key Concepts](key_concepts.md) | A tour of key features and concepts |
+| [インストール](installation.md) | Backcastの開発環境セットアップ |
+| [クイックスタート](quickstart.md) | Backcastの起動方法と基本的な使い方 |
+| [キーコンセプト](key_concepts.md) | 主要な機能と概念の紹介（3Dモード、Gridモードを含む） |
