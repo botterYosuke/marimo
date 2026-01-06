@@ -10,7 +10,7 @@ files:
   - dist/**
   - electron/**
   - backend/dist/**
-  - backend/backcast.py
+  - frontend/public/files/wasm-intro.py
   - backend/server-manager.js
   - package.json
   - "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}"
