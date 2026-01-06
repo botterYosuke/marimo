@@ -12,7 +12,7 @@ Backcastの最も強力な機能の1つは、[`marimo.ui`](../api/inputs/index.m
 </div>
 
 !!! example "例"
-    [APIリファレンス](../api/inputs/index.md)または[GitHubリポジトリ](https://github.com/marimo-team/marimo/tree/main/examples/ui)で、入力要素の使用例をご覧ください。
+    [APIリファレンス](../api/inputs/index.md)で、入力要素の使用例をご覧ください。
 
 ## 対話がセルを実行する方法
 

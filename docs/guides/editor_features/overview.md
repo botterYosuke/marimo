@@ -178,7 +178,7 @@ Backcastは、エディタのさまざまな場所でコンテキストに応じ
 
 キーボードショートカットは非常に個人的なものですが、設定で再マッピングできます。
 
-_ショートカットが見つからない場合？[GitHub issue](https://github.com/marimo-team/marimo/issues)を提出してください。_
+_ショートカットが見つからない場合？プロジェクトのGitHub Issuesに投稿してください。_
 
 
 ## コマンドパレット
@@ -192,7 +192,7 @@ _ショートカットが見つからない場合？[GitHub issue](https://githu
 </figure>
 </div>
 
-_コマンドが見つからない場合？[GitHub issue](https://github.com/marimo-team/marimo/issues)を提出してください。_
+_コマンドが見つからない場合？プロジェクトのGitHub Issuesに投稿してください。_
 
 ## エディタ幅
 
@@ -251,5 +251,5 @@ _オンラインプレイグラウンドはWebAssemblyを使用します。PyPI�
 </figure>
 </div>
 
-フィードバックを会話のきっかけにしたい場合（お話ししたいです！）、[GitHub issues](https://github.com/marimo-team/marimo/issues)または[Discord](https://marimo.io/discord?ref=docs)に投稿することを検討してください。ただし、フロー状態でコンテキストスイッチできない場合は、フィードバックフォームがバックアップします。
+フィードバックを会話のきっかけにしたい場合、プロジェクトのGitHub Issuesに投稿することを検討してください。ただし、フロー状態でコンテキストスイッチできない場合は、フィードバックフォームがバックアップします。
 

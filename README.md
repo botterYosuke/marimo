@@ -20,13 +20,13 @@
 - ⚡️ **reactive:** セルを実行すると Backcast はリアクティブに[すべての依存セルを実行](docs/guides/reactivity.md)するか、影響を受けるセルを古いものとしてマークします。
 - 🖐️ **interactive:** [スライダー、テーブル、プロットなど](docs/guides/interactivity.md)を Python にバインドできます（コールバック不要）。
 - 🐍 **git-friendly:** ノートブックは `.py` ファイルとして保存されます。
-- 🛢️ **designed for data:** データフレーム、データベース、ウェアハウス、レイクハウスを [SQL でクエリ](https://docs.marimo.io/guides/working_with_data/sql.html)したり、[データフレームをフィルタ・検索](https://docs.marimo.io/guides/working_with_data/dataframes.html)できます。
-- 🤖 **AI-native:** データ作業に特化した AI でセルを[生成](https://docs.marimo.io/guides/generate_with_ai/)できます。
-- 🔬 **reproducible:** [隠れた状態なし](docs/guides/reactivity.md#no-hidden-state)、決定論的な実行、[組み込みパッケージ管理](https://docs.marimo.io/guides/package_management/)を備えています。
-- 🏃 **executable:** ノートブックを [Python スクリプトとして実行](https://docs.marimo.io/guides/scripts.html)でき、CLI 引数でパラメータ化できます。
-- 🛜 **shareable:** インタラクティブな Web アプリとしてデプロイしたり、[スライド](https://docs.marimo.io/guides/apps.html#slides-layout)に変換したり、[WASM でブラウザ実行](https://docs.marimo.io/guides/wasm.html)できます。
-- 🧩 **reusable:** ノートブック間で関数やクラスを[インポートして再利用](https://docs.marimo.io/guides/reusing_functions/)できます。
-- 🧪 **testable:** ノートブックに対して [pytest を実行](https://docs.marimo.io/guides/testing/)できます。
+- 🛢️ **designed for data:** データフレーム、データベース、ウェアハウス、レイクハウスをSQLでクエリできます（将来の機能として拡張予定）。
+- 🤖 **AI-native:** データ作業に特化した AI でセルを生成できます（将来の機能として拡張予定）。
+- 🔬 **reproducible:** [隠れた状態なし](docs/guides/reactivity.md#no-hidden-state)、決定論的な実行を備えています。
+- 🏃 **executable:** ノートブックは `.py` ファイルとして保存され、Pythonスクリプトとして実行可能です（将来の機能として拡張予定）。
+- 🛜 **shareable:** インタラクティブな Web アプリとしてデプロイできます（将来の機能として拡張予定）。
+- 🧩 **reusable:** ノートブック間で関数やクラスをインポートして再利用できます（将来の機能として拡張予定）。
+- 🧪 **testable:** ノートブックに対してテストを実行できます（将来の機能として拡張予定）。
 - ⌨️ **a modern editor:** GitHub Copilot、AI アシスタント、Ruff によるコード整形、高速補完などのエディタ機能を備えています。
 
 ## クイックスタート
