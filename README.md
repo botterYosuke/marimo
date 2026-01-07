@@ -37,6 +37,10 @@
 # 依存関係のインストール
 pnpm install
 
+# Electronのビルドスクリプト承認（pnpm v10の場合）
+pnpm approve-builds electron
+# 対話プロンプトでelectronを選択して承認
+
 # 開発サーバーの起動（フロントエンド + バックエンド）
 pnpm dev
 

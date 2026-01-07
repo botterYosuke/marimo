@@ -24,6 +24,21 @@ cd backcast
 pnpm install
 ```
 
+### 2.5. Electronのビルドスクリプト承認（pnpm v10の場合）
+
+pnpm v10を使用している場合、electronのビルドスクリプトを手動で承認する必要があります。以下のコマンドを実行してください：
+
+```powershell
+pnpm approve-builds electron
+```
+
+対話的なプロンプトが表示されたら、以下の手順で進めてください：
+
+1. スペースキーを押して`electron`を選択
+2. Enterキーを押して承認
+
+これにより、次回以降の`pnpm install`でelectronのビルドスクリプトが自動的に実行されるようになります。
+
 ### 3. 開発サーバーの起動
 
 ```powershell
