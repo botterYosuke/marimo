@@ -56,32 +56,20 @@ const remoteDefaultFileStore: FileStore = {
     // Do nothing
   },
   readFile() {
-    // #region agent log
     const hostname = window.location.hostname;
     const isProduction = hostname === "marimo.app";
     const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
     const shouldRead = isProduction || isLocalhost;
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'store.ts:60',message:'remoteDefaultFileStore.readFile: hostname check',data:{hostname,isProduction,isLocalhost,shouldRead},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     // Only do this on the marimo playground (https://marimo.app) or localhost (for development)
     if (!shouldRead) {
       return null;
     }
     const url = new URL("files/wasm-intro.py", document.baseURI);
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'store.ts:64',message:'remoteDefaultFileStore.readFile: fetch URL',data:{url:url.toString()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     return fetch(url.toString())
       .then((res) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'store.ts:65',message:'remoteDefaultFileStore.readFile: fetch response',data:{ok:res.ok,status:res.status,url:url.toString()},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
         return res.ok ? res.text() : null;
       })
       .catch((err) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'store.ts:66',message:'remoteDefaultFileStore.readFile: fetch error',data:{error:err?.message||String(err),url:url.toString()},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
         return null;
       });
   },

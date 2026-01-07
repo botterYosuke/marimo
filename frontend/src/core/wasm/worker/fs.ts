@@ -53,10 +53,6 @@ export const WasmFileSystem = {
     const { pyodide, filename, code } = opts;
     const FS = getFS(pyodide);
 
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'fs.ts:43',message:'initNotebookCode: entry',data:{filename,notebookFilename:NOTEBOOK_FILENAME,codeLength:code?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
-
     const readIfExist = (filename: string): string | null => {
       try {
         return decodeUtf8(FS.readFile(filename));
@@ -68,23 +64,15 @@ export const WasmFileSystem = {
     // If there is a filename, read the file if it exists
     // We don't want to change the contents of the file if it already exists
     if (filename && filename !== NOTEBOOK_FILENAME) {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'fs.ts:56',message:'initNotebookCode: checking existing file',data:{filename,notebookFilename:NOTEBOOK_FILENAME},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       const existingContent = readIfExist(filename);
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'fs.ts:57',message:'initNotebookCode: existing file read result',data:{filename,existingContentExists:!!existingContent,existingContentLength:existingContent?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       if (existingContent) {
+        currentFilename = filename;
         return {
           code: existingContent,
           filename,
         };
       }
       // If filename is specified but file doesn't exist, write to that filename
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'fs.ts:74',message:'initNotebookCode: writing to specified filename',data:{filename,codeLength:code?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       FS.writeFile(filename, code);
       currentFilename = filename;
       return {
@@ -94,9 +82,6 @@ export const WasmFileSystem = {
     }
 
     // If there is no filename, write the code to the last used file
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'fs.ts:85',message:'initNotebookCode: writing to NOTEBOOK_FILENAME',data:{notebookFilename:NOTEBOOK_FILENAME,codeLength:code?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
     FS.writeFile(NOTEBOOK_FILENAME, code);
     currentFilename = NOTEBOOK_FILENAME;
     return {

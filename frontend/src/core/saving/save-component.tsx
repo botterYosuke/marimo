@@ -31,6 +31,7 @@ import { connectionAtom } from "../network/connection";
 import { getSessionId } from "../kernel/session";
 import { useRequestClient } from "../network/requests";
 import { WebSocketState } from "../websocket/types";
+import { isWasm } from "../wasm/utils";
 import { filenameAtom } from "./file-state";
 import { useFilename, useUpdateFilename } from "./filename";
 import { lastSavedNotebookAtom, needsSaveAtom } from "./state";
@@ -183,13 +184,27 @@ export function useSaveNotebook() {
         }
       } catch (e) {
         // エラーが発生した場合は、元のfilenameを使用
-        Logger.warn(
-          "Failed to get filename from backend, using filename from atom",
-          {
-            error: e,
-            filename,
-          }
-        );
+        // worker.tsとsave-worker.tsのsaveNotebookがopts.filenameを使用するため、
+        // ここでgetCurrentFilename()を呼び出す必要はない
+        // Pyodide環境ではgetRunningNotebooks()が未実装であるため、エラーは予想される動作
+        if (isWasm()) {
+          // Pyodide環境では、getRunningNotebooks()が未実装であるため、警告を出さない
+          Logger.debug(
+            "getRunningNotebooks() not implemented in Pyodide environment, using filename from atom",
+            {
+              filename,
+            }
+          );
+        } else {
+          // 通常環境では、エラーを警告として記録
+          Logger.warn(
+            "Failed to get filename from backend, using filename from atom",
+            {
+              error: e,
+              filename,
+            }
+          );
+        }
       }
 
       await sendSave({

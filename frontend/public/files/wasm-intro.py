@@ -2,20 +2,20 @@
 
 import marimo
 
-__generated_with = "0.2.6"
+__generated_with = "0.18.4"
 app = marimo.App()
 
 
 @app.cell
-def __():
+def _():
     import marimo as mo
 
     mo.md("# Welcome to [marimo](https://github.com/marimo-team/marimo)! 🌊🍃")
-    return mo,
+    return (mo,)
 
 
 @app.cell(hide_code=True)
-def __(mo):
+def _(mo):
     mo.md(
         """
         **This marimo notebook is powered by [WASM](https://webassembly.org/)**:
@@ -27,7 +27,7 @@ def __(mo):
 
 
 @app.cell(hide_code=True)
-def __(mo):
+def _(mo):
     mo.accordion(
         {
             "When should I use WASM notebooks?": """
@@ -50,7 +50,7 @@ def __(mo):
 
 
 @app.cell(hide_code=True)
-def __(mo):
+def _(mo):
     mo.accordion(
         {
             "Installing packages in WASM notebooks": mo.md(
@@ -73,50 +73,46 @@ def __(mo):
 
 
 @app.cell
-def __(mo):
+def _(mo):
     slider = mo.ui.slider(1, 22)
-    return slider,
+    return (slider,)
 
 
 @app.cell
-def __(mo, slider):
-    mo.md(
-        f"""
-        marimo is a **reactive** Python notebook.
+def _(mo, slider):
+    mo.md(f"""
+    marimo is a **reactive** Python notebook.
 
-        This means that unlike traditional notebooks, marimo notebooks **run
-        automatically** when you modify them or
-        interact with UI elements, like this slider: {slider}.
+    This means that unlike traditional notebooks, marimo notebooks **run
+    automatically** when you modify them or
+    interact with UI elements, like this slider: {slider}.
 
-        {"##" + "🍃" * slider.value}
-        """
-    )
+    {"##" + "🍃" * slider.value}
+    """)
     return
 
 
 @app.cell(hide_code=True)
-def __(mo):
-    mo.md(
-        """
-        ## 1. Reactive execution
+def _(mo):
+    mo.md("""
+    ## 1. Reactive execution
 
-        A marimo notebook is made up of small blocks of Python code called
-        cells.
+    A marimo notebook is made up of small blocks of Python code called
+    cells.
 
-        marimo reads your cells and models the dependencies among them: whenever
-        a cell that defines a global variable  is run, marimo
-        **automatically runs** all cells that reference that variable.
+    marimo reads your cells and models the dependencies among them: whenever
+    a cell that defines a global variable  is run, marimo
+    **automatically runs** all cells that reference that variable.
 
-        Reactivity keeps your program state and outputs in sync with your code,
-        making for a dynamic programming environment that prevents bugs before they
-        happen.
-        """
-    )
+    Reactivity keeps your program state and outputs in sync with your code,
+    making for a dynamic programming environment that prevents bugs before they
+    happen.
+    """)
     return
 
 
 @app.cell(hide_code=True)
-def __(changed, mo):
+def _(changed, mo):
     (
         mo.md(
             f"""
@@ -143,13 +139,13 @@ def __(changed, mo):
 
 
 @app.cell
-def __():
+def _():
     changed = False
-    return changed,
+    return (changed,)
 
 
 @app.cell(hide_code=True)
-def __(mo):
+def _(mo):
     mo.accordion(
         {
             "Tip: execution order": (
@@ -167,19 +163,17 @@ def __(mo):
 
 
 @app.cell(hide_code=True)
-def __(mo):
-    mo.md(
-        """
-        **Global names must be unique.** To enable reactivity, marimo imposes a
-        constraint on how names appear in cells: no two cells may define the same
-        variable.
-        """
-    )
+def _(mo):
+    mo.md("""
+    **Global names must be unique.** To enable reactivity, marimo imposes a
+    constraint on how names appear in cells: no two cells may define the same
+    variable.
+    """)
     return
 
 
 @app.cell(hide_code=True)
-def __(mo):
+def _(mo):
     mo.accordion(
         {
             "Tip: encapsulation": (
@@ -194,7 +188,7 @@ def __(mo):
 
 
 @app.cell(hide_code=True)
-def __(mo):
+def _(mo):
     mo.accordion(
         {
             "Tip: private variables": (
@@ -209,9 +203,9 @@ def __(mo):
 
 
 @app.cell(hide_code=True)
-def __(mo):
-    mo.md(
-        """## 2. UI elements
+def _(mo):
+    mo.md("""
+    ## 2. UI elements
 
         Cells can output interactive UI elements. Interacting with a UI
         element **automatically triggers notebook execution**: when
@@ -220,85 +214,82 @@ def __(mo):
 
         marimo provides a library of UI elements to choose from under
         `marimo.ui`.
-        """
-    )
+    """)
     return
 
 
 @app.cell
-def __(mo):
-    mo.md("**🌊 Some UI elements.** Try interacting with the below elements.")
+def _(mo):
+    mo.md("""
+    **🌊 Some UI elements.** Try interacting with the below elements.
+    """)
     return
 
 
 @app.cell
-def __(mo):
+def _(mo):
     icon = mo.ui.dropdown(["🍃", "🌊", "✨"], value="🍃")
-    return icon,
+    return (icon,)
 
 
 @app.cell
-def __(icon, mo):
+def _(icon, mo):
     repetitions = mo.ui.slider(1, 16, label=f"number of {icon.value}: ")
-    return repetitions,
+    return (repetitions,)
 
 
 @app.cell
-def __(icon, repetitions):
+def _(icon, repetitions):
     icon, repetitions
     return
 
 
 @app.cell
-def __(icon, mo, repetitions):
+def _(icon, mo, repetitions):
     mo.md("# " + icon.value * repetitions.value)
     return
 
 
 @app.cell(hide_code=True)
-def __(mo):
-    mo.md(
-        """
-        ## 3. marimo is just Python
+def _(mo):
+    mo.md("""
+    ## 3. marimo is just Python
 
-        marimo cells parse Python (and only Python), and marimo notebooks are
-        stored as pure Python files — outputs are _not_ included. There's no
-        magical syntax.
+    marimo cells parse Python (and only Python), and marimo notebooks are
+    stored as pure Python files — outputs are _not_ included. There's no
+    magical syntax.
 
-        The Python files generated by marimo are:
+    The Python files generated by marimo are:
 
-        - easily versioned with git, yielding minimal diffs
-        - legible for both humans and machines
-        - formattable using your tool of choice,
-        - usable as Python  scripts, with UI  elements taking their default
-        values, and
-        - importable by other modules (more on that in the future).
-        """
-    )
+    - easily versioned with git, yielding minimal diffs
+    - legible for both humans and machines
+    - formattable using your tool of choice,
+    - usable as Python  scripts, with UI  elements taking their default
+    values, and
+    - importable by other modules (more on that in the future).
+    """)
     return
 
 
 @app.cell(hide_code=True)
-def __(mo):
-    mo.md(
-        """
-        ## 4. Running notebooks as apps
+def _(mo):
+    mo.md("""
+    ## 4. Running notebooks as apps
 
-        marimo notebooks can double as apps. Click the app window icon in the
-        bottom-right to see this notebook in "app view."
+    marimo notebooks can double as apps. Click the app window icon in the
+    bottom-right to see this notebook in "app view."
 
-        Serve a notebook as an app with `marimo run` at the command-line.
-        Of course, you can use marimo just to level-up your
-        notebooking, without ever making apps.
-        """
-    )
+    Serve a notebook as an app with `marimo run` at the command-line.
+    Of course, you can use marimo just to level-up your
+    notebooking, without ever making apps.
+    """)
     return
 
 
 @app.cell(hide_code=True)
-def __(mo):
-    mo.md(
-        """## 5. The `marimo` command-line tool
+def _(mo):
+    mo.md("""
+    ## 5. The `marimo` command-line tool
 
         **Creating and editing notebooks.** Use
 
@@ -351,50 +342,47 @@ def __(mo):
 
         In addition to tutorials, we have examples in our
         [our GitHub repo](https://www.github.com/marimo-team/marimo/tree/main/examples).
-        """
-    )
+    """)
     return
 
 
 @app.cell(hide_code=True)
-def __(mo):
-    mo.md(
-        """
-        ## 6. The marimo editor
+def _(mo):
+    mo.md("""
+    ## 6. The marimo editor
 
-        Here are some tips to help you get started with the marimo editor.
-        """
-    )
+    Here are some tips to help you get started with the marimo editor.
+    """)
     return
 
 
 @app.cell
-def __(mo, tips):
+def _(mo, tips):
     mo.accordion(tips)
     return
 
 
 @app.cell
-def __(mo):
-    mo.md("## Finally, a fun fact")
+def _(mo):
+    mo.md("""
+    ## Finally, a fun fact
+    """)
     return
 
 
 @app.cell(hide_code=True)
-def __(mo):
-    mo.md(
-        """
-        The name "marimo" is a reference to a type of algae that, under
-        the right conditions, clumps together to form a small sphere
-        called a "marimo moss ball". Made of just strands of algae, these
-        beloved assemblages are greater than the sum of their parts.
-        """
-    )
+def _(mo):
+    mo.md("""
+    The name "marimo" is a reference to a type of algae that, under
+    the right conditions, clumps together to form a small sphere
+    called a "marimo moss ball". Made of just strands of algae, these
+    beloved assemblages are greater than the sum of their parts.
+    """)
     return
 
 
 @app.cell(hide_code=True)
-def __():
+def _():
     tips = {
         "Saving": (
             """
@@ -486,7 +474,7 @@ def __():
            """
         ),
     }
-    return tips,
+    return (tips,)
 
 
 if __name__ == "__main__":

@@ -41,10 +41,14 @@ async function loadPyodideAndPackages() {
     });
 
     // Mount the filesystem
-    await controller.mountFilesystem?.({
+    const mountResult = await controller.mountFilesystem?.({
       code: "",
       filename: null,
     });
+    // Set the current filename from mountFilesystem result
+    if (mountResult) {
+      WasmFileSystem.setCurrentFilename(mountResult.filename);
+    }
 
     rpc.send.initialized({});
   } catch (error) {
@@ -68,10 +72,21 @@ const requestHandler = createRPCRequestHandler({
   },
   saveNotebook: async (opts: SaveNotebookRequest) => {
     await pyodideReadyPromise; // Make sure loading is done
-    const filename = WasmFileSystem.getCurrentFilename();
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'save-worker.ts:69',message:'saveNotebook: saving with filename',data:{filename,notebookFilename:WasmFileSystem.NOTEBOOK_FILENAME},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
+    // Use opts.filename if provided (from save-component.tsx), otherwise use getCurrentFilename()
+    // This ensures we use the filename that was determined by save-component.tsx
+    const filename = opts.filename || WasmFileSystem.getCurrentFilename();
+    // Ensure the file exists in the filesystem before calling save_file
+    // save-worker.ts is a separate worker instance, so it may not have the same files
+    // that were created in worker.ts. We need to create the file if it doesn't exist.
+    const FS = self.pyodide.FS;
+    try {
+      // Try to read the file to check if it exists
+      FS.readFile(filename);
+    } catch (e) {
+      // File doesn't exist, create it with empty content
+      // save_file will overwrite it with the actual content
+      FS.writeFile(filename, "");
+    }
     const saveFile = self.pyodide.runPython(`
       from marimo._pyodide.bootstrap import save_file
 

@@ -83,22 +83,16 @@ export class DefaultWasmController implements WasmController {
 
   async mountFilesystem(opts: { code: string; filename: string | null }) {
     const span = t.startSpan("mountFilesystem");
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'bootstrap.ts:84',message:'mountFilesystem: received opts',data:{filename:opts.filename,codeLength:opts.code?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-    // #endregion
     // Set up the filesystem
     WasmFileSystem.createHomeDir(this.requirePyodide);
     WasmFileSystem.mountFS(this.requirePyodide);
     await WasmFileSystem.populateFilesToMemory(this.requirePyodide);
-    span.end("ok");
     const result = WasmFileSystem.initNotebookCode({
       pyodide: this.requirePyodide,
       code: opts.code,
       filename: opts.filename,
     });
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'bootstrap.ts:95',message:'mountFilesystem: initNotebookCode result',data:{resultFilename:result.filename,resultCodeLength:result.code?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
+    span.end("ok");
     return result;
   }
 
@@ -123,10 +117,9 @@ export class DefaultWasmController implements WasmController {
     self.user_config = userConfig;
 
     const span = t.startSpan("startSession.runPython");
-    const nbFilename = filename || WasmFileSystem.NOTEBOOK_FILENAME;
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'bootstrap.ts:119',message:'startSession: filename resolution',data:{filename,notebookFilename:WasmFileSystem.NOTEBOOK_FILENAME,nbFilename},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
+    // Use getCurrentFilename() to get the filename that was set by mountFilesystem
+    // This ensures we use the same filename that was used when initializing the notebook
+    const nbFilename = WasmFileSystem.getCurrentFilename();
     const [bridge, init, packages] = this.requirePyodide.runPython(
       `
       print("[py] Starting marimo...")

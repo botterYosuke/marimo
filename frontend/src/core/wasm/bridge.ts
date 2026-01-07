@@ -33,6 +33,7 @@ import { store } from "../state/jotai";
 import { BasicTransport } from "../websocket/transports/basic";
 import type { IConnectionTransport } from "../websocket/transports/transport";
 import { getFilenameFromDOM } from "../dom/htmlUtils";
+import { getSessionId } from "../kernel/session";
 import { PyodideRouter } from "./router";
 import { getWorkerRPC } from "./rpc";
 import { createShareableLink } from "./share";
@@ -61,6 +62,8 @@ export class PyodideBridge implements RunRequests, EditRequests {
   private messageConsumer:
     | ((message: MessageEvent<string>) => void)
     | undefined;
+  // Track the current session filename for getRunningNotebooks()
+  private currentSessionFilename: string | null = null;
 
   public initialized = new Deferred<void>();
 
@@ -149,11 +152,9 @@ export class PyodideBridge implements RunRequests, EditRequests {
     const fallbackCode = await fallbackFileStore.readFile();
     // Use getFilenameFromDOM to get filename from URL param or DOM element
     const filename = PyodideRouter.getFilename() || getFilenameFromDOM();
+    // Store the filename for getRunningNotebooks()
+    this.currentSessionFilename = filename;
     const userConfig = store.get(userConfigAtom);
-
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'bridge.ts:149',message:'startSession: filename from router or DOM',data:{filename,routerFilename:PyodideRouter.getFilename(),domFilename:getFilenameFromDOM(),codeExists:!!code,fallbackCodeExists:!!fallbackCode,codeLength:code?.length||0,fallbackCodeLength:fallbackCode?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
 
     const queryParameters: Record<string, string | string[]> = {};
     const searchParams = new URLSearchParams(window.location.search);
@@ -206,6 +207,8 @@ export class PyodideBridge implements RunRequests, EditRequests {
     // Set filename in the URL params,
     // so refreshing the page will keep the filename
     PyodideRouter.setFilename(filename);
+    // Update the current session filename for getRunningNotebooks()
+    this.currentSessionFilename = filename;
 
     await this.rpc.proxy.request.bridge({
       functionName: "rename_file",
@@ -254,10 +257,9 @@ export class PyodideBridge implements RunRequests, EditRequests {
   sendRun: EditRequests["sendRun"] = async (request) => {
     await this.rpc.proxy.request.loadPackages(request.codes.join("\n"));
 
-    await this.putControlRequest({
-      type: "execute-cells",
-      ...request,
-    });
+    // Pass request directly to putControlRequest, same as islands/bridge.ts
+    // ExecuteCellsRequest is already a CommandMessage type
+    await this.putControlRequest(request as CommandMessage);
     return null;
   };
   sendRunScratchpad: EditRequests["sendRunScratchpad"] = async (request) => {
@@ -590,7 +592,20 @@ export class PyodideBridge implements RunRequests, EditRequests {
   openTutorial = throwNotImplemented;
   getRecentFiles = throwNotImplemented;
   getWorkspaceFiles = throwNotImplemented;
-  getRunningNotebooks = throwNotImplemented;
+  getRunningNotebooks: EditRequests["getRunningNotebooks"] = async () => {
+    // Return the current session information
+    const sessionId = getSessionId();
+    const files = this.currentSessionFilename
+      ? [
+          {
+            sessionId,
+            path: this.currentSessionFilename,
+            name: this.currentSessionFilename,
+          },
+        ]
+      : [];
+    return { files };
+  };
   shutdownSession = throwNotImplemented;
   autoExportAsHTML = throwNotImplemented;
   autoExportAsMarkdown = throwNotImplemented;

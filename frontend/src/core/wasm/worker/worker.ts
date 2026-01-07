@@ -89,10 +89,6 @@ const requestHandler = createRPCRequestHandler({
   }) => {
     await pyodideReadyPromise; // Make sure loading is done
 
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'worker.ts:84',message:'startSession: received opts',data:{filename:opts.filename,codeLength:opts.code?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-    // #endregion
-
     if (started) {
       Logger.warn("Session already started");
       return;
@@ -101,13 +97,14 @@ const requestHandler = createRPCRequestHandler({
     started = true;
     try {
       invariant(self.controller, "Controller not loaded");
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'worker.ts:100',message:'startSession: calling mountFilesystem',data:{filename:opts.filename,codeLength:opts.code?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
-      await self.controller.mountFilesystem?.({
+      const mountResult = await self.controller.mountFilesystem?.({
         code: opts.code,
         filename: opts.filename,
       });
+      // Set the current filename from mountFilesystem result
+      if (mountResult) {
+        WasmFileSystem.setCurrentFilename(mountResult.filename);
+      }
       const startSession = t.wrapAsync(
         self.controller.startSession.bind(self.controller),
       );
@@ -120,9 +117,6 @@ const requestHandler = createRPCRequestHandler({
       rpc.send.initializingMessage({
         message: "Loading notebook and dependencies...",
       });
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'worker.ts:116',message:'startSession: calling controller.startSession',data:{filename:opts.filename,codeLength:opts.code?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       const bridge = await startSession({
         code: opts.code,
         filename: opts.filename,
@@ -261,14 +255,24 @@ const requestHandler = createRPCRequestHandler({
   saveNotebook: async (opts: SaveNotebookRequest) => {
     // Partially duplicated from save-worker.ts
     await pyodideReadyPromise; // Make sure loading is done
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'worker.ts:251',message:'saveNotebook: saving with filename',data:{notebookFilename:WasmFileSystem.NOTEBOOK_FILENAME},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
+    // Use opts.filename if provided (from save-component.tsx), otherwise use getCurrentFilename()
+    // This ensures we use the filename that was determined by save-component.tsx
+    const filename = opts.filename || WasmFileSystem.getCurrentFilename();
+    // Ensure the file exists in the filesystem before calling save_file
+    const FS = self.pyodide.FS;
+    try {
+      // Try to read the file to check if it exists
+      FS.readFile(filename);
+    } catch (e) {
+      // File doesn't exist, create it with empty content
+      // save_file will overwrite it with the actual content
+      FS.writeFile(filename, "");
+    }
     const saveFile = self.pyodide.runPython(`
       from marimo._pyodide.bootstrap import save_file
       save_file
     `);
-    await saveFile(JSON.stringify(opts), WasmFileSystem.NOTEBOOK_FILENAME);
+    await saveFile(JSON.stringify(opts), filename);
   },
 
   /**
