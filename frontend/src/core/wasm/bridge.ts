@@ -32,6 +32,7 @@ import type {
 import { store } from "../state/jotai";
 import { BasicTransport } from "../websocket/transports/basic";
 import type { IConnectionTransport } from "../websocket/transports/transport";
+import { getFilenameFromDOM } from "../dom/htmlUtils";
 import { PyodideRouter } from "./router";
 import { getWorkerRPC } from "./rpc";
 import { createShareableLink } from "./share";
@@ -146,8 +147,13 @@ export class PyodideBridge implements RunRequests, EditRequests {
 
     const code = await notebookFileStore.readFile();
     const fallbackCode = await fallbackFileStore.readFile();
-    const filename = PyodideRouter.getFilename();
+    // Use getFilenameFromDOM to get filename from URL param or DOM element
+    const filename = PyodideRouter.getFilename() || getFilenameFromDOM();
     const userConfig = store.get(userConfigAtom);
+
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'bridge.ts:149',message:'startSession: filename from router or DOM',data:{filename,routerFilename:PyodideRouter.getFilename(),domFilename:getFilenameFromDOM(),codeExists:!!code,fallbackCodeExists:!!fallbackCode,codeLength:code?.length||0,fallbackCodeLength:fallbackCode?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
 
     const queryParameters: Record<string, string | string[]> = {};
     const searchParams = new URLSearchParams(window.location.search);

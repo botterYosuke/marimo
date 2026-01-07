@@ -12,7 +12,7 @@
     "vite": "cd frontend && vite",
     "backend": "cross-env ENV=development python -u backend/run.py",
     "dev": "concurrently --names \"backend,vite\" --prefix-colors \"blue,green\" --kill-others-on-fail false \"pnpm run backend\" \"pnpm vite\"",
-    "dev:pyodide": "cross-env PYODIDE=true VITE_WASM_MARIMO_PREBUILT_WHEEL=true pnpm dev",
+    "dev:pyodide": "cross-env PYODIDE=true VITE_WASM_MARIMO_PREBUILT_WHEEL=true pnpm vite",
     "start:electron": "wait-on http://localhost:3000 --timeout 60000 -v && cross-env NODE_ENV=development pnpm exec electron .",
     "start": "concurrently --names \"dev,electron\" --prefix-colors \"blue,cyan\" --kill-others-on-fail false \"pnpm dev\" \"pnpm start:electron\"",
     "build:backend": "cd backend && python -m PyInstaller --clean backcast-server.spec",

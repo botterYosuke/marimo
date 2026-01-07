@@ -68,12 +68,16 @@ const requestHandler = createRPCRequestHandler({
   },
   saveNotebook: async (opts: SaveNotebookRequest) => {
     await pyodideReadyPromise; // Make sure loading is done
+    const filename = WasmFileSystem.getCurrentFilename();
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/806ba12d-a164-41a6-8625-2def7626046a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'save-worker.ts:69',message:'saveNotebook: saving with filename',data:{filename,notebookFilename:WasmFileSystem.NOTEBOOK_FILENAME},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     const saveFile = self.pyodide.runPython(`
       from marimo._pyodide.bootstrap import save_file
 
       save_file
     `);
-    await saveFile(JSON.stringify(opts), WasmFileSystem.NOTEBOOK_FILENAME);
+    await saveFile(JSON.stringify(opts), filename);
     await WasmFileSystem.persistFilesToRemote(self.pyodide);
   },
 });
