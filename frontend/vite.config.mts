@@ -6,6 +6,9 @@ import { defineConfig, type Plugin } from "vite";
 import topLevelAwait from "vite-plugin-top-level-await";
 import wasm from "vite-plugin-wasm";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const SERVER_PORT = process.env.SERVER_PORT || 2718;
 const HOST = process.env.HOST || "127.0.0.1";
@@ -45,6 +48,7 @@ const ReactCompilerConfig = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  root: __dirname,
   // This allows for a dynamic <base> tag in index.html
   base: "./",
   server: {
@@ -114,6 +118,7 @@ export default defineConfig({
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
   },
   build: {
+    outDir: "../dist",
     minify: isDev ? false : "oxc", // default is "oxc"
     sourcemap: isDev,
   },
