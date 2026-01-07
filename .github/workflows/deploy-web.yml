@@ -3,7 +3,7 @@ name: Deploy Web to Firebase
 on:
   push:
     branches:
-      - master
+      - sasa/main
   workflow_dispatch:
 
 jobs:
