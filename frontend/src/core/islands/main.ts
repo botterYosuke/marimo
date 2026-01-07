@@ -19,6 +19,10 @@ import { Functions } from "@/utils/functions";
 import { safeExtractSetUIElementMessageBuffers } from "@/utils/json/base64";
 import { jsonParseWithSpecialChar } from "@/utils/json/json-parser";
 import { Logger } from "@/utils/Logger";
+import type {
+  NotificationMessage,
+  NotificationPayload,
+} from "../kernel/messages";
 import {
   createNotebookActions,
   notebookAtom,
@@ -105,7 +109,22 @@ export async function initialize() {
   // Consume messages from the kernel
   IslandsPyodideBridge.INSTANCE.consumeMessages((message) => {
     const msg = jsonParseWithSpecialChar(message);
-    switch (msg.data.op) {
+    
+    // 後方互換性のため、msg.op と msg.data.op の両方に対応
+    // Pyodide環境では op がトップレベルにある可能性がある
+    const msgWithOp = msg as NotificationPayload & { op?: string };
+    const op = msgWithOp.op ?? msg.data?.op;
+    
+    if (!op) {
+      Logger.warn("Received message without op field", msg);
+      return;
+    }
+    
+    // msg.dataの型をopに基づいて絞り込む
+    // Pyodide環境ではopがトップレベルにあるが、msg.dataは依然としてNotificationMessage型
+    const data = msg.data as NotificationMessage;
+    
+    switch (op) {
       case "banner":
       case "missing-package-alert":
       case "installing-package-alert":
@@ -127,7 +146,7 @@ export async function initialize() {
         // Unsupported
         return;
       case "kernel-ready":
-        handleKernelReady(msg.data, {
+        handleKernelReady(data, {
           autoInstantiate: true,
           setCells: actions.setCells,
           setLayoutData: Functions.NOOP,
@@ -145,42 +164,42 @@ export async function initialize() {
         return;
       case "send-ui-element-message":
         UI_ELEMENT_REGISTRY.broadcastMessage(
-          msg.data.ui_element as UIElementId,
-          msg.data.message,
-          safeExtractSetUIElementMessageBuffers(msg.data),
+          data.ui_element as UIElementId,
+          data.message,
+          safeExtractSetUIElementMessageBuffers(data),
         );
         return;
 
       case "remove-ui-elements":
-        handleRemoveUIElements(msg.data);
+        handleRemoveUIElements(data);
         return;
       case "function-call-result":
         FUNCTIONS_REGISTRY.resolve(
-          msg.data.function_call_id as RequestId,
-          msg.data,
+          data.function_call_id as RequestId,
+          data,
         );
         return;
       case "cell-op":
-        handleCellNotificationeration(msg.data, actions.handleCellMessage);
+        handleCellNotificationeration(data, actions.handleCellMessage);
         return;
       case "alert":
         // TODO: support toast with islands
         toast({
-          title: msg.data.title,
+          title: data.title,
           description: renderHTML({
-            html: msg.data.description,
+            html: data.description,
           }),
-          variant: msg.data.variant,
+          variant: data.variant,
         });
         return;
       case "query-params-append":
-        queryParamHandlers.append(msg.data);
+        queryParamHandlers.append(data);
         return;
       case "query-params-set":
-        queryParamHandlers.set(msg.data);
+        queryParamHandlers.set(data);
         return;
       case "query-params-delete":
-        queryParamHandlers.delete(msg.data);
+        queryParamHandlers.delete(data);
         return;
       case "query-params-clear":
         queryParamHandlers.clear();
@@ -192,7 +211,7 @@ export async function initialize() {
       case "cache-info":
         return;
       default:
-        logNever(msg.data);
+        logNever(data);
     }
   });
 
