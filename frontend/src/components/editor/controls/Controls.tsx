@@ -34,6 +34,7 @@ import { renderShortcut } from "../../shortcuts/renderShortcut";
 import { Tooltip } from "../../ui/tooltip";
 import { useShouldShowInterrupt } from "../cell/useShouldShowInterrupt";
 import { HideInKioskMode } from "../kiosk-mode";
+import { EditViewModeSelect } from "../renderers/edit-view-mode-select";
 import { LayoutSelect } from "../renderers/layout-select";
 import { CommandPaletteButton } from "./command-palette-button";
 
@@ -90,6 +91,7 @@ export const Controls = ({
       {!closed && (
         <div className={topRightControls}>
           {presenting && <LayoutSelect />}
+          {!presenting && <EditViewModeSelect />}
           <NotebookMenuDropdown
             disabled={disabled}
             tooltip={connectionTooltip}

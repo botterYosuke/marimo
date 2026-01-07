@@ -29,8 +29,8 @@ export const CellsRenderer: React.FC<PropsWithChildren<Props>> = memo(
     const { selectedLayout, layoutData } = useLayoutState();
     const kioskMode = useAtomValue(kioskModeAtom);
 
-    // Just render children if we are in edit mode
-    if (mode === "edit" && !kioskMode) {
+    // editモードでverticalかつkioskModeでない場合のみchildrenを返す
+    if (mode === "edit" && selectedLayout === "vertical" && !kioskMode) {
       return children;
     }
 
