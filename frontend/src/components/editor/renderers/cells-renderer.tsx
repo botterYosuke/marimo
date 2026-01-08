@@ -18,6 +18,7 @@ import {
   type LayoutType,
   OVERRIDABLE_LAYOUT_TYPES,
 } from "./types";
+import { EditGridLayoutRenderer } from "./grid-layout/edit-grid-layout";
 
 interface Props {
   appConfig: AppConfig;
@@ -81,7 +82,12 @@ export const PluginCellRenderer = (props: PluginCellRendererProps) => {
   const { setCurrentLayoutData } = useLayoutActions();
   const cells = flattenTopLevelNotebookCells(notebook);
 
-  const Renderer = plugin.Component;
+  // editモードかつgridプラグインの場合はEditGridLayoutRendererを使用
+  let Renderer = plugin.Component;
+  if (mode === "edit" && plugin.type === "grid") {
+    Renderer = EditGridLayoutRenderer;
+  }
+
   const body = (
     <Renderer
       appConfig={appConfig}
