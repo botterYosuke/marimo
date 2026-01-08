@@ -14,7 +14,6 @@ import type { GridLayout, GridLayoutCellSide } from "./types";
 
 import "react-grid-layout/css/styles.css";
 import "./styles.css";
-import { BorderAllIcon } from "@radix-ui/react-icons";
 import { startCase } from "lodash-es";
 import {
   AlignEndVerticalIcon,
@@ -22,7 +21,6 @@ import {
   AlignStartVerticalIcon,
   CheckIcon,
   GripHorizontalIcon,
-  LockIcon,
   ScrollIcon,
   XIcon,
 } from "lucide-react";
@@ -33,8 +31,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import { NumberField } from "@/components/ui/number-field";
 import { Switch } from "@/components/ui/switch";
 import { outputIsLoading } from "@/core/cells/cell";
 import type { CellId } from "@/core/cells/ids";
@@ -65,7 +61,6 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
     w?: number;
     h?: number;
   } | null>(null);
-  const [isLocked, setIsLocked] = useState(false);
 
   const cols = useMemo(
     () => ({
@@ -93,7 +88,7 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
 
   const { isDragging, ...dragProps } = useIsDragging();
 
-  const enableInteractions = !isReading && !isLocked;
+  const enableInteractions = !isReading;
   const layoutByCellId = Maps.keyBy(layout.cells, (cell) => cell.i);
 
   const handleMakeScrollable = (cellId: CellId) => (isScrollable: boolean) => {
@@ -303,61 +298,53 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
   }
 
   return (
-    <>
-      <GridControls
-        layout={layout}
-        setLayout={setLayout}
-        isLocked={isLocked}
-        setIsLocked={setIsLocked}
-      />
-      <div className={cn("relative flex z-10 flex-1 overflow-hidden")}>
-        <div className={cn("grow overflow-auto transparent-when-disconnected")}>
-          {grid}
-        </div>
-        <div className="flex-none flex flex-col w-[300px] p-2 pb-20 gap-2 overflow-auto bg-(--slate-2) border-t border-x rounded-t shadow-sm transparent-when-disconnected mx-2 mt-4">
-          <div className="text font-bold text-(--slate-20) shrink-0">
-            Outputs
-          </div>
-          {notInGrid.map((cell) => (
-            <div
-              key={cell.id}
-              draggable={true}
-              // eslint-disable-next-line react/no-unknown-property
-              unselectable="on"
-              data-cell-id={cell.id}
-              // Firefox requires some kind of initialization which we can do by adding this attribute
-              // @see https://bugzilla.mozilla.org/show_bug.cgi?id=568313
-              onDragStart={(e) => {
-                // get height of self
-                const height = e.currentTarget.offsetHeight;
-
-                setDroppingItem({
-                  i: cell.id,
-                  w: layout.columns / 4,
-                  h: Math.ceil(height / layout.rowHeight) || 1,
-                });
-                e.dataTransfer.setData("text/plain", "");
-              }}
-              className={cn(
-                DRAG_HANDLE,
-                "droppable-element bg-background border-border border overflow-hidden p-2 rounded shrink-0",
-              )}
-            >
-              <GridCell
-                code={cell.code}
-                className="select-none pointer-events-none"
-                mode={mode}
-                cellId={cell.id}
-                output={cell.output}
-                isScrollable={false}
-                status={cell.status}
-                hidden={false}
-              />
-            </div>
-          ))}
-        </div>
+    <div className={cn("relative flex z-10 flex-1 overflow-hidden")}>
+      <div className={cn("grow overflow-auto transparent-when-disconnected")}>
+        {grid}
       </div>
-    </>
+      <div className="flex-none flex flex-col w-[300px] p-2 pb-20 gap-2 overflow-auto bg-(--slate-2) border-t border-x rounded-t shadow-sm transparent-when-disconnected mx-2 mt-4">
+        <div className="text font-bold text-(--slate-20) shrink-0">
+          Outputs
+        </div>
+        {notInGrid.map((cell) => (
+          <div
+            key={cell.id}
+            draggable={true}
+            // eslint-disable-next-line react/no-unknown-property
+            unselectable="on"
+            data-cell-id={cell.id}
+            // Firefox requires some kind of initialization which we can do by adding this attribute
+            // @see https://bugzilla.mozilla.org/show_bug.cgi?id=568313
+            onDragStart={(e) => {
+              // get height of self
+              const height = e.currentTarget.offsetHeight;
+
+              setDroppingItem({
+                i: cell.id,
+                w: layout.columns / 4,
+                h: Math.ceil(height / layout.rowHeight) || 1,
+              });
+              e.dataTransfer.setData("text/plain", "");
+            }}
+            className={cn(
+              DRAG_HANDLE,
+              "droppable-element bg-background border-border border overflow-hidden p-2 rounded shrink-0",
+            )}
+          >
+            <GridCell
+              code={cell.code}
+              className="select-none pointer-events-none"
+              mode={mode}
+              cellId={cell.id}
+              output={cell.output}
+              isScrollable={false}
+              status={cell.status}
+              hidden={false}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -416,100 +403,6 @@ const GridCell = memo(
   },
 );
 GridCell.displayName = "GridCell";
-
-const GridControls: React.FC<{
-  layout: GridLayout;
-  setLayout: (layout: GridLayout) => void;
-  isLocked: boolean;
-  setIsLocked: (isLocked: boolean) => void;
-}> = ({ layout, setLayout, isLocked, setIsLocked }) => {
-  return (
-    <div className="flex flex-row absolute pl-5 top-8 gap-4 w-full justify-end pr-[350px] pb-3 border-b z-50">
-      <div className="flex flex-row items-center gap-2">
-        <Label htmlFor="columns">Columns</Label>
-        <NumberField
-          data-testid="grid-columns-input"
-          id="columns"
-          value={layout.columns}
-          className="w-[60px]"
-          placeholder="# of Columns"
-          minValue={1}
-          onChange={(valueAsNumber) => {
-            setLayout({
-              ...layout,
-              columns: valueAsNumber,
-            });
-          }}
-        />
-      </div>
-      <div className="flex flex-row items-center gap-2">
-        <Label htmlFor="rowHeight">Row Height (px)</Label>
-        <NumberField
-          data-testid="grid-row-height-input"
-          id="rowHeight"
-          value={layout.rowHeight}
-          className="w-[60px]"
-          placeholder="Row Height (px)"
-          minValue={1}
-          onChange={(valueAsNumber) => {
-            setLayout({
-              ...layout,
-              rowHeight: valueAsNumber,
-            });
-          }}
-        />
-      </div>
-      <div className="flex flex-row items-center gap-2">
-        <Label htmlFor="maxWidth">Max Width (px)</Label>
-        <NumberField
-          data-testid="grid-max-width-input"
-          id="maxWidth"
-          value={layout.maxWidth}
-          className="w-[90px]"
-          step={100}
-          placeholder="Full"
-          onChange={(valueAsNumber) => {
-            setLayout({
-              ...layout,
-              maxWidth: Number.isNaN(valueAsNumber) ? undefined : valueAsNumber,
-            });
-          }}
-        />
-      </div>
-      <div className="flex flex-row items-center gap-2">
-        <Label className="flex flex-row items-center gap-1" htmlFor="lock">
-          <BorderAllIcon className="h-3 w-3" />
-          Bordered
-        </Label>
-        <Switch
-          data-testid="grid-bordered-switch"
-          id="lock"
-          checked={layout.bordered}
-          size="sm"
-          onCheckedChange={(bordered) => {
-            setLayout({
-              ...layout,
-              bordered,
-            });
-          }}
-        />
-      </div>
-      <div className="flex flex-row items-center gap-2">
-        <Label className="flex flex-row items-center gap-1" htmlFor="lock">
-          <LockIcon className="h-3 w-3" />
-          Lock Grid
-        </Label>
-        <Switch
-          data-testid="grid-lock-switch"
-          id="lock"
-          checked={isLocked}
-          size="sm"
-          onCheckedChange={setIsLocked}
-        />
-      </div>
-    </div>
-  );
-};
 
 const EditableGridCell = React.forwardRef(
   (
