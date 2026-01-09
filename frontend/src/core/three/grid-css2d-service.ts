@@ -73,8 +73,8 @@ export class GridCSS2DService {
     container.style.position = "absolute";
     container.style.top = "0";
     container.style.left = "0";
-    container.style.width = "0";
-    container.style.height = "0";
+    container.style.width = "100%";
+    container.style.height = "100%";
     container.style.pointerEvents = "none";
     container.style.zIndex = "100";
 
@@ -150,7 +150,7 @@ export class GridCSS2DService {
   /**
    * カメラからの距離に基づいてスケール値を計算します
    */
-  private calculateScale(distance: number, camera?: THREE.PerspectiveCamera): number {
+  private calculateScale(distance: number): number {
     if (distance <= 0) {
       return this.MAX_SCALE;
     }
@@ -185,8 +185,8 @@ export class GridCSS2DService {
     // 距離を計算（y方向のみ）+ オフセット
     const distance = Math.abs(cameraPosition.y - objectPosition.y) + distanceOffset;
 
-    // スケールを計算（cameraを引数で渡す）
-    const scale = this.calculateScale(distance, camera);
+    // スケールを計算
+    const scale = this.calculateScale(distance);
 
     // CSS2DRendererが設定した既存のtransformを取得
     const existingTransform = container.style.transform || "";
