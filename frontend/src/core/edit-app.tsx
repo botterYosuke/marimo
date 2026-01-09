@@ -71,6 +71,24 @@ export const EditApp: React.FC<AppProps> = ({
   const isEditing = viewState.mode === "edit";
   const isPresenting = viewState.mode === "present";
   const isRunning = useAtomValue(notebookIsRunningAtom);
+  
+  // 3Dモード用の状態管理
+  const threeDContainerRef = useRef<HTMLDivElement>(null);
+  const sceneManagerRef = useRef<SceneManager | null>(null);
+  const css2DServiceRef = useRef<CellCSS2DService | null>(null);
+  const [is3DInitialized, setIs3DInitialized] = useState(false);
+  const [containerReady, setContainerReady] = useState(false);
+
+  // Gridレイアウト用の状態管理（3Dモードの時のみ使用）
+  const notebook = useNotebook();
+  const layoutState = useLayoutState();
+  const { setCurrentLayoutData } = useLayoutActions();
+  const cells = flattenTopLevelNotebookCells(notebook);
+
+  // GridLayoutRenderer用のsetLayoutラッパー
+  const setGridLayout = (layout: GridLayout) => {
+    setCurrentLayoutData(layout);
+  };
 
   // Initialize RuntimeState event-listeners
   useEffect(() => {
@@ -79,6 +97,68 @@ export const EditApp: React.FC<AppProps> = ({
       RuntimeState.INSTANCE.stop();
     };
   }, []);
+  
+  // 3Dモードの初期化
+  useEffect(() => {
+    if (!isEditing) {
+      // 3Dモードが無効な場合はクリーンアップ
+      if (sceneManagerRef.current) {
+        sceneManagerRef.current.dispose();
+        sceneManagerRef.current = null;
+      }
+      if (css2DServiceRef.current) {
+        css2DServiceRef.current.dispose();
+        css2DServiceRef.current = null;
+      }
+      setIs3DInitialized(false);
+      setContainerReady(false);
+      return;
+    }
+
+    // refが設定されるまで待つ
+    if (!containerReady || !threeDContainerRef.current) {
+      return;
+    }
+
+    // SceneManagerとCellCSS2DServiceのインスタンスを作成
+    if (!sceneManagerRef.current) {
+      sceneManagerRef.current = new SceneManager();
+    }
+    if (!css2DServiceRef.current) {
+      css2DServiceRef.current = new CellCSS2DService();
+    }
+
+    const container = threeDContainerRef.current;
+    const sceneManager = sceneManagerRef.current;
+    const css2DService = css2DServiceRef.current;
+
+    // 初期化順序: SceneManager.initialize() → CellCSS2DService.initializeRenderer() → setCSS2DRenderCallback()
+    sceneManager.initialize(container);
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    css2DService.initializeRenderer(container, width, height);
+
+    // CSS2DRendererのレンダリングループをSceneManagerに統合
+    sceneManager.setCSS2DRenderCallback((scene, camera) => {
+      css2DService.render(scene, camera);
+    });
+
+    setIs3DInitialized(true);
+
+    return () => {
+      // クリーンアップ
+      if (sceneManagerRef.current) {
+        sceneManagerRef.current.dispose();
+        sceneManagerRef.current = null;
+      }
+      if (css2DServiceRef.current) {
+        css2DServiceRef.current.dispose();
+        css2DServiceRef.current = null;
+      }
+      setIs3DInitialized(false);
+      setContainerReady(false);
+    };
+  }, [isEditing, containerReady]);
 
   const { connection } = useMarimoKernelConnection({
     autoInstantiate: userConfig.runtime.auto_instantiate,
@@ -165,9 +245,43 @@ export const EditApp: React.FC<AppProps> = ({
 
         {/* Don't render until we have a single cell */}
         {hasCells && (
-          <CellsRenderer appConfig={appConfig} mode={viewState.mode}>
-            {editableCellsArray}
-          </CellsRenderer>
+          <>
+          {/* 3Dモードの場合 */}
+          {isEditing && (
+            <>
+              <div
+                ref={(el) => {
+                  threeDContainerRef.current = el;
+                  // refが設定されたらstateを更新してuseEffectをトリガー
+                  if (el) {
+                    setContainerReady(true);
+                  } else {
+                    setContainerReady(false);
+                  }
+                }}
+                className="absolute inset-0 w-full h-full"
+                style={{ zIndex: 0 }}
+              />
+              {is3DInitialized && sceneManagerRef.current && css2DServiceRef.current && layoutState.selectedLayout === "grid" && (
+                <EditGrid3DRenderer
+                  mode={viewState.mode}
+                  appConfig={appConfig}
+                  sceneManager={sceneManagerRef.current}
+                  css2DService={css2DServiceRef.current}
+                  layout={(layoutState.layoutData.grid as GridLayout) || { cells: [], columns: 12, rowHeight: 50, scrollableCells: new Set(), cellSide: new Map() }}
+                  setLayout={setGridLayout}
+                  cells={cells}
+                />
+              )}
+            </>
+          )}
+          {/* 通常モードの場合 */}
+          {(!isEditing || !is3DInitialized) && (
+            <CellsRenderer appConfig={appConfig} mode={viewState.mode}>
+              {editableCellsArray}
+            </CellsRenderer>
+          )}
+        </>
         )}
       </AppContainer>
       <MultiCellActionToolbar />
