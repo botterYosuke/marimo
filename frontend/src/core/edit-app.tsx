@@ -18,6 +18,7 @@ import {
 import { CellArray } from "../components/editor/renderers/cell-array";
 import { CellsRenderer } from "../components/editor/renderers/cells-renderer";
 import { Grid3DRenderer } from "../components/editor/renderers/grid-3d-renderer";
+import { GridLayoutPlugin } from "../components/editor/renderers/grid-layout/plugin";
 import { useHotkey } from "../hooks/useHotkey";
 import {
   cellIdsAtom,
@@ -272,11 +273,10 @@ export const EditApp: React.FC<AppProps> = ({
               {is3DInitialized && sceneManagerRef.current && css2DServiceRef.current && layoutState.selectedLayout === "grid" && (
                 <Grid3DRenderer
                   mode={viewState.mode}
-                  userConfig={userConfig}
                   appConfig={appConfig}
                   sceneManager={sceneManagerRef.current}
                   css2DService={css2DServiceRef.current}
-                  layout={(layoutState.layoutData.grid as GridLayout) || { cells: [], columns: 12, rowHeight: 50, scrollableCells: new Set(), cellSide: new Map() }}
+                  layout={(layoutState.layoutData.grid as GridLayout) || GridLayoutPlugin.getInitialLayout(cells)}
                   setLayout={setGridLayout}
                   cells={cells}
                 />

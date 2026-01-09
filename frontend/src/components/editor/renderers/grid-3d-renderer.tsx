@@ -7,13 +7,12 @@ import { GridCSS2DService } from "@/core/three/grid-css2d-service";
 import { SceneManager } from "@/core/three/scene-manager";
 import { EditGridLayoutRenderer } from "./grid-layout/edit-grid-layout";
 import type { GridLayout } from "./grid-layout/types";
-import type { AppConfig, UserConfig } from "@/core/config/config-schema";
+import type { AppConfig } from "@/core/config/config-schema";
 import type { AppMode } from "@/core/mode";
 import type { CellData, CellRuntimeState } from "@/core/cells/types";
 
 interface Grid3DRendererProps {
   mode: AppMode;
-  userConfig: UserConfig;
   appConfig: AppConfig;
   sceneManager: SceneManager;
   css2DService: GridCSS2DService;
