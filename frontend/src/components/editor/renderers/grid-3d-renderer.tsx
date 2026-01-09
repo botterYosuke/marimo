@@ -1,10 +1,11 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { createPortal } from "react-dom";
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import * as THREE from "three";
-import { GridCSS2DService } from "@/core/three/grid-css2d-service";
-import { SceneManager } from "@/core/three/scene-manager";
+import type { GridCSS2DService } from "@/core/three/grid-css2d-service";
+import type { SceneManager } from "@/core/three/scene-manager";
 import { EditGridLayoutRenderer } from "./grid-layout/edit-grid-layout";
 import type { GridLayout } from "./grid-layout/types";
 import type { AppConfig } from "@/core/config/config-schema";
