@@ -3,7 +3,7 @@
 import { usePrevious } from "@dnd-kit/utilities";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controls } from "@/components/editor/controls/Controls";
 import { AppHeader } from "@/components/editor/header/app-header";
 import { FilenameForm } from "@/components/editor/header/filename-form";
@@ -17,6 +17,7 @@ import {
 } from "../components/editor/cell/useRunCells";
 import { CellArray } from "../components/editor/renderers/cell-array";
 import { CellsRenderer } from "../components/editor/renderers/cells-renderer";
+import { Grid3DRenderer } from "../components/editor/renderers/grid-3d-renderer";
 import { useHotkey } from "../hooks/useHotkey";
 import {
   cellIdsAtom,
@@ -24,18 +25,24 @@ import {
   notebookIsRunningAtom,
   numColumnsAtom,
   useCellActions,
+  useNotebook,
+  flattenTopLevelNotebookCells,
 } from "./cells/cells";
 import { CellEffects } from "./cells/effects";
 import type { AppConfig, UserConfig } from "./config/config-schema";
 import { RuntimeState } from "./kernel/RuntimeState";
 import { getSessionId } from "./kernel/session";
 import { useTogglePresenting } from "./layout/useTogglePresenting";
+import { useLayoutState, useLayoutActions } from "./layout/layout";
 import { viewStateAtom } from "./mode";
 import { useRequestClient } from "./network/requests";
 import { useFilename } from "./saving/filename";
 import { lastSavedNotebookAtom } from "./saving/state";
 import { useJotaiEffect } from "./state/jotai";
+import { GridCSS2DService } from "./three/grid-css2d-service";
+import { SceneManager } from "./three/scene-manager";
 import { useMarimoKernelConnection } from "./websocket/useMarimoKernelConnection";
+import type { GridLayout } from "../components/editor/renderers/grid-layout/types";
 
 interface AppProps {
   /**
@@ -75,7 +82,7 @@ export const EditApp: React.FC<AppProps> = ({
   // 3Dモード用の状態管理
   const threeDContainerRef = useRef<HTMLDivElement>(null);
   const sceneManagerRef = useRef<SceneManager | null>(null);
-  const css2DServiceRef = useRef<CellCSS2DService | null>(null);
+  const css2DServiceRef = useRef<GridCSS2DService | null>(null);
   const [is3DInitialized, setIs3DInitialized] = useState(false);
   const [containerReady, setContainerReady] = useState(false);
 
@@ -120,19 +127,19 @@ export const EditApp: React.FC<AppProps> = ({
       return;
     }
 
-    // SceneManagerとCellCSS2DServiceのインスタンスを作成
+    // SceneManagerとGridCSS2DServiceのインスタンスを作成
     if (!sceneManagerRef.current) {
       sceneManagerRef.current = new SceneManager();
     }
     if (!css2DServiceRef.current) {
-      css2DServiceRef.current = new CellCSS2DService();
+      css2DServiceRef.current = new GridCSS2DService();
     }
 
     const container = threeDContainerRef.current;
     const sceneManager = sceneManagerRef.current;
     const css2DService = css2DServiceRef.current;
 
-    // 初期化順序: SceneManager.initialize() → CellCSS2DService.initializeRenderer() → setCSS2DRenderCallback()
+    // 初期化順序: SceneManager.initialize() → GridCSS2DService.initializeRenderer() → setCSS2DRenderCallback()
     sceneManager.initialize(container);
     const width = container.clientWidth;
     const height = container.clientHeight;
@@ -263,8 +270,9 @@ export const EditApp: React.FC<AppProps> = ({
                 style={{ zIndex: 0 }}
               />
               {is3DInitialized && sceneManagerRef.current && css2DServiceRef.current && layoutState.selectedLayout === "grid" && (
-                <EditGrid3DRenderer
+                <Grid3DRenderer
                   mode={viewState.mode}
+                  userConfig={userConfig}
                   appConfig={appConfig}
                   sceneManager={sceneManagerRef.current}
                   css2DService={css2DServiceRef.current}
@@ -276,7 +284,7 @@ export const EditApp: React.FC<AppProps> = ({
             </>
           )}
           {/* 通常モードの場合 */}
-          {(!isEditing || !is3DInitialized) && (
+          {(!isEditing || !is3DInitialized || layoutState.selectedLayout !== "grid") && (
             <CellsRenderer appConfig={appConfig} mode={viewState.mode}>
               {editableCellsArray}
             </CellsRenderer>

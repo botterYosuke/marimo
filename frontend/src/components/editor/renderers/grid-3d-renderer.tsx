@@ -3,11 +3,10 @@
 import { createPortal } from "react-dom";
 import React, { useEffect, useState } from "react";
 import * as THREE from "three";
-import { CellCSS2DService } from "@/core/three/grid-css2d-service";
+import { GridCSS2DService } from "@/core/three/grid-css2d-service";
 import { SceneManager } from "@/core/three/scene-manager";
-import { Grid3DLayoutRenderer } from "./3d-layout/grid-3d-layout-renderer";
+import { EditGridLayoutRenderer } from "./grid-layout/edit-grid-layout";
 import type { GridLayout } from "./grid-layout/types";
-import type { Grid3DConfig } from "./3d-layout/types";
 import type { AppConfig, UserConfig } from "@/core/config/config-schema";
 import type { AppMode } from "@/core/mode";
 import type { CellData, CellRuntimeState } from "@/core/cells/types";
@@ -17,20 +16,19 @@ interface Grid3DRendererProps {
   userConfig: UserConfig;
   appConfig: AppConfig;
   sceneManager: SceneManager;
-  css2DService: CellCSS2DService;
+  css2DService: GridCSS2DService;
   layout: GridLayout;
   setLayout: (layout: GridLayout) => void;
   cells: (CellRuntimeState & CellData)[];
-  grid3DConfig?: Grid3DConfig;
 }
 
 /**
  * Grid3DRenderer
  *
  * Gridレイアウトを3D空間に配置するコンポーネント
- * - Grid3DLayoutRendererをCSS2DRendererで表示
+ * - EditGridLayoutRendererをCSS2DRendererで表示
  * - 1つのCSS2DObjectとしてGrid全体を表示
- * - セルを追加するロジックは含めない（Grid3DLayoutRendererが内部で処理）
+ * - セルを追加するロジックは含めない（EditGridLayoutRendererが内部で処理）
  */
 export const Grid3DRenderer: React.FC<Grid3DRendererProps> = ({
   mode,
@@ -40,13 +38,12 @@ export const Grid3DRenderer: React.FC<Grid3DRendererProps> = ({
   layout,
   setLayout,
   cells,
-  grid3DConfig,
 }) => {
   const [gridContainer, setGridContainer] = useState<HTMLDivElement | null>(null);
 
-  // CellCSS2DServiceからグリッドコンテナを取得
+  // GridCSS2DServiceからグリッドコンテナを取得
   useEffect(() => {
-    const container = css2DService.getGridContainer();
+    const container = css2DService.getContainer();
     if (container) {
       setGridContainer(container);
     } else {
@@ -63,18 +60,16 @@ export const Grid3DRenderer: React.FC<Grid3DRendererProps> = ({
     }
 
     const scene = sceneManager.getScene();
-    const camera = sceneManager.getCamera();
 
     if (!scene) {
       return;
     }
 
     // 既にアタッチされている場合はスキップ
-    if (!css2DService.getGridCSS2DObject()) {
-      css2DService.attachGridContainerToScene(
+    if (!css2DService.getCSS2DObject()) {
+      css2DService.attachContainerToScene(
         scene,
         new THREE.Vector3(0, 0, 0),
-        camera
       );
     }
   }, [gridContainer, sceneManager, css2DService]);
@@ -84,16 +79,14 @@ export const Grid3DRenderer: React.FC<Grid3DRendererProps> = ({
     return null;
   }
 
-  // Grid3DLayoutRendererをCSS2Dコンテナ内にレンダリング
+  // EditGridLayoutRendererをCSS2Dコンテナ内にレンダリング
   return createPortal(
-    <Grid3DLayoutRenderer
+    <EditGridLayoutRenderer
       appConfig={appConfig}
       mode={mode}
       cells={cells}
       layout={layout}
       setLayout={setLayout}
-      grid3DConfig={grid3DConfig}
-      sceneManager={sceneManager}
     />,
     gridContainer,
   );
