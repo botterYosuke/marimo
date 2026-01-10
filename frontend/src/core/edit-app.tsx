@@ -371,6 +371,7 @@ export const EditApp: React.FC<AppProps> = ({
             "pt-4 sm:pt-12 pb-2 mb-4 print:hidden z-50",
             // Keep the header sticky when scrolling horizontally, for column mode
             "sticky left-0",
+            "pointer-events-none",
           )}
         >
           {isEditing && !is3DMode && (
