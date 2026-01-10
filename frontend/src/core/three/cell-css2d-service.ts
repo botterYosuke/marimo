@@ -75,8 +75,8 @@ export class CellCSS2DService {
     container.style.position = "absolute";
     container.style.top = "0";
     container.style.left = "0";
-    container.style.width = "100%";
-    container.style.height = "100%";
+    container.style.width = "0";
+    container.style.height = "0";
     container.style.pointerEvents = "none";
     container.style.zIndex = "100";
 
@@ -117,6 +117,13 @@ export class CellCSS2DService {
   ): CSS2DObject | null {
     if (!this.cellContainer) {
       this.createCellContainer();
+    }
+
+    if (!this.cellContainer) {
+      console.warn(
+        "Cell container is not created. Call initializeRenderer() first.",
+      );
+      return null;
     }
 
     // 既存のオブジェクトを削除
@@ -305,6 +312,14 @@ export class CellCSS2DService {
 
     // scaleが見つからない場合は1.0を返す
     return 1.0;
+  }
+
+  /**
+   * 現在のスケール値を取得します
+   * getContainerScale()のエイリアスです
+   */
+  getCurrentScale(): number {
+    return this.getContainerScale();
   }
 
   /**

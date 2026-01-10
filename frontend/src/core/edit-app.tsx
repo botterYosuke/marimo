@@ -420,9 +420,7 @@ export const EditApp: React.FC<AppProps> = ({
                 appConfig={appConfig}
                 sceneManager={sceneManagerRef.current}
                 css2DService={cellCSS2DServiceRef.current}
-              >
-                {editableCellsArray}
-              </Cell3DRenderer>
+              />
             </>
           ) : null}
           </>
