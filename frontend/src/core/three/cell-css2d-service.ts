@@ -4,20 +4,21 @@ import { CSS2DRenderer, CSS2DObject } from "three/examples/jsm/renderers/CSS2DRe
 import * as THREE from "three";
 
 /**
- * GridCSS2DService
+ * CellCSS2DService
  *
- * CSS2DRendererの初期化と管理を担当
- * - CSS2DRendererの初期化
- * - コンテナDOM要素の作成と管理
- * - コンテナ全体をCSS2DObjectとして3D空間に配置
+ * CSS2DRendererの初期化と管理を担当（セルコンテナ専用）
+ * - CSS2DRendererの初期化（z-index: 15）
+ * - セルコンテナDOM要素の作成と管理
+ * - セルコンテナ全体をCSS2DObjectとして3D空間に配置
  * - カメラ距離に基づくスケール調整
  * - レンダリングループの管理
  */
-export class GridCSS2DService {
+export class CellCSS2DService {
   private css2DRenderer?: CSS2DRenderer;
   private css2DObject?: CSS2DObject;
   private isContainerVisible = true;
-  private divContainer?: HTMLDivElement;
+  private cellContainer?: HTMLDivElement;
+  private styleElement?: HTMLStyleElement;
 
   // スケール計算用の設定
   private baseDistance: number | null = null; // 基準距離（起動時の距離で初期化）
@@ -32,7 +33,7 @@ export class GridCSS2DService {
   private readonly CAMERA_MOVE_THRESHOLD = 0.1; // 最小移動量
 
   /**
-   * CSS2DRendererとコンテナを初期化します
+   * CSS2DRendererとセルコンテナを初期化します
    */
   initializeRenderer(hostElement: HTMLElement, width: number, height: number): CSS2DRenderer {
     this.dispose();
@@ -46,71 +47,74 @@ export class GridCSS2DService {
     rendererElement.style.top = "0";
     rendererElement.style.left = "0";
     rendererElement.style.pointerEvents = "none";
-    // z-index: 5 - gridを最下層に配置（3D物体をgridとcellの間に配置するため）
-    rendererElement.style.zIndex = "5";
+    // z-index: 15 - セルを最上層に配置（3D物体をgridとcellの間に配置するため）
+    rendererElement.style.zIndex = "15";
 
     hostElement.appendChild(rendererElement);
 
-    // コンテナを作成
-    this.createContainer();
+    // セルコンテナを作成
+    this.createCellContainer();
     this.applyContainerVisibility();
 
     return this.css2DRenderer;
   }
 
   /**
-   * コンテナDOM要素を作成します
+   * セルコンテナDOM要素を作成します
    */
-  private createContainer(): HTMLDivElement {
-    if (this.divContainer) {
+  private createCellContainer(): HTMLDivElement {
+    if (this.cellContainer) {
       this.applyContainerVisibility();
-      return this.divContainer;
+      return this.cellContainer;
     }
 
     const container = document.createElement("div");
-    container.className = "grid-3d-container";
+    container.className = "cell-3d-container";
 
     // CSSスタイルをインラインで設定
     container.style.position = "absolute";
     container.style.top = "0";
     container.style.left = "0";
-    container.style.width = "500px";
+    container.style.width = "100%";
     container.style.height = "100%";
     container.style.pointerEvents = "none";
     container.style.zIndex = "100";
 
     // 子要素のpointer-eventsを有効化するためのスタイルを追加
-    const style = document.createElement("style");
-    style.textContent = `
-      .grid-3d-container > * {
+    this.styleElement = document.createElement("style");
+    this.styleElement.textContent = `
+      .cell-3d-container > * {
         pointer-events: all;
       }
     `;
-    document.head.appendChild(style);
+    document.head.appendChild(this.styleElement);
 
-    this.divContainer = container;
+    this.cellContainer = container;
     this.applyContainerVisibility();
 
     return container;
   }
 
   /**
-   * コンテナを取得します
+   * セルコンテナを取得します
    */
-  getContainer(): HTMLDivElement | undefined {
-    return this.divContainer;
+  getCellContainer(): HTMLDivElement | undefined {
+    return this.cellContainer;
   }
 
   /**
-   * コンテナを3D空間に配置します
+   * セルコンテナを3D空間に配置します
    */
-  attachContainerToScene(
+  attachCellContainerToScene(
     scene: THREE.Scene,
-    position: THREE.Vector3 = new THREE.Vector3(0, 0, 0),
+    // 初期位置: (0, 600, 0) - gridContainerより前方（Y軸正方向）に配置
+    // 3D物体をgridとcellの間に表示するため、セルをより前方（カメラに近い位置）に配置
+    // カメラ位置: (0, 1200, 0) との関係を考慮
+    position: THREE.Vector3 = new THREE.Vector3(0, 600, 0),
   ): CSS2DObject | null {
-    if (!this.divContainer) {
+    if (!this.cellContainer) {
       console.warn(
-        "grid-3d-container is not created. Call initializeRenderer() first.",
+        "cell-3d-container is not created. Call initializeRenderer() first.",
       );
       return null;
     }
@@ -121,7 +125,7 @@ export class GridCSS2DService {
     }
 
     // CSS2DObjectを作成
-    this.css2DObject = new CSS2DObject(this.divContainer);
+    this.css2DObject = new CSS2DObject(this.cellContainer);
     this.css2DObject.position.copy(position);
     this.css2DObject.scale.set(1, 1, 1);
 
@@ -139,7 +143,7 @@ export class GridCSS2DService {
   }
 
   /**
-   * コンテナの3D位置を取得します
+   * セルコンテナの3D位置を取得します
    */
   getContainerPosition(): THREE.Vector3 | undefined {
     if (this.css2DObject) {
@@ -170,9 +174,9 @@ export class GridCSS2DService {
   }
 
   /**
-   * コンテナのスケールを更新する共通ロジック
+   * セルコンテナのスケールを更新する共通ロジック
    */
-  private updateContainerScaleInternal(
+  private updateCellContainerScaleInternal(
     container: HTMLDivElement,
     css2DObject: CSS2DObject,
     camera: THREE.PerspectiveCamera,
@@ -206,13 +210,13 @@ export class GridCSS2DService {
   }
 
   /**
-   * コンテナのスケールを更新します
+   * セルコンテナのスケールを更新します
    */
-  private updateContainerScale(camera: THREE.PerspectiveCamera): void {
-    if (!this.divContainer || !this.css2DObject) {
+  private updateCellContainerScale(camera: THREE.PerspectiveCamera): void {
+    if (!this.cellContainer || !this.css2DObject) {
       return;
     }
-    this.updateContainerScaleInternal(this.divContainer, this.css2DObject, camera);
+    this.updateCellContainerScaleInternal(this.cellContainer, this.css2DObject, camera);
   }
 
   /**
@@ -241,7 +245,7 @@ export class GridCSS2DService {
     this.css2DRenderer.render(scene, camera);
 
     // CSS2DRendererのrender()の後にscaleを適用
-    this.updateContainerScale(camera);
+    this.updateCellContainerScale(camera);
 
     this.lastCameraPosition.copy(camera.position);
     this.needsRender = false;
@@ -281,38 +285,15 @@ export class GridCSS2DService {
   }
 
   /**
-   * 現在のスケール値を取得します
-   */
-  getCurrentScale(): number {
-    if (!this.divContainer) {
-      return 1.0;
-    }
-
-    // transformスタイルからscale値を抽出
-    const transform = this.divContainer.style.transform || "";
-    const scaleMatch = transform.match(/scale\(([^)]+)\)/);
-
-    if (scaleMatch) { 
-      if(scaleMatch[1]) {
-        const scaleValue = parseFloat(scaleMatch[1].trim());
-        return Number.isNaN(scaleValue) ? 1.0 : scaleValue;
-      }
-    }
-
-    // scaleが見つからない場合は1.0を返す
-    return 1.0;
-  }
-
-  /**
-   * コンテナの現在のスケール値を取得します
+   * セルコンテナの現在のスケール値を取得します
    */
   getContainerScale(): number {
-    if (!this.divContainer) {
+    if (!this.cellContainer) {
       return 1.0;
     }
 
     // transformスタイルからscale値を抽出
-    const transform = this.divContainer.style.transform || "";
+    const transform = this.cellContainer.style.transform || "";
     const scaleMatch = transform.match(/scale\(([^)]+)\)/);
 
     if (scaleMatch) { 
@@ -327,28 +308,28 @@ export class GridCSS2DService {
   }
 
   /**
-   * コンテナを非表示にします
+   * セルコンテナを非表示にします
    */
-  hideDivContainer(): void {
+  hideCellContainer(): void {
     this.isContainerVisible = false;
     this.applyContainerVisibility();
   }
 
   /**
-   * コンテナを表示します
+   * セルコンテナを表示します
    */
-  showDivContainer(): void {
+  showCellContainer(): void {
     this.isContainerVisible = true;
     this.applyContainerVisibility();
   }
 
   /**
-   * コンテナの表示状態を反映します
+   * セルコンテナの表示状態を反映します
    */
   private applyContainerVisibility(): void {
     const displayValue = this.isContainerVisible ? "" : "none";
-    if (this.divContainer) {
-      this.divContainer.style.display = displayValue;
+    if (this.cellContainer) {
+      this.cellContainer.style.display = displayValue;
     }
   }
 
@@ -362,17 +343,25 @@ export class GridCSS2DService {
     }
     this.css2DObject = undefined;
 
-    // コンテナを削除
-    if (this.divContainer) {
-      // コンテナ内の子要素をすべて削除
-      while (this.divContainer.firstChild) {
-        this.divContainer.removeChild(this.divContainer.firstChild);
+    // セルコンテナを削除
+    if (this.cellContainer) {
+      // セルコンテナ内の子要素をすべて削除
+      while (this.cellContainer.firstChild) {
+        this.cellContainer.removeChild(this.cellContainer.firstChild);
       }
-      // コンテナ自体を削除
-      if (this.divContainer.parentElement) {
-        this.divContainer.parentElement.removeChild(this.divContainer);
+      // セルコンテナ自体を削除
+      if (this.cellContainer.parentElement) {
+        this.cellContainer.parentElement.removeChild(this.cellContainer);
       }
-      this.divContainer = undefined;
+      this.cellContainer = undefined;
+    }
+
+    // スタイル要素を削除
+    if (this.styleElement) {
+      if (this.styleElement.parentElement) {
+        this.styleElement.parentElement.removeChild(this.styleElement);
+      }
+      this.styleElement = undefined;
     }
 
     // CSS2DRendererのDOMを削除
@@ -401,5 +390,3 @@ export class GridCSS2DService {
   }
 
 }
-
-

@@ -53,7 +53,8 @@ export class SceneManager {
     this.renderer.domElement.style.position = "absolute";
     this.renderer.domElement.style.top = "0";
     this.renderer.domElement.style.left = "0";
-    this.renderer.domElement.style.zIndex = "0";
+    // z-index: 10 - 3D物体をgrid（z-index: 5）とcell（z-index: 15）の間に配置するため
+    this.renderer.domElement.style.zIndex = "10";
     hostElement.appendChild(this.renderer.domElement);
 
     // OrbitControlsの作成

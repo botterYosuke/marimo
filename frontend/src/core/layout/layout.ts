@@ -19,7 +19,8 @@ export interface LayoutState {
 
 export function initialLayoutState(): LayoutState {
   return {
-    selectedLayout: "grid",
+    // selectedLayout: "grid",
+    selectedLayout: "vertical",
     layoutData: {},
   };
 }

@@ -3,7 +3,7 @@
 import { usePrevious } from "@dnd-kit/utilities";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Controls } from "@/components/editor/controls/Controls";
 import { AppHeader } from "@/components/editor/header/app-header";
 import { FilenameForm } from "@/components/editor/header/filename-form";
@@ -18,6 +18,7 @@ import {
 import { CellArray } from "../components/editor/renderers/cell-array";
 import { CellsRenderer } from "../components/editor/renderers/cells-renderer";
 import { Grid3DRenderer } from "../components/editor/renderers/grid-3d-renderer";
+import { Cell3DRenderer } from "../components/editor/renderers/cell-3d-renderer";
 import { GridLayoutPlugin } from "../components/editor/renderers/grid-layout/plugin";
 import { useHotkey } from "../hooks/useHotkey";
 import {
@@ -41,6 +42,7 @@ import { useFilename } from "./saving/filename";
 import { lastSavedNotebookAtom } from "./saving/state";
 import { useJotaiEffect } from "./state/jotai";
 import { GridCSS2DService } from "./three/grid-css2d-service";
+import { CellCSS2DService } from "./three/cell-css2d-service";
 import { SceneManager } from "./three/scene-manager";
 import { useMarimoKernelConnection } from "./websocket/useMarimoKernelConnection";
 import type { GridLayout } from "../components/editor/renderers/grid-layout/types";
@@ -84,6 +86,7 @@ export const EditApp: React.FC<AppProps> = ({
   const threeDContainerRef = useRef<HTMLDivElement>(null);
   const sceneManagerRef = useRef<SceneManager | null>(null);
   const css2DServiceRef = useRef<GridCSS2DService | null>(null);
+  const cellCSS2DServiceRef = useRef<CellCSS2DService | null>(null);
   const [is3DInitialized, setIs3DInitialized] = useState(false);
   const [containerReady, setContainerReady] = useState(false);
 
@@ -104,19 +107,23 @@ export const EditApp: React.FC<AppProps> = ({
     return () => {
       RuntimeState.INSTANCE.stop();
     };
-  }, []);
+  }, [sendComponentValues]);
   
   // 3Dモードの初期化
   useEffect(() => {
     if (!isEditing) {
       // 3Dモードが無効な場合はクリーンアップ
-      if (sceneManagerRef.current) {
-        sceneManagerRef.current.dispose();
-        sceneManagerRef.current = null;
+      if (cellCSS2DServiceRef.current) {
+        cellCSS2DServiceRef.current.dispose();
+        cellCSS2DServiceRef.current = null;
       }
       if (css2DServiceRef.current) {
         css2DServiceRef.current.dispose();
         css2DServiceRef.current = null;
+      }
+      if (sceneManagerRef.current) {
+        sceneManagerRef.current.dispose();
+        sceneManagerRef.current = null;
       }
       setIs3DInitialized(false);
       setContainerReady(false);
@@ -128,41 +135,145 @@ export const EditApp: React.FC<AppProps> = ({
       return;
     }
 
-    // SceneManagerとGridCSS2DServiceのインスタンスを作成
+    // 初期化順序を明確化:
+    // 1. SceneManagerのインスタンス作成
+    // 2. GridCSS2DServiceのインスタンス作成
+    // 3. CellCSS2DServiceのインスタンス作成
+    // 4. SceneManager.initialize()を呼び出し
+    // 5. GridCSS2DService.initializeRenderer()を呼び出し（エラーハンドリング追加）
+    // 6. CellCSS2DService.initializeRenderer()を呼び出し（エラーハンドリング追加）
+    // 7. SceneManager.setCSS2DRenderCallback()で両方のCSS2DRendererをレンダリング
+
     if (!sceneManagerRef.current) {
       sceneManagerRef.current = new SceneManager();
     }
     if (!css2DServiceRef.current) {
       css2DServiceRef.current = new GridCSS2DService();
     }
+    if (!cellCSS2DServiceRef.current) {
+      cellCSS2DServiceRef.current = new CellCSS2DService();
+    }
 
     const container = threeDContainerRef.current;
     const sceneManager = sceneManagerRef.current;
     const css2DService = css2DServiceRef.current;
 
-    // 初期化順序: SceneManager.initialize() → GridCSS2DService.initializeRenderer() → setCSS2DRenderCallback()
+    // SceneManager.initialize()を呼び出し
     sceneManager.initialize(container);
     const width = container.clientWidth;
     const height = container.clientHeight;
-    css2DService.initializeRenderer(container, width, height);
 
-    // CSS2DRendererのレンダリングループをSceneManagerに統合
-    sceneManager.setCSS2DRenderCallback((scene, camera) => {
-      css2DService.render(scene, camera);
-    });
-
-    setIs3DInitialized(true);
-
-    return () => {
-      // クリーンアップ
+    // GridCSS2DService.initializeRenderer()を呼び出し（エラーハンドリング追加）
+    try {
+      css2DService.initializeRenderer(container, width, height);
+    } catch (error) {
+      console.error("Failed to initialize GridCSS2DService:", error);
+      // エラー時はロールバック（既存のインスタンスをクリーンアップ）
+      if (css2DServiceRef.current) {
+        css2DServiceRef.current.dispose();
+        css2DServiceRef.current = null;
+      }
       if (sceneManagerRef.current) {
         sceneManagerRef.current.dispose();
         sceneManagerRef.current = null;
+      }
+      setIs3DInitialized(false);
+      return;
+    }
+
+    // CellCSS2DService.initializeRenderer()を呼び出し（エラーハンドリング追加）
+    try {
+      const cellCSS2DService = cellCSS2DServiceRef.current;
+      cellCSS2DService.initializeRenderer(container, width, height);
+    } catch (error) {
+      console.error("Failed to initialize CellCSS2DService:", error);
+      // エラー時はロールバック（CellCSS2DService、GridCSS2DService、SceneManagerをクリーンアップ）
+      if (cellCSS2DServiceRef.current) {
+        cellCSS2DServiceRef.current.dispose();
+        cellCSS2DServiceRef.current = null;
       }
       if (css2DServiceRef.current) {
         css2DServiceRef.current.dispose();
         css2DServiceRef.current = null;
       }
+      if (sceneManagerRef.current) {
+        sceneManagerRef.current.dispose();
+        sceneManagerRef.current = null;
+      }
+      setIs3DInitialized(false);
+      return;
+    }
+
+    // SceneManager.setCSS2DRenderCallback()で両方のCSS2DRendererをレンダリング
+    sceneManager.setCSS2DRenderCallback((scene, camera) => {
+      // GridCSS2DServiceをレンダリング（gridレイアウト用）
+      if (css2DServiceRef.current) {
+        css2DServiceRef.current.render(scene, camera);
+      }
+      // CellCSS2DServiceをレンダリング（verticalレイアウト用）
+      if (cellCSS2DServiceRef.current) {
+        cellCSS2DServiceRef.current.render(scene, camera);
+      }
+    });
+
+    // リサイズハンドラー: SceneManagerは内部でWebGLRendererとカメラのリサイズを処理（80-97行目）
+    // SceneManagerのリサイズハンドラーはprivateなので、外部から制御できない
+    // そのため、edit-app.tsxで別のリサイズハンドラーを追加する実装で動作する
+    // 同じresizeイベントで処理することで効率的
+    // 注意: SceneManagerのリサイズハンドラーと重複しないよう注意
+    // 両方のCSS2DRendererのリサイズを確実に実行する
+    const handleResize = () => {
+      // refから直接参照することで、常に最新の値を取得
+      const currentContainer = threeDContainerRef.current;
+      const currentSceneManager = sceneManagerRef.current;
+      const currentCss2DService = css2DServiceRef.current;
+      const currentCellCSS2DService = cellCSS2DServiceRef.current;
+
+      if (!currentContainer || !currentSceneManager || !currentCss2DService || !currentCellCSS2DService) {
+        return;
+      }
+      const width = currentContainer.clientWidth || window.innerWidth;
+      const height = currentContainer.clientHeight || window.innerHeight;
+      
+      // SceneManagerが内部でカメラとWebGLRendererのリサイズを処理（既存のリサイズハンドラー）
+      // ここでCSS2DRendererのリサイズを追加
+      currentCss2DService.setSize(width, height);
+      currentCellCSS2DService.setSize(width, height);
+      
+      // シーンを再レンダリング
+      const scene = currentSceneManager.getScene();
+      if (scene) {
+        currentSceneManager.markNeedsRender();
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
+    setIs3DInitialized(true);
+
+    return () => {
+      // リサイズハンドラーを削除（確実に削除する必要がある）
+      window.removeEventListener("resize", handleResize);
+      
+      // クリーンアップ順序: 初期化の逆順で実行
+      // 1. CellCSS2DServiceのクリーンアップ（最後に初期化したものから）
+      if (cellCSS2DServiceRef.current) {
+        cellCSS2DServiceRef.current.dispose();
+        cellCSS2DServiceRef.current = null;
+      }
+      
+      // 2. GridCSS2DServiceのクリーンアップ
+      if (css2DServiceRef.current) {
+        css2DServiceRef.current.dispose();
+        css2DServiceRef.current = null;
+      }
+      
+      // 3. SceneManagerのクリーンアップ（最初に初期化したものから）
+      if (sceneManagerRef.current) {
+        sceneManagerRef.current.dispose();
+        sceneManagerRef.current = null;
+      }
+      
+      // 状態をリセット
       setIs3DInitialized(false);
       setContainerReady(false);
     };
@@ -229,6 +340,33 @@ export const EditApp: React.FC<AppProps> = ({
     />
   );
 
+  // 条件を明確な変数に分離（useMemoで最適化）
+  // 注意: shouldShowGrid3DRendererとshouldShowCell3DRendererは同時にtrueにならない
+  // layoutState.selectedLayoutが"grid"と"vertical"のいずれか一方のみを取るため
+  const shouldShowGrid3DRenderer = useMemo(() => 
+    isEditing && 
+    is3DInitialized && 
+    sceneManagerRef.current !== null && 
+    css2DServiceRef.current !== null && 
+    layoutState.selectedLayout === "grid",
+    [isEditing, is3DInitialized, layoutState.selectedLayout]
+  );
+
+  // verticalレイアウトではCell3DRendererではなくCellsRendererを使用
+  const shouldShowCell3DRenderer = useMemo(() => false,
+    []
+  );
+
+  // CellsRendererは3Dモードが無効、またはverticalレイアウト、またはgrid/vertical以外のレイアウトの場合に表示
+  // gridレイアウトの場合はGrid3DRenderer、verticalレイアウトの場合はCellsRendererを表示
+  const shouldShowCellsRenderer = useMemo(() =>
+    !isEditing || 
+    !is3DInitialized || 
+    layoutState.selectedLayout === "vertical" ||
+    layoutState.selectedLayout !== "grid",
+    [isEditing, is3DInitialized, layoutState.selectedLayout]
+  );
+
   return (
     <>
       <AppContainer
@@ -270,7 +408,7 @@ export const EditApp: React.FC<AppProps> = ({
                 className="absolute inset-0 w-full h-full"
                 style={{ zIndex: 0 }}
               />
-              {is3DInitialized && sceneManagerRef.current && css2DServiceRef.current && layoutState.selectedLayout === "grid" && (
+              {shouldShowGrid3DRenderer && sceneManagerRef.current && css2DServiceRef.current && (
                 <Grid3DRenderer
                   mode={viewState.mode}
                   appConfig={appConfig}
@@ -281,13 +419,23 @@ export const EditApp: React.FC<AppProps> = ({
                   cells={cells}
                 />
               )}
+              {shouldShowCell3DRenderer && sceneManagerRef.current && cellCSS2DServiceRef.current && (
+                <Cell3DRenderer
+                  mode={viewState.mode}
+                  userConfig={userConfig}
+                  appConfig={appConfig}
+                  sceneManager={sceneManagerRef.current}
+                  css2DService={cellCSS2DServiceRef.current}
+                >
+                  {editableCellsArray}
+                </Cell3DRenderer>
+              )}
+              {shouldShowCellsRenderer && (
+                <CellsRenderer appConfig={appConfig} mode={viewState.mode}>
+                  {editableCellsArray}
+                </CellsRenderer>
+              )}
             </>
-          )}
-          {/* 通常モードの場合 */}
-          {(!isEditing || !is3DInitialized || layoutState.selectedLayout !== "grid") && (
-            <CellsRenderer appConfig={appConfig} mode={viewState.mode}>
-              {editableCellsArray}
-            </CellsRenderer>
           )}
         </>
         )}
