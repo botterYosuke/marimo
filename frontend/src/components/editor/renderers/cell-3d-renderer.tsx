@@ -16,16 +16,16 @@ interface Cell3DRendererProps {
   appConfig: AppConfig;
   sceneManager: SceneManager;
   css2DService: CellCSS2DService;
-  children: React.ReactNode; // verticalレイアウトのセル（editableCellsArray）
+  children: React.ReactNode; // gridレイアウトのセル（editableCellsArray）
 }
 
 /**
  * Cell3DRenderer
  *
- * verticalレイアウトのセルを3D空間に配置するコンポーネント
- * - verticalレイアウトのセルをCSS2DRendererで表示
+ * gridレイアウトのセルを3D空間に配置するコンポーネント
+ * - gridレイアウトのセルをCSS2DRendererで表示（cell-3d-container）
  * - 1つのCSS2DObjectとしてセル全体を表示
- * - 3D配置ロジックは不要（verticalレイアウトのセルをそのまま配置）
+ * - 3D配置ロジックは不要（gridレイアウトのセルをそのまま配置）
  */
 export const Cell3DRenderer: React.FC<Cell3DRendererProps> = ({
   mode,
@@ -81,6 +81,6 @@ export const Cell3DRenderer: React.FC<Cell3DRendererProps> = ({
     return null;
   }
 
-  // verticalレイアウトのセルをCSS2Dコンテナ内にレンダリング
+  // gridレイアウトのセルをCSS2Dコンテナ内にレンダリング
   return createPortal(children, cellContainer);
 };

@@ -8,6 +8,7 @@ import { createReducerAndAtoms } from "@/utils/createReducer";
 import { Logger } from "@/utils/Logger";
 import { getNotebook } from "../cells/cells";
 import { notebookCells } from "../cells/utils";
+import { is3DModeAtom } from "../mode";
 import { store } from "../state/jotai";
 
 export type LayoutData = GridLayout | undefined;
@@ -18,9 +19,9 @@ export interface LayoutState {
 }
 
 export function initialLayoutState(): LayoutState {
+  const is3DMode = store.get(is3DModeAtom);
   return {
-    // selectedLayout: "grid",
-    selectedLayout: "vertical",
+    selectedLayout: is3DMode ? "grid" : "vertical",
     layoutData: {},
   };
 }

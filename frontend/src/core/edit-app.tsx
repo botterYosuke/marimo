@@ -3,7 +3,8 @@
 import { usePrevious } from "@dnd-kit/utilities";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+// import { NotStartedConnectionAlert } from "@/components/editor/alerts/connecting-alert";
 import { Controls } from "@/components/editor/controls/Controls";
 import { AppHeader } from "@/components/editor/header/app-header";
 import { FilenameForm } from "@/components/editor/header/filename-form";
@@ -91,7 +92,7 @@ export const EditApp: React.FC<AppProps> = ({
   // 3Dモード用の状態管理
   const is3DModeFromAtom = useAtomValue(is3DModeAtom);
   // gridレイアウトの場合のみ3Dモードとして扱う
-  const is3DMode = is3DModeFromAtom && isEditing && layoutState.selectedLayout === "grid";
+  const is3DMode = is3DModeFromAtom && layoutState.selectedLayout === "grid";
   const threeDContainerRef = useRef<HTMLDivElement>(null);
   const sceneManagerRef = useRef<SceneManager | null>(null);
   const css2DServiceRef = useRef<GridCSS2DService | null>(null);
@@ -309,7 +310,7 @@ export const EditApp: React.FC<AppProps> = ({
     if (previousWidth === "columns" && appConfig.width !== "columns") {
       mergeAllColumns();
     }
-  }, [appConfig.width, previousWidth, mergeAllColumns, numColumns]);
+  }, [appConfig.width, previousWidth, mergeAllColumns]);
 
   const runStaleCells = useRunStaleCells();
   const runAllCells = useRunAllCells();
@@ -343,30 +344,6 @@ export const EditApp: React.FC<AppProps> = ({
     />
   );
 
-  // 条件を明確な変数に分離（useMemoで最適化）
-  // 注意: shouldShowGrid3DRendererとshouldShowCell3DRendererは同時にtrueにならない
-  // layoutState.selectedLayoutが"grid"と"vertical"のいずれか一方のみを取るため
-  const shouldShowGrid3DRenderer = useMemo(() => 
-    is3DMode && 
-    is3DInitialized && 
-    sceneManagerRef.current !== null && 
-    css2DServiceRef.current !== null && 
-    layoutState.selectedLayout === "grid",
-    [is3DMode, is3DInitialized, layoutState.selectedLayout]
-  );
-
-  // verticalレイアウトではCell3DRendererではなくCellsRendererを使用
-  const shouldShowCell3DRenderer = useMemo(() => false,
-    []
-  );
-
-  // CellsRendererは3Dモードでない場合、または3Dモードだが初期化が完了していない場合に表示
-  // 注意: is3DModeは既にlayoutState.selectedLayout === "grid"を含んでいるため、
-  // verticalレイアウトの場合は!is3DModeがtrueになる
-  const shouldShowCellsRenderer = useMemo(() => {
-    return !is3DMode || (is3DMode && !is3DInitialized);
-  }, [is3DMode, is3DInitialized]);
-
   return (
     <>
       <AppContainer
@@ -389,62 +366,55 @@ export const EditApp: React.FC<AppProps> = ({
           )}
         </AppHeader>
 
-        {/* Don't render until we have a single cell */}
-        {hasCells && (
+        {/* 3D表示モード */}
+        {is3DMode ? (
           <>
           {/* 3Dモードの場合（gridレイアウトのみ） */}
-          {isEditing && is3DMode && (
+          <div
+            ref={(el) => {
+              threeDContainerRef.current = el;
+              // refが設定されたらstateを更新してuseEffectをトリガー
+              if (el) {
+                setContainerReady(true);
+              } else {
+                setContainerReady(false);
+              }
+            }}
+            className="absolute inset-0 w-full h-full"
+            style={{ zIndex: 0 }}
+          />
+          {is3DInitialized && hasCells && sceneManagerRef.current && css2DServiceRef.current && cellCSS2DServiceRef.current ? (
             <>
-              <div
-                ref={(el) => {
-                  threeDContainerRef.current = el;
-                  // refが設定されたらstateを更新してuseEffectをトリガー
-                  if (el) {
-                    setContainerReady(true);
-                  } else {
-                    setContainerReady(false);
-                  }
-                }}
-                className="absolute inset-0 w-full h-full"
-                style={{ zIndex: 0 }}
+              <Grid3DRenderer
+                mode={viewState.mode}
+                appConfig={appConfig}
+                sceneManager={sceneManagerRef.current}
+                css2DService={css2DServiceRef.current}
+                layout={(layoutState.layoutData.grid as GridLayout) || GridLayoutPlugin.getInitialLayout(cells)}
+                setLayout={setGridLayout}
+                cells={cells}
               />
-              {shouldShowGrid3DRenderer && sceneManagerRef.current && css2DServiceRef.current && (
-                <Grid3DRenderer
-                  mode={viewState.mode}
-                  appConfig={appConfig}
-                  sceneManager={sceneManagerRef.current}
-                  css2DService={css2DServiceRef.current}
-                  layout={(layoutState.layoutData.grid as GridLayout) || GridLayoutPlugin.getInitialLayout(cells)}
-                  setLayout={setGridLayout}
-                  cells={cells}
-                />
-              )}
-              {shouldShowCell3DRenderer && sceneManagerRef.current && cellCSS2DServiceRef.current && (
-                <Cell3DRenderer
-                  mode={viewState.mode}
-                  userConfig={userConfig}
-                  appConfig={appConfig}
-                  sceneManager={sceneManagerRef.current}
-                  css2DService={cellCSS2DServiceRef.current}
-                >
-                  {editableCellsArray}
-                </Cell3DRenderer>
-              )}
-              {shouldShowCellsRenderer && (
-                <CellsRenderer appConfig={appConfig} mode={viewState.mode}>
-                  {editableCellsArray}
-                </CellsRenderer>
-              )}
+              <Cell3DRenderer
+                mode={viewState.mode}
+                userConfig={userConfig}
+                appConfig={appConfig}
+                sceneManager={sceneManagerRef.current}
+                css2DService={cellCSS2DServiceRef.current}
+              >
+                {editableCellsArray}
+              </Cell3DRenderer>
             </>
-          )}
-          {/* 3Dモードでない場合（isEditingがtrueだがis3DModeがfalse、またはpresentモード） */}
-          {shouldShowCellsRenderer && !(isEditing && is3DMode) && (
+          ) : null}
+          </>
+        ) : ( 
+          /* Don't render until we have a single cell */
+          hasCells && (          
             <CellsRenderer appConfig={appConfig} mode={viewState.mode}>
               {editableCellsArray}
             </CellsRenderer>
-          )}
-        </>
+          )
         )}
+        {/* {!hasCells && <NotStartedConnectionAlert />} */}
       </AppContainer>
       <MultiCellActionToolbar />
       {!hideControls && (
