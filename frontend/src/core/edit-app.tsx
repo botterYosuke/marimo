@@ -36,7 +36,7 @@ import { RuntimeState } from "./kernel/RuntimeState";
 import { getSessionId } from "./kernel/session";
 import { useTogglePresenting } from "./layout/useTogglePresenting";
 import { useLayoutState, useLayoutActions } from "./layout/layout";
-import { viewStateAtom } from "./mode";
+import { is3DModeAtom, viewStateAtom } from "./mode";
 import { useRequestClient } from "./network/requests";
 import { useFilename } from "./saving/filename";
 import { lastSavedNotebookAtom } from "./saving/state";
@@ -82,19 +82,22 @@ export const EditApp: React.FC<AppProps> = ({
   const isPresenting = viewState.mode === "present";
   const isRunning = useAtomValue(notebookIsRunningAtom);
   
+  // Gridレイアウト用の状態管理（3Dモードの時のみ使用）
+  const notebook = useNotebook();
+  const layoutState = useLayoutState();
+  const { setCurrentLayoutData } = useLayoutActions();
+  const cells = flattenTopLevelNotebookCells(notebook);
+
   // 3Dモード用の状態管理
+  const is3DModeFromAtom = useAtomValue(is3DModeAtom);
+  // gridレイアウトの場合のみ3Dモードとして扱う
+  const is3DMode = is3DModeFromAtom && isEditing && layoutState.selectedLayout === "grid";
   const threeDContainerRef = useRef<HTMLDivElement>(null);
   const sceneManagerRef = useRef<SceneManager | null>(null);
   const css2DServiceRef = useRef<GridCSS2DService | null>(null);
   const cellCSS2DServiceRef = useRef<CellCSS2DService | null>(null);
   const [is3DInitialized, setIs3DInitialized] = useState(false);
   const [containerReady, setContainerReady] = useState(false);
-
-  // Gridレイアウト用の状態管理（3Dモードの時のみ使用）
-  const notebook = useNotebook();
-  const layoutState = useLayoutState();
-  const { setCurrentLayoutData } = useLayoutActions();
-  const cells = flattenTopLevelNotebookCells(notebook);
 
   // GridLayoutRenderer用のsetLayoutラッパー
   const setGridLayout = (layout: GridLayout) => {
@@ -111,7 +114,7 @@ export const EditApp: React.FC<AppProps> = ({
   
   // 3Dモードの初期化
   useEffect(() => {
-    if (!isEditing) {
+    if (!is3DMode) {
       // 3Dモードが無効な場合はクリーンアップ
       if (cellCSS2DServiceRef.current) {
         cellCSS2DServiceRef.current.dispose();
@@ -277,7 +280,7 @@ export const EditApp: React.FC<AppProps> = ({
       setIs3DInitialized(false);
       setContainerReady(false);
     };
-  }, [isEditing, containerReady]);
+  }, [is3DMode, containerReady]);
 
   const { connection } = useMarimoKernelConnection({
     autoInstantiate: userConfig.runtime.auto_instantiate,
@@ -344,12 +347,12 @@ export const EditApp: React.FC<AppProps> = ({
   // 注意: shouldShowGrid3DRendererとshouldShowCell3DRendererは同時にtrueにならない
   // layoutState.selectedLayoutが"grid"と"vertical"のいずれか一方のみを取るため
   const shouldShowGrid3DRenderer = useMemo(() => 
-    isEditing && 
+    is3DMode && 
     is3DInitialized && 
     sceneManagerRef.current !== null && 
     css2DServiceRef.current !== null && 
     layoutState.selectedLayout === "grid",
-    [isEditing, is3DInitialized, layoutState.selectedLayout]
+    [is3DMode, is3DInitialized, layoutState.selectedLayout]
   );
 
   // verticalレイアウトではCell3DRendererではなくCellsRendererを使用
@@ -357,15 +360,12 @@ export const EditApp: React.FC<AppProps> = ({
     []
   );
 
-  // CellsRendererは3Dモードが無効、またはverticalレイアウト、またはgrid/vertical以外のレイアウトの場合に表示
-  // gridレイアウトの場合はGrid3DRenderer、verticalレイアウトの場合はCellsRendererを表示
-  const shouldShowCellsRenderer = useMemo(() =>
-    !isEditing || 
-    !is3DInitialized || 
-    layoutState.selectedLayout === "vertical" ||
-    layoutState.selectedLayout !== "grid",
-    [isEditing, is3DInitialized, layoutState.selectedLayout]
-  );
+  // CellsRendererは3Dモードでない場合、または3Dモードだが初期化が完了していない場合に表示
+  // 注意: is3DModeは既にlayoutState.selectedLayout === "grid"を含んでいるため、
+  // verticalレイアウトの場合は!is3DModeがtrueになる
+  const shouldShowCellsRenderer = useMemo(() => {
+    return !is3DMode || (is3DMode && !is3DInitialized);
+  }, [is3DMode, is3DInitialized]);
 
   return (
     <>
@@ -392,8 +392,8 @@ export const EditApp: React.FC<AppProps> = ({
         {/* Don't render until we have a single cell */}
         {hasCells && (
           <>
-          {/* 3Dモードの場合 */}
-          {isEditing && (
+          {/* 3Dモードの場合（gridレイアウトのみ） */}
+          {isEditing && is3DMode && (
             <>
               <div
                 ref={(el) => {
@@ -436,6 +436,12 @@ export const EditApp: React.FC<AppProps> = ({
                 </CellsRenderer>
               )}
             </>
+          )}
+          {/* 3Dモードでない場合（isEditingがtrueだがis3DModeがfalse、またはpresentモード） */}
+          {shouldShowCellsRenderer && !(isEditing && is3DMode) && (
+            <CellsRenderer appConfig={appConfig} mode={viewState.mode}>
+              {editableCellsArray}
+            </CellsRenderer>
           )}
         </>
         )}
