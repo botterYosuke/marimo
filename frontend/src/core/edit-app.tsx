@@ -22,6 +22,11 @@ import { CellsRenderer } from "../components/editor/renderers/cells-renderer";
 import { Grid3DRenderer } from "../components/editor/renderers/grid-3d-renderer";
 import { Cell3DRenderer } from "../components/editor/renderers/cell-3d-renderer";
 import { GridLayoutPlugin } from "../components/editor/renderers/grid-layout/plugin";
+import { PackageAlert } from "../components/editor/package-alert";
+import { StartupLogsAlert } from "../components/editor/alerts/startup-logs-alert";
+import { StdinBlockingAlert } from "../components/editor/stdin-blocking-alert";
+import { ConnectingAlert } from "../components/editor/alerts/connecting-alert";
+import { NotebookBanner } from "../components/editor/notebook-banner";
 import { useHotkey } from "../hooks/useHotkey";
 import {
   cellIdsAtom,
@@ -386,6 +391,16 @@ export const EditApp: React.FC<AppProps> = ({
         {/* 3D表示モード */}
         {is3DMode ? (
           <>
+            {/* アラートとバナーは通常の2D表示として表示 */}
+            <div className="m-auto pb-24 sm:pb-12 max-w-(--content-width) min-w-[400px] pr-4 relative z-50 pointer-events-none">
+              <div className="pointer-events-auto">
+                <PackageAlert />
+                <StartupLogsAlert />
+                <StdinBlockingAlert />
+                <ConnectingAlert />
+                <NotebookBanner width={appConfig.width} />
+              </div>
+            </div>
             {/* AddCellButtonsを3Dモードでも表示 */}
             {columnIds[0] && (
               <div className="relative z-50 flex justify-center pointer-events-none">
