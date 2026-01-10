@@ -74,19 +74,10 @@ export class GridCSS2DService {
     container.style.position = "absolute";
     container.style.top = "0";
     container.style.left = "0";
-    container.style.width = "500px";
+    container.style.width = "100%";
     container.style.height = "100%";
     container.style.pointerEvents = "none";
-    container.style.zIndex = "100";
-
-    // 子要素のpointer-eventsを有効化するためのスタイルを追加
-    const style = document.createElement("style");
-    style.textContent = `
-      .grid-3d-container > * {
-        pointer-events: all;
-      }
-    `;
-    document.head.appendChild(style);
+    container.style.zIndex = "1";
 
     this.divContainer = container;
     this.applyContainerVisibility();
