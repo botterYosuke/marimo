@@ -238,6 +238,11 @@ export const EditApp: React.FC<AppProps> = ({
       if (cellCSS2DServiceRef.current) {
         cellCSS2DServiceRef.current.render(scene, camera);
       }
+      // CellCSS2DRenderer.render()がGrid containerのtransformを上書きするため、
+      // Grid containerのscaleを再適用する
+      if (css2DServiceRef.current) {
+        css2DServiceRef.current.forceUpdateContainerScale(camera);
+      }
     });
 
     // リサイズハンドラー: SceneManagerは内部でWebGLRendererとカメラのリサイズを処理（80-97行目）

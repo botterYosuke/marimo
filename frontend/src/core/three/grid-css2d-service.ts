@@ -214,13 +214,23 @@ export class GridCSS2DService {
   }
 
   /**
-   * コンテナのスケールを更新します
+   * コンテナのスケールを更新します（内部用）
    */
   private updateContainerScale(camera: THREE.PerspectiveCamera): void {
     if (!this.divContainer || !this.css2DObject) {
       return;
     }
     this.updateContainerScaleInternal(this.divContainer, this.css2DObject, camera);
+  }
+
+  /**
+   * 外部からコンテナのスケールを強制的に更新します
+   * CellCSS2DRenderer.render()がGrid containerのtransformを上書きした後に呼び出されます
+   */
+  forceUpdateContainerScale(camera: THREE.PerspectiveCamera): void {
+    this.updateContainerScale(camera);
+    // lastCameraPositionを更新して、次のフレームでのカメラ移動検出を正確にする
+    this.lastCameraPosition.copy(camera.position);
   }
 
   /**
@@ -235,9 +245,8 @@ export class GridCSS2DService {
     }
 
     // カメラが移動した場合も再レンダリング
-    const cameraMoved =
-      camera.position.distanceTo(this.lastCameraPosition) >
-      this.CAMERA_MOVE_THRESHOLD;
+    const cameraDistance = camera.position.distanceTo(this.lastCameraPosition);
+    const cameraMoved = cameraDistance > this.CAMERA_MOVE_THRESHOLD;
 
     // レンダリング条件：変更がある、操作中、またはカメラが移動した場合のみ
     if (!this.needsRender && !this.isInteracting && !cameraMoved) {
@@ -249,6 +258,7 @@ export class GridCSS2DService {
     this.css2DRenderer.render(scene, camera);
 
     // CSS2DRendererのrender()の後にscaleを適用
+    // CSS2DRenderer.render()がtransformをリセットするため、scale()を再適用する必要がある
     this.updateContainerScale(camera);
 
     this.lastCameraPosition.copy(camera.position);
