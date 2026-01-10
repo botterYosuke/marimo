@@ -52,6 +52,7 @@ import { useJotaiEffect } from "./state/jotai";
 import { GridCSS2DService } from "./three/grid-css2d-service";
 import { CellCSS2DService } from "./three/cell-css2d-service";
 import { SceneManager } from "./three/scene-manager";
+import { cell3DViewAtom } from "./three/cell-3d-view";
 import { useMarimoKernelConnection } from "./websocket/useMarimoKernelConnection";
 import type { GridLayout } from "../components/editor/renderers/grid-layout/types";
 
@@ -107,6 +108,9 @@ export const EditApp: React.FC<AppProps> = ({
   const cellCSS2DServiceRef = useRef<CellCSS2DService | null>(null);
   const [is3DInitialized, setIs3DInitialized] = useState(false);
   const [containerReady, setContainerReady] = useState(false);
+  const cell3DView = useAtomValue(cell3DViewAtom);
+  const setCell3DView = useSetAtom(cell3DViewAtom);
+  const hasRestoredViewRef = useRef(false);
 
   // GridLayoutRenderer用のsetLayoutラッパー
   const setGridLayout = (layout: GridLayout) => {
@@ -275,7 +279,39 @@ export const EditApp: React.FC<AppProps> = ({
 
     setIs3DInitialized(true);
 
+    // OrbitControlsのendイベントで視点情報を保存
+    const controls = sceneManager.getControls();
+    let handleEnd: (() => void) | undefined;
+    if (controls) {
+      const camera = sceneManager.getCamera();
+      handleEnd = () => {
+        if (camera && controls) {
+          setCell3DView({
+            position: {
+              x: camera.position.x,
+              y: camera.position.y,
+              z: camera.position.z,
+            },
+            target: {
+              x: controls.target.x,
+              y: controls.target.y,
+              z: controls.target.z,
+            },
+          });
+        }
+      };
+      controls.addEventListener("end", handleEnd);
+    }
+
     return () => {
+      // OrbitControlsのendイベントリスナーを削除
+      if (handleEnd && sceneManagerRef.current) {
+        const currentControls = sceneManagerRef.current.getControls();
+        if (currentControls) {
+          currentControls.removeEventListener("end", handleEnd);
+        }
+      }
+
       // リサイズハンドラーを削除（確実に削除する必要がある）
       window.removeEventListener("resize", handleResize);
       
@@ -301,8 +337,45 @@ export const EditApp: React.FC<AppProps> = ({
       // 状態をリセット
       setIs3DInitialized(false);
       setContainerReady(false);
+      hasRestoredViewRef.current = false;
     };
-  }, [is3DMode, containerReady]);
+  }, [is3DMode, containerReady, setCell3DView]);
+
+  // 視点情報の復元（初回のみ）
+  useEffect(() => {
+    if (!is3DInitialized || !sceneManagerRef.current || hasRestoredViewRef.current) {
+      return;
+    }
+
+    const savedView = cell3DView;
+    if (savedView) {
+      try {
+        sceneManagerRef.current.setCameraView(
+          new THREE.Vector3(
+            savedView.position.x,
+            savedView.position.y,
+            savedView.position.z,
+          ),
+          new THREE.Vector3(
+            savedView.target.x,
+            savedView.target.y,
+            savedView.target.z,
+          ),
+        );
+        hasRestoredViewRef.current = true;
+      } catch (error) {
+        // エラーが発生した場合も、エラーを投げずに処理を続行
+        console.warn("Failed to restore camera view:", error);
+      }
+    }
+  }, [is3DInitialized, cell3DView]);
+
+  // 3Dモードが切れたら復元フラグをリセット
+  useEffect(() => {
+    if (!is3DMode) {
+      hasRestoredViewRef.current = false;
+    }
+  }, [is3DMode]);
 
   const { connection } = useMarimoKernelConnection({
     autoInstantiate: userConfig.runtime.auto_instantiate,
