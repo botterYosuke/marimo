@@ -96,8 +96,12 @@ export class GridCSS2DService {
 
   /**
    * コンテナを取得します
+   * コンテナが存在しない場合は自動的に作成します
    */
   getContainer(): HTMLDivElement | undefined {
+    if (!this.divContainer) {
+      this.createContainer();
+    }
     return this.divContainer;
   }
 
@@ -108,6 +112,10 @@ export class GridCSS2DService {
     scene: THREE.Scene,
     position: THREE.Vector3 = new THREE.Vector3(0, 0, 0),
   ): CSS2DObject | null {
+    if (!this.divContainer) {
+      this.createContainer();
+    }
+
     if (!this.divContainer) {
       console.warn(
         "grid-3d-container is not created. Call initializeRenderer() first.",

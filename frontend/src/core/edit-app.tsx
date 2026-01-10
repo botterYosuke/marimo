@@ -4,6 +4,7 @@ import { usePrevious } from "@dnd-kit/utilities";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 // import { NotStartedConnectionAlert } from "@/components/editor/alerts/connecting-alert";
 import { Controls } from "@/components/editor/controls/Controls";
 import { AppHeader } from "@/components/editor/header/app-header";
@@ -208,6 +209,25 @@ export const EditApp: React.FC<AppProps> = ({
       return;
     }
 
+    // シーンにコンテナをアタッチ（GridCSS2DServiceとCellCSS2DService）
+    const scene = sceneManager.getScene();
+    if (scene) {
+      // GridCSS2DServiceのコンテナをシーンにアタッチ
+      if (css2DServiceRef.current && !css2DServiceRef.current.getCSS2DObject()) {
+        css2DServiceRef.current.attachContainerToScene(
+          scene,
+          new THREE.Vector3(0, 0, 0),
+        );
+      }
+      // CellCSS2DServiceのコンテナをシーンにアタッチ
+      if (cellCSS2DServiceRef.current && !cellCSS2DServiceRef.current.getCSS2DObject()) {
+        cellCSS2DServiceRef.current.attachCellContainerToScene(
+          scene,
+          new THREE.Vector3(0, 600, 0),
+        );
+      }
+    }
+
     // SceneManager.setCSS2DRenderCallback()で両方のCSS2DRendererをレンダリング
     sceneManager.setCSS2DRenderCallback((scene, camera) => {
       // GridCSS2DServiceをレンダリング（gridレイアウト用）
@@ -380,8 +400,8 @@ export const EditApp: React.FC<AppProps> = ({
                 setContainerReady(false);
               }
             }}
-            className="absolute inset-0 w-full h-full"
-            style={{ zIndex: 0 }}
+            className="w-full h-full relative"
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 1 }}
           />
           {is3DInitialized && hasCells && sceneManagerRef.current && css2DServiceRef.current && cellCSS2DServiceRef.current ? (
             <>

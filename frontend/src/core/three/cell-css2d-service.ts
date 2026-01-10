@@ -99,6 +99,9 @@ export class CellCSS2DService {
    * セルコンテナを取得します
    */
   getCellContainer(): HTMLDivElement | undefined {
+    if (!this.cellContainer) {
+      this.createCellContainer();
+    }
     return this.cellContainer;
   }
 
@@ -113,10 +116,7 @@ export class CellCSS2DService {
     position: THREE.Vector3 = new THREE.Vector3(0, 600, 0),
   ): CSS2DObject | null {
     if (!this.cellContainer) {
-      console.warn(
-        "cell-3d-container is not created. Call initializeRenderer() first.",
-      );
-      return null;
+      this.createCellContainer();
     }
 
     // 既存のオブジェクトを削除
