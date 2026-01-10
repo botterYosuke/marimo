@@ -37,7 +37,7 @@ import {
 } from "../../../core/cells/cells";
 import { formatAll } from "../../../core/codemirror/format";
 import type { AppConfig, UserConfig } from "../../../core/config/config-schema";
-import type { AppMode } from "../../../core/mode";
+import { is3DModeAtom, type AppMode } from "../../../core/mode";
 import { useHotkey } from "../../../hooks/useHotkey";
 import { type Theme, useTheme } from "../../../theme/useTheme";
 import { AddCellWithAI } from "../ai/add-cell-with-ai";
@@ -240,7 +240,7 @@ const CellColumn: React.FC<{
   );
 };
 
-const AddCellButtons: React.FC<{
+export const AddCellButtons: React.FC<{
   columnId: CellColumnId;
   className?: string;
 }> = ({ columnId, className }) => {
@@ -248,6 +248,7 @@ const AddCellButtons: React.FC<{
   const [isAiButtonOpen, isAiButtonOpenActions] = useBoolean(false);
   const aiEnabled = useAtomValue(aiEnabledAtom);
   const isConnected = useAtomValue(isConnectedAtom);
+  const is3DMode = useAtomValue(is3DModeAtom);
 
   const buttonClass = cn(
     "mb-0 rounded-none sm:px-4 md:px-5 lg:px-8 tracking-wide no-wrap whitespace-nowrap",
@@ -318,7 +319,7 @@ const AddCellButtons: React.FC<{
             aiEnabled ? null : <span>Enable via settings under AI Assist</span>
           }
           delayDuration={100}
-          asChild={false}
+          asChild={true}
         >
           <Button
             className={buttonClass}
@@ -336,10 +337,10 @@ const AddCellButtons: React.FC<{
   };
 
   return (
-    <div className="flex justify-center mt-4 pt-6 pb-32 group gap-4 w-full print:hidden">
+    <div className={cn("flex justify-center mt-4 pt-6 group gap-4 w-full print:hidden pointer-events-none", is3DMode ? "pb-4" : "pb-32")}>
       <div
         className={cn(
-          "shadow-sm border border-border rounded transition-all duration-200 overflow-hidden divide-x divide-border flex",
+          "shadow-sm border border-border rounded transition-all duration-200 overflow-hidden divide-x divide-border flex pointer-events-auto bg-background",
           !isAiButtonOpen && "w-fit",
           isAiButtonOpen &&
             "w-full max-w-4xl shadow-lg shadow-(color:--blue-3)",

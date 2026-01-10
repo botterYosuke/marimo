@@ -17,7 +17,7 @@ import {
   useRunAllCells,
   useRunStaleCells,
 } from "../components/editor/cell/useRunCells";
-import { CellArray } from "../components/editor/renderers/cell-array";
+import { AddCellButtons, CellArray } from "../components/editor/renderers/cell-array";
 import { CellsRenderer } from "../components/editor/renderers/cells-renderer";
 import { Grid3DRenderer } from "../components/editor/renderers/grid-3d-renderer";
 import { Cell3DRenderer } from "../components/editor/renderers/cell-3d-renderer";
@@ -25,6 +25,7 @@ import { GridLayoutPlugin } from "../components/editor/renderers/grid-layout/plu
 import { useHotkey } from "../hooks/useHotkey";
 import {
   cellIdsAtom,
+  columnIdsAtom,
   hasCellsAtom,
   notebookIsRunningAtom,
   numColumnsAtom,
@@ -76,6 +77,7 @@ export const EditApp: React.FC<AppProps> = ({
   const viewState = useAtomValue(viewStateAtom);
   const numColumns = useAtomValue(numColumnsAtom);
   const hasCells = useAtomValue(hasCellsAtom);
+  const columnIds = useAtomValue(columnIdsAtom);
   const filename = useFilename();
   const setLastSavedNotebook = useSetAtom(lastSavedNotebookAtom);
   const { sendComponentValues, sendInterrupt } = useRequestClient();
@@ -384,40 +386,46 @@ export const EditApp: React.FC<AppProps> = ({
         {/* 3D表示モード */}
         {is3DMode ? (
           <>
-          {/* 3Dモードの場合（gridレイアウトのみ） */}
-          <div
-            ref={(el) => {
-              threeDContainerRef.current = el;
-              // refが設定されたらstateを更新してuseEffectをトリガー
-              if (el) {
-                setContainerReady(true);
-              } else {
-                setContainerReady(false);
-              }
-            }}
-            className="w-full h-full relative"
-            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 1 }}
-          />
-          {is3DInitialized && hasCells && sceneManagerRef.current && css2DServiceRef.current && cellCSS2DServiceRef.current ? (
-            <>
-              <Grid3DRenderer
-                mode={viewState.mode}
-                appConfig={appConfig}
-                sceneManager={sceneManagerRef.current}
-                css2DService={css2DServiceRef.current}
-                layout={(layoutState.layoutData.grid as GridLayout) || GridLayoutPlugin.getInitialLayout(cells)}
-                setLayout={setGridLayout}
-                cells={cells}
-              />
-              <Cell3DRenderer
-                mode={viewState.mode}
-                userConfig={userConfig}
-                appConfig={appConfig}
-                sceneManager={sceneManagerRef.current}
-                css2DService={cellCSS2DServiceRef.current}
-              />
-            </>
-          ) : null}
+            {/* AddCellButtonsを3Dモードでも表示 */}
+            {columnIds[0] && (
+              <div className="relative z-50 flex justify-center pointer-events-none">
+                <AddCellButtons columnId={columnIds[0]} />
+              </div>
+            )}
+            {/* 3Dモードの場合（gridレイアウトのみ） */}
+            <div
+              ref={(el) => {
+                threeDContainerRef.current = el;
+                // refが設定されたらstateを更新してuseEffectをトリガー
+                if (el) {
+                  setContainerReady(true);
+                } else {
+                  setContainerReady(false);
+                }
+              }}
+              className="w-full h-full relative"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 1 }}
+            />
+            {is3DInitialized && hasCells && sceneManagerRef.current && css2DServiceRef.current && cellCSS2DServiceRef.current ? (
+              <>
+                <Grid3DRenderer
+                  mode={viewState.mode}
+                  appConfig={appConfig}
+                  sceneManager={sceneManagerRef.current}
+                  css2DService={css2DServiceRef.current}
+                  layout={(layoutState.layoutData.grid as GridLayout) || GridLayoutPlugin.getInitialLayout(cells)}
+                  setLayout={setGridLayout}
+                  cells={cells}
+                />
+                <Cell3DRenderer
+                  mode={viewState.mode}
+                  userConfig={userConfig}
+                  appConfig={appConfig}
+                  sceneManager={sceneManagerRef.current}
+                  css2DService={cellCSS2DServiceRef.current}
+                />
+              </>
+            ) : null}
           </>
         ) : ( 
           /* Don't render until we have a single cell */
