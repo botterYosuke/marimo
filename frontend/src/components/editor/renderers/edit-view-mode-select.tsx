@@ -3,6 +3,7 @@
 import { startCase } from "lodash-es";
 import { Grid3x3Icon, ListIcon } from "lucide-react";
 import type React from "react";
+import { useSetAtom } from "jotai";
 import {
   Select,
   SelectContent,
@@ -13,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLayoutActions, useLayoutState } from "@/core/layout/layout";
+import { is3DModeAtom } from "@/core/mode";
 import { logNever } from "@/utils/assertNever";
 
 type EditViewModeType = "vertical" | "grid";
@@ -22,6 +24,7 @@ const EDIT_VIEW_MODES: EditViewModeType[] = ["vertical", "grid"];
 export const EditViewModeSelect: React.FC = () => {
   const { selectedLayout } = useLayoutState();
   const { setLayoutView } = useLayoutActions();
+  const setIs3DMode = useSetAtom(is3DModeAtom);
 
   // selectedLayoutが"vertical"または"grid"でない場合（例："slides"）、
   // "vertical"をデフォルトとして使用
@@ -34,7 +37,12 @@ export const EditViewModeSelect: React.FC = () => {
     <Select
       data-testid="edit-view-mode-select"
       value={currentLayout}
-      onValueChange={(v) => setLayoutView(v as EditViewModeType)}
+      onValueChange={(v) => {
+        const layoutType = v as EditViewModeType;
+        setLayoutView(layoutType);
+        // gridを選択したときにis3DModeAtomをtrueに設定
+        setIs3DMode(layoutType === "grid");
+      }}
     >
       <SelectTrigger
         className="min-w-[110px] border-border bg-background"

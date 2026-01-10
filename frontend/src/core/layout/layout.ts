@@ -94,6 +94,10 @@ export function getSerializedLayout() {
     Logger.error(`Unknown layout type: ${selectedLayout}`);
     return null;
   }
+  // dataがundefinedの場合はnullを返す
+  if (data === undefined) {
+    return null;
+  }
   return {
     type: selectedLayout,
     data: plugin.serializeLayout(data, notebookCells(notebook)),

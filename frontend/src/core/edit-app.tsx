@@ -91,8 +91,8 @@ export const EditApp: React.FC<AppProps> = ({
 
   // 3Dモード用の状態管理
   const is3DModeFromAtom = useAtomValue(is3DModeAtom);
-  // gridレイアウトの場合のみ3Dモードとして扱う
-  const is3DMode = is3DModeFromAtom && layoutState.selectedLayout === "grid";
+  // Editモードの時のみatomの値に従って3D表示を制御
+  const is3DMode = is3DModeFromAtom && viewState.mode === "edit";
   const threeDContainerRef = useRef<HTMLDivElement>(null);
   const sceneManagerRef = useRef<SceneManager | null>(null);
   const css2DServiceRef = useRef<GridCSS2DService | null>(null);
