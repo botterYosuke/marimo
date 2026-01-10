@@ -2,6 +2,8 @@
 
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import type { GridCSS2DService } from "./grid-css2d-service";
+import type { CellCSS2DService } from "./cell-css2d-service";
 
 /**
  * SceneManager
@@ -19,18 +21,26 @@ export class SceneManager {
   private needsRender = true;
   private readonly MIN_FRAME_INTERVAL = 16; // 約60FPS
   private lastRenderTime = 0;
-  private css2DRenderCallback?: (
-    scene: THREE.Scene,
-    camera: THREE.PerspectiveCamera,
-  ) => void;
+  private gridCSS2DService?: GridCSS2DService;
+  private cellCSS2DService?: CellCSS2DService;
 
   /**
    * Three.jsシーンを初期化します
    * 
    * @param hostElement レンダラーを配置する親要素
+   * @param gridCSS2DService GridCSS2DServiceの参照（オプショナル）
+   * @param cellCSS2DService CellCSS2DServiceの参照（オプショナル）
    */
-  initialize(hostElement: HTMLDivElement): void {
+  initialize(
+    hostElement: HTMLDivElement,
+    gridCSS2DService?: GridCSS2DService,
+    cellCSS2DService?: CellCSS2DService,
+  ): void {
     this.dispose();
+
+    // サービス参照を保存
+    this.gridCSS2DService = gridCSS2DService;
+    this.cellCSS2DService = cellCSS2DService;
 
     this.hostElement = hostElement;
     const width = hostElement.clientWidth;
@@ -133,10 +143,30 @@ export class SceneManager {
       // レンダリング
       if (this.needsRender) {
         this.renderer.render(this.scene, this.camera);
-        // CSS2Dレンダリングのコールバックを実行
-        if (this.css2DRenderCallback) {
-          this.css2DRenderCallback(this.scene, this.camera);
+
+        // CSS2Dレンダリングを直接呼び出し
+        // 注意: 各サービスのrender()は内部で早期リターンする可能性がある
+        // （needsRender、isInteracting、cameraMovedによる判定）
+        if (this.gridCSS2DService) {
+          this.gridCSS2DService.render(this.scene, this.camera);
         }
+        if (this.cellCSS2DService) {
+          this.cellCSS2DService.render(this.scene, this.camera);
+        }
+
+        // Grid containerのscaleを再適用
+        // 重要: CellCSS2DService.render()内のCSS2DRenderer.render()が
+        // シーン内の全CSS2DObjectのtransformを再計算・上書きするため、
+        // Grid containerに適用したscale()が消える可能性がある
+        // そのため、CellCSS2DService.render()の後に必ずforceUpdateContainerScale()を呼び出し、
+        // scale()を再適用する
+        // 注意: このメソッドはGridCSS2DService.render()の早期リターンに関係なく
+        // 実行されるため、updateContainerScale()が2回実行される可能性があるが、
+        // これは意図的な動作（確実性を優先）
+        if (this.gridCSS2DService) {
+          this.gridCSS2DService.forceUpdateContainerScale(this.camera);
+        }
+
         this.needsRender = false;
       }
     };
@@ -197,15 +227,6 @@ export class SceneManager {
   }
 
   /**
-   * CSS2Dレンダリングのコールバックを設定します
-   */
-  setCSS2DRenderCallback(
-    callback: (scene: THREE.Scene, camera: THREE.PerspectiveCamera) => void,
-  ): void {
-    this.css2DRenderCallback = callback;
-  }
-
-  /**
    * リソースをクリーンアップします
    */
   dispose(): void {
@@ -259,6 +280,8 @@ export class SceneManager {
     this.hostElement = undefined;
     this.needsRender = true;
     this.lastRenderTime = 0;
+    this.gridCSS2DService = undefined;
+    this.cellCSS2DService = undefined;
   }
 }
 

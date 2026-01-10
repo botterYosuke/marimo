@@ -144,10 +144,11 @@ export const EditApp: React.FC<AppProps> = ({
     // 1. SceneManagerのインスタンス作成
     // 2. GridCSS2DServiceのインスタンス作成
     // 3. CellCSS2DServiceのインスタンス作成
-    // 4. SceneManager.initialize()を呼び出し
+    // 4. SceneManager.initialize()を呼び出し（サービス参照を渡す）
     // 5. GridCSS2DService.initializeRenderer()を呼び出し（エラーハンドリング追加）
     // 6. CellCSS2DService.initializeRenderer()を呼び出し（エラーハンドリング追加）
-    // 7. SceneManager.setCSS2DRenderCallback()で両方のCSS2DRendererをレンダリング
+    // 7. シーンにコンテナをアタッチ
+    // 注意: CSS2DレンダリングはSceneManagerのアニメーションループ内で直接実行される
 
     if (!sceneManagerRef.current) {
       sceneManagerRef.current = new SceneManager();
@@ -162,9 +163,14 @@ export const EditApp: React.FC<AppProps> = ({
     const container = threeDContainerRef.current;
     const sceneManager = sceneManagerRef.current;
     const css2DService = css2DServiceRef.current;
+    const cellCSS2DService = cellCSS2DServiceRef.current;
 
-    // SceneManager.initialize()を呼び出し
-    sceneManager.initialize(container);
+    // SceneManager.initialize()を呼び出し（サービス参照を渡す）
+    sceneManager.initialize(
+      container,
+      css2DService,
+      cellCSS2DService,
+    );
     const width = container.clientWidth;
     const height = container.clientHeight;
 
@@ -227,23 +233,6 @@ export const EditApp: React.FC<AppProps> = ({
         );
       }
     }
-
-    // SceneManager.setCSS2DRenderCallback()で両方のCSS2DRendererをレンダリング
-    sceneManager.setCSS2DRenderCallback((scene, camera) => {
-      // GridCSS2DServiceをレンダリング（gridレイアウト用）
-      if (css2DServiceRef.current) {
-        css2DServiceRef.current.render(scene, camera);
-      }
-      // CellCSS2DServiceをレンダリング（verticalレイアウト用）
-      if (cellCSS2DServiceRef.current) {
-        cellCSS2DServiceRef.current.render(scene, camera);
-      }
-      // CellCSS2DRenderer.render()がGrid containerのtransformを上書きするため、
-      // Grid containerのscaleを再適用する
-      if (css2DServiceRef.current) {
-        css2DServiceRef.current.forceUpdateContainerScale(camera);
-      }
-    });
 
     // リサイズハンドラー: SceneManagerは内部でWebGLRendererとカメラのリサイズを処理（80-97行目）
     // SceneManagerのリサイズハンドラーはprivateなので、外部から制御できない
