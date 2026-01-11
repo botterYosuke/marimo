@@ -119,10 +119,18 @@ export default defineConfig({
   },
   build: {
     outDir: "../dist",
-    minify: isDev ? false : "oxc", // default is "oxc"
+    minify: isDev ? false : "esbuild", // Changed from "oxc" to "esbuild" to fix Worker function reference issues
     sourcemap: isDev,
     rollupOptions: {
       external: ["react-dnd", "react-dnd-html5-backend", "dnd-core"],
+      output: {
+        manualChunks: (id) => {
+          // Split react-grid-layout into a separate chunk to avoid import resolution issues
+          if (id.includes("react-grid-layout")) {
+            return "react-grid-layout";
+          }
+        },
+      },
     },
   },
   resolve: {
