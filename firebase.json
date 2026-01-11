@@ -25,6 +25,10 @@
       {
         "source": "!/wasm/**",
         "destination": "/index.html"
+      },
+      {
+        "source": "!/files/**",
+        "destination": "/index.html"
       }
     ]
   }

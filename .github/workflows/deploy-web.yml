@@ -72,6 +72,16 @@ jobs:
             echo "ERROR: index.html not found"
             exit 1
           fi
+          # Check if wasm-intro.py file is present
+          if [ -f dist/files/wasm-intro.py ]; then
+            echo "✓ files/wasm-intro.py exists"
+            echo "Size: $(wc -c < dist/files/wasm-intro.py) bytes"
+          else
+            echo "ERROR: files/wasm-intro.py not found in dist directory"
+            echo "Listing dist/files/ directory:"
+            ls -la dist/files/ 2>/dev/null || echo "dist/files/ directory does not exist"
+            exit 1
+          fi
 
       - name: Setup Firebase CLI
         run: npm install -g firebase-tools
