@@ -97,7 +97,7 @@ Backcastはノートブック編集に拡張されたvimキーバインディン
 
 ```toml title="marimo.toml"
 [keymap]
-vimrc = /User/absolute/path/to/.vimrc
+vimrc = "/User/absolute/path/to/.vimrc"
 ```
 
 ///
@@ -106,7 +106,7 @@ vimrc = /User/absolute/path/to/.vimrc
 
 ```toml title="pyproject.toml"
 [tool.marimo.keymap]
-vimrc = relative/path/.vimrc
+vimrc = "relative/path/.vimrc"
 ```
 
 ///
