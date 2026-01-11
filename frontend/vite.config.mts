@@ -121,6 +121,9 @@ export default defineConfig({
     outDir: "../dist",
     minify: isDev ? false : "oxc", // default is "oxc"
     sourcemap: isDev,
+    rollupOptions: {
+      external: ["react-dnd", "react-dnd-html5-backend", "dnd-core"],
+    },
   },
   resolve: {
     alias: {
