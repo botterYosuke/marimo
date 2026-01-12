@@ -135,6 +135,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // react-dndを明示的に解決（Rolldownのモノレポワークスペース解決問題を回避）
+      "react-dnd": path.resolve(__dirname, "../node_modules/react-dnd"),
+      "react-dnd-html5-backend": path.resolve(__dirname, "../node_modules/react-dnd-html5-backend"),
+      "dnd-core": path.resolve(__dirname, "../node_modules/dnd-core"),
       "@marimo-team/llm-info/icons": path.resolve(__dirname, "../packages/llm-info/icons"),
       "@marimo-team/llm-info/models.json": path.resolve(
         __dirname,
