@@ -371,6 +371,11 @@ const DEFAULT_HOT_KEY = {
     group: "Other",
     key: "Mod-Shift-i",
   },
+  "global.switchLayout": {
+    name: "Switch layout",
+    group: "Other",
+    key: "Mod-Shift-v",
+  },
 
   // Global Navigation
   "global.focusTop": {

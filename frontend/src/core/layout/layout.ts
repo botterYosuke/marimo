@@ -6,6 +6,7 @@ import { cellRendererPlugins } from "@/components/editor/renderers/plugins";
 import type { LayoutType } from "@/components/editor/renderers/types";
 import { createReducerAndAtoms } from "@/utils/createReducer";
 import { Logger } from "@/utils/Logger";
+import { repl } from "@/utils/repl";
 import { getNotebook } from "../cells/cells";
 import { notebookCells } from "../cells/utils";
 import { is3DModeAtom } from "../mode";
@@ -69,6 +70,20 @@ export const useLayoutState = () => {
 export const useLayoutActions = () => {
   return useActions();
 };
+
+/**
+ * Set layout view programmatically. Exposed via repl for testing.
+ */
+function setLayoutViewForTesting(layout: LayoutType) {
+  const currentState = store.get(layoutStateAtom);
+  store.set(layoutStateAtom, {
+    ...currentState,
+    selectedLayout: layout,
+  });
+}
+
+// Allow setting layout view from the console for testing
+repl(setLayoutViewForTesting, "setLayoutView");
 
 /**
  * Get the serialized layout data, to be used when saving.

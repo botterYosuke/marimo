@@ -4,6 +4,7 @@ import { atom } from "jotai";
 import { isIslands } from "@/core/islands/utils";
 import { assertExists } from "@/utils/assertExists";
 import { invariant } from "@/utils/invariant";
+import { repl } from "@/utils/repl";
 import type { CellId } from "./cells/ids";
 import { store } from "./state/jotai";
 
@@ -84,3 +85,13 @@ export const kioskModeAtom = atom<boolean>(false);
  * When true, Edit View displays cells in 3D mode.
  */
 export const is3DModeAtom = atom<boolean>(true);
+
+/**
+ * Set the 3D mode state. Exposed via repl for testing.
+ */
+function setIs3DMode(value: boolean) {
+  store.set(is3DModeAtom, value);
+}
+
+// Allow setting 3D mode from the console for testing
+repl(setIs3DMode, "setIs3DMode");

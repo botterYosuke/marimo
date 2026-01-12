@@ -22,6 +22,7 @@ import { CellsRenderer } from "../components/editor/renderers/cells-renderer";
 import { Grid3DRenderer } from "../components/editor/renderers/grid-3d-renderer";
 import { Cell3DRenderer } from "../components/editor/renderers/cell-3d-renderer";
 import { GridLayoutPlugin } from "../components/editor/renderers/grid-layout/plugin";
+import type { LayoutType } from "../components/editor/renderers/types";
 import { PackageAlert } from "../components/editor/package-alert";
 import { StartupLogsAlert } from "../components/editor/alerts/startup-logs-alert";
 import { StdinBlockingAlert } from "../components/editor/stdin-blocking-alert";
@@ -44,7 +45,7 @@ import { RuntimeState } from "./kernel/RuntimeState";
 import { getSessionId } from "./kernel/session";
 import { useTogglePresenting } from "./layout/useTogglePresenting";
 import { useLayoutState, useLayoutActions } from "./layout/layout";
-import { is3DModeAtom, viewStateAtom } from "./mode";
+import { is3DModeAtom, viewStateAtom, type AppMode } from "./mode";
 import { useRequestClient } from "./network/requests";
 import { useFilename } from "./saving/filename";
 import { lastSavedNotebookAtom } from "./saving/state";
@@ -409,6 +410,22 @@ export const EditApp: React.FC<AppProps> = ({
   const runStaleCells = useRunStaleCells();
   const runAllCells = useRunAllCells();
   const togglePresenting = useTogglePresenting();
+  const { selectedLayout } = useLayoutState();
+  const { setLayoutView } = useLayoutActions();
+
+  // Get next layout based on current layout and mode
+  const getNextLayout = (currentLayout: LayoutType, mode: AppMode): LayoutType => {
+    if (mode === "edit") {
+      // editモードでは vertical と grid のみ
+      return currentLayout === "vertical" ? "grid" : "vertical";
+    } else {
+      // presentモードでは vertical, grid, slides の3つを循環
+      const layouts: LayoutType[] = ["vertical", "grid", "slides"];
+      const currentIndex = layouts.indexOf(currentLayout);
+      const nextIndex = (currentIndex + 1) % layouts.length;
+      return layouts[nextIndex];
+    }
+  };
 
   // HOTKEYS
   useHotkey("global.runStale", () => {
@@ -428,6 +445,10 @@ export const EditApp: React.FC<AppProps> = ({
   });
   useHotkey("global.expandAllSections", () => {
     expandAllCells();
+  });
+  useHotkey("global.switchLayout", () => {
+    const nextLayout = getNextLayout(selectedLayout, viewState.mode);
+    setLayoutView(nextLayout);
   });
 
   const editableCellsArray = (

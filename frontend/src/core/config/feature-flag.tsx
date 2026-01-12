@@ -2,7 +2,8 @@
 
 import { repl } from "@/utils/repl";
 import { getRequestClient } from "../network/requests";
-import { getResolvedMarimoConfig } from "./config";
+import { getResolvedMarimoConfig, userConfigAtom } from "./config";
+import { store } from "../state/jotai";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ExperimentalFeatures {
@@ -37,7 +38,17 @@ export function getFeatureFlag<T extends keyof ExperimentalFeatures>(
 }
 
 function setFeatureFlag(feature: keyof ExperimentalFeatures, value: boolean) {
-  // Send only the changed portion to avoid overwriting other config values
+  // Update userConfigAtom immediately for instant UI update
+  const currentConfig = store.get(userConfigAtom);
+  store.set(userConfigAtom, {
+    ...currentConfig,
+    experimental: {
+      ...currentConfig.experimental,
+      [feature]: value,
+    },
+  });
+  
+  // Also save to server (async, may fail in WASM mode)
   void getRequestClient().saveUserConfig({
     config: { experimental: { [feature]: value } },
   });
