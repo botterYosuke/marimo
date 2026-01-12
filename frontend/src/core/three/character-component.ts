@@ -28,6 +28,8 @@ export class CharacterComponent {
   private isLoading = false;
   private animations: THREE.AnimationClip[] = [];
   private currentAction?: THREE.AnimationAction;
+  private rotors: THREE.Object3D[] = [];
+  private static readonly ROTOR_ROTATION_SPEED = 15; // 回転速度（ラジアン/秒）
 
   /**
    * シーンにキャラクターモデルを読み込んで追加します
@@ -58,6 +60,9 @@ export class CharacterComponent {
 
         // モデルの構造を確認（デバッグ用）
         this.logModelStructure();
+
+        // ローターを検索
+        this.findRotors();
 
         // 初期位置・スケール・回転を適用
         this.applyTransform();
@@ -106,12 +111,14 @@ export class CharacterComponent {
    * アニメーションループ内で毎フレーム呼び出されます
    */
   update(): void {
-    if (!this.mixer) {
-      return;
+    const delta = this.clock.getDelta();
+
+    if (this.mixer) {
+      this.mixer.update(delta);
     }
 
-    const delta = this.clock.getDelta();
-    this.mixer.update(delta);
+    // ローターを回転させる
+    this.updateRotors(delta);
   }
 
   /**
@@ -131,6 +138,7 @@ export class CharacterComponent {
     }
 
     this.animations = [];
+    this.rotors = [];
 
     if (this.model) {
       scene.remove(this.model);
@@ -295,5 +303,57 @@ export class CharacterComponent {
         }
       }
     });
+  }
+
+  /**
+   * モデルからローターオブジェクトを検索して保存します
+   */
+  private findRotors(): void {
+    if (!this.model) {
+      return;
+    }
+
+    this.rotors = [];
+    const rotorNames = [
+      "rotor",
+      "Rotor",
+      "ROTOR",
+      "propeller",
+      "Propeller",
+      "PROPELLER",
+      "prop",
+      "Prop",
+    ];
+
+    this.model.traverse((child) => {
+      const name = child.name.toLowerCase();
+      if (rotorNames.some((rotorName) => name.includes(rotorName.toLowerCase()))) {
+        this.rotors.push(child);
+        console.log(`ローターを検出: ${child.name}`);
+      }
+    });
+
+    if (this.rotors.length === 0) {
+      console.warn("ローターが見つかりませんでした。モデル構造を確認してください。");
+    } else {
+      console.log(`${this.rotors.length}個のローターを検出しました`);
+    }
+  }
+
+  /**
+   * ローターを回転させます
+   *
+   * @param delta フレーム間の時間差（秒）
+   */
+  private updateRotors(delta: number): void {
+    if (this.rotors.length === 0) {
+      return;
+    }
+
+    const rotationSpeed = CharacterComponent.ROTOR_ROTATION_SPEED * delta;
+    for (const rotor of this.rotors) {
+      // Z軸（上方向）を中心に回転
+      rotor.rotation.z += rotationSpeed;
+    }
   }
 }
