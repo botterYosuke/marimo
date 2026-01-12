@@ -3,7 +3,7 @@ name: Deploy Web to Firebase
 on:
   push:
     branches:
-      - master
+      - game
   workflow_dispatch:
 
 jobs:
