@@ -146,6 +146,7 @@ export default defineConfig({
       ),
     },
     tsconfigPaths: true,
+    conditions: ["import", "module", "browser", "default"],
     dedupe: [
       "react",
       "react-dom",
