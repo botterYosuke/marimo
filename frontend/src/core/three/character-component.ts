@@ -56,6 +56,9 @@ export class CharacterComponent {
         this.isLoading = false;
         this.model = fbx;
 
+        // モデルの構造を確認（デバッグ用）
+        this.logModelStructure();
+
         // 初期位置・スケール・回転を適用
         this.applyTransform();
 
@@ -152,9 +155,6 @@ export class CharacterComponent {
 
     // スケールを調整（モデルのサイズに応じて）
     this.adjustScale();
-
-    // 回転は必要に応じて設定
-    // this.model.rotation.set(0, 0, 0);
   }
 
   /**
@@ -249,6 +249,29 @@ export class CharacterComponent {
       animationNames: this.animations.map((clip) => clip.name),
       position: this.model.position,
       scale: this.model.scale,
+      rotation: this.model.rotation,
+    });
+  }
+
+  /**
+   * モデルの構造をログ出力します（デバッグ用）
+   */
+  private logModelStructure(): void {
+    if (!this.model) {
+      return;
+    }
+
+    console.log("FBXモデルの構造:");
+    this.model.traverse((child) => {
+      if (child instanceof THREE.Mesh || child instanceof THREE.Group) {
+        console.log(`  - ${child.name || "無名"}:`, {
+          type: child.constructor.name,
+          position: child.position,
+          rotation: child.rotation,
+          scale: child.scale,
+          children: child.children.length,
+        });
+      }
     });
   }
 
