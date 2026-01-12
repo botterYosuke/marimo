@@ -8,7 +8,7 @@ import wasm from "vite-plugin-wasm";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -65,16 +65,22 @@ const reactDndResolvePlugin = (): Plugin => {
             paths: [nodeModulesPath, __dirname],
           });
           return resolved;
-        } catch (error) {
+        } catch {
           // 解決に失敗した場合は、node_modules内のパスを直接構築
           const packagePath = path.resolve(nodeModulesPath, id);
           if (existsSync(packagePath)) {
             // package.jsonからエントリーポイントを取得
             const packageJsonPath = path.resolve(packagePath, "package.json");
             if (existsSync(packageJsonPath)) {
-              const packageJson = require(packageJsonPath);
-              const entryPoint = packageJson.module || packageJson.main || "index.js";
-              return path.resolve(packagePath, entryPoint);
+              try {
+                const packageJsonContent = readFileSync(packageJsonPath, "utf-8");
+                const packageJson = JSON.parse(packageJsonContent);
+                const entryPoint = packageJson.module || packageJson.main || "index.js";
+                return path.resolve(packagePath, entryPoint);
+              } catch {
+                // package.jsonの読み込みに失敗した場合は、パッケージパスを返す
+                return packagePath;
+              }
             }
             return packagePath;
           }
