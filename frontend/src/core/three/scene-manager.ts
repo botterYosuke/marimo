@@ -5,6 +5,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import type { GridCSS2DService } from "./grid-css2d-service";
 import type { CellCSS2DService } from "./cell-css2d-service";
+import { CharacterComponent } from "./character-component";
 
 /**
  * SceneManager
@@ -25,6 +26,7 @@ export class SceneManager {
   private lastRenderTime = 0;
   private gridCSS2DService?: GridCSS2DService;
   private cellCSS2DService?: CellCSS2DService;
+  private characterComponent?: CharacterComponent;
 
   /**
    * Three.jsシーンを初期化します
@@ -128,6 +130,14 @@ export class SceneManager {
 
     window.addEventListener("resize", this.resizeHandler);
 
+    // キャラクターコンポーネントの初期化
+    // Grid → 3Dモデル → Cellの順序で配置するため、
+    // Gridコンテナの配置後に、CharacterComponentを初期化
+    if (this.scene) {
+      this.characterComponent = new CharacterComponent();
+      this.characterComponent.load(this.scene);
+    }
+
     // アニメーションループの開始
     this.startAnimationLoop();
   }
@@ -159,6 +169,13 @@ export class SceneManager {
         if (this.controls.enabled) {
           this.needsRender = true;
         }
+      }
+
+      // キャラクターコンポーネントのアニメーション更新
+      if (this.characterComponent) {
+        this.characterComponent.update();
+        // アニメーションが再生されている場合はレンダリングが必要
+        this.needsRender = true;
       }
 
       // レンダリング
@@ -283,6 +300,12 @@ export class SceneManager {
       }
       this.renderer.dispose();
       this.renderer = undefined;
+    }
+
+    // キャラクターコンポーネントのクリーンアップ
+    if (this.characterComponent && this.scene) {
+      this.characterComponent.dispose(this.scene);
+      this.characterComponent = undefined;
     }
 
     if (this.scene) {
