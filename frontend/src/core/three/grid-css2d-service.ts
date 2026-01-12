@@ -31,6 +31,9 @@ export class GridCSS2DService {
   private lastCameraPosition = new THREE.Vector3();
   private readonly CAMERA_MOVE_THRESHOLD = 0.1; // 最小移動量
 
+  // スタイル要素のID（重複チェック用）
+  private static readonly STYLE_ELEMENT_ID = "marimo-grid-3d-container-styles";
+
   /**
    * CSS2DRendererとコンテナを初期化します
    */
@@ -78,11 +81,65 @@ export class GridCSS2DService {
     container.style.height = "100%";
     container.style.pointerEvents = "none";
     container.style.zIndex = "1";
+    // 背景や装飾を非表示にする
+    container.style.background = "transparent";
+    container.style.border = "none";
+    container.style.boxShadow = "none";
+
+    // 子要素のスタイルを上書きするCSSを追加
+    this.injectContainerStyles();
 
     this.divContainer = container;
     this.applyContainerVisibility();
 
     return container;
+  }
+
+  /**
+   * 子要素のスタイルを上書きするCSSを注入します
+   */
+  private injectContainerStyles(): void {
+    // 既存のスタイル要素が存在する場合はスキップ
+    if (document.getElementById(GridCSS2DService.STYLE_ELEMENT_ID)) {
+      return;
+    }
+
+    const style = document.createElement("style");
+    style.id = GridCSS2DService.STYLE_ELEMENT_ID;
+    style.textContent = `
+      /* グリッドレイアウトの背景・ボーダー・シャドウを非表示 */
+      .grid-3d-container .react-grid-layout {
+        background: transparent !important;
+        background-image: none !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      /* borderedモード時の背景・ボーダー・シャドウを非表示 */
+      .grid-3d-container .bg-background.border-t.border-x {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      /* サイドバーの背景・ボーダー・シャドウを非表示 */
+      .grid-3d-container .flex-none.flex.flex-col.w-\\[300px\\] {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  /**
+   * 注入したスタイル要素を削除します
+   */
+  private removeContainerStyles(): void {
+    const styleElement = document.getElementById(GridCSS2DService.STYLE_ELEMENT_ID);
+    if (styleElement) {
+      styleElement.remove();
+    }
   }
 
   /**
@@ -392,6 +449,9 @@ export class GridCSS2DService {
       }
       this.css2DRenderer = undefined;
     }
+
+    // 注入したスタイル要素を削除
+    this.removeContainerStyles();
 
     // 基準距離をリセット
     this.baseDistance = null;
