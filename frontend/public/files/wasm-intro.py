@@ -3,7 +3,7 @@
 import marimo
 
 __generated_with = "0.18.4"
-app = marimo.App()
+app = marimo.App(layout_file="layouts/wasm-intro.grid.json")
 
 
 @app.cell

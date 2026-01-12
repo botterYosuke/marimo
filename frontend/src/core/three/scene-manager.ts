@@ -2,6 +2,7 @@
 
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import type { GridCSS2DService } from "./grid-css2d-service";
 import type { CellCSS2DService } from "./cell-css2d-service";
 import { CharacterComponent } from "./character-component";
@@ -13,6 +14,7 @@ import { CharacterComponent } from "./character-component";
  */
 export class SceneManager {
   private renderer?: THREE.WebGLRenderer;
+  private css2DRenderer?: CSS2DRenderer;
   private scene?: THREE.Scene;
   private camera?: THREE.PerspectiveCamera;
   private controls?: OrbitControls;
@@ -58,6 +60,19 @@ export class SceneManager {
     this.camera.lookAt(0, 0, 0); // カメラを原点（XZ平面）に向ける
     this.camera.up.set(0, 0, -1); // Z軸負方向を上として設定
 
+    // CSS2DRendererの作成（WebGLRendererの前に作成）
+    this.css2DRenderer = new CSS2DRenderer();
+    // zOrder関数を無効化（z-indexの自動設定を停止）
+    this.css2DRenderer.sortObjects = false;
+    this.css2DRenderer.setSize(width, height);
+    const css2DRendererElement = this.css2DRenderer.domElement;
+    css2DRendererElement.style.position = "absolute";
+    css2DRendererElement.style.top = "0";
+    css2DRendererElement.style.left = "0";
+    css2DRendererElement.style.pointerEvents = "none";
+    // z-indexは個々のCSS2DObjectのelementで制御（zOrder関数は無効化済み）
+    // Grid CSS2DObject: z-index: 5, Cell CSS2DObject: z-index: 20
+
     // レンダラーの作成
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(window.devicePixelRatio || 1);
@@ -65,8 +80,11 @@ export class SceneManager {
     this.renderer.domElement.style.position = "absolute";
     this.renderer.domElement.style.top = "0";
     this.renderer.domElement.style.left = "0";
-    // z-index: 10 - 3D物体をgrid（z-index: 5）とcell（z-index: 15）の間に配置するため
+    // z-index: 10 - 3D物体をgrid（z-index: 5）とcell（z-index: 20）の間に配置するため
     this.renderer.domElement.style.zIndex = "10";
+    
+    // CSS2DRendererのDOM要素をWebGL Canvasの前に配置
+    hostElement.appendChild(this.css2DRenderer.domElement);
     hostElement.appendChild(this.renderer.domElement);
 
     // OrbitControlsの作成
@@ -105,6 +123,9 @@ export class SceneManager {
       this.camera.aspect = clientWidth / clientHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(clientWidth, clientHeight);
+      if (this.css2DRenderer) {
+        this.css2DRenderer.setSize(clientWidth, clientHeight);
+      }
     };
 
     window.addEventListener("resize", this.resizeHandler);
@@ -159,16 +180,14 @@ export class SceneManager {
 
       // レンダリング
       if (this.needsRender) {
-        this.renderer.render(this.scene, this.camera);
-
         // CSS2Dレンダリング（1回だけ実行）
-        // 注意: CSS2DRenderer.render()はシーン内の全CSS2DObjectをレンダリングするため、
-        // どちらか一方のCSS2DRendererでレンダリングすれば十分
-        const css2DRenderer = this.cellCSS2DService?.getRenderer() || 
-                              this.gridCSS2DService?.getRenderer();
-        if (css2DRenderer && this.scene && this.camera) {
-          css2DRenderer.render(this.scene, this.camera);
+        // 1つのCSS2DRendererでGridとCellの両方のCSS2DObjectをレンダリング
+        if (this.css2DRenderer && this.scene && this.camera) {
+          this.css2DRenderer.render(this.scene, this.camera);
         }
+
+        // WebGLレンダリング（3Dモデル、z-index: 10）
+        this.renderer.render(this.scene, this.camera);
 
         // 各サービスのスケール更新（レンダリング後）
         // CSS2DRenderer.render()が全CSS2DObjectのtransformを再計算・上書きするため、
@@ -216,6 +235,13 @@ export class SceneManager {
   }
 
   /**
+   * CSS2DRendererを取得します
+   */
+  getCSS2DRenderer(): CSS2DRenderer | undefined {
+    return this.css2DRenderer;
+  }
+
+  /**
    * カメラの視点を設定します
    * 
    * @param position カメラの位置
@@ -256,6 +282,14 @@ export class SceneManager {
     if (this.controls) {
       this.controls.dispose();
       this.controls = undefined;
+    }
+
+    if (this.css2DRenderer) {
+      const element = this.css2DRenderer.domElement;
+      if (element?.parentElement) {
+        element.parentElement.removeChild(element);
+      }
+      this.css2DRenderer = undefined;
     }
 
     if (this.renderer) {

@@ -1,6 +1,6 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { CSS2DRenderer, CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import { CSS2DObject, type CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import * as THREE from "three";
 
 /**
@@ -14,7 +14,6 @@ import * as THREE from "three";
  * - レンダリングループの管理
  */
 export class GridCSS2DService {
-  private css2DRenderer?: CSS2DRenderer;
   private css2DObject?: CSS2DObject;
   private isContainerVisible = true;
   private divContainer?: HTMLDivElement;
@@ -35,30 +34,15 @@ export class GridCSS2DService {
   private static readonly STYLE_ELEMENT_ID = "marimo-grid-3d-container-styles";
 
   /**
-   * CSS2DRendererとコンテナを初期化します
+   * コンテナを初期化します
+   * CSS2DRendererはSceneManagerで管理されるため、参照のみを受け取る
    */
-  initializeRenderer(hostElement: HTMLElement, width: number, height: number): CSS2DRenderer {
+  initializeRenderer(css2DRenderer: CSS2DRenderer): void {
     this.dispose();
-
-    this.css2DRenderer = new CSS2DRenderer();
-    this.css2DRenderer.setSize(width, height);
-
-    // CSS2DRendererのスタイル設定
-    const rendererElement = this.css2DRenderer.domElement;
-    rendererElement.style.position = "absolute";
-    rendererElement.style.top = "0";
-    rendererElement.style.left = "0";
-    rendererElement.style.pointerEvents = "none";
-    // z-index: 5 - gridを最下層に配置（3D物体をgridとcellの間に配置するため）
-    rendererElement.style.zIndex = "5";
-
-    hostElement.appendChild(rendererElement);
 
     // コンテナを作成
     this.createContainer();
     this.applyContainerVisibility();
-
-    return this.css2DRenderer;
   }
 
   /**
@@ -128,6 +112,16 @@ export class GridCSS2DService {
         border: none !important;
         box-shadow: none !important;
       }
+
+      /* スクロールバーを非表示（スクロール機能は維持） */
+      .grid-3d-container * {
+        scrollbar-width: none !important; /* Firefox */
+        -ms-overflow-style: none !important; /* IE and Edge */
+      }
+
+      .grid-3d-container *::-webkit-scrollbar {
+        display: none !important; /* Chrome, Safari, Opera */
+      }
     `;
     document.head.appendChild(style);
   }
@@ -180,6 +174,9 @@ export class GridCSS2DService {
     this.css2DObject = new CSS2DObject(this.divContainer);
     this.css2DObject.position.copy(position);
     this.css2DObject.scale.set(1, 1, 1);
+    
+    // z-indexを設定（Grid用）
+    this.css2DObject.element.style.zIndex = "5";
 
     // シーンに追加
     scene.add(this.css2DObject);
@@ -281,37 +278,6 @@ export class GridCSS2DService {
     this.lastCameraPosition.copy(camera.position);
   }
 
-  /**
-   * CSS2Dシーンをレンダリングします
-   */
-  render(
-    scene: THREE.Scene,
-    camera: THREE.PerspectiveCamera,
-  ): void {
-    if (!this.css2DRenderer) {
-      return;
-    }
-
-    // カメラが移動した場合も再レンダリング
-    const cameraDistance = camera.position.distanceTo(this.lastCameraPosition);
-    const cameraMoved = cameraDistance > this.CAMERA_MOVE_THRESHOLD;
-
-    // レンダリング条件：変更がある、操作中、またはカメラが移動した場合のみ
-    if (!this.needsRender && !this.isInteracting && !cameraMoved) {
-      return; // スキップ
-    }
-
-    // CSS2DRendererのrender()を先に実行
-    // これがtransformを設定する
-    this.css2DRenderer.render(scene, camera);
-
-    // CSS2DRendererのrender()の後にscaleを適用
-    // CSS2DRenderer.render()がtransformをリセットするため、scale()を再適用する必要がある
-    this.updateContainerScale(camera);
-
-    this.lastCameraPosition.copy(camera.position);
-    this.needsRender = false;
-  }
 
   /**
    * レンダリングが必要であることをマークします
@@ -330,21 +296,6 @@ export class GridCSS2DService {
     }
   }
 
-  /**
-   * レンダラーのサイズを変更します
-   */
-  setSize(width: number, height: number): void {
-    if (this.css2DRenderer) {
-      this.css2DRenderer.setSize(width, height);
-    }
-  }
-
-  /**
-   * CSS2DRendererを取得します
-   */
-  getRenderer(): CSS2DRenderer | undefined {
-    return this.css2DRenderer;
-  }
 
   /**
    * 現在のスケール値を取得します
@@ -441,14 +392,6 @@ export class GridCSS2DService {
       this.divContainer = undefined;
     }
 
-    // CSS2DRendererのDOMを削除
-    if (this.css2DRenderer) {
-      const element = this.css2DRenderer.domElement;
-      if (element?.parentElement) {
-        element.parentElement.removeChild(element);
-      }
-      this.css2DRenderer = undefined;
-    }
 
     // 注入したスタイル要素を削除
     this.removeContainerStyles();
@@ -466,7 +409,7 @@ export class GridCSS2DService {
    * CSS2Dレンダリングが初期化されているかチェックします
    */
   isInitialized(): boolean {
-    return !!this.css2DRenderer;
+    return !!this.divContainer;
   }
 
 }

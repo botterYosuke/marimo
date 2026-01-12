@@ -156,10 +156,11 @@ export const EditApp: React.FC<AppProps> = ({
     // 1. SceneManagerのインスタンス作成
     // 2. GridCSS2DServiceのインスタンス作成
     // 3. CellCSS2DServiceのインスタンス作成
-    // 4. SceneManager.initialize()を呼び出し（サービス参照を渡す）
-    // 5. GridCSS2DService.initializeRenderer()を呼び出し（エラーハンドリング追加）
-    // 6. CellCSS2DService.initializeRenderer()を呼び出し（エラーハンドリング追加）
-    // 7. シーンにコンテナをアタッチ
+    // 4. SceneManager.initialize()を呼び出し（サービス参照を渡す、CSS2DRendererを作成）
+    // 5. SceneManagerからCSS2DRendererを取得
+    // 6. GridCSS2DService.initializeRenderer()を呼び出し（CSS2DRendererを渡す）
+    // 7. CellCSS2DService.initializeRenderer()を呼び出し（同じCSS2DRendererを渡す）
+    // 8. シーンにコンテナをアタッチ
     // 注意: CSS2DレンダリングはSceneManagerのアニメーションループ内で直接実行される
 
     if (!sceneManagerRef.current) {
@@ -177,18 +178,28 @@ export const EditApp: React.FC<AppProps> = ({
     const css2DService = css2DServiceRef.current;
     const cellCSS2DService = cellCSS2DServiceRef.current;
 
-    // SceneManager.initialize()を呼び出し（サービス参照を渡す）
+    // SceneManager.initialize()を呼び出し（サービス参照を渡す、CSS2DRendererを作成）
     sceneManager.initialize(
       container,
       css2DService,
       cellCSS2DService,
     );
-    const width = container.clientWidth;
-    const height = container.clientHeight;
 
-    // GridCSS2DService.initializeRenderer()を呼び出し（エラーハンドリング追加）
+    // SceneManagerからCSS2DRendererを取得
+    const css2DRenderer = sceneManager.getCSS2DRenderer();
+    if (!css2DRenderer) {
+      console.error("Failed to get CSS2DRenderer from SceneManager");
+      if (sceneManagerRef.current) {
+        sceneManagerRef.current.dispose();
+        sceneManagerRef.current = null;
+      }
+      setIs3DInitialized(false);
+      return;
+    }
+
+    // GridCSS2DService.initializeRenderer()を呼び出し（CSS2DRendererを渡す）
     try {
-      css2DService.initializeRenderer(container, width, height);
+      css2DService.initializeRenderer(css2DRenderer);
     } catch (error) {
       console.error("Failed to initialize GridCSS2DService:", error);
       // エラー時はロールバック（既存のインスタンスをクリーンアップ）
@@ -204,10 +215,9 @@ export const EditApp: React.FC<AppProps> = ({
       return;
     }
 
-    // CellCSS2DService.initializeRenderer()を呼び出し（エラーハンドリング追加）
+    // CellCSS2DService.initializeRenderer()を呼び出し（同じCSS2DRendererを渡す）
     try {
-      const cellCSS2DService = cellCSS2DServiceRef.current;
-      cellCSS2DService.initializeRenderer(container, width, height);
+      cellCSS2DService.initializeRenderer(css2DRenderer);
     } catch (error) {
       console.error("Failed to initialize CellCSS2DService:", error);
       // エラー時はロールバック（CellCSS2DService、GridCSS2DService、SceneManagerをクリーンアップ）
@@ -262,14 +272,7 @@ export const EditApp: React.FC<AppProps> = ({
       if (!currentContainer || !currentSceneManager || !currentCss2DService || !currentCellCSS2DService) {
         return;
       }
-      const width = currentContainer.clientWidth || window.innerWidth;
-      const height = currentContainer.clientHeight || window.innerHeight;
-      
-      // SceneManagerが内部でカメラとWebGLRendererのリサイズを処理（既存のリサイズハンドラー）
-      // ここでCSS2DRendererのリサイズを追加
-      currentCss2DService.setSize(width, height);
-      currentCellCSS2DService.setSize(width, height);
-      
+      // SceneManagerが内部でカメラ、WebGLRenderer、CSS2DRendererのリサイズを処理
       // シーンを再レンダリング
       const scene = currentSceneManager.getScene();
       if (scene) {

@@ -1,20 +1,19 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { CSS2DRenderer, CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import { CSS2DObject, type CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import * as THREE from "three";
 
 /**
  * CellCSS2DService
  *
  * CSS2DRendererの初期化と管理を担当（セルコンテナ専用）
- * - CSS2DRendererの初期化（z-index: 15）
+ * - CSS2DRendererの初期化（z-index: 20）
  * - セルコンテナDOM要素の作成と管理
  * - セルコンテナ全体をCSS2DObjectとして3D空間に配置
  * - カメラ距離に基づくスケール調整
  * - レンダリングループの管理
  */
 export class CellCSS2DService {
-  private css2DRenderer?: CSS2DRenderer;
   private css2DObject?: CSS2DObject;
   private isContainerVisible = true;
   private cellContainer?: HTMLDivElement;
@@ -33,30 +32,15 @@ export class CellCSS2DService {
   private readonly CAMERA_MOVE_THRESHOLD = 0.1; // 最小移動量
 
   /**
-   * CSS2DRendererとセルコンテナを初期化します
+   * セルコンテナを初期化します
+   * CSS2DRendererはSceneManagerで管理されるため、参照のみを受け取る
    */
-  initializeRenderer(hostElement: HTMLElement, width: number, height: number): CSS2DRenderer {
+  initializeRenderer(css2DRenderer: CSS2DRenderer): void {
     this.dispose();
-
-    this.css2DRenderer = new CSS2DRenderer();
-    this.css2DRenderer.setSize(width, height);
-
-    // CSS2DRendererのスタイル設定
-    const rendererElement = this.css2DRenderer.domElement;
-    rendererElement.style.position = "absolute";
-    rendererElement.style.top = "0";
-    rendererElement.style.left = "0";
-    rendererElement.style.pointerEvents = "none";
-    // z-index: 15 - セルを最上層に配置（3D物体をgridとcellの間に配置するため）
-    rendererElement.style.zIndex = "15";
-
-    hostElement.appendChild(rendererElement);
 
     // セルコンテナを作成
     this.createCellContainer();
     this.applyContainerVisibility();
-
-    return this.css2DRenderer;
   }
 
   /**
@@ -78,7 +62,7 @@ export class CellCSS2DService {
     container.style.width = "0";
     container.style.height = "0";
     container.style.pointerEvents = "none";
-    container.style.zIndex = "100";
+    container.style.zIndex = "20";
 
     // 子要素のpointer-eventsを有効化するためのスタイルを追加
     this.styleElement = document.createElement("style");
@@ -135,6 +119,11 @@ export class CellCSS2DService {
     this.css2DObject = new CSS2DObject(this.cellContainer);
     this.css2DObject.position.copy(position);
     this.css2DObject.scale.set(1, 1, 1);
+    
+    // z-indexを設定（Cell用）
+    this.css2DObject.element.style.zIndex = "20";
+    // pointer-eventsを有効化（Cellウィンドウのドラッグやクリックを可能にする）
+    this.css2DObject.element.style.pointerEvents = "auto";
 
     // シーンに追加
     scene.add(this.css2DObject);
@@ -214,6 +203,8 @@ export class CellCSS2DService {
     // DOM要素のtransformスタイルを更新
     container.style.transform = newTransform;
     container.style.transformOrigin = "center center";
+    // z-indexを再設定（zOrder関数は無効化済みだが、念のため設定）
+    container.style.zIndex = "20";
   }
 
   /**
@@ -232,41 +223,17 @@ export class CellCSS2DService {
    */
   forceUpdateCellContainerScale(camera: THREE.PerspectiveCamera): void {
     this.updateCellContainerScale(camera);
+    // z-indexを再設定（zOrder関数は無効化済みだが、念のため設定）
+    if (this.cellContainer) {
+      this.cellContainer.style.zIndex = "20";
+    }
+    if (this.css2DObject?.element) {
+      this.css2DObject.element.style.zIndex = "20";
+    }
     // lastCameraPositionを更新して、次のフレームでのカメラ移動検出を正確にする
     this.lastCameraPosition.copy(camera.position);
   }
 
-  /**
-   * CSS2Dシーンをレンダリングします
-   */
-  render(
-    scene: THREE.Scene,
-    camera: THREE.PerspectiveCamera,
-  ): void {
-    if (!this.css2DRenderer) {
-      return;
-    }
-
-    // カメラが移動した場合も再レンダリング
-    const cameraMoved =
-      camera.position.distanceTo(this.lastCameraPosition) >
-      this.CAMERA_MOVE_THRESHOLD;
-
-    // レンダリング条件：変更がある、操作中、またはカメラが移動した場合のみ
-    if (!this.needsRender && !this.isInteracting && !cameraMoved) {
-      return; // スキップ
-    }
-
-    // CSS2DRendererのrender()を先に実行
-    // これがtransformを設定する
-    this.css2DRenderer.render(scene, camera);
-
-    // CSS2DRendererのrender()の後にscaleを適用
-    this.updateCellContainerScale(camera);
-
-    this.lastCameraPosition.copy(camera.position);
-    this.needsRender = false;
-  }
 
   /**
    * レンダリングが必要であることをマークします
@@ -285,21 +252,6 @@ export class CellCSS2DService {
     }
   }
 
-  /**
-   * レンダラーのサイズを変更します
-   */
-  setSize(width: number, height: number): void {
-    if (this.css2DRenderer) {
-      this.css2DRenderer.setSize(width, height);
-    }
-  }
-
-  /**
-   * CSS2DRendererを取得します
-   */
-  getRenderer(): CSS2DRenderer | undefined {
-    return this.css2DRenderer;
-  }
 
   /**
    * セルコンテナの現在のスケール値を取得します
@@ -389,14 +341,6 @@ export class CellCSS2DService {
       this.styleElement = undefined;
     }
 
-    // CSS2DRendererのDOMを削除
-    if (this.css2DRenderer) {
-      const element = this.css2DRenderer.domElement;
-      if (element?.parentElement) {
-        element.parentElement.removeChild(element);
-      }
-      this.css2DRenderer = undefined;
-    }
 
     // 基準距離をリセット
     this.baseDistance = null;
@@ -411,7 +355,7 @@ export class CellCSS2DService {
    * CSS2Dレンダリングが初期化されているかチェックします
    */
   isInitialized(): boolean {
-    return !!this.css2DRenderer;
+    return !!this.cellContainer;
   }
 
 }
