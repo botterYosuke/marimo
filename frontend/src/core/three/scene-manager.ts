@@ -161,27 +161,23 @@ export class SceneManager {
       if (this.needsRender) {
         this.renderer.render(this.scene, this.camera);
 
-        // CSS2Dレンダリングを直接呼び出し
-        // 注意: 各サービスのrender()は内部で早期リターンする可能性がある
-        // （needsRender、isInteracting、cameraMovedによる判定）
-        if (this.gridCSS2DService) {
-          this.gridCSS2DService.render(this.scene, this.camera);
-        }
-        if (this.cellCSS2DService) {
-          this.cellCSS2DService.render(this.scene, this.camera);
+        // CSS2Dレンダリング（1回だけ実行）
+        // 注意: CSS2DRenderer.render()はシーン内の全CSS2DObjectをレンダリングするため、
+        // どちらか一方のCSS2DRendererでレンダリングすれば十分
+        const css2DRenderer = this.cellCSS2DService?.getRenderer() || 
+                              this.gridCSS2DService?.getRenderer();
+        if (css2DRenderer && this.scene && this.camera) {
+          css2DRenderer.render(this.scene, this.camera);
         }
 
-        // Grid containerのscaleを再適用
-        // 重要: CellCSS2DService.render()内のCSS2DRenderer.render()が
-        // シーン内の全CSS2DObjectのtransformを再計算・上書きするため、
-        // Grid containerに適用したscale()が消える可能性がある
-        // そのため、CellCSS2DService.render()の後に必ずforceUpdateContainerScale()を呼び出し、
-        // scale()を再適用する
-        // 注意: このメソッドはGridCSS2DService.render()の早期リターンに関係なく
-        // 実行されるため、updateContainerScale()が2回実行される可能性があるが、
-        // これは意図的な動作（確実性を優先）
+        // 各サービスのスケール更新（レンダリング後）
+        // CSS2DRenderer.render()が全CSS2DObjectのtransformを再計算・上書きするため、
+        // 各コンテナのscale()を再適用する必要がある
         if (this.gridCSS2DService) {
           this.gridCSS2DService.forceUpdateContainerScale(this.camera);
+        }
+        if (this.cellCSS2DService) {
+          this.cellCSS2DService.forceUpdateCellContainerScale(this.camera);
         }
 
         this.needsRender = false;

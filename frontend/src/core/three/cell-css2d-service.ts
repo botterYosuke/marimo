@@ -227,6 +227,16 @@ export class CellCSS2DService {
   }
 
   /**
+   * 外部からセルコンテナのスケールを強制的に更新します
+   * CSS2DRenderer.render()がCell containerのtransformを上書きした後に呼び出されます
+   */
+  forceUpdateCellContainerScale(camera: THREE.PerspectiveCamera): void {
+    this.updateCellContainerScale(camera);
+    // lastCameraPositionを更新して、次のフレームでのカメラ移動検出を正確にする
+    this.lastCameraPosition.copy(camera.position);
+  }
+
+  /**
    * CSS2Dシーンをレンダリングします
    */
   render(
