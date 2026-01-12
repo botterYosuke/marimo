@@ -211,7 +211,7 @@ export class GridCSS2DService {
 
     // 基準距離が設定されていない場合は、現在の距離を基準距離として使用
     if (this.baseDistance === null) {
-        this.baseDistance = this.DEFAULT_BASE_DISTANCE;
+        this.baseDistance = this.DEFAULT_BASE_DISTANCE * 2;
     }
 
     // スケール = 基準距離 / 現在の距離

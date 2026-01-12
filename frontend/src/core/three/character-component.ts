@@ -1,26 +1,26 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import * as THREE from "three";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 /**
  * CharacterComponent
  *
  * 【役割】
- * - Three.jsシーンにFBXキャラクターモデルを読み込み、配置する
+ * - Three.jsシーンにGLTFキャラクターモデルを読み込み、配置する
  * - キャラクターのアニメーションを更新し、表示状態を管理する
  *
  * 【責務の境界】
- * - モデルリソース（FBX）のロードとアタッチ
+ * - モデルリソース（GLTF）のロードとアタッチ
  * - アニメーションミキサーの更新と破棄
  * - Three.jsシーンへの追加・削除のみを担当
  */
 export class CharacterComponent {
-  private static readonly MODEL_URL = "drone_fab_fbx_v1.Fbx";
-  private static readonly MODEL_BASE_PATH = "/drone_fab_v1_fbx/";
+  private static readonly MODEL_URL = "Drone.gltf";
+  private static readonly MODEL_BASE_PATH = "/sci-fi-drone/source/";
   private static readonly DEFAULT_POSITION = new THREE.Vector3(0, 300, 0);
   private static readonly DEFAULT_SCALE = new THREE.Vector3(1, 1, 1);
-  private static readonly TARGET_SIZE = 100; // 3D空間での目標サイズ（単位）
+  private static readonly TARGET_SIZE = 300; // 3D空間での目標サイズ（単位）
 
   private mixer?: THREE.AnimationMixer;
   private model?: THREE.Group;
@@ -42,21 +42,22 @@ export class CharacterComponent {
     }
 
     this.isLoading = true;
-    const loader = new FBXLoader();
+    const loader = new GLTFLoader();
     
-    // テクスチャパスの解決
-    loader.setPath(CharacterComponent.MODEL_BASE_PATH);
+    // テクスチャパスの解決（テクスチャは/sci-fi-drone/textures/にある）
+    loader.setPath("/sci-fi-drone/");
 
     // モデルファイルのパス（setPathを使用するため相対パス）
-    const modelPath = CharacterComponent.MODEL_URL;
+    const modelPath = `source/${CharacterComponent.MODEL_URL}`;
 
-    console.log(`FBXモデルの読み込みを開始: ${CharacterComponent.MODEL_BASE_PATH}${modelPath}`);
+    console.log(`GLTFモデルの読み込みを開始: ${CharacterComponent.MODEL_BASE_PATH}${CharacterComponent.MODEL_URL}`);
 
     loader.load(
       modelPath,
-      (fbx) => {
+      (gltf) => {
         this.isLoading = false;
-        this.model = fbx;
+        // GLTFローダーの結果からsceneを取得
+        this.model = gltf.scene;
 
         // モデルの構造を確認（デバッグ用）
         this.logModelStructure();
@@ -71,8 +72,8 @@ export class CharacterComponent {
         scene.add(this.model);
 
         // アニメーションの設定
-        if (fbx.animations && fbx.animations.length > 0) {
-          this.animations = fbx.animations;
+        if (gltf.animations && gltf.animations.length > 0) {
+          this.animations = gltf.animations;
           this.mixer = new THREE.AnimationMixer(this.model);
 
           // 初期アニメーションを再生（Idle系を優先、なければ先頭を再生）
@@ -86,7 +87,7 @@ export class CharacterComponent {
         if (progress.lengthComputable) {
           const percentComplete = (progress.loaded / progress.total) * 100;
           console.log(
-            `FBXモデルの読み込み進捗: ${percentComplete.toFixed(1)}%`,
+            `GLTFモデルの読み込み進捗: ${percentComplete.toFixed(1)}%`,
           );
         }
       },
@@ -95,11 +96,11 @@ export class CharacterComponent {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
-        console.error("FBXキャラクターモデルのロードに失敗しました:", error);
+        console.error("GLTFキャラクターモデルのロードに失敗しました:", error);
         console.error("エラー詳細:", {
           message: errorMessage,
           stack: errorStack,
-          modelPath: `${CharacterComponent.MODEL_BASE_PATH}${modelPath}`,
+          modelPath: `${CharacterComponent.MODEL_BASE_PATH}${CharacterComponent.MODEL_URL}`,
         });
         // エラー時のフォールバック処理は必要に応じて実装
       },
@@ -252,7 +253,7 @@ export class CharacterComponent {
       return;
     }
 
-    console.log("FBXキャラクターモデルが読み込まれました:", {
+    console.log("GLTFキャラクターモデルが読み込まれました:", {
       animations: this.animations.length,
       animationNames: this.animations.map((clip) => clip.name),
       position: this.model.position,
@@ -269,7 +270,7 @@ export class CharacterComponent {
       return;
     }
 
-    console.log("FBXモデルの構造:");
+    console.log("GLTFモデルの構造:");
     this.model.traverse((child) => {
       if (child instanceof THREE.Mesh || child instanceof THREE.Group) {
         console.log(`  - ${child.name || "無名"}:`, {
