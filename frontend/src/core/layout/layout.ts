@@ -27,39 +27,40 @@ export function initialLayoutState(): LayoutState {
   };
 }
 
-const { valueAtom: layoutStateAtom, useActions } = createReducerAndAtoms(
-  initialLayoutState,
-  {
-    setLayoutView: (state, payload: LayoutType) => {
-      return {
-        ...state,
-        selectedLayout: payload,
-      };
-    },
-    setLayoutData: (
-      state,
-      payload: { layoutView: LayoutType; data: LayoutData },
-    ) => {
-      return {
-        ...state,
-        selectedLayout: payload.layoutView,
-        layoutData: {
-          ...state.layoutData,
-          [payload.layoutView]: payload.data,
-        },
-      };
-    },
-    setCurrentLayoutData: (state, payload: LayoutData) => {
-      return {
-        ...state,
-        layoutData: {
-          ...state.layoutData,
-          [state.selectedLayout]: payload,
-        },
-      };
-    },
+const {
+  valueAtom: layoutStateAtom,
+  useActions,
+  reducer: layoutReducer,
+} = createReducerAndAtoms(initialLayoutState, {
+  setLayoutView: (state, payload: LayoutType) => {
+    return {
+      ...state,
+      selectedLayout: payload,
+    };
   },
-);
+  setLayoutData: (
+    state,
+    payload: { layoutView: LayoutType; data: LayoutData },
+  ) => {
+    return {
+      ...state,
+      selectedLayout: payload.layoutView,
+      layoutData: {
+        ...state.layoutData,
+        [payload.layoutView]: payload.data,
+      },
+    };
+  },
+  setCurrentLayoutData: (state, payload: LayoutData) => {
+    return {
+      ...state,
+      layoutData: {
+        ...state.layoutData,
+        [state.selectedLayout]: payload,
+      },
+    };
+  },
+});
 
 export { layoutStateAtom };
 
@@ -73,13 +74,15 @@ export const useLayoutActions = () => {
 
 /**
  * Set layout view programmatically. Exposed via repl for testing.
+ * Uses the reducer to ensure consistency with useLayoutActions.
  */
 function setLayoutViewForTesting(layout: LayoutType) {
   const currentState = store.get(layoutStateAtom);
-  store.set(layoutStateAtom, {
-    ...currentState,
-    selectedLayout: layout,
+  const newState = layoutReducer(currentState, {
+    type: "setLayoutView",
+    payload: layout,
   });
+  store.set(layoutStateAtom, newState);
 }
 
 // Allow setting layout view from the console for testing

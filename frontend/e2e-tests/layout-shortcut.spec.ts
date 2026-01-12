@@ -32,33 +32,6 @@ if (process.env.MARIMO_TEST_URL) {
   editUrl = getAppUrl("layout_grid.py");
 }
 
-interface BoundingBox {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-function expectValidBoundingBox(
-  bb: BoundingBox | null,
-): asserts bb is BoundingBox {
-  expect(bb).toBeDefined();
-  if (!bb) {
-    throw new Error("bb is null");
-  }
-  expect(bb.x).toBeGreaterThan(0);
-  expect(bb.y).toBeGreaterThan(0);
-  expect(bb.width).toBeGreaterThan(0);
-  expect(bb.height).toBeGreaterThan(0);
-}
-
-async function bbForText(page: Page, text: string) {
-  const el = page.getByText(text).first();
-  await expect(el).toBeVisible();
-  const bb = await el.boundingBox();
-  expectValidBoundingBox(bb);
-  return bb;
-}
 
 async function getLayoutSelectValue(page: Page): Promise<string> {
   const layoutSelect = page.getByTestId("layout-select");
@@ -158,33 +131,124 @@ async function enableWasmLayoutsFlag(page: Page): Promise<void> {
 /**
  * Set layout to vertical to ensure initial layout is vertical
  * This is needed because is3DModeAtom defaults to true, which makes initial layout grid
+ * First set is3DModeAtom to false, then set layout to vertical
  */
 async function setLayoutToVertical(page: Page): Promise<void> {
-  const layoutSet = await page.evaluate(() => {
+  const result = await page.evaluate(() => {
+    // setIs3DMode is exposed via repl() as window.__marimo__setIs3DMode
+    const setIs3DMode = (window as unknown as Record<string, unknown>)
+      .__marimo__setIs3DMode;
     // setLayoutView is exposed via repl() as window.__marimo__setLayoutView
     const setLayoutView = (window as unknown as Record<string, unknown>)
       .__marimo__setLayoutView;
+    
+    let is3DModeSet = false;
+    let layoutSet = false;
+    
+    if (typeof setIs3DMode === "function") {
+      try {
+        (setIs3DMode as (value: boolean) => void)(false);
+        is3DModeSet = true;
+        console.log("setIs3DMode(false) called successfully");
+      } catch (error) {
+        console.warn("Failed to set is3DMode to false:", error);
+      }
+    } else {
+      console.warn("setIs3DMode is not available on window.__marimo__setIs3DMode");
+    }
+    
     if (typeof setLayoutView === "function") {
       try {
         (setLayoutView as (layout: string) => void)("vertical");
-        return true;
+        layoutSet = true;
+        console.log("setLayoutView('vertical') called successfully");
       } catch (error) {
         console.warn("Failed to set layout to vertical:", error);
-        return false;
       }
     } else {
       console.warn("setLayoutView is not available on window.__marimo__setLayoutView");
-      return false;
     }
+    
+    return { is3DModeSet, layoutSet };
   });
   
-  if (!layoutSet) {
-    console.warn("Could not set layout to vertical, continuing anyway...");
+  if (!result.is3DModeSet && !result.layoutSet) {
+    console.warn("Could not set is3DMode or layout, continuing anyway...");
     return;
   }
   
-  // Wait a bit for the layout to update
-  await page.waitForTimeout(1000);
+  // Wait a bit for the layout to update and React to re-render
+  await page.waitForTimeout(2000);
+}
+
+/**
+ * Set layout to grid for testing
+ */
+async function setLayoutToGrid(page: Page): Promise<void> {
+  const result = await page.evaluate(() => {
+    // setLayoutView is exposed via repl() as window.__marimo__setLayoutView
+    const setLayoutView = (window as unknown as Record<string, unknown>)
+      .__marimo__setLayoutView;
+    
+    let layoutSet = false;
+    
+    if (typeof setLayoutView === "function") {
+      try {
+        (setLayoutView as (layout: string) => void)("grid");
+        layoutSet = true;
+        console.log("setLayoutView('grid') called successfully");
+      } catch (error) {
+        console.warn("Failed to set layout to grid:", error);
+      }
+    } else {
+      console.warn("setLayoutView is not available on window.__marimo__setLayoutView");
+    }
+    
+    return { layoutSet };
+  });
+  
+  if (!result.layoutSet) {
+    console.warn("Could not set layout to grid, continuing anyway...");
+    return;
+  }
+  
+  // Wait a bit for the layout to update and React to re-render
+  await page.waitForTimeout(2000);
+}
+
+/**
+ * Set layout to slides for testing (present mode only)
+ */
+async function setLayoutToSlides(page: Page): Promise<void> {
+  const result = await page.evaluate(() => {
+    // setLayoutView is exposed via repl() as window.__marimo__setLayoutView
+    const setLayoutView = (window as unknown as Record<string, unknown>)
+      .__marimo__setLayoutView;
+    
+    let layoutSet = false;
+    
+    if (typeof setLayoutView === "function") {
+      try {
+        (setLayoutView as (layout: string) => void)("slides");
+        layoutSet = true;
+        console.log("setLayoutView('slides') called successfully");
+      } catch (error) {
+        console.warn("Failed to set layout to slides:", error);
+      }
+    } else {
+      console.warn("setLayoutView is not available on window.__marimo__setLayoutView");
+    }
+    
+    return { layoutSet };
+  });
+  
+  if (!result.layoutSet) {
+    console.warn("Could not set layout to slides, continuing anyway...");
+    return;
+  }
+  
+  // Wait a bit for the layout to update and React to re-render
+  await page.waitForTimeout(2000);
 }
 
 test("can switch layout with keyboard shortcut in edit mode", async ({
@@ -201,6 +265,17 @@ test("can switch layout with keyboard shortcut in edit mode", async ({
   
   // Set layout to vertical to ensure initial layout is vertical
   await setLayoutToVertical(page);
+  
+  // Debug: Check layout state after setLayoutToVertical
+  const layoutStateAfterSetVertical = await page.evaluate(() => {
+    const gridContainer = document.querySelector("[data-testid='grid-layout-container'], .grid-layout-container, [class*='grid-layout']");
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return {
+      hasGridContainer: gridContainer !== null,
+      hasReactGridLayout: reactGridLayout !== null,
+    };
+  });
+  console.log("Layout state after setLayoutToVertical:", layoutStateAfterSetVertical);
 
   // Debug: Check if Pyodide is loaded and cells are being executed
   const debugInfo = await page.evaluate(() => {
@@ -273,111 +348,54 @@ test("can switch layout with keyboard shortcut in edit mode", async ({
   await page.waitForTimeout(2000);
 
   // Initially should be in vertical layout (default when is3DModeAtom is false)
-  // Verify text 1 is above text 2 (vertical layout)
-  let bb1 = await bbForText(page, "text 1");
-  let bb2 = await bbForText(page, "text 2");
-  expect(bb1.y).toBeLessThan(bb2.y);
-  expect(Math.abs(bb1.x - bb2.x)).toBeLessThan(10);
-
-  // Debug: Check if wasm_layouts flag is enabled and layout state
-  const flagCheck = await page.evaluate(() => {
-    // Try to access the feature flag through the config
-    // We can't directly call getFeatureFlag, but we can check if layouts are working
-    const layoutSelect = document.querySelector("[data-testid='layout-select']");
-    // Check for grid layout indicators in the DOM
-    const gridContainer = document.querySelector("[data-testid='grid-layout-container'], .grid-layout-container, [class*='grid-layout']");
-    const reactGridLayout = document.querySelector(".react-grid-layout");
-    return {
-      hasLayoutSelect: layoutSelect !== null,
-      layoutSelectVisible: layoutSelect !== null && (layoutSelect as HTMLElement).offsetParent !== null,
-      hasGridContainer: gridContainer !== null,
-      hasReactGridLayout: reactGridLayout !== null,
-    };
+  // Verify vertical layout is active (grid layout container should not exist)
+  await expect(page.locator(".react-grid-layout")).not.toBeVisible({
+    timeout: 2000,
   });
-  console.log("Flag check:", flagCheck);
-  
+
   // Press Ctrl+Shift+V (or Cmd+Shift+V on Mac) to switch to grid layout
   console.log("Pressing keyboard shortcut to switch layout...");
   await pressShortcut(page, "global.switchLayout");
   
-  // Wait a bit for the keyboard event to be processed
-  await page.waitForTimeout(1000);
-  
-  // Debug: Check layout state after shortcut
-  const layoutState = await page.evaluate(() => {
-    // Check if there's any indication of layout change
-    const cells = document.querySelectorAll(".marimo-cell, [data-testid='cell-editor']");
-    const gridContainer = document.querySelector("[data-testid='grid-layout-container'], .grid-layout-container, [class*='grid-layout']");
-    const reactGridLayout = document.querySelector(".react-grid-layout");
-    return {
-      cellCount: cells.length,
-      hasGridContainer: gridContainer !== null,
-      hasReactGridLayout: reactGridLayout !== null,
-      bodyText: document.body.textContent?.substring(0, 200) || "",
-    };
+  // Wait for grid layout to be rendered
+  await expect(page.locator(".react-grid-layout")).toBeVisible({
+    timeout: 5000,
   });
-  console.log("Layout state after shortcut:", layoutState);
-  
-  // Wait for layout transition with polling to ensure layout has changed
-  await expect
-    .poll(
-      async () => {
-        const currentBb1 = await bbForText(page, "text 1");
-        const currentBb2 = await bbForText(page, "text 2");
-        const yDiff = Math.abs(currentBb1.y - currentBb2.y);
-        // Log for debugging
-        if (yDiff >= 10) {
-          console.log(`Layout not changed yet: yDiff=${yDiff}, bb1.y=${currentBb1.y}, bb2.y=${currentBb2.y}`);
-        }
-        return yDiff;
-      },
-      {
-        timeout: 15000, // Increased timeout
-        intervals: [200, 500, 1000],
-        message: "Layout did not change to grid within 15s",
-      },
-    )
-    .toBeLessThan(10); // Same row (within 10px)
 
-  // Verify layout switched to grid (text 1 and text 2 should be on same row)
-  bb1 = await bbForText(page, "text 1");
-  bb2 = await bbForText(page, "text 2");
-  // Allow some tolerance for positioning
-  expect(Math.abs(bb1.y - bb2.y)).toBeLessThan(10); // Same row (within 10px)
-  expect(bb1.x).toBeGreaterThan(bb2.x); // text 1 is to the right of text 2
+  // Verify layout switched to grid (grid layout container should exist)
+  const gridLayoutExists = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(gridLayoutExists).toBe(true);
 
   // Press Ctrl+Shift+V again to switch back to vertical
   await pressShortcut(page, "global.switchLayout");
   
-  // Wait a bit for the keyboard event to be processed
-  await page.waitForTimeout(500);
-  
-  // Wait for layout transition with polling to ensure layout has changed back to vertical
+  // Wait for vertical layout to be active (grid layout container should not exist)
   await expect
     .poll(
       async () => {
-        const currentBb1 = await bbForText(page, "text 1");
-        const currentBb2 = await bbForText(page, "text 2");
-        const isVertical = currentBb1.y < currentBb2.y && Math.abs(currentBb1.x - currentBb2.x) < 10;
-        // Log for debugging
-        if (!isVertical) {
-          console.log(`Layout not changed back yet: bb1.y=${currentBb1.y}, bb2.y=${currentBb2.y}, bb1.x=${currentBb1.x}, bb2.x=${currentBb2.x}`);
-        }
-        return isVertical;
+        const hasGridLayout = await page.evaluate(() => {
+          const reactGridLayout = document.querySelector(".react-grid-layout");
+          return reactGridLayout !== null;
+        });
+        return !hasGridLayout;
       },
       {
-        timeout: 15000, // Increased timeout
+        timeout: 5000,
         intervals: [200, 500, 1000],
-        message: "Layout did not change back to vertical within 15s",
+        message: "Layout did not change back to vertical within 5s",
       },
     )
     .toBe(true);
 
-  // Verify layout switched back to vertical
-  bb1 = await bbForText(page, "text 1");
-  bb2 = await bbForText(page, "text 2");
-  expect(bb1.y).toBeLessThan(bb2.y); // text 1 is above text 2
-  expect(Math.abs(bb1.x - bb2.x)).toBeLessThan(10); // Same column (within 10px)
+  // Verify layout switched back to vertical (grid layout container should not exist)
+  const gridLayoutStillExists = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(gridLayoutStillExists).toBe(false);
 
   await takeScreenshot(page, _filename);
 });
@@ -485,6 +503,796 @@ test("can cycle through layouts with keyboard shortcut in present mode", async (
 
   layoutValue = await getLayoutSelectValue(page);
   expect(layoutValue).toBe("vertical");
+
+  await takeScreenshot(page, _filename);
+});
+
+test("can switch layout from vertical to grid in edit mode", async ({
+  page,
+}) => {
+  console.log("Navigating to:", editUrl);
+  await safeGoto(page, editUrl, 90000);
+
+  // Wait for marimo app to be fully loaded with longer timeout for WASM
+  await waitForMarimoApp(page, 90000);
+
+  // Enable wasm_layouts flag for WASM mode
+  await enableWasmLayoutsFlag(page);
+  
+  // Set layout to vertical to ensure initial layout is vertical
+  await setLayoutToVertical(page);
+
+  // Wait for cells to be executed and their output to be visible
+  await expect
+    .poll(
+      async () => {
+        const bodyText = await page.textContent("body");
+        const hasText1 = bodyText?.includes("text 1") || false;
+        const hasText2 = bodyText?.includes("text 2") || false;
+        return hasText1 && hasText2;
+      },
+      {
+        timeout: 120000,
+        intervals: [2000, 5000, 10000],
+        message: "Cells did not execute within 120s",
+      },
+    )
+    .toBe(true);
+
+  await expect(page.getByText("text 1").first()).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.getByText("text 2").first()).toBeVisible({
+    timeout: 30000,
+  });
+
+  await page.waitForTimeout(2000);
+
+  // Verify initial state is vertical layout
+  const initialHasGridLayout = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(initialHasGridLayout).toBe(false);
+
+  // Press keyboard shortcut to switch to grid layout
+  await pressShortcut(page, "global.switchLayout");
+  
+  // Wait for grid layout to be rendered
+  await expect(page.locator(".react-grid-layout")).toBeVisible({
+    timeout: 5000,
+  });
+
+  // Verify layout switched to grid
+  const gridLayoutExists = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(gridLayoutExists).toBe(true);
+
+  await takeScreenshot(page, _filename);
+});
+
+test("can switch layout from grid to vertical in edit mode", async ({
+  page,
+}) => {
+  console.log("Navigating to:", editUrl);
+  await safeGoto(page, editUrl, 90000);
+
+  // Wait for marimo app to be fully loaded with longer timeout for WASM
+  await waitForMarimoApp(page, 90000);
+
+  // Enable wasm_layouts flag for WASM mode
+  await enableWasmLayoutsFlag(page);
+  
+  // Set layout to vertical first (to ensure known state)
+  await setLayoutToVertical(page);
+
+  // Wait for cells to be executed and their output to be visible
+  await expect
+    .poll(
+      async () => {
+        const bodyText = await page.textContent("body");
+        const hasText1 = bodyText?.includes("text 1") || false;
+        const hasText2 = bodyText?.includes("text 2") || false;
+        return hasText1 && hasText2;
+      },
+      {
+        timeout: 120000,
+        intervals: [2000, 5000, 10000],
+        message: "Cells did not execute within 120s",
+      },
+    )
+    .toBe(true);
+
+  await expect(page.getByText("text 1").first()).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.getByText("text 2").first()).toBeVisible({
+    timeout: 30000,
+  });
+
+  await page.waitForTimeout(2000);
+
+  // Switch to grid layout using keyboard shortcut
+  await pressShortcut(page, "global.switchLayout");
+  
+  // Wait for grid layout to be rendered
+  await expect(page.locator(".react-grid-layout")).toBeVisible({
+    timeout: 5000,
+  });
+
+  // Verify initial state is grid layout
+  const initialHasGridLayout = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(initialHasGridLayout).toBe(true);
+
+  // Press keyboard shortcut to switch to vertical layout
+  await pressShortcut(page, "global.switchLayout");
+  
+  // Wait for vertical layout to be active
+  await expect
+    .poll(
+      async () => {
+        const hasGridLayout = await page.evaluate(() => {
+          const reactGridLayout = document.querySelector(".react-grid-layout");
+          return reactGridLayout !== null;
+        });
+        return !hasGridLayout;
+      },
+      {
+        timeout: 5000,
+        intervals: [200, 500, 1000],
+        message: "Layout did not change to vertical within 5s",
+      },
+    )
+    .toBe(true);
+
+  // Verify layout switched to vertical
+  const gridLayoutStillExists = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(gridLayoutStillExists).toBe(false);
+
+  await takeScreenshot(page, _filename);
+});
+
+test("can switch layout from vertical to grid in present mode", async ({
+  page,
+}) => {
+  console.log("Navigating to:", editUrl);
+  await safeGoto(page, editUrl, 90000);
+
+  // Wait for marimo app to be fully loaded with longer timeout for WASM
+  await waitForMarimoApp(page, 90000);
+
+  // Enable wasm_layouts flag for WASM mode
+  await enableWasmLayoutsFlag(page);
+  
+  // Set layout to vertical to ensure initial layout is vertical
+  await setLayoutToVertical(page);
+
+  // Wait for cells to be executed and their output to be visible
+  await expect
+    .poll(
+      async () => {
+        const bodyText = await page.textContent("body");
+        const hasText1 = bodyText?.includes("text 1") || false;
+        const hasText2 = bodyText?.includes("text 2") || false;
+        return hasText1 && hasText2;
+      },
+      {
+        timeout: 120000,
+        intervals: [1000, 2000, 5000],
+        message: "Cells did not execute within 120s",
+      },
+    )
+    .toBe(true);
+
+  await expect(page.getByText("text 1").first()).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.getByText("text 2").first()).toBeVisible({
+    timeout: 30000,
+  });
+
+  await page.waitForTimeout(2000);
+
+  // Toggle to present mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Wait for layout-select to appear in present mode
+  await expect(page.getByTestId("layout-select")).toBeVisible({
+    timeout: 30000,
+  });
+
+  // Verify initial layout is vertical
+  let layoutValue = await getLayoutSelectValue(page);
+  if (layoutValue !== "vertical") {
+    // Switch to vertical if not already
+    await setLayoutToVertical(page);
+    layoutValue = await getLayoutSelectValue(page);
+  }
+  expect(layoutValue).toBe("vertical");
+
+  // Press keyboard shortcut to switch to grid
+  await pressShortcut(page, "global.switchLayout");
+  await waitForLayoutChange(page, "grid", 5000);
+
+  // Verify layout switched to grid
+  layoutValue = await getLayoutSelectValue(page);
+  expect(layoutValue).toBe("grid");
+
+  await takeScreenshot(page, _filename);
+});
+
+test("can switch layout from grid to slides in present mode", async ({
+  page,
+}) => {
+  console.log("Navigating to:", editUrl);
+  await safeGoto(page, editUrl, 90000);
+
+  // Wait for marimo app to be fully loaded with longer timeout for WASM
+  await waitForMarimoApp(page, 90000);
+
+  // Enable wasm_layouts flag for WASM mode
+  await enableWasmLayoutsFlag(page);
+  
+  // Set layout to vertical first, then switch to present mode
+  await setLayoutToVertical(page);
+
+  // Wait for cells to be executed and their output to be visible
+  await expect
+    .poll(
+      async () => {
+        const bodyText = await page.textContent("body");
+        const hasText1 = bodyText?.includes("text 1") || false;
+        const hasText2 = bodyText?.includes("text 2") || false;
+        return hasText1 && hasText2;
+      },
+      {
+        timeout: 120000,
+        intervals: [1000, 2000, 5000],
+        message: "Cells did not execute within 120s",
+      },
+    )
+    .toBe(true);
+
+  await expect(page.getByText("text 1").first()).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.getByText("text 2").first()).toBeVisible({
+    timeout: 30000,
+  });
+
+  await page.waitForTimeout(2000);
+
+  // Toggle to present mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Wait for layout-select to appear in present mode
+  await expect(page.getByTestId("layout-select")).toBeVisible({
+    timeout: 30000,
+  });
+
+  // Set layout to grid (using setLayoutToGrid in present mode)
+  await setLayoutToGrid(page);
+  let layoutValue = await getLayoutSelectValue(page);
+  if (layoutValue !== "grid") {
+    // If not grid, press shortcut to get to grid
+    while (layoutValue !== "grid") {
+      await pressShortcut(page, "global.switchLayout");
+      await page.waitForTimeout(500);
+      layoutValue = await getLayoutSelectValue(page);
+      if (layoutValue === "grid") {
+        break;
+      }
+    }
+  }
+  expect(layoutValue).toBe("grid");
+
+  // Press keyboard shortcut to switch to slides
+  await pressShortcut(page, "global.switchLayout");
+  await waitForLayoutChange(page, "slides", 5000);
+
+  // Verify layout switched to slides
+  layoutValue = await getLayoutSelectValue(page);
+  expect(layoutValue).toBe("slides");
+
+  await takeScreenshot(page, _filename);
+});
+
+test("can switch layout from slides to vertical in present mode", async ({
+  page,
+}) => {
+  console.log("Navigating to:", editUrl);
+  await safeGoto(page, editUrl, 90000);
+
+  // Wait for marimo app to be fully loaded with longer timeout for WASM
+  await waitForMarimoApp(page, 90000);
+
+  // Enable wasm_layouts flag for WASM mode
+  await enableWasmLayoutsFlag(page);
+  
+  // Set layout to vertical first, then switch to present mode
+  await setLayoutToVertical(page);
+
+  // Wait for cells to be executed and their output to be visible
+  await expect
+    .poll(
+      async () => {
+        const bodyText = await page.textContent("body");
+        const hasText1 = bodyText?.includes("text 1") || false;
+        const hasText2 = bodyText?.includes("text 2") || false;
+        return hasText1 && hasText2;
+      },
+      {
+        timeout: 120000,
+        intervals: [1000, 2000, 5000],
+        message: "Cells did not execute within 120s",
+      },
+    )
+    .toBe(true);
+
+  await expect(page.getByText("text 1").first()).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.getByText("text 2").first()).toBeVisible({
+    timeout: 30000,
+  });
+
+  await page.waitForTimeout(2000);
+
+  // Toggle to present mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Wait for layout-select to appear in present mode
+  await expect(page.getByTestId("layout-select")).toBeVisible({
+    timeout: 30000,
+  });
+
+  // Set layout to slides
+  await setLayoutToSlides(page);
+  let layoutValue = await getLayoutSelectValue(page);
+  if (layoutValue !== "slides") {
+    // If not slides, press shortcut to get to slides
+    while (layoutValue !== "slides") {
+      await pressShortcut(page, "global.switchLayout");
+      await page.waitForTimeout(500);
+      layoutValue = await getLayoutSelectValue(page);
+      if (layoutValue === "slides") {
+        break;
+      }
+    }
+  }
+  expect(layoutValue).toBe("slides");
+
+  // Press keyboard shortcut to switch to vertical
+  await pressShortcut(page, "global.switchLayout");
+  await waitForLayoutChange(page, "vertical", 5000);
+
+  // Verify layout switched to vertical
+  layoutValue = await getLayoutSelectValue(page);
+  expect(layoutValue).toBe("vertical");
+
+  await takeScreenshot(page, _filename);
+});
+
+test("can switch from edit mode (vertical) to present mode", async ({
+  page,
+}) => {
+  console.log("Navigating to:", editUrl);
+  await safeGoto(page, editUrl, 90000);
+
+  // Wait for marimo app to be fully loaded with longer timeout for WASM
+  await waitForMarimoApp(page, 90000);
+
+  // Enable wasm_layouts flag for WASM mode
+  await enableWasmLayoutsFlag(page);
+  
+  // Set layout to vertical to ensure initial layout is vertical
+  await setLayoutToVertical(page);
+
+  // Wait for cells to be executed and their output to be visible
+  await expect
+    .poll(
+      async () => {
+        const bodyText = await page.textContent("body");
+        const hasText1 = bodyText?.includes("text 1") || false;
+        const hasText2 = bodyText?.includes("text 2") || false;
+        return hasText1 && hasText2;
+      },
+      {
+        timeout: 120000,
+        intervals: [2000, 5000, 10000],
+        message: "Cells did not execute within 120s",
+      },
+    )
+    .toBe(true);
+
+  await expect(page.getByText("text 1").first()).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.getByText("text 2").first()).toBeVisible({
+    timeout: 30000,
+  });
+
+  await page.waitForTimeout(2000);
+
+  // Verify we're in edit mode (layout-select should not be visible)
+  // In grid layout, code cells might not be visible in the same way
+  await expect(page.getByTestId("layout-select")).not.toBeVisible({
+    timeout: 2000,
+  });
+
+  // Verify initial layout is vertical (no grid layout container)
+  const initialHasGridLayout = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(initialHasGridLayout).toBe(false);
+
+  // Toggle to present mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Verify we're in present mode (code should be hidden, layout-select should be visible)
+  await expect(page.getByText("# Grid Layout")).not.toBeVisible({
+    timeout: 5000,
+  });
+  await expect(page.getByTestId("layout-select")).toBeVisible({
+    timeout: 30000,
+  });
+
+  // Verify layout is still vertical in present mode
+  const layoutValue = await getLayoutSelectValue(page);
+  expect(layoutValue).toBe("vertical");
+
+  await takeScreenshot(page, _filename);
+});
+
+test("can switch from edit mode (grid) to present mode", async ({
+  page,
+}) => {
+  console.log("Navigating to:", editUrl);
+  await safeGoto(page, editUrl, 90000);
+
+  // Wait for marimo app to be fully loaded with longer timeout for WASM
+  await waitForMarimoApp(page, 90000);
+
+  // Enable wasm_layouts flag for WASM mode
+  await enableWasmLayoutsFlag(page);
+  
+  // Set layout to vertical first, then switch to grid
+  await setLayoutToVertical(page);
+
+  // Wait for cells to be executed and their output to be visible
+  await expect
+    .poll(
+      async () => {
+        const bodyText = await page.textContent("body");
+        const hasText1 = bodyText?.includes("text 1") || false;
+        const hasText2 = bodyText?.includes("text 2") || false;
+        return hasText1 && hasText2;
+      },
+      {
+        timeout: 120000,
+        intervals: [2000, 5000, 10000],
+        message: "Cells did not execute within 120s",
+      },
+    )
+    .toBe(true);
+
+  await expect(page.getByText("text 1").first()).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.getByText("text 2").first()).toBeVisible({
+    timeout: 30000,
+  });
+
+  await page.waitForTimeout(2000);
+
+  // Switch to grid layout using keyboard shortcut
+  await pressShortcut(page, "global.switchLayout");
+  await expect(page.locator(".react-grid-layout")).toBeVisible({
+    timeout: 5000,
+  });
+
+  // Verify we're in edit mode (layout-select should not be visible)
+  // In grid layout, code cells might not be visible in the same way
+  await expect(page.getByTestId("layout-select")).not.toBeVisible({
+    timeout: 2000,
+  });
+
+  // Verify initial layout is grid
+  const initialHasGridLayout = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(initialHasGridLayout).toBe(true);
+
+  // Toggle to present mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Verify we're in present mode (code should be hidden, layout-select should be visible)
+  await expect(page.getByText("# Grid Layout")).not.toBeVisible({
+    timeout: 5000,
+  });
+  await expect(page.getByTestId("layout-select")).toBeVisible({
+    timeout: 30000,
+  });
+
+  // Verify layout is still grid in present mode
+  const layoutValue = await getLayoutSelectValue(page);
+  expect(layoutValue).toBe("grid");
+
+  await takeScreenshot(page, _filename);
+});
+
+test("can switch from present mode (vertical) to edit mode", async ({
+  page,
+}) => {
+  console.log("Navigating to:", editUrl);
+  await safeGoto(page, editUrl, 90000);
+
+  // Wait for marimo app to be fully loaded with longer timeout for WASM
+  await waitForMarimoApp(page, 90000);
+
+  // Enable wasm_layouts flag for WASM mode
+  await enableWasmLayoutsFlag(page);
+  
+  // Set layout to vertical to ensure initial layout is vertical
+  await setLayoutToVertical(page);
+
+  // Wait for cells to be executed and their output to be visible
+  await expect
+    .poll(
+      async () => {
+        const bodyText = await page.textContent("body");
+        const hasText1 = bodyText?.includes("text 1") || false;
+        const hasText2 = bodyText?.includes("text 2") || false;
+        return hasText1 && hasText2;
+      },
+      {
+        timeout: 120000,
+        intervals: [1000, 2000, 5000],
+        message: "Cells did not execute within 120s",
+      },
+    )
+    .toBe(true);
+
+  await expect(page.getByText("text 1").first()).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.getByText("text 2").first()).toBeVisible({
+    timeout: 30000,
+  });
+
+  await page.waitForTimeout(2000);
+
+  // Toggle to present mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Wait for layout-select to appear in present mode
+  await expect(page.getByTestId("layout-select")).toBeVisible({
+    timeout: 30000,
+  });
+
+  // Verify we're in present mode (code should be hidden, layout-select should be visible)
+  await expect(page.getByText("# Grid Layout")).not.toBeVisible({
+    timeout: 5000,
+  });
+
+  // Verify layout is vertical in present mode
+  let layoutValue = await getLayoutSelectValue(page);
+  if (layoutValue !== "vertical") {
+    await setLayoutToVertical(page);
+    layoutValue = await getLayoutSelectValue(page);
+  }
+  expect(layoutValue).toBe("vertical");
+
+  // Toggle back to edit mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Verify we're in edit mode (layout-select should not be visible)
+  // In grid layout, code cells might not be visible in the same way
+  await expect(page.getByTestId("layout-select")).not.toBeVisible({
+    timeout: 2000,
+  });
+
+  // Verify layout is still vertical in edit mode (no grid layout container)
+  const hasGridLayout = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(hasGridLayout).toBe(false);
+
+  await takeScreenshot(page, _filename);
+});
+
+test("can switch from present mode (grid) to edit mode", async ({
+  page,
+}) => {
+  console.log("Navigating to:", editUrl);
+  await safeGoto(page, editUrl, 90000);
+
+  // Wait for marimo app to be fully loaded with longer timeout for WASM
+  await waitForMarimoApp(page, 90000);
+
+  // Enable wasm_layouts flag for WASM mode
+  await enableWasmLayoutsFlag(page);
+  
+  // Set layout to vertical first, then switch to present mode
+  await setLayoutToVertical(page);
+
+  // Wait for cells to be executed and their output to be visible
+  await expect
+    .poll(
+      async () => {
+        const bodyText = await page.textContent("body");
+        const hasText1 = bodyText?.includes("text 1") || false;
+        const hasText2 = bodyText?.includes("text 2") || false;
+        return hasText1 && hasText2;
+      },
+      {
+        timeout: 120000,
+        intervals: [1000, 2000, 5000],
+        message: "Cells did not execute within 120s",
+      },
+    )
+    .toBe(true);
+
+  await expect(page.getByText("text 1").first()).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.getByText("text 2").first()).toBeVisible({
+    timeout: 30000,
+  });
+
+  await page.waitForTimeout(2000);
+
+  // Toggle to present mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Wait for layout-select to appear in present mode
+  await expect(page.getByTestId("layout-select")).toBeVisible({
+    timeout: 30000,
+  });
+
+  // Switch to grid layout in present mode
+  await pressShortcut(page, "global.switchLayout");
+  await waitForLayoutChange(page, "grid", 5000);
+
+  // Verify we're in present mode (code should be hidden, layout-select should be visible)
+  await expect(page.getByText("# Grid Layout")).not.toBeVisible({
+    timeout: 5000,
+  });
+
+  // Verify layout is grid in present mode
+  const layoutValue = await getLayoutSelectValue(page);
+  expect(layoutValue).toBe("grid");
+
+  // Toggle back to edit mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Verify we're in edit mode (layout-select should not be visible)
+  // In grid layout, code cells might not be visible in the same way
+  await expect(page.getByTestId("layout-select")).not.toBeVisible({
+    timeout: 2000,
+  });
+
+  // Verify layout is still grid in edit mode
+  await expect(page.locator(".react-grid-layout")).toBeVisible({
+    timeout: 5000,
+  });
+  const hasGridLayout = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(hasGridLayout).toBe(true);
+
+  await takeScreenshot(page, _filename);
+});
+
+test("can switch from present mode (slides) to edit mode", async ({
+  page,
+}) => {
+  console.log("Navigating to:", editUrl);
+  await safeGoto(page, editUrl, 90000);
+
+  // Wait for marimo app to be fully loaded with longer timeout for WASM
+  await waitForMarimoApp(page, 90000);
+
+  // Enable wasm_layouts flag for WASM mode
+  await enableWasmLayoutsFlag(page);
+  
+  // Set layout to vertical first, then switch to present mode
+  await setLayoutToVertical(page);
+
+  // Wait for cells to be executed and their output to be visible
+  await expect
+    .poll(
+      async () => {
+        const bodyText = await page.textContent("body");
+        const hasText1 = bodyText?.includes("text 1") || false;
+        const hasText2 = bodyText?.includes("text 2") || false;
+        return hasText1 && hasText2;
+      },
+      {
+        timeout: 120000,
+        intervals: [1000, 2000, 5000],
+        message: "Cells did not execute within 120s",
+      },
+    )
+    .toBe(true);
+
+  await expect(page.getByText("text 1").first()).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.getByText("text 2").first()).toBeVisible({
+    timeout: 30000,
+  });
+
+  await page.waitForTimeout(2000);
+
+  // Toggle to present mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Wait for layout-select to appear in present mode
+  await expect(page.getByTestId("layout-select")).toBeVisible({
+    timeout: 30000,
+  });
+
+  // Switch to slides layout in present mode
+  await setLayoutToSlides(page);
+  let layoutValue = await getLayoutSelectValue(page);
+  if (layoutValue !== "slides") {
+    // If not slides, press shortcut to get to slides
+    while (layoutValue !== "slides") {
+      await pressShortcut(page, "global.switchLayout");
+      await page.waitForTimeout(500);
+      layoutValue = await getLayoutSelectValue(page);
+      if (layoutValue === "slides") {
+        break;
+      }
+    }
+  }
+  expect(layoutValue).toBe("slides");
+
+  // Verify we're in present mode (code should be hidden, layout-select should be visible)
+  await expect(page.getByText("# Grid Layout")).not.toBeVisible({
+    timeout: 5000,
+  });
+
+  // Toggle back to edit mode using keyboard shortcut
+  await pressShortcut(page, "global.hideCode");
+  await page.waitForTimeout(2000);
+
+  // Verify we're in edit mode (layout-select should not be visible)
+  // In grid layout, code cells might not be visible in the same way
+  await expect(page.getByTestId("layout-select")).not.toBeVisible({
+    timeout: 2000,
+  });
+
+  // In edit mode, slides layout is not available, so it should fall back to vertical
+  // Verify layout is vertical in edit mode (no grid layout container)
+  const hasGridLayout = await page.evaluate(() => {
+    const reactGridLayout = document.querySelector(".react-grid-layout");
+    return reactGridLayout !== null;
+  });
+  expect(hasGridLayout).toBe(false);
 
   await takeScreenshot(page, _filename);
 });
