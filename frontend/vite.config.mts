@@ -7,6 +7,8 @@ import topLevelAwait from "vite-plugin-top-level-await";
 import wasm from "vite-plugin-wasm";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
+import { existsSync } from "node:fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -38,6 +40,49 @@ const devHtmlPlugin = (): Plugin => {
         );
       }
       return html;
+    },
+  };
+};
+
+// react-dnd解決プラグイン
+const reactDndResolvePlugin = (): Plugin => {
+  const require = createRequire(import.meta.url);
+  const nodeModulesPath = path.resolve(__dirname, "../node_modules");
+
+  // react-dnd関連パッケージのリスト
+  const reactDndPackages = ["react-dnd", "react-dnd-html5-backend", "dnd-core"];
+
+  return {
+    name: "react-dnd-resolve",
+    enforce: "pre", // 他のプラグインより先に実行
+    resolveId(id, importer) {
+      // react-dnd関連パッケージを明示的に解決
+      if (reactDndPackages.includes(id)) {
+        try {
+          // pnpmのワークスペースでは、node_modulesから解決を試みる
+          // 実際のパスは、node_modules内のシンボリックリンクを解決することで取得できる
+          const resolved = require.resolve(id, {
+            paths: [nodeModulesPath, __dirname],
+          });
+          return resolved;
+        } catch (error) {
+          // 解決に失敗した場合は、node_modules内のパスを直接構築
+          const packagePath = path.resolve(nodeModulesPath, id);
+          if (existsSync(packagePath)) {
+            // package.jsonからエントリーポイントを取得
+            const packageJsonPath = path.resolve(packagePath, "package.json");
+            if (existsSync(packageJsonPath)) {
+              const packageJson = require(packageJsonPath);
+              const entryPoint = packageJson.module || packageJson.main || "index.js";
+              return path.resolve(packagePath, entryPoint);
+            }
+            return packagePath;
+          }
+          // 解決に失敗した場合は、標準の解決プロセスに委譲
+          return null;
+        }
+      }
+      return null; // 他のモジュールは標準の解決プロセスを使用
     },
   };
 };
@@ -169,6 +214,7 @@ export default defineConfig({
   },
   plugins: [
     devHtmlPlugin(),
+    reactDndResolvePlugin(),
     react({
       babel: {
         presets: ["@babel/preset-typescript"],
