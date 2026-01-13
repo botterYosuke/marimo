@@ -415,6 +415,21 @@ export const EditApp: React.FC<AppProps> = ({
   const togglePresenting = useTogglePresenting();
   const { selectedLayout } = useLayoutState();
   const { setLayoutView } = useLayoutActions();
+  const setIs3DMode = useSetAtom(is3DModeAtom);
+
+  // presentモードからeditモードに切り替える際に、selectedLayoutに基づいてis3DModeAtomを更新
+  // editモードでは"slides"は使用できないため、"vertical"に変換する
+  useEffect(() => {
+    if (viewState.mode === "edit") {
+      // editモードでは"slides"は使用できないため、"vertical"に変換
+      if (selectedLayout === "slides") {
+        setLayoutView("vertical");
+        setIs3DMode(false);
+      } else {
+        setIs3DMode(selectedLayout === "grid");
+      }
+    }
+  }, [viewState.mode, selectedLayout, setIs3DMode, setLayoutView]);
 
   // Get next layout based on current layout and mode
   const getNextLayout = (currentLayout: LayoutType, mode: AppMode): LayoutType => {
@@ -452,6 +467,10 @@ export const EditApp: React.FC<AppProps> = ({
   useHotkey("global.switchLayout", () => {
     const nextLayout = getNextLayout(selectedLayout, viewState.mode);
     setLayoutView(nextLayout);
+    // gridを選択したときにis3DModeAtomをtrueに設定（editモードのみ）
+    if (viewState.mode === "edit") {
+      setIs3DMode(nextLayout === "grid");
+    }
   });
 
   const editableCellsArray = (
