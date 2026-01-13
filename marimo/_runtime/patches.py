@@ -182,6 +182,21 @@ def create_main_module(
     _module.__dict__.setdefault("__builtin__", globals()["__builtins__"])
     _module.__dict__.setdefault("__builtins__", globals()["__builtins__"])
 
+    # 株価関数をbuiltinsに追加（遅延インポート）
+    try:
+        import builtins
+        from marimo._plugins.stocks import (
+            get_stock_price,
+            get_stock_board,
+            get_stock_info,
+        )
+        builtins.get_stock_price = get_stock_price
+        builtins.get_stock_board = get_stock_board
+        builtins.get_stock_info = get_stock_info
+    except ImportError:
+        # プラグインが利用できない場合はスキップ（エラーを出さない）
+        pass
+
     if input_override is not None:
         _module.__dict__.setdefault("input", input_override)
     if print_override is not None:

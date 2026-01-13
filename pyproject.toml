@@ -86,6 +86,9 @@ sql = [
     "polars[pyarrow]>=1.9.0",  # SQL output back in Python
     "sqlglot[rs]>=26.2.0"      # SQL cells parsing
 ]
+stocks = [
+    "requests>=2.31.0",  # 株価API用
+]
 
 # For per-notebook sandboxed kernels
 sandbox = [
