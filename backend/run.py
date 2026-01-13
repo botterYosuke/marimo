@@ -12,6 +12,11 @@ import sys
 import traceback
 from pathlib import Path
 
+# Add project root to Python path so marimo module can be imported
+project_root = Path(__file__).parent.parent.resolve()
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from marimo._server.file_router import AppFileRouter
 from marimo._session.model import SessionMode
 from marimo._server.start import start
