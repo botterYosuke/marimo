@@ -374,7 +374,7 @@ const DEFAULT_HOT_KEY = {
   "global.switchLayout": {
     name: "Switch layout",
     group: "Other",
-    key: "Mod-Shift-v",
+    key: "Mod-,",
   },
 
   // Global Navigation
