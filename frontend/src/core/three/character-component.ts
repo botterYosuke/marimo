@@ -466,7 +466,7 @@ export class CharacterComponent {
     // 球面座標から直交座標に変換
     const x =
       radius * Math.cos(elevation) * Math.cos(azimuth);
-    const y = radius * Math.sin(elevation);
+    const y = 0; // 水平面のみで移動（Y座標（高度）の変化を固定）
     const z =
       radius * Math.cos(elevation) * Math.sin(azimuth);
 
@@ -489,8 +489,8 @@ export class CharacterComponent {
 
     const currentTime = this.clock.getElapsedTime() * 1000; // ミリ秒に変換
 
-    // 一定時間ごと、または目標位置に到達したら新しい目標位置を生成
-    let distanceToTarget = this.model.position.distanceTo(
+    // ウェイポイント更新チェック（先に実行して最新の目標位置を確定）
+    const distanceToTarget = this.model.position.distanceTo(
       this.targetPosition,
     );
     const hasReachedTarget = distanceToTarget < 10; // 10単位以内なら到達とみなす
@@ -501,26 +501,23 @@ export class CharacterComponent {
     ) {
       this.targetPosition = this.generateRandomPosition();
       this.nextWaypointTime = currentTime + this.waypointInterval;
-      // 新しいウェイポイントが生成された後、距離を再計算
-      distanceToTarget = this.model.position.distanceTo(this.targetPosition);
     }
 
-    // 現在位置から目標位置へスムーズに移動
+    // 現在位置から目標位置への移動処理
     const moveDistance = this.movementSpeed * delta;
+    const direction = new THREE.Vector3().subVectors(
+      this.targetPosition,
+      this.model.position,
+    );
+    const currentDistance = direction.length();
 
     // 目標位置までの距離が移動距離より小さい場合は目標位置に設定
-    if (distanceToTarget <= moveDistance || distanceToTarget < 0.1) {
+    if (currentDistance <= moveDistance || currentDistance < 0.1) {
       this.model.position.copy(this.targetPosition);
     } else {
-      // 方向ベクトルを計算して正規化
-      const direction = new THREE.Vector3()
-        .subVectors(this.targetPosition, this.model.position)
-        .normalize();
-
-      // 線形補間で移動
-      this.model.position.add(
-        direction.multiplyScalar(moveDistance),
-      );
+      // 方向ベクトルを正規化して移動
+      direction.normalize();
+      this.model.position.add(direction.multiplyScalar(moveDistance));
     }
 
     // ドローンが視点中心の方を向くように回転を調整
