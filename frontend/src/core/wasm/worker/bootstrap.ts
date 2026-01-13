@@ -54,24 +54,37 @@ export class DefaultWasmController implements WasmController {
     // Load pyodide and packages
     const span = t.startSpan("loadPyodide");
     try {
+      const packages = [
+        "micropip",
+        "msgspec",
+        "packaging",
+      ];
+      Logger.log("Loading packages:", packages);
       const pyodide = await loadPyodide({
         // Perf: These get loaded while pyodide is being bootstrapped
-        packages: [
-          "micropip",
-          "msgspec",
-          getMarimoWheel(opts.version),
-          "Markdown",
-          "pymdown-extensions",
-          "narwhals",
-          "packaging",
-        ],
+        packages,
         _makeSnapshot: MAKE_SNAPSHOT,
-        lockFileURL: `https://wasm.marimo.app/pyodide-lock.json?v=${opts.version}&pyodide=${opts.pyodideVersion}`,
+        lockFileURL: `https://cdn.jsdelivr.net/pyodide/${opts.pyodideVersion}/full/pyodide-lock.json`,
         // Without this, this fails in Firefox with
         // `Could not extract indexURL path from pyodide module`
         // This fixes for Firefox and does not break Chrome/others
         indexURL: `https://cdn.jsdelivr.net/pyodide/${opts.pyodideVersion}/full/`,
       });
+
+      const wheel = getMarimoWheel(opts.version);
+      await pyodide.runPythonAsync(`
+        import micropip
+        # Install marimo
+        if "${wheel}".startswith("http"):
+            await micropip.install("${wheel}")
+        else:
+            await micropip.install("${wheel}")
+
+        # Manually install narwhals to ensure we get a compatible version
+        # The lock file might have an older version
+        await micropip.install("narwhals>=2.0.0")
+      `);
+
       this.pyodide = pyodide;
       span.end("ok");
       return pyodide;
