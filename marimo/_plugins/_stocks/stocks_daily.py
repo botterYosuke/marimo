@@ -104,5 +104,6 @@ class stocks_price:
             threading.Thread(target=self.db.save_stock_prices, args=(original_code, df), daemon=True).start()
             return df
 
-
-        raise ValueError(f"日本株式銘柄の取得に失敗しました: {original_code}")
+        # すべてのデータソースから取得できなかった場合は空のDataFrameを返す
+        logger.warning(f"日本株式銘柄の取得に失敗しました: {original_code}")
+        return pd.DataFrame()

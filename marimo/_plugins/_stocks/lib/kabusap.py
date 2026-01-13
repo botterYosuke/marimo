@@ -38,7 +38,11 @@ class kabusap:
         self.api_key = ""
         self.headers = {}  # 初期化を確実にする
         self._initialized = True
-        self.isEnable = self._set_token()
+        try:
+            self.isEnable = self._set_token()
+        except Exception as e:
+            logger.error(f"トークン設定中にエラーが発生しました: {e}")
+            self.isEnable = False
         if self.isEnable:
             self.headers = {
                 'Content-Type': 'application/json',
@@ -53,8 +57,11 @@ class kabusap:
         「APIを使用する準備が完了しました。」と出力されれば、kabuステーションAPIをコールすることができるようになります！
         """
         # 環境変数を読み込み（遅延読み込み）
-        from dotenv import load_dotenv
-        load_dotenv()
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ImportError:
+            logger.warning("python-dotenvがインストールされていません。環境変数ファイルの読み込みをスキップします。")
         
         api_password = os.getenv('KABUSAP_API_PASSWORD')
         

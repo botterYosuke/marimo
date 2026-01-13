@@ -40,7 +40,11 @@ class jquants:
         self.token_expires_at = None
         self.headers = {}  # 初期化を確実にする
         self._initialized = True
-        self.isEnable = self._set_token()
+        try:
+            self.isEnable = self._set_token()
+        except Exception as e:
+            logger.error(f"トークン設定中にエラーが発生しました: {e}")
+            self.isEnable = False
         if self.isEnable:
             self.headers = {'Authorization': 'Bearer {}'.format(self.id_token)}
 
@@ -53,8 +57,11 @@ class jquants:
         「APIを使用する準備が完了しました。」と出力されれば、J-Quants APIをコールすることができるようになります！
         """
         # 環境変数を読み込み（遅延読み込み）
-        from dotenv import load_dotenv
-        load_dotenv()
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ImportError:
+            logger.warning("python-dotenvがインストールされていません。環境変数ファイルの読み込みをスキップします。")
         
         USER_DATA = {
             "mailaddress": os.getenv('JQuants_EMAIL_ADDRESS'),

@@ -228,8 +228,11 @@ class e_api:
         「APIを使用する準備が完了しました。」と出力されれば、立花証券 APIをコールすることができるようになります！
         """
         # 環境変数を読み込み（遅延読み込み）
-        from dotenv import load_dotenv
-        load_dotenv()
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ImportError:
+            logger.warning("python-dotenvがインストールされていません。環境変数ファイルの読み込みをスキップします。")
         
         # ログインがブロックされているかチェック
         if self._is_login_blocked():

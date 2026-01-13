@@ -9,6 +9,23 @@ from datetime import datetime, timedelta
 import pytest
 
 
+@pytest.fixture(autouse=True, scope="module")
+def setup_builtins():
+    """builtinsモジュールに関数を追加するフィクスチャ"""
+    try:
+        from marimo._plugins.stocks import (
+            get_stock_price,
+            get_stock_board,
+            get_stock_info,
+        )
+        builtins.get_stock_price = get_stock_price
+        builtins.get_stock_board = get_stock_board
+        builtins.get_stock_info = get_stock_info
+    except ImportError:
+        # プラグインが利用できない場合はスキップ
+        pytest.skip("Stocks plugin not available")
+
+
 class TestStocksPluginBasic:
     """基本機能テスト"""
 

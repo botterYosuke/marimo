@@ -49,7 +49,9 @@ class stocks_info:
         else:
             return df
 
-        raise ValueError(f"日本株式上場銘柄一覧の取得に失敗しました: {self.jq.isEnable}")
+        # すべてのデータソースから取得できなかった場合は空のDataFrameを返す
+        logger.warning(f"日本株式上場銘柄一覧の取得に失敗しました: code={code}, jq.isEnable={self.jq.isEnable}")
+        return pd.DataFrame()
 
     def get_company_name(self, code: str):
         """
