@@ -133,9 +133,9 @@ export class SceneManager {
     // キャラクターコンポーネントの初期化
     // Grid → 3Dモデル → Cellの順序で配置するため、
     // Gridコンテナの配置後に、CharacterComponentを初期化
-    if (this.scene) {
+    if (this.scene && this.camera && this.controls) {
       this.characterComponent = new CharacterComponent();
-      this.characterComponent.load(this.scene);
+      this.characterComponent.load(this.scene, this.camera, this.controls);
     }
 
     // アニメーションループの開始
