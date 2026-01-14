@@ -257,9 +257,10 @@ export class PyodideBridge implements RunRequests, EditRequests {
   sendRun: EditRequests["sendRun"] = async (request) => {
     await this.rpc.proxy.request.loadPackages(request.codes.join("\n"));
 
-    // Pass request directly to putControlRequest, same as islands/bridge.ts
-    // ExecuteCellsRequest is already a CommandMessage type
-    await this.putControlRequest(request as CommandMessage);
+    await this.putControlRequest({
+      type: "execute-cells",
+      ...request,
+    });
     return null;
   };
   sendRunScratchpad: EditRequests["sendRunScratchpad"] = async (request) => {
