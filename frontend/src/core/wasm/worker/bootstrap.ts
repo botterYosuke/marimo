@@ -56,6 +56,7 @@ export class DefaultWasmController implements WasmController {
     try {
       const packages = [
         "micropip",
+        "msgspec",
         "packaging",
       ];
       Logger.log("Loading packages:", packages);
@@ -73,18 +74,21 @@ export class DefaultWasmController implements WasmController {
       const wheel = getMarimoWheel(opts.version);
       await pyodide.runPythonAsync(`
         import micropip
-        # Install msgspec>=0.20.0 before marimo-base to avoid version conflicts
-        # Pyodide's default msgspec (0.18.6) conflicts with marimo-base's requirement
-        await micropip.install("msgspec>=0.20.0")
         
-        # Install marimo
+        # Use Pyodide's default msgspec (0.18.6) which satisfies msgspec>=0.18.6
+        # msgspec>=0.20.0 is not available as a pure Python wheel for Pyodide
+        # Install marimo-base with deps=False to skip dependency resolution,
+        # then manually install the required dependencies
+        
+        # Install marimo-base wheel without dependency resolution
+        # This allows us to use Pyodide's default msgspec (0.18.6)
         if "${wheel}".startswith("http"):
-            await micropip.install("${wheel}")
+            await micropip.install("${wheel}", deps=False)
         else:
-            await micropip.install("${wheel}")
-
-        # Manually install narwhals to ensure we get a compatible version
-        # The lock file might have an older version
+            await micropip.install("${wheel}", deps=False)
+        
+        # Manually install required dependencies
+        # msgspec is already loaded from Pyodide (0.18.6), which satisfies >=0.18.6
         await micropip.install("narwhals>=2.0.0")
       `);
 
