@@ -82,13 +82,12 @@ export class DefaultWasmController implements WasmController {
         
         # Install marimo-base wheel without dependency resolution
         # This allows us to use Pyodide's default msgspec (0.18.6)
-        if "${wheel}".startswith("http"):
-            await micropip.install("${wheel}", deps=False)
-        else:
-            await micropip.install("${wheel}", deps=False)
+        wheel_url = "${wheel}"
+        await micropip.install(wheel_url, deps=False)
         
         # Manually install required dependencies
         # msgspec is already loaded from Pyodide (0.18.6), which satisfies >=0.18.6
+        # Install other dependencies that marimo-base needs
         await micropip.install("narwhals>=2.0.0")
       `);
 
