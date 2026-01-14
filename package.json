@@ -1,4 +1,8 @@
 {
+  "name": "marimo",
+  "version": "0.19.2",
+  "type": "module",
+  "main": "electron/main.js",
   "scripts": {
     "typecheck": "pnpm turbo typecheck",
     "format": "pnpm biome format --write",
@@ -6,14 +10,22 @@
     "build": "pnpm turbo build",
     "codegen": "pnpm turbo run codegen",
     "lint": "pnpm biome check --write && pnpm run -r lint",
-    "dev": "pnpm run --filter @marimo-team/frontend dev"
+    "dev": "concurrently --names \"fe,server\" --prefix-colors \"blue,green\" --kill-others-on-fail false \"pnpm run --filter @marimo-team/frontend dev\" \"pnpm start:server\"",
+    "start:server": "uv run marimo edit --no-token --headless --port 2718 %TEMP%",
+    "start:electron": "wait-on http-get://localhost:3000 --timeout 60000 -v && cross-env NODE_ENV=development pnpm exec electron .",
+    "start": "concurrently --names \"dev,server,electron\" --prefix-colors \"blue,green,cyan\" --kill-others-on-fail false \"pnpm dev\" \"pnpm start:server\" \"pnpm start:electron\""
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
     "@testing-library/jest-dom": "^6.9.1",
     "@typescript/native-preview": "7.0.0-dev.20251128.1",
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
     "turbo": "^2.7.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "wait-on": "^9.0.3"
   },
   "engines": {
     "node": ">=20",
