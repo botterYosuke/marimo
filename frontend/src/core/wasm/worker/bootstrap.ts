@@ -85,10 +85,15 @@ export class DefaultWasmController implements WasmController {
         wheel_url = "${wheel}"
         await micropip.install(wheel_url, deps=False)
         
-        # Manually install required dependencies
+        # Manually install required dependencies that marimo-base needs
         # msgspec is already loaded from Pyodide (0.18.6), which satisfies >=0.18.6
-        # Install other dependencies that marimo-base needs
-        await micropip.install("narwhals>=2.0.0")
+        # Install other dependencies from pyproject.toml
+        await micropip.install([
+          "narwhals>=2.0.0",
+          "markdown>=3.6,<4",
+          "pymdown-extensions>=10.15,<11",
+          "itsdangerous>=2.0.0",
+        ])
       `);
 
       this.pyodide = pyodide;
