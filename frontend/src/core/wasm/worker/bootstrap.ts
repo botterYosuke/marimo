@@ -56,7 +56,6 @@ export class DefaultWasmController implements WasmController {
     try {
       const packages = [
         "micropip",
-        "msgspec",
         "packaging",
       ];
       Logger.log("Loading packages:", packages);
@@ -74,6 +73,10 @@ export class DefaultWasmController implements WasmController {
       const wheel = getMarimoWheel(opts.version);
       await pyodide.runPythonAsync(`
         import micropip
+        # Install msgspec>=0.20.0 before marimo-base to avoid version conflicts
+        # Pyodide's default msgspec (0.18.6) conflicts with marimo-base's requirement
+        await micropip.install("msgspec>=0.20.0")
+        
         # Install marimo
         if "${wheel}".startswith("http"):
             await micropip.install("${wheel}")
