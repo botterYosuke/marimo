@@ -3,7 +3,7 @@
 import { usePrevious } from "@dnd-kit/utilities";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 // import { NotStartedConnectionAlert } from "@/components/editor/alerts/connecting-alert";
 import { Controls } from "@/components/editor/controls/Controls";
@@ -109,6 +109,7 @@ export const EditApp: React.FC<AppProps> = ({
   const cellCSS2DServiceRef = useRef<CellCSS2DService | null>(null);
   const [is3DInitialized, setIs3DInitialized] = useState(false);
   const [containerReady, setContainerReady] = useState(false);
+  const containerReadyRef = useRef(false);
   const cell3DView = useAtomValue(cell3DViewAtom);
   const setCell3DView = useSetAtom(cell3DViewAtom);
   const hasRestoredViewRef = useRef(false);
@@ -117,6 +118,28 @@ export const EditApp: React.FC<AppProps> = ({
   const setGridLayout = (layout: GridLayout) => {
     setCurrentLayoutData(layout);
   };
+
+  // cellsのID配列をメモ化して、cells配列の変更を検知する
+  const cellIds = useMemo(() => cells.map(c => c.id).join(','), [cells]);
+  
+  // layoutState.layoutData.gridの内容を比較するためのキーを生成
+  const gridLayoutData = layoutState.layoutData.grid;
+  const gridLayoutKey = useMemo(() => {
+    if (!gridLayoutData) return 'none';
+    // gridLayoutDataの内容を比較するためのキーを生成
+    const cellsKey = gridLayoutData.cells.map(c => `${c.i}-${c.x}-${c.y}-${c.w}-${c.h}`).join('|');
+    return `${gridLayoutData.columns}-${gridLayoutData.rowHeight}-${cellsKey}`;
+  }, [gridLayoutData]);
+
+  // layoutプロップをメモ化して無限ループを防ぐ
+  // gridLayoutKeyとcellIdsで実際の変更を検知し、gridLayoutDataとcellsの参照が変わっても
+  // 内容が同じなら再計算されないようにする
+  // 注意: gridLayoutKeyとcellIdsはuseMemo内で直接使用されていないが、
+  // 実際の変更を検知するために依存配列に含めている
+  const gridLayout = useMemo(() => {
+    return (gridLayoutData as GridLayout) || GridLayoutPlugin.getInitialLayout(cells);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gridLayoutKey, cellIds, gridLayoutData, cells]);
 
   // Initialize RuntimeState event-listeners
   useEffect(() => {
@@ -526,12 +549,15 @@ export const EditApp: React.FC<AppProps> = ({
             {/* 3Dモードの場合（gridレイアウトのみ） */}
             <div
               ref={(el) => {
-                threeDContainerRef.current = el;
-                // refが設定されたらstateを更新してuseEffectをトリガー
-                if (el) {
-                  setContainerReady(true);
-                } else {
-                  setContainerReady(false);
+                // refが変更された場合のみ状態を更新（無限ループを防ぐ）
+                if (threeDContainerRef.current !== el) {
+                  threeDContainerRef.current = el;
+                  // 前の値と比較して変更があった場合のみsetStateを呼び出す
+                  const isReady = !!el;
+                  if (containerReadyRef.current !== isReady) {
+                    containerReadyRef.current = isReady;
+                    setContainerReady(isReady);
+                  }
                 }
               }}
               className="w-full h-full relative"
@@ -544,7 +570,7 @@ export const EditApp: React.FC<AppProps> = ({
                   appConfig={appConfig}
                   sceneManager={sceneManagerRef.current}
                   css2DService={css2DServiceRef.current}
-                  layout={(layoutState.layoutData.grid as GridLayout) || GridLayoutPlugin.getInitialLayout(cells)}
+                  layout={gridLayout}
                   setLayout={setGridLayout}
                   cells={cells}
                 />
