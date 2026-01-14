@@ -2,6 +2,7 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 /**
  * CharacterComponent
@@ -31,15 +32,41 @@ export class CharacterComponent {
   private rotors: THREE.Object3D[] = [];
   private static readonly ROTOR_ROTATION_SPEED = 15; // 回転速度（ラジアン/秒）
 
+  // 旋回機能用のプロパティ
+  private camera?: THREE.PerspectiveCamera;
+  private controls?: OrbitControls;
+  private targetPosition = new THREE.Vector3();
+  private movementSpeed = 200; // 移動速度（単位/秒）
+  private waypointInterval = 3000; // 目標位置更新間隔（ミリ秒）
+  private nextWaypointTime = 0;
+  private safetyMargin = 0.8; // 安全マージン（80%）
+  private minDistance = 100; // 視点中心からの最小距離
+  private maxDistanceRatio = 0.8; // 最大距離の比率
+  private orbitEnabled = true; // 旋回機能の有効/無効
+  private currentVelocity = new THREE.Vector3(); // 現在の進行方向（慣性を考慮）
+  private velocityInertia = 0.85; // 速度の慣性係数（0.0-1.0、大きいほど慣性が強い）
+  private rotationSpeed = 1.2; // 回転速度（ラジアン/秒）
+  private maxRotationSpeed = 2.0; // 最大回転速度（ラジアン/秒）
+
   /**
    * シーンにキャラクターモデルを読み込んで追加します
    *
    * @param scene Three.jsシーン
+   * @param camera カメラの参照（旋回機能用、オプショナル）
+   * @param controls OrbitControlsの参照（旋回機能用、オプショナル）
    */
-  load(scene: THREE.Scene): void {
+  load(
+    scene: THREE.Scene,
+    camera?: THREE.PerspectiveCamera,
+    controls?: OrbitControls,
+  ): void {
     if (this.model || this.isLoading) {
       return;
     }
+
+    // カメラとcontrolsの参照を保存
+    this.camera = camera;
+    this.controls = controls;
 
     this.isLoading = true;
     const loader = new GLTFLoader();
@@ -67,6 +94,11 @@ export class CharacterComponent {
 
         // 初期位置・スケール・回転を適用
         this.applyTransform();
+
+        // 旋回機能の初期化
+        if (this.camera && this.controls && this.orbitEnabled) {
+          this.initializeOrbit();
+        }
 
         // シーンに追加
         scene.add(this.model);
@@ -120,6 +152,11 @@ export class CharacterComponent {
 
     // ローターを回転させる
     this.updateRotors(delta);
+
+    // 旋回機能の更新
+    if (this.orbitEnabled && this.camera && this.controls && this.model) {
+      this.updateOrbit(delta);
+    }
   }
 
   /**
@@ -149,6 +186,13 @@ export class CharacterComponent {
 
     this.clock = new THREE.Clock();
     this.isLoading = false;
+
+    // 旋回機能のクリーンアップ
+    this.camera = undefined;
+    this.controls = undefined;
+    this.targetPosition = new THREE.Vector3();
+    this.nextWaypointTime = 0;
+    this.currentVelocity = new THREE.Vector3();
   }
 
   /**
@@ -355,6 +399,212 @@ export class CharacterComponent {
     for (const rotor of this.rotors) {
       // Z軸（上方向）を中心に回転
       rotor.rotation.z += rotationSpeed;
+    }
+  }
+
+  /**
+   * 旋回機能を初期化します
+   */
+  private initializeOrbit(): void {
+    if (!this.model || !this.camera || !this.controls) {
+      return;
+    }
+
+    // 初期位置を現在のモデル位置に設定
+    this.targetPosition.copy(this.model.position);
+    this.nextWaypointTime = 0;
+
+    // 初期速度方向をゼロに設定（最初は動かない状態から開始）
+    this.currentVelocity.set(0, 0, 0);
+  }
+
+  /**
+   * 画面内範囲を計算します
+   * カメラのFOVと距離から、画面内に収まる範囲を計算
+   *
+   * @returns 視点中心からの最大距離
+   */
+  private calculateMaxDistance(): number {
+    if (!this.camera || !this.controls) {
+      return 500; // デフォルト値
+    }
+
+    // カメラから視点中心までの距離
+    const distance = this.camera.position.distanceTo(this.controls.target);
+
+    // FOVは垂直視野角（度）なので、ラジアンに変換
+    const fovRad = (this.camera.fov * Math.PI) / 180;
+    // 視野角から計算した半径（垂直方向の半分）
+    const radius = distance * Math.tan(fovRad / 2);
+
+    // 安全マージンを考慮して最大距離を計算
+    const maxDistance = radius * this.safetyMargin;
+
+    // 最小距離と最大距離の比率を考慮
+    return Math.max(
+      this.minDistance,
+      Math.min(maxDistance, distance * this.maxDistanceRatio),
+    );
+  }
+
+  /**
+   * 視点中心を中心としたランダムな位置を生成します
+   *
+   * @returns ランダムな位置
+   */
+  private generateRandomPosition(): THREE.Vector3 {
+    if (!this.controls) {
+      return new THREE.Vector3(0, 300, 0);
+    }
+
+    const maxDistance = this.calculateMaxDistance();
+
+    // 球面座標系でランダムな位置を生成
+    // 半径: 最小距離から最大距離の間
+    const minRadius = this.minDistance;
+    const radius =
+      minRadius + Math.random() * (maxDistance - minRadius);
+
+    // 仰角（elevation）: -45度から45度の間（水平面を中心に）
+    const elevation = (Math.random() - 0.5) * (Math.PI / 2);
+
+    // 方位角（azimuth）: 0から2πの間（全方向）
+    const azimuth = Math.random() * Math.PI * 2;
+
+    // 球面座標から直交座標に変換
+    const x =
+      radius * Math.cos(elevation) * Math.cos(azimuth);
+    const y = 0; // 水平面のみで移動（Y座標（高度）の変化を固定）
+    const z =
+      radius * Math.cos(elevation) * Math.sin(azimuth);
+
+    // 視点中心を基準にした位置を返す
+    const position = new THREE.Vector3(x, y, z);
+    position.add(this.controls.target);
+
+    return position;
+  }
+
+  /**
+   * 旋回機能を更新します
+   *
+   * @param delta フレーム間の時間差（秒）
+   */
+  private updateOrbit(delta: number): void {
+    if (!this.model || !this.camera || !this.controls) {
+      return;
+    }
+
+    const currentTime = this.clock.getElapsedTime() * 1000; // ミリ秒に変換
+
+    // ウェイポイント更新チェック（先に実行して最新の目標位置を確定）
+    const distanceToTarget = this.model.position.distanceTo(
+      this.targetPosition,
+    );
+    const hasReachedTarget = distanceToTarget < 10; // 10単位以内なら到達とみなす
+
+    if (
+      currentTime >= this.nextWaypointTime ||
+      hasReachedTarget
+    ) {
+      this.targetPosition = this.generateRandomPosition();
+      this.nextWaypointTime = currentTime + this.waypointInterval;
+    }
+
+    // 現在位置から目標位置への移動処理（慣性を考慮）
+    const moveDistance = this.movementSpeed * delta;
+    const targetDirection = new THREE.Vector3().subVectors(
+      this.targetPosition,
+      this.model.position,
+    );
+    const currentDistance = targetDirection.length();
+
+    // 目標位置までの距離が移動距離より小さい場合は目標位置に設定
+    if (currentDistance <= moveDistance || currentDistance < 0.1) {
+      this.model.position.copy(this.targetPosition);
+      // 目標位置に到達したら速度を現在の方向に維持（完全にゼロにしない）
+      // 次のウェイポイントに向かう準備として、現在の速度方向を保持
+      if (this.currentVelocity.length() < 0.1) {
+        // 速度がほぼゼロの場合のみ、目標方向を設定
+        this.currentVelocity.copy(targetDirection);
+      }
+    } else {
+      // 目標方向を正規化
+      targetDirection.normalize();
+
+      // 現在の速度方向と目標方向の角度差を計算
+      const velocityLength = this.currentVelocity.length();
+      let angleDifference = 0;
+      if (velocityLength > 0.01) {
+        const normalizedVelocity = this.currentVelocity.clone().normalize();
+        const dot = normalizedVelocity.dot(targetDirection);
+        angleDifference = Math.acos(Math.max(-1, Math.min(1, dot))) * (180 / Math.PI);
+      }
+
+      // 角度差に応じて慣性係数を調整（角度差が大きいほど慣性を強く）
+      // 90度以上の場合は、より強い慣性を適用して急激な方向転換を防ぐ
+      const angleRad = angleDifference * (Math.PI / 180);
+      const adaptiveInertia = angleRad > Math.PI / 2
+        ? Math.min(0.98, this.velocityInertia + 0.13)  // 90度以上は慣性をさらに強く（0.98まで）
+        : angleRad > Math.PI / 4
+        ? Math.min(0.92, this.velocityInertia + 0.07)  // 45-90度は中程度の慣性
+        : Math.min(0.88, this.velocityInertia + 0.03);  // 45度未満でも少し慣性を強く（0.88まで）
+
+      // 現在の速度方向と目標方向を補間（慣性を考慮）
+      // adaptiveInertiaが大きいほど現在の進行方向を維持（慣性が強い）
+      // 1 - adaptiveInertiaが小さいほど目標方向に素早く向かう
+      const desiredVelocity = targetDirection.clone();
+      this.currentVelocity
+        .multiplyScalar(adaptiveInertia)
+        .add(desiredVelocity.multiplyScalar(1 - adaptiveInertia))
+        .normalize();
+
+      // 補間された方向に移動
+      this.model.position.add(
+        this.currentVelocity.clone().multiplyScalar(moveDistance),
+      );
+    }
+
+    // ドローンが進行方向を向くようにスムーズに回転
+    if (this.currentVelocity.length() > 0.01) {
+      // 進行方向が十分にある場合、進行方向を向く
+      const targetRotation = new THREE.Object3D();
+      targetRotation.position.copy(this.model.position);
+      targetRotation.lookAt(
+        this.model.position.clone().add(this.currentVelocity),
+      );
+      const desiredQuaternion = targetRotation.quaternion.clone();
+
+      // 現在の回転と目標回転の角度差を計算
+      const currentQuaternion = this.model.quaternion.clone();
+      const angleToTarget = currentQuaternion.angleTo(desiredQuaternion) * (180 / Math.PI);
+
+      // 角度差に応じて回転速度を調整（角度差が大きいほど遅く）
+      // 90度以上の場合は回転速度をさらに下げる
+      const angleRad = angleToTarget * (Math.PI / 180);
+      const adaptiveRotationSpeed = angleRad > Math.PI / 2 
+        ? this.rotationSpeed * 0.2  // 90度以上は20%の速度（以前は30%）
+        : angleRad > Math.PI / 4
+        ? this.rotationSpeed * (0.2 + 0.25 * (1 - (angleRad - Math.PI / 4) / (Math.PI / 4)))  // 45-90度の間で線形補間（0.2-0.45）
+        : this.rotationSpeed * (0.45 + 0.55 * (1 - angleRad / (Math.PI / 4))); // 0-45度の間で線形補間（0.45-1.0）
+      const clampedRotationSpeed = Math.min(adaptiveRotationSpeed, this.maxRotationSpeed);
+
+      // 現在の回転から目標回転へスムーズに補間
+      const rotationLerpFactor = Math.min(clampedRotationSpeed * delta, 1.0);
+      this.model.quaternion.slerp(desiredQuaternion, rotationLerpFactor);
+    } else if (this.controls) {
+      // 速度がほぼゼロの場合、視点中心を向く
+      const lookAtTarget = new THREE.Vector3().copy(
+        this.controls.target,
+      );
+      const targetRotation = new THREE.Object3D();
+      targetRotation.position.copy(this.model.position);
+      targetRotation.lookAt(lookAtTarget);
+      const desiredQuaternion = targetRotation.quaternion.clone();
+
+      // 現在の回転から目標回転へスムーズに補間
+      const rotationLerpFactor = Math.min(this.rotationSpeed * delta, 1.0);
+      this.model.quaternion.slerp(desiredQuaternion, rotationLerpFactor);
     }
   }
 }

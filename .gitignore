@@ -47,3 +47,4 @@ __marimo__/
 __tests__/
 __pycache__
 frontend/e2e-tests/screenshots/
+marimo/_plugins/db/
