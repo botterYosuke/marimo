@@ -18,7 +18,7 @@ import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js
  */
 export class CharacterComponent {
   private static readonly MODEL_URL = "Drone.gltf";
-  private static readonly MODEL_BASE_PATH = "/sci-fi-drone/source/";
+  private static readonly MODEL_BASE_PATH = "sci-fi-drone/source/";
   private static readonly DEFAULT_POSITION = new THREE.Vector3(0, 300, 0);
   private static readonly DEFAULT_SCALE = new THREE.Vector3(1, 1, 1);
   private static readonly TARGET_SIZE = 300; // 3D空間での目標サイズ（単位）
@@ -71,8 +71,8 @@ export class CharacterComponent {
     this.isLoading = true;
     const loader = new GLTFLoader();
 
-    // テクスチャパスの解決（テクスチャは/sci-fi-drone/textures/にある）
-    loader.setPath("/sci-fi-drone/");
+    // テクスチャパスの解決（テクスチャはsci-fi-drone/textures/にある）
+    loader.setPath("sci-fi-drone/");
 
     // モデルファイルのパス（setPathを使用するため相対パス）
     const modelPath = `source/${CharacterComponent.MODEL_URL}`;
