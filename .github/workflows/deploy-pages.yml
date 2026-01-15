@@ -19,37 +19,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Install repo
+        uses: ./.github/actions/install
 
-      - name: Install marimo
-        run: pip install marimo
+      - name: Generate LLM info TypeScript files
+        run: pnpm --filter @marimo-team/llm-info codegen
 
-      - name: Export notebooks to WASM
+      - name: Build Pyodide frontend
+        working-directory: ./frontend
+        env:
+          NODE_ENV: production
+          PYODIDE: "true"
+          VITE_MARIMO_VERSION: "0.19.2"
+        run: pnpm build
+
+      - name: Verify build output
         run: |
-          mkdir -p dist
-          for notebook in $(find examples -name "*.py" -type f); do
-            name=$(basename "$notebook" .py)
-            marimo export html-wasm "$notebook" -o "dist/${name}.html" || echo "Skipped: $notebook (export failed)"
-          done
-
-      - name: Create index page
-        run: |
-          echo "<html><head><title>Marimo Examples</title></head><body>" > dist/index.html
-          echo "<h1>Marimo Examples</h1><ul>" >> dist/index.html
-          for f in dist/*.html; do
-            [ "$f" = "dist/index.html" ] && continue
-            name=$(basename "$f")
-            echo "<li><a href='$name'>$name</a></li>" >> dist/index.html
-          done
-          echo "</ul></body></html>" >> dist/index.html
+          echo "Checking build output..."
+          ls -la frontend/dist/
+          test -f frontend/dist/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: frontend/dist
 
   deploy:
     needs: build
