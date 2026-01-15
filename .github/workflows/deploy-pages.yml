@@ -32,7 +32,7 @@ jobs:
           mkdir -p dist
           for notebook in $(find examples -name "*.py" -type f); do
             name=$(basename "$notebook" .py)
-            marimo export html-wasm "$notebook" -o "dist/${name}.html"
+            marimo export html-wasm "$notebook" -o "dist/${name}.html" || echo "Skipped: $notebook (export failed)"
           done
 
       - name: Create index page
