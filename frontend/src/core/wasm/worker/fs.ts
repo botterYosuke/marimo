@@ -6,9 +6,18 @@ import { getFS } from "./getFS";
 const NOTEBOOK_FILENAME = "notebook.py";
 const HOME_DIR = "/marimo";
 
+// Store the current filename used in the session
+let currentFilename: string | null = null;
+
 export const WasmFileSystem = {
   NOTEBOOK_FILENAME,
   HOME_DIR,
+  setCurrentFilename: (filename: string | null) => {
+    currentFilename = filename;
+  },
+  getCurrentFilename: (): string => {
+    return currentFilename || NOTEBOOK_FILENAME;
+  },
   createHomeDir: (pyodide: PyodideInterface) => {
     // Create and change to the home directory
     const FS = getFS(pyodide);
@@ -32,7 +41,8 @@ export const WasmFileSystem = {
   },
   readNotebook: (pyodide: PyodideInterface) => {
     const FS = getFS(pyodide);
-    const absPath = `${HOME_DIR}/${NOTEBOOK_FILENAME}`;
+    const filename = currentFilename || NOTEBOOK_FILENAME;
+    const absPath = `${HOME_DIR}/${filename}`;
     return decodeUtf8(FS.readFile(absPath));
   },
   initNotebookCode: (opts: {
@@ -56,15 +66,24 @@ export const WasmFileSystem = {
     if (filename && filename !== NOTEBOOK_FILENAME) {
       const existingContent = readIfExist(filename);
       if (existingContent) {
+        currentFilename = filename;
         return {
           code: existingContent,
           filename,
         };
       }
+      // If filename is specified but file doesn't exist, write to that filename
+      FS.writeFile(filename, code);
+      currentFilename = filename;
+      return {
+        code: code,
+        filename,
+      };
     }
 
     // If there is no filename, write the code to the last used file
     FS.writeFile(NOTEBOOK_FILENAME, code);
+    currentFilename = NOTEBOOK_FILENAME;
     return {
       code: code,
       filename: NOTEBOOK_FILENAME,

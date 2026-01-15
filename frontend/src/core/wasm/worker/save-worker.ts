@@ -68,12 +68,27 @@ const requestHandler = createRPCRequestHandler({
   },
   saveNotebook: async (opts: SaveNotebookRequest) => {
     await pyodideReadyPromise; // Make sure loading is done
+    // Use opts.filename if provided (from save-component.tsx), otherwise use getCurrentFilename()
+    // This ensures we use the filename that was determined by save-component.tsx
+    const filename = opts.filename || WasmFileSystem.getCurrentFilename();
+    // Ensure the file exists in the filesystem before calling save_file
+    // save-worker.ts is a separate worker instance, so it may not have the same files
+    // that were created in worker.ts. We need to create the file if it doesn't exist.
+    const FS = self.pyodide.FS;
+    try {
+      // Try to read the file to check if it exists
+      FS.readFile(filename);
+    } catch (e) {
+      // File doesn't exist, create it with empty content
+      // save_file will overwrite it with the actual content
+      FS.writeFile(filename, "");
+    }
     const saveFile = self.pyodide.runPython(`
       from marimo._pyodide.bootstrap import save_file
 
       save_file
     `);
-    await saveFile(JSON.stringify(opts), WasmFileSystem.NOTEBOOK_FILENAME);
+    await saveFile(JSON.stringify(opts), filename);
     await WasmFileSystem.persistFilesToRemote(self.pyodide);
   },
 });
