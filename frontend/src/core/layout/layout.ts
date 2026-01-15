@@ -6,8 +6,10 @@ import { cellRendererPlugins } from "@/components/editor/renderers/plugins";
 import type { LayoutType } from "@/components/editor/renderers/types";
 import { createReducerAndAtoms } from "@/utils/createReducer";
 import { Logger } from "@/utils/Logger";
+import { repl } from "@/utils/repl";
 import { getNotebook } from "../cells/cells";
 import { notebookCells } from "../cells/utils";
+import { is3DModeAtom } from "../mode";
 import { store } from "../state/jotai";
 
 export type LayoutData = GridLayout | undefined;
@@ -18,45 +20,47 @@ export interface LayoutState {
 }
 
 export function initialLayoutState(): LayoutState {
+  const is3DMode = store.get(is3DModeAtom);
   return {
-    selectedLayout: "vertical",
+    selectedLayout: is3DMode ? "grid" : "vertical",
     layoutData: {},
   };
 }
 
-const { valueAtom: layoutStateAtom, useActions } = createReducerAndAtoms(
-  initialLayoutState,
-  {
-    setLayoutView: (state, payload: LayoutType) => {
-      return {
-        ...state,
-        selectedLayout: payload,
-      };
-    },
-    setLayoutData: (
-      state,
-      payload: { layoutView: LayoutType; data: LayoutData },
-    ) => {
-      return {
-        ...state,
-        selectedLayout: payload.layoutView,
-        layoutData: {
-          ...state.layoutData,
-          [payload.layoutView]: payload.data,
-        },
-      };
-    },
-    setCurrentLayoutData: (state, payload: LayoutData) => {
-      return {
-        ...state,
-        layoutData: {
-          ...state.layoutData,
-          [state.selectedLayout]: payload,
-        },
-      };
-    },
+const {
+  valueAtom: layoutStateAtom,
+  useActions,
+  reducer: layoutReducer,
+} = createReducerAndAtoms(initialLayoutState, {
+  setLayoutView: (state, payload: LayoutType) => {
+    return {
+      ...state,
+      selectedLayout: payload,
+    };
   },
-);
+  setLayoutData: (
+    state,
+    payload: { layoutView: LayoutType; data: LayoutData },
+  ) => {
+    return {
+      ...state,
+      selectedLayout: payload.layoutView,
+      layoutData: {
+        ...state.layoutData,
+        [payload.layoutView]: payload.data,
+      },
+    };
+  },
+  setCurrentLayoutData: (state, payload: LayoutData) => {
+    return {
+      ...state,
+      layoutData: {
+        ...state.layoutData,
+        [state.selectedLayout]: payload,
+      },
+    };
+  },
+});
 
 export { layoutStateAtom };
 
@@ -67,6 +71,22 @@ export const useLayoutState = () => {
 export const useLayoutActions = () => {
   return useActions();
 };
+
+/**
+ * Set layout view programmatically. Exposed via repl for testing.
+ * Uses the reducer to ensure consistency with useLayoutActions.
+ */
+function setLayoutViewForTesting(layout: LayoutType) {
+  const currentState = store.get(layoutStateAtom);
+  const newState = layoutReducer(currentState, {
+    type: "setLayoutView",
+    payload: layout,
+  });
+  store.set(layoutStateAtom, newState);
+}
+
+// Allow setting layout view from the console for testing
+repl(setLayoutViewForTesting, "setLayoutView");
 
 /**
  * Get the serialized layout data, to be used when saving.
@@ -90,6 +110,10 @@ export function getSerializedLayout() {
   );
   if (plugin === undefined) {
     Logger.error(`Unknown layout type: ${selectedLayout}`);
+    return null;
+  }
+  // dataがundefinedの場合はnullを返す
+  if (data === undefined) {
     return null;
   }
   return {
