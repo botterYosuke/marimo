@@ -26,6 +26,7 @@ import { aiEnabledAtom } from "@/core/config/config";
 import { canInteractWithAppAtom } from "@/core/network/connection";
 import { useBoolean } from "@/hooks/useBoolean";
 import { cn } from "@/utils/cn";
+import { is3DModeAtom } from "@/core/mode";
 import { Functions } from "@/utils/functions";
 import type { CellColumnId } from "@/utils/id-tree";
 import { invariant } from "@/utils/invariant";
@@ -253,6 +254,7 @@ export const AddCellButtons: React.FC<{
   const [isAiButtonOpen, isAiButtonOpenActions] = useBoolean(false);
   const aiEnabled = useAtomValue(aiEnabledAtom);
   const canInteractWithApp = useAtomValue(canInteractWithAppAtom);
+  const is3DMode = useAtomValue(is3DModeAtom);
 
   const buttonClass = cn(
     "mb-0 rounded-none sm:px-4 md:px-5 lg:px-8 tracking-wide no-wrap whitespace-nowrap",
@@ -323,7 +325,7 @@ export const AddCellButtons: React.FC<{
             aiEnabled ? null : <span>Enable via settings under AI Assist</span>
           }
           delayDuration={100}
-          asChild={false}
+          asChild={true}
         >
           <Button
             className={buttonClass}
@@ -341,10 +343,10 @@ export const AddCellButtons: React.FC<{
   };
 
   return (
-    <div className="flex justify-center mt-4 pt-6 pb-32 group gap-4 w-full print:hidden">
+    <div className={cn("flex justify-center mt-4 pt-6 group gap-4 w-full print:hidden pointer-events-none", is3DMode ? "pb-4" : "pb-32")}>
       <div
         className={cn(
-          "border border-border rounded transition-all duration-200 overflow-hidden divide-x divide-border flex",
+          "shadow-sm border border-border rounded transition-all duration-200 overflow-hidden divide-x divide-border flex pointer-events-auto bg-background",
           !isAiButtonOpen && "w-fit shadow-sm-solid-shade",
           isAiButtonOpen &&
             "w-full max-w-4xl shadow-md-solid-shade shadow-(color:--blue-3)",
