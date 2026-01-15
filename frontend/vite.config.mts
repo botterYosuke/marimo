@@ -319,8 +319,18 @@ export default defineConfig({
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
   },
   build: {
-    minify: isDev ? false : "oxc", // default is "oxc"
+    minify: isDev ? false : "esbuild", // Changed from "oxc" to "esbuild" to fix CJS module issues
     sourcemap: isDev,
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          // Split react-grid-layout into a separate chunk to avoid import resolution issues
+          if (id.includes("react-grid-layout")) {
+            return "react-grid-layout";
+          }
+        },
+      },
+    },
   },
   resolve: {
     tsconfigPaths: true,
