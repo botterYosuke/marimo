@@ -209,6 +209,41 @@ If the server is already running, make sure it is using port ${SERVER_PORT} with
   };
 };
 
+// Plugin for production build - transforms template variables for Pyodide
+const htmlBuildPlugin = (): Plugin => {
+  return {
+    apply: "build",
+    name: "html-build-transform",
+    transformIndexHtml: async (html) => {
+      if (!isPyodide) {
+        return html;
+      }
+
+      const marimoVersion = process.env.VITE_MARIMO_VERSION ?? "latest";
+      html = html.replace("{{ base_url }}", "");
+      html = html.replace("{{ title }}", "marimo");
+      html = html.replace("{{ filename }}", "wasm-intro.py");
+      html = html.replace('{{ version }}', marimoVersion);
+      html = html.replace('{{ user_config }}', '{}');
+      html = html.replace('{{ server_token }}', '');
+      html = html.replace(
+        "'{{ mount_config }}'",
+        JSON.stringify({
+          filename: "wasm-intro.py",
+          mode: "edit",
+          version: marimoVersion,
+          config: {},
+          configOverrides: {},
+          appConfig: {},
+          serverToken: "",
+        }),
+      );
+      html = html.replace(/<\/head>/, "<marimo-wasm></marimo-wasm></head>");
+      return html;
+    },
+  };
+};
+
 const ReactCompilerConfig = {
   target: "19",
 };
@@ -310,6 +345,7 @@ export default defineConfig({
   },
   plugins: [
     htmlDevPlugin(),
+    htmlBuildPlugin(),
     react({
       babel: {
         presets: ["@babel/preset-typescript"],
