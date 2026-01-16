@@ -14,7 +14,7 @@
     "dev:pyodide": "concurrently --names \"pyodide-server,fe\" --prefix-colors \"green,blue\" --kill-others-on-fail false \"uv run pyodide/build_and_serve.py\" \"cd frontend && cross-env PYODIDE=true VITE_MARIMO_VERSION=0.19.2 pnpm dev\"",
     "start:server": "uv run marimo edit --no-token --headless --port 2718 %TEMP%",
     "start:electron": "wait-on http-get://localhost:3000 --timeout 60000 -v && cross-env NODE_ENV=development pnpm exec electron .",
-    "start": "concurrently --names \"dev,server,electron\" --prefix-colors \"blue,green,cyan\" --kill-others-on-fail false \"pnpm dev\" \"pnpm start:server\" \"pnpm start:electron\""
+    "start": "concurrently --names \"dev,electron\" --prefix-colors \"blue,cyan\" --kill-others-on-fail false \"pnpm dev\" \"pnpm start:electron\""
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
