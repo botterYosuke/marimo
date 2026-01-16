@@ -102,8 +102,21 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
   // Use ref to access latest focusedFloatingWindowCellId without adding it to dependency array
   const focusedFloatingWindowCellIdRef = useRef<CellId | null>(null);
   focusedFloatingWindowCellIdRef.current = focusedFloatingWindowCellId;
-  // Track focusOut timeout to properly clean up
-  const focusOutTimeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Track focusOut animation frame to properly clean up
+  const focusOutAnimationFrameRef = useRef<number | null>(null);
+
+  // Helper function to check if element is within floating-window or codemirror editor
+  const isInFloatingWindowOrEditor = (element: HTMLElement | null): boolean => {
+    if (!element) {
+      return false;
+    }
+    return !!(
+      element.closest(".floating-window") ||
+      element.closest("[data-cell-wrapper-id]") ||
+      element.closest("[data-cell-id]") ||
+      element.closest(".cm-editor")
+    );
+  };
 
   // Helper function to extract cellId from element or its ancestors
   const extractCellId = (target: HTMLElement): CellId | null => {
@@ -130,7 +143,7 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
       return;
     }
 
-    // mousedownイベントでfloating-window内のクリックを検出
+    // Detect clicks within floating-window using mousedown event
     const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const cellId = extractCellId(target);
@@ -146,19 +159,13 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
 
-      // First, try to find floating-window directly (even if not inside codemirror)
-      const floatingWindow =
-        target.closest(".floating-window") ||
-        target.closest("[data-cell-wrapper-id]") ||
-        target.closest("[data-cell-id]");
-
-      // Also check if inside codemirror editor
-      const cmEditor = target.closest(".cm-editor");
+      // Check if target is within floating-window or codemirror editor
+      const isInFloatingWindow = isInFloatingWindowOrEditor(target);
 
       // If not in floating-window or codemirror, check if we should keep the current focused cellId
       // This handles cases where focus moves to portal elements (like dropdowns) that are not
       // direct children of the floating-window but are still associated with it
-      if (!floatingWindow && !cmEditor) {
+      if (!isInFloatingWindow) {
         // Don't clear the focused cellId if we already have one - this allows focus to move
         // to portal elements (like dropdowns) without losing the highlight
         // Only return early if we don't have a focused cellId yet
@@ -167,12 +174,6 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
         }
         // If we have a focused cellId, keep it even if we can't find the floating-window
         // This handles portal elements that are rendered outside the floating-window DOM tree
-        return;
-      }
-
-      // Determine which element to use for cellId extraction
-      const containerElement = floatingWindow || cmEditor;
-      if (!containerElement) {
         return;
       }
 
@@ -187,28 +188,24 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
     };
 
     const handleFocusOut = (e: FocusEvent) => {
-      // Clear any pending timeout
-      if (focusOutTimeoutIdRef.current !== null) {
-        clearTimeout(focusOutTimeoutIdRef.current);
+      // Clear any pending animation frame
+      if (focusOutAnimationFrameRef.current !== null) {
+        cancelAnimationFrame(focusOutAnimationFrameRef.current);
       }
 
-      // Use setTimeout to check if focus moved to another floating-window
+      // Use requestAnimationFrame to check if focus moved to another floating-window
       // This allows us to check the new focus target after the focus event completes
-      focusOutTimeoutIdRef.current = setTimeout(() => {
-        focusOutTimeoutIdRef.current = null;
+      focusOutAnimationFrameRef.current = requestAnimationFrame(() => {
+        focusOutAnimationFrameRef.current = null;
         const activeElement = document.activeElement as HTMLElement;
         if (activeElement) {
           // Check if focus moved to another floating-window or codemirror
-          const floatingWindow =
-            activeElement.closest(".floating-window") ||
-            activeElement.closest("[data-cell-wrapper-id]") ||
-            activeElement.closest("[data-cell-id]");
-          const cmEditor = activeElement.closest(".cm-editor");
+          const isInFloatingWindow = isInFloatingWindowOrEditor(activeElement);
 
           // Only clear if focus is truly outside any floating-window or codemirror
           // Don't clear if focus is just moving within the floating-window (e.g., dropdowns)
           // Keep the previous focused cellId if we can't determine a new one
-          if (!floatingWindow && !cmEditor) {
+          if (!isInFloatingWindow) {
             // Check if mousedown happened recently (within 100ms) - if so, don't clear
             // This prevents clearing when clicking on buttons/titlebar that cause focus to move temporarily
             const timeSinceMouseDown = Date.now() - mouseDownTimeRef.current;
@@ -218,12 +215,7 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
 
             // Additional check: see if the relatedTarget (where focus is going) is within a floating-window
             const relatedTarget = e.relatedTarget as HTMLElement | null;
-            const relatedInFloatingWindow =
-              relatedTarget &&
-              (relatedTarget.closest(".floating-window") ||
-                relatedTarget.closest("[data-cell-wrapper-id]") ||
-                relatedTarget.closest("[data-cell-id]") ||
-                relatedTarget.closest(".cm-editor"));
+            const relatedInFloatingWindow = isInFloatingWindowOrEditor(relatedTarget);
 
             // Only clear if the focus is truly leaving the floating-window and it wasn't a recent mousedown
             if (!relatedInFloatingWindow && !wasRecentMouseDown) {
@@ -235,18 +227,18 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
           // No active element means focus left the page
           setFocusedFloatingWindowCellId(null);
         }
-      }, 0);
+      });
     };
 
-    // mousedownイベントリスナーを追加（capture phaseで登録してstopPropagationを回避）
+    // Add mousedown event listener (register in capture phase to avoid stopPropagation issues)
     document.addEventListener("mousedown", handleMouseDown, true);
     document.addEventListener("focusin", handleFocusIn);
     document.addEventListener("focusout", handleFocusOut);
 
     return () => {
-      if (focusOutTimeoutIdRef.current !== null) {
-        clearTimeout(focusOutTimeoutIdRef.current);
-        focusOutTimeoutIdRef.current = null;
+      if (focusOutAnimationFrameRef.current !== null) {
+        cancelAnimationFrame(focusOutAnimationFrameRef.current);
+        focusOutAnimationFrameRef.current = null;
       }
       document.removeEventListener("mousedown", handleMouseDown, true);
       document.removeEventListener("focusin", handleFocusIn);
