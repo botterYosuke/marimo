@@ -4,6 +4,7 @@ import React, {
   type PropsWithChildren,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
@@ -55,7 +56,7 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
   mode,
 }) => {
   const isReading = mode === "read";
-  const inGridIds = new Set(layout.cells.map((cell) => cell.i));
+  const inGridIds = useMemo(() => new Set(layout.cells.map((cell) => cell.i)), [layout.cells]);
   const [droppingItem, setDroppingItem] = useState<{
     i: string;
     w?: number;
@@ -90,6 +91,168 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
 
   const enableInteractions = !isReading;
   const layoutByCellId = Maps.keyBy(layout.cells, (cell) => cell.i);
+
+  // Track focused floating-window cellId
+  const [focusedFloatingWindowCellId, setFocusedFloatingWindowCellId] =
+    useState<CellId | null>(null);
+
+  // Track when mousedown occurred to prevent premature clearing in focusout
+  const mouseDownTimeRef = useRef<number>(0);
+  const mouseDownCellIdRef = useRef<CellId | null>(null);
+  // Use ref to access latest focusedFloatingWindowCellId without adding it to dependency array
+  const focusedFloatingWindowCellIdRef = useRef<CellId | null>(null);
+  focusedFloatingWindowCellIdRef.current = focusedFloatingWindowCellId;
+  // Track focusOut timeout to properly clean up
+  const focusOutTimeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Helper function to extract cellId from element or its ancestors
+  const extractCellId = (target: HTMLElement): CellId | null => {
+    // Try to find floating-window or data-cell-wrapper-id/data-cell-id container
+    const container =
+      target.closest(".floating-window") ||
+      target.closest("[data-cell-wrapper-id]") ||
+      target.closest("[data-cell-id]");
+
+    if (container) {
+      // Prefer data-cell-wrapper-id (used by floating-window) over data-cell-id
+      return (
+        (container.getAttribute("data-cell-wrapper-id") as CellId | null) ||
+        (container.getAttribute("data-cell-id") as CellId | null)
+      );
+    }
+
+    return null;
+  };
+
+  // Listen for focus and mouse events on floating-window containing codemirror editor
+  useEffect(() => {
+    if (isReading) {
+      return;
+    }
+
+    // mousedownイベントでfloating-window内のクリックを検出
+    const handleMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const cellId = extractCellId(target);
+
+      if (cellId) {
+        // Record mousedown time and cellId to prevent premature clearing in focusout
+        mouseDownTimeRef.current = Date.now();
+        mouseDownCellIdRef.current = cellId;
+        setFocusedFloatingWindowCellId(cellId);
+      }
+    };
+
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+
+      // First, try to find floating-window directly (even if not inside codemirror)
+      const floatingWindow =
+        target.closest(".floating-window") ||
+        target.closest("[data-cell-wrapper-id]") ||
+        target.closest("[data-cell-id]");
+
+      // Also check if inside codemirror editor
+      const cmEditor = target.closest(".cm-editor");
+
+      // If not in floating-window or codemirror, check if we should keep the current focused cellId
+      // This handles cases where focus moves to portal elements (like dropdowns) that are not
+      // direct children of the floating-window but are still associated with it
+      if (!floatingWindow && !cmEditor) {
+        // Don't clear the focused cellId if we already have one - this allows focus to move
+        // to portal elements (like dropdowns) without losing the highlight
+        // Only return early if we don't have a focused cellId yet
+        if (!focusedFloatingWindowCellIdRef.current) {
+          return;
+        }
+        // If we have a focused cellId, keep it even if we can't find the floating-window
+        // This handles portal elements that are rendered outside the floating-window DOM tree
+        return;
+      }
+
+      // Determine which element to use for cellId extraction
+      const containerElement = floatingWindow || cmEditor;
+      if (!containerElement) {
+        return;
+      }
+
+      // Try to get cellId from floating-window or codemirror container
+      const cellId = extractCellId(target);
+
+      if (cellId) {
+        // Always set the focused cellId, even if not in grid (it might be in sidebar)
+        // The GridCell component will handle the highlighting appropriately
+        setFocusedFloatingWindowCellId(cellId);
+      }
+    };
+
+    const handleFocusOut = (e: FocusEvent) => {
+      // Clear any pending timeout
+      if (focusOutTimeoutIdRef.current !== null) {
+        clearTimeout(focusOutTimeoutIdRef.current);
+      }
+
+      // Use setTimeout to check if focus moved to another floating-window
+      // This allows us to check the new focus target after the focus event completes
+      focusOutTimeoutIdRef.current = setTimeout(() => {
+        focusOutTimeoutIdRef.current = null;
+        const activeElement = document.activeElement as HTMLElement;
+        if (activeElement) {
+          // Check if focus moved to another floating-window or codemirror
+          const floatingWindow =
+            activeElement.closest(".floating-window") ||
+            activeElement.closest("[data-cell-wrapper-id]") ||
+            activeElement.closest("[data-cell-id]");
+          const cmEditor = activeElement.closest(".cm-editor");
+
+          // Only clear if focus is truly outside any floating-window or codemirror
+          // Don't clear if focus is just moving within the floating-window (e.g., dropdowns)
+          // Keep the previous focused cellId if we can't determine a new one
+          if (!floatingWindow && !cmEditor) {
+            // Check if mousedown happened recently (within 100ms) - if so, don't clear
+            // This prevents clearing when clicking on buttons/titlebar that cause focus to move temporarily
+            const timeSinceMouseDown = Date.now() - mouseDownTimeRef.current;
+            const wasRecentMouseDown =
+              timeSinceMouseDown < 100 &&
+              mouseDownCellIdRef.current === focusedFloatingWindowCellIdRef.current;
+
+            // Additional check: see if the relatedTarget (where focus is going) is within a floating-window
+            const relatedTarget = e.relatedTarget as HTMLElement | null;
+            const relatedInFloatingWindow =
+              relatedTarget &&
+              (relatedTarget.closest(".floating-window") ||
+                relatedTarget.closest("[data-cell-wrapper-id]") ||
+                relatedTarget.closest("[data-cell-id]") ||
+                relatedTarget.closest(".cm-editor"));
+
+            // Only clear if the focus is truly leaving the floating-window and it wasn't a recent mousedown
+            if (!relatedInFloatingWindow && !wasRecentMouseDown) {
+              setFocusedFloatingWindowCellId(null);
+            }
+            // Otherwise, keep the current focusedFloatingWindowCellId
+          }
+        } else {
+          // No active element means focus left the page
+          setFocusedFloatingWindowCellId(null);
+        }
+      }, 0);
+    };
+
+    // mousedownイベントリスナーを追加（capture phaseで登録してstopPropagationを回避）
+    document.addEventListener("mousedown", handleMouseDown, true);
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusout", handleFocusOut);
+
+    return () => {
+      if (focusOutTimeoutIdRef.current !== null) {
+        clearTimeout(focusOutTimeoutIdRef.current);
+        focusOutTimeoutIdRef.current = null;
+      }
+      document.removeEventListener("mousedown", handleMouseDown, true);
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusout", handleFocusOut);
+    };
+  }, [isReading]);
 
   const handleMakeScrollable = (cellId: CellId) => (isScrollable: boolean) => {
     const scrollableCells = new Set(layout.scrollableCells);
@@ -213,6 +376,7 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
               isScrollable={isScrollable}
               side={side}
               hidden={cell.errored || cell.interrupted || cell.stopped}
+              focusedFloatingWindowCellId={focusedFloatingWindowCellId}
             />
           );
 
@@ -278,6 +442,7 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
                 status={cell.status}
                 isScrollable={false}
                 hidden={false}
+                focusedFloatingWindowCellId={focusedFloatingWindowCellId}
               />
             );
           })}
@@ -340,6 +505,7 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
               isScrollable={false}
               status={cell.status}
               hidden={false}
+              focusedFloatingWindowCellId={focusedFloatingWindowCellId}
             />
           </div>
         ))}
@@ -356,6 +522,7 @@ interface GridCellProps extends Pick<CellRuntimeState, "output" | "status"> {
   hidden: boolean;
   isScrollable: boolean;
   side?: GridLayoutCellSide;
+  focusedFloatingWindowCellId?: CellId | null;
 }
 
 const GridCell = memo(
@@ -369,28 +536,36 @@ const GridCell = memo(
     isScrollable,
     side,
     className,
+    focusedFloatingWindowCellId,
   }: GridCellProps) => {
+    const isFloatingWindowFocused = focusedFloatingWindowCellId === cellId;
     const loading = outputIsLoading(status);
 
     const isOutputEmpty = output == null || output.data === "";
+
+    const computedClassName = cn(
+      className,
+      "h-full w-full p-2 overflow-x-auto",
+      hidden && "invisible",
+      isScrollable ? "overflow-y-auto" : "overflow-y-hidden",
+      side === "top" && "flex items-start",
+      side === "bottom" && "flex items-end",
+      side === "left" && "flex justify-start",
+      side === "right" && "flex justify-end",
+      isFloatingWindowFocused && "border-2 border-(--sky-8) rounded",
+    );
+
     // If not reading, show code when there is no output
     if (isOutputEmpty && mode !== "read") {
-      return <TinyCode className={className} code={code} />;
+      return (
+        <div className={computedClassName}>
+          <TinyCode code={code} />
+        </div>
+      );
     }
 
     return (
-      <div
-        className={cn(
-          className,
-          "h-full w-full p-2 overflow-x-auto",
-          hidden && "invisible",
-          isScrollable ? "overflow-y-auto" : "overflow-y-hidden",
-          side === "top" && "flex items-start",
-          side === "bottom" && "flex items-end",
-          side === "left" && "flex justify-start",
-          side === "right" && "flex justify-end",
-        )}
-      >
+      <div className={computedClassName}>
         <OutputArea
           allowExpand={false}
           output={output}
