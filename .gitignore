@@ -130,3 +130,4 @@ __marimo__
 site
 .playwright-mcp/
 .cursor/plans/
+dist-electron/

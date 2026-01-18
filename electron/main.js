@@ -2,9 +2,12 @@
 
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
+import os from "node:os";
+import { spawn, ChildProcess } from "node:child_process";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { initLogger, logInfo, logError } from "./utils/logger.js";
-import { getAppRoot } from "./utils/paths.js";
+import { getAppRoot, getMarimoServerExecutable } from "./utils/paths.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +19,7 @@ let mainWindow = null;
 
 // Server configuration
 const SERVER_URL = "http://localhost:2718";
+const SERVER_PORT = 2718;
 const SERVER_STATUS = {
   RUNNING: "running",
   STOPPED: "stopped",
@@ -25,6 +29,7 @@ const SERVER_STATUS = {
 
 let serverStatus = SERVER_STATUS.STOPPED;
 let serverLogs = [];
+let serverProcess = null; // Child process for the Python server
 
 /**
  * Create the main application window
@@ -65,6 +70,140 @@ function createWindow() {
   logInfo("Main window created");
 }
 
+/**
+ * Start the marimo Python server
+ */
+function startServer() {
+  // If server is already starting or running, don't start again
+  if (serverStatus === SERVER_STATUS.STARTING || serverStatus === SERVER_STATUS.RUNNING) {
+    logInfo("Server is already starting or running");
+    return;
+  }
+
+  logInfo("Starting marimo server...");
+  serverStatus = SERVER_STATUS.STARTING;
+
+  // Notify the main window
+  if (mainWindow) {
+    mainWindow.webContents.send("server:status-changed", serverStatus);
+  }
+
+  // Get the server executable path
+  const serverExecutable = getMarimoServerExecutable();
+  logInfo(`Server executable: ${serverExecutable}`);
+
+  // Check if we're in production (packaged app)
+  if (app.isPackaged) {
+    // In production, use the PyInstaller executable
+    if (!existsSync(serverExecutable)) {
+      logError(`Server executable not found: ${serverExecutable}`);
+      serverStatus = SERVER_STATUS.ERROR;
+      if (mainWindow) {
+        mainWindow.webContents.send("server:status-changed", serverStatus);
+      }
+      return;
+    }
+
+    // Get temp directory for notebook files
+    const tempDir = process.env.TEMP || process.env.TMP || os.tmpdir();
+    const notebookDir = path.join(tempDir, "marimo");
+
+    // Spawn the server process
+    serverProcess = spawn(serverExecutable, [
+      "edit",
+      "--no-token",
+      "--headless",
+      "--port",
+      String(SERVER_PORT),
+      notebookDir,
+    ], {
+      stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        ...process.env,
+        // Ensure PATH includes necessary directories
+        PATH: process.env.PATH || "",
+      },
+    });
+  } else {
+    // In development, use the Python command directly
+    // This falls back to the existing behavior for development
+    logInfo("Development mode: server should be started externally");
+    serverStatus = SERVER_STATUS.STOPPED;
+    if (mainWindow) {
+      mainWindow.webContents.send("server:status-changed", serverStatus);
+    }
+    return;
+  }
+
+  // Handle server output
+  if (serverProcess) {
+    serverProcess.stdout?.on("data", (data) => {
+      const message = data.toString();
+      logInfo(`[Server] ${message.trim()}`);
+      serverLogs.push({ timestamp: Date.now(), type: "stdout", message });
+
+      // Limit log size
+      if (serverLogs.length > 1000) {
+        serverLogs.shift();
+      }
+    });
+
+    serverProcess.stderr?.on("data", (data) => {
+      const message = data.toString();
+      logError(`[Server] ${message.trim()}`);
+      serverLogs.push({ timestamp: Date.now(), type: "stderr", message });
+
+      // Limit log size
+      if (serverLogs.length > 1000) {
+        serverLogs.shift();
+      }
+    });
+
+    serverProcess.on("error", (error) => {
+      logError("Failed to start server", error);
+      serverStatus = SERVER_STATUS.ERROR;
+      if (mainWindow) {
+        mainWindow.webContents.send("server:status-changed", serverStatus);
+      }
+      serverProcess = null;
+    });
+
+    serverProcess.on("exit", (code, signal) => {
+      logInfo(`Server process exited with code ${code} and signal ${signal}`);
+      serverStatus = SERVER_STATUS.STOPPED;
+      if (mainWindow) {
+        mainWindow.webContents.send("server:status-changed", serverStatus);
+      }
+      serverProcess = null;
+    });
+  }
+}
+
+/**
+ * Stop the marimo Python server
+ */
+function stopServer() {
+  if (serverProcess) {
+    logInfo("Stopping marimo server...");
+    serverStatus = SERVER_STATUS.STOPPED;
+
+    // Kill the server process
+    if (process.platform === "win32") {
+      // On Windows, use taskkill for a cleaner shutdown
+      spawn("taskkill", ["/pid", String(serverProcess.pid), "/f", "/t"]);
+    } else {
+      serverProcess.kill("SIGTERM");
+    }
+
+    serverProcess = null;
+
+    // Notify the main window
+    if (mainWindow) {
+      mainWindow.webContents.send("server:status-changed", serverStatus);
+    }
+  }
+}
+
 // IPC Handlers
 ipcMain.handle("server:get-url", () => {
   logInfo("IPC: server:get-url");
@@ -87,15 +226,25 @@ ipcMain.handle("server:get-status", async () => {
   return serverStatus;
 });
 
+ipcMain.handle("server:start", async () => {
+  logInfo("IPC: server:start");
+  startServer();
+  return { success: true, message: "Server start requested" };
+});
+
+ipcMain.handle("server:stop", async () => {
+  logInfo("IPC: server:stop");
+  stopServer();
+  return { success: true, message: "Server stop requested" };
+});
+
 ipcMain.handle("server:restart", async () => {
   logInfo("IPC: server:restart");
-  // Note: Server is managed externally via package.json scripts
-  // This is a placeholder for future server management
-  serverStatus = SERVER_STATUS.STARTING;
-  if (mainWindow) {
-    mainWindow.webContents.send("server:status-changed", serverStatus);
-  }
-  // In a real implementation, you would restart the server process here
+  stopServer();
+  // Wait a bit before starting again
+  setTimeout(() => {
+    startServer();
+  }, 1000);
   return { success: true, message: "Server restart requested" };
 });
 
@@ -108,6 +257,11 @@ ipcMain.handle("server:get-logs", () => {
 app.whenReady().then(async () => {
   logInfo("App ready");
   createWindow();
+
+  // Start the server automatically if packaged (production)
+  if (app.isPackaged) {
+    startServer();
+  }
 
   // Check server status periodically
   setInterval(async () => {
@@ -136,9 +290,17 @@ app.whenReady().then(async () => {
 });
 
 app.on("window-all-closed", () => {
+  // Stop the server when the app is closed
+  stopServer();
+
   if (process.platform !== "darwin") {
     app.quit();
   }
+});
+
+app.on("before-quit", () => {
+  // Ensure server is stopped before quitting
+  stopServer();
 });
 
 // Error handling

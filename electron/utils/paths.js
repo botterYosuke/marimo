@@ -58,3 +58,14 @@ export function getVenvPythonPath() {
   return path.join(venvDir, "bin", "python3");
 }
 
+/**
+ * Get the PyInstaller executable path for the marimo server
+ * This is the standalone executable created by PyInstaller
+ */
+export function getMarimoServerExecutable() {
+  const appRoot = getAppRoot();
+  if (process.platform === "win32") {
+    return path.join(appRoot, "resources", "marimo-server.exe");
+  }
+  return path.join(appRoot, "resources", "marimo-server");
+}

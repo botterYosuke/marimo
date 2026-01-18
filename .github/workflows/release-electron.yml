@@ -1,0 +1,357 @@
+name: Release Electron App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false  # Don't cancel if another build is in progress
+
+permissions:
+  contents: write  # Required for creating releases
+  id-token: write  # Required for OIDC
+
+env:
+  TURBO_TEAM: marimo
+
+jobs:
+  # Build and release Electron app for Windows, macOS, and Linux
+  build_windows:
+    name: 🪟 Build Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⎔ Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: 📥 Install Node.js dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: 📦 Build frontend
+        uses: ./.github/actions/build-frontend
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          codecov-token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+
+      - name: 🔨 Get version
+        id: get_version
+        shell: pwsh
+        run: |
+          $version = uv version --short
+          echo "marimo_version=$version" >> $env:GITHUB_OUTPUT
+          echo "MARIMO_VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: 📦 Install Python dependencies (electron)
+        run: uv pip install -e ".[electron]"
+
+      - name: 🔨 Build Python executable (PyInstaller)
+        run: |
+          uv run pyinstaller --clean --noconfirm marimo.spec
+
+      - name: 📦 Verify Python executable
+        shell: pwsh
+        run: |
+          if (Test-Path "dist\marimo-server.exe") {
+            Write-Host "✅ Python executable built successfully"
+          } else {
+            Write-Host "❌ Python executable not found"
+            exit 1
+          }
+
+      - name: 📦 Update package.json version
+        working-directory: frontend
+        run: |
+          npm version ${{ env.MARIMO_VERSION }} --no-git-tag-version
+
+      - name: 📦 Build Electron app
+        run: pnpm exec electron-builder --win --x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📤 Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-windows-${{ env.MARIMO_VERSION }}
+          path: |
+            dist-electron/*.exe
+            dist-electron/*.blockmap
+          retention-days: 30
+
+  build_macos:
+    name: 🍎 Build macOS
+    runs-on: macos-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⎔ Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: 📥 Install Node.js dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: 📦 Build frontend
+        uses: ./.github/actions/build-frontend
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          codecov-token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+
+      - name: 🔨 Get version
+        id: get_version
+        run: |
+          version=$(uv version --short)
+          echo "marimo_version=$version" >> $GITHUB_OUTPUT
+          echo "MARIMO_VERSION=$version" >> $GITHUB_ENV
+
+      - name: 📦 Install Python dependencies (electron)
+        run: uv pip install -e ".[electron]"
+
+      - name: 🔨 Build Python executable (PyInstaller)
+        run: |
+          uv run pyinstaller --clean --noconfirm marimo.spec
+
+      - name: 📦 Verify Python executable
+        run: |
+          if [ -f "dist/marimo-server" ]; then
+            echo "✅ Python executable built successfully"
+          else
+            echo "❌ Python executable not found"
+            exit 1
+          fi
+
+      - name: 📦 Update package.json version
+        working-directory: frontend
+        run: |
+          npm version ${{ env.MARIMO_VERSION }} --no-git-tag-version
+
+      - name: 📦 Build Electron app
+        run: pnpm exec electron-builder --mac --x64 --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false  # Skip code signing for now
+
+      - name: 📤 Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-macos-${{ env.MARIMO_VERSION }}
+          path: |
+            dist-electron/*.dmg
+            dist-electron/*.zip
+            dist-electron/*.blockmap
+          retention-days: 30
+
+  build_linux:
+    name: 🐧 Build Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⎔ Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: 📥 Install Node.js dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: 📦 Build frontend
+        uses: ./.github/actions/build-frontend
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          codecov-token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+
+      - name: 🔨 Get version
+        id: get_version
+        run: |
+          version=$(uv version --short)
+          echo "marimo_version=$version" >> $GITHUB_OUTPUT
+          echo "MARIMO_VERSION=$version" >> $GITHUB_ENV
+
+      - name: 📦 Install Python dependencies (electron)
+        run: uv pip install -e ".[electron]"
+
+      - name: 🔨 Build Python executable (PyInstaller)
+        run: |
+          uv run pyinstaller --clean --noconfirm marimo.spec
+
+      - name: 📦 Verify Python executable
+        run: |
+          if [ -f "dist/marimo-server" ]; then
+            echo "✅ Python executable built successfully"
+          else
+            echo "❌ Python executable not found"
+            exit 1
+          fi
+
+      - name: 📦 Update package.json version
+        working-directory: frontend
+        run: |
+          npm version ${{ env.MARIMO_VERSION }} --no-git-tag-version
+
+      - name: 📦 Build Electron app
+        run: pnpm exec electron-builder --linux --x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📤 Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-linux-${{ env.MARIMO_VERSION }}
+          path: |
+            dist-electron/*.AppImage
+            dist-electron/*.deb
+            dist-electron/*.blockmap
+          retention-days: 30
+
+  # Create GitHub Release with all artifacts
+  create_release:
+    name: 📦 Create Release
+    needs: [build_windows, build_macos, build_linux]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+
+      - name: 🔨 Get version
+        id: get_version
+        run: |
+          version=$(uv version --short)
+          echo "marimo_version=$version" >> $GITHUB_OUTPUT
+          echo "tag=v$version-electron" >> $GITHUB_OUTPUT
+
+      - name: 🔍 Check if release already exists
+        id: check_release
+        run: |
+          # Use GitHub API to check if release exists
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_version.outputs.tag }}")
+
+          if [ "$response" = "200" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Release ${{ steps.get_version.outputs.tag }} already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "✅ Release ${{ steps.get_version.outputs.tag }} does not exist"
+          fi
+
+      - name: 📥 Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: electron-windows-${{ steps.get_version.outputs.marimo_version }}
+          path: artifacts/windows
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📥 Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: electron-macos-${{ steps.get_version.outputs.marimo_version }}
+          path: artifacts/macos
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📥 Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: electron-linux-${{ steps.get_version.outputs.marimo_version }}
+          path: artifacts/linux
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📝 Create Release
+        if: steps.check_release.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          name: "marimo Electron App ${{ steps.get_version.outputs.marimo_version }}"
+          body: |
+            ## Electron App Release ${{ steps.get_version.outputs.marimo_version }}
+
+            This release contains the Electron desktop application for marimo.
+
+            ### Downloads
+
+            #### Windows
+            - **Installer**: `marimo Setup ${{ steps.get_version.outputs.marimo_version }}.exe`
+            - **Portable**: `marimo ${{ steps.get_version.outputs.marimo_version }}.exe`
+
+            #### macOS
+            - **DMG**: `marimo-${{ steps.get_version.outputs.marimo_version }}.dmg`
+            - **Zip**: `marimo-${{ steps.get_version.outputs.marimo_version }}-mac.zip`
+
+            #### Linux
+            - **AppImage**: `marimo-${{ steps.get_version.outputs.marimo_version }}.AppImage`
+            - **Debian**: `marimo_${{ steps.get_version.outputs.marimo_version }}_amd64.deb`
+
+            ### Installation
+
+            - **Windows**: Run the installer or use the portable executable
+            - **macOS**: Open the DMG file and drag marimo to Applications
+            - **Linux**: Make the AppImage executable (`chmod +x`) and run it, or install the .deb package
+
+          files: |
+            artifacts/**/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ⚠️ Skip release (already exists)
+        if: steps.check_release.outputs.exists == 'true'
+        run: |
+          echo "⚠️ Release ${{ steps.get_version.outputs.tag }} already exists. Skipping release creation."
+          exit 0

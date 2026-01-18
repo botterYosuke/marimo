@@ -14,7 +14,9 @@
     "dev:pyodide": "concurrently --names \"pyodide-server,fe\" --prefix-colors \"green,blue\" --kill-others-on-fail false \"uv run pyodide/build_and_serve.py\" \"cd frontend && cross-env PYODIDE=true VITE_MARIMO_VERSION=0.19.2 pnpm dev\"",
     "start:server": "uv run marimo edit --no-token --headless --port 2718 %TEMP%",
     "start:electron": "wait-on http-get://localhost:3000 --timeout 60000 -v && cross-env NODE_ENV=development pnpm exec electron .",
-    "start": "concurrently --names \"dev,server,electron\" --prefix-colors \"blue,green,cyan\" --kill-others-on-fail false \"pnpm dev\" \"pnpm start:server\" \"pnpm start:electron\""
+    "start": "concurrently --names \"dev,electron\" --prefix-colors \"blue,cyan\" --kill-others-on-fail false \"pnpm dev\" \"pnpm start:electron\"",
+    "build:electron-py": "uv run pyinstaller --clean --noconfirm marimo.spec",
+    "dist:electron": "pnpm build && electron-builder"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
@@ -47,6 +49,84 @@
       "allowedVersions": {
         "vite": "7"
       }
+    }
+  },
+  "build": {
+    "appId": "com.marimo.app",
+    "productName": "marimo",
+    "directories": {
+      "output": "dist-electron",
+      "buildResources": "electron/build"
+    },
+    "files": [
+      "electron/**/*",
+      "frontend/dist/**/*",
+      "resources/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "electron/build/icon.ico",
+      "extraResources": [
+        {
+          "from": "dist/marimo-server.exe",
+          "to": "marimo-server.exe",
+          "filter": ["**/*"]
+        }
+      ]
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "electron/build/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "extraResources": [
+        {
+          "from": "dist/marimo-server",
+          "to": "marimo-server",
+          "filter": ["**/*"]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "electron/build/icon.png",
+      "category": "Development",
+      "extraResources": [
+        {
+          "from": "dist/marimo-server",
+          "to": "marimo-server",
+          "filter": ["**/*"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     }
   }
 }
