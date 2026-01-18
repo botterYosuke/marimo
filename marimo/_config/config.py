@@ -119,7 +119,7 @@ class VenvConfig(TypedDict, total=False):
 
 # TODO(akshayka): remove normal, migrate to compact
 # normal == compact
-WidthType = Literal["normal", "compact", "medium", "full", "columns"]
+WidthType = Literal["normal", "compact", "medium", "full", "columns", "grid"]
 Theme = Literal["light", "dark", "system"]
 ExportType = Literal["html", "markdown", "ipynb"]
 SqlOutputType = Literal["polars", "lazy-polars", "pandas", "native", "auto"]
@@ -662,7 +662,7 @@ DEFAULT_CONFIG: MarimoConfig = {
         "theme": "light",
         "code_editor_font_size": 14,
         "cell_output": "below",
-        "default_width": "medium",
+        "default_width": "grid",
         "dataframes": "rich",
         "default_table_page_size": 10,
         "default_table_max_columns": 50,
