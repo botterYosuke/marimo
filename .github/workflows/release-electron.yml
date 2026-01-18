@@ -166,12 +166,21 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           # Ensure we're in the project root and marimo.spec exists
+          echo "Current directory: $(pwd)"
+          echo "Checking for marimo.spec..."
+
+          # Check if file exists and is tracked in git
           if [ ! -f "marimo.spec" ]; then
-            echo "❌ marimo.spec not found in current directory: $(pwd)"
-            ls -la | head -20
+            echo "❌ marimo.spec not found in filesystem"
+            echo "Checking git status..."
+            git ls-files | grep -i "marimo.spec" || echo "marimo.spec not tracked in git"
+            echo "Files in root directory:"
+            ls -la *.spec 2>/dev/null || echo "No .spec files found"
             exit 1
           fi
-          echo "✅ Building from: $(pwd)"
+
+          echo "✅ Found marimo.spec at: $(pwd)/marimo.spec"
+          echo "Building Python executable..."
           uv run pyinstaller --clean --noconfirm marimo.spec
 
       - name: 📦 Verify Python executable
@@ -257,12 +266,21 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           # Ensure we're in the project root and marimo.spec exists
+          echo "Current directory: $(pwd)"
+          echo "Checking for marimo.spec..."
+
+          # Check if file exists and is tracked in git
           if [ ! -f "marimo.spec" ]; then
-            echo "❌ marimo.spec not found in current directory: $(pwd)"
-            ls -la | head -20
+            echo "❌ marimo.spec not found in filesystem"
+            echo "Checking git status..."
+            git ls-files | grep -i "marimo.spec" || echo "marimo.spec not tracked in git"
+            echo "Files in root directory:"
+            ls -la *.spec 2>/dev/null || echo "No .spec files found"
             exit 1
           fi
-          echo "✅ Building from: $(pwd)"
+
+          echo "✅ Found marimo.spec at: $(pwd)/marimo.spec"
+          echo "Building Python executable..."
           uv run pyinstaller --clean --noconfirm marimo.spec
 
       - name: 📦 Verify Python executable
