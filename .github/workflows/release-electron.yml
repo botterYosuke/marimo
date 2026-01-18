@@ -72,7 +72,16 @@ jobs:
           uv pip install -e ".[electron]"
 
       - name: 🔨 Build Python executable (PyInstaller)
+        shell: pwsh
+        working-directory: ${{ github.workspace }}
         run: |
+          # Ensure we're in the project root and marimo.spec exists
+          if (-not (Test-Path "marimo.spec")) {
+            Write-Host "❌ marimo.spec not found in current directory: $(Get-Location)"
+            Get-ChildItem -Name | Select-Object -First 10
+            exit 1
+          }
+          Write-Host "✅ Building from: $(Get-Location)"
           uv run pyinstaller --clean --noconfirm marimo.spec
 
       - name: 📦 Verify Python executable
@@ -154,7 +163,15 @@ jobs:
           uv pip install -e ".[electron]"
 
       - name: 🔨 Build Python executable (PyInstaller)
+        working-directory: ${{ github.workspace }}
         run: |
+          # Ensure we're in the project root and marimo.spec exists
+          if [ ! -f "marimo.spec" ]; then
+            echo "❌ marimo.spec not found in current directory: $(pwd)"
+            ls -la | head -20
+            exit 1
+          fi
+          echo "✅ Building from: $(pwd)"
           uv run pyinstaller --clean --noconfirm marimo.spec
 
       - name: 📦 Verify Python executable
@@ -237,7 +254,15 @@ jobs:
           uv pip install -e ".[electron]"
 
       - name: 🔨 Build Python executable (PyInstaller)
+        working-directory: ${{ github.workspace }}
         run: |
+          # Ensure we're in the project root and marimo.spec exists
+          if [ ! -f "marimo.spec" ]; then
+            echo "❌ marimo.spec not found in current directory: $(pwd)"
+            ls -la | head -20
+            exit 1
+          fi
+          echo "✅ Building from: $(pwd)"
           uv run pyinstaller --clean --noconfirm marimo.spec
 
       - name: 📦 Verify Python executable
