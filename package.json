@@ -3,6 +3,10 @@
   "version": "0.19.2",
   "type": "module",
   "main": "electron/main.js",
+  "author": {
+    "name": "marimo team",
+    "email": "info@marimo.io"
+  },
   "scripts": {
     "typecheck": "pnpm turbo typecheck",
     "format": "pnpm biome format --write",
@@ -114,6 +118,7 @@
       ],
       "icon": "electron/build/icon.png",
       "category": "Development",
+      "maintainer": "marimo team <info@marimo.io>",
       "extraResources": [
         {
           "from": "dist/marimo-server",
