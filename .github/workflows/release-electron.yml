@@ -3,7 +3,7 @@ name: Release Electron App
 on:
   push:
     branches:
-      - main
+      - sasa/install
   workflow_dispatch: {}
 
 concurrency:
@@ -61,8 +61,15 @@ jobs:
           echo "marimo_version=$version" >> $env:GITHUB_OUTPUT
           echo "MARIMO_VERSION=$version" >> $env:GITHUB_ENV
 
+      - name: 📦 Create virtual environment
+        shell: pwsh
+        run: uv venv
+
       - name: 📦 Install Python dependencies (electron)
-        run: uv pip install -e ".[electron]"
+        shell: pwsh
+        run: |
+          . .venv/Scripts/Activate.ps1
+          uv pip install -e ".[electron]"
 
       - name: 🔨 Build Python executable (PyInstaller)
         run: |
@@ -138,8 +145,13 @@ jobs:
           echo "marimo_version=$version" >> $GITHUB_OUTPUT
           echo "MARIMO_VERSION=$version" >> $GITHUB_ENV
 
+      - name: 📦 Create virtual environment
+        run: uv venv
+
       - name: 📦 Install Python dependencies (electron)
-        run: uv pip install -e ".[electron]"
+        run: |
+          source .venv/bin/activate
+          uv pip install -e ".[electron]"
 
       - name: 🔨 Build Python executable (PyInstaller)
         run: |
@@ -216,8 +228,13 @@ jobs:
           echo "marimo_version=$version" >> $GITHUB_OUTPUT
           echo "MARIMO_VERSION=$version" >> $GITHUB_ENV
 
+      - name: 📦 Create virtual environment
+        run: uv venv
+
       - name: 📦 Install Python dependencies (electron)
-        run: uv pip install -e ".[electron]"
+        run: |
+          source .venv/bin/activate
+          uv pip install -e ".[electron]"
 
       - name: 🔨 Build Python executable (PyInstaller)
         run: |
