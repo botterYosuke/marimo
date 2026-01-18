@@ -439,19 +439,37 @@ export const EditApp: React.FC<AppProps> = ({
   const { setLayoutView } = useLayoutActions();
   const setIs3DMode = useSetAtom(is3DModeAtom);
 
-  // presentモードからeditモードに切り替える際に、selectedLayoutに基づいてis3DModeAtomを更新
-  // editモードでは"slides"は使用できないため、"vertical"に変換する
+  // appConfig.widthに基づいてレイアウトを自動切り替え
+  // "grid" → gridレイアウト、それ以外 → verticalレイアウト
   useEffect(() => {
     if (viewState.mode === "edit") {
+      if (appConfig.width === "grid") {
+        setLayoutView("grid");
+        setIs3DMode(true);
+      } else {
+        setLayoutView("vertical");
+        setIs3DMode(false);
+      }
+    }
+  }, [viewState.mode, appConfig.width, setLayoutView, setIs3DMode]);
+
+  // presentモードからeditモードに切り替える際に、selectedLayoutに基づいてis3DModeAtomを更新
+  // editモードでは"slides"は使用できないため、"vertical"に変換する
+  // 注意: このuseEffectはappConfig.widthに基づく自動切り替えの後に実行される可能性があるため、
+  // appConfig.widthが"grid"でない場合のみ、selectedLayoutの状態を確認する
+  useEffect(() => {
+    if (viewState.mode === "edit") {
+      // appConfig.widthが"grid"の場合は既に上のuseEffectで処理されるため、スキップ
+      if (appConfig.width === "grid") {
+        return;
+      }
       // editモードでは"slides"は使用できないため、"vertical"に変換
       if (selectedLayout === "slides") {
         setLayoutView("vertical");
         setIs3DMode(false);
-      } else {
-        setIs3DMode(selectedLayout === "grid");
       }
     }
-  }, [viewState.mode, selectedLayout, setIs3DMode, setLayoutView]);
+  }, [viewState.mode, selectedLayout, appConfig.width, setIs3DMode, setLayoutView]);
 
   // HOTKEYS
   useHotkey("global.runStale", () => {
