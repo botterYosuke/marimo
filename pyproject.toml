@@ -114,6 +114,12 @@ mcp = [
     "pydantic>2",
 ]
 
+# For Electron app build with PyInstaller
+electron = [
+    "pyinstaller>=5.0.0",
+    "BackcastPro>=0.2.1",
+]
+
 [dependency-groups]
 dev = [
     "hatch>=1.15.1",
