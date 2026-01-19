@@ -184,6 +184,13 @@ def start(
     Start the server.
     """
     import packaging.version
+    import tempfile
+
+    # BackcastProのキャッシュディレクトリを一時ディレクトリに設定
+    # ノートブックの__file__と同じディレクトリになるようにする
+    if 'BACKCASTPRO_CACHE_DIR' not in os.environ:
+        temp_dir = tempfile.gettempdir()
+        os.environ['BACKCASTPRO_CACHE_DIR'] = temp_dir
 
     # Defaults when mcp is enabled
     if mcp:
