@@ -18,7 +18,7 @@
     "dev": "pnpm clean:processes && concurrently --names \"fe,server\" --prefix-colors \"blue,green\" --kill-others-on-fail false \"pnpm run --filter @marimo-team/frontend dev\" \"pnpm start:server\"",
     "dev:pyodide": "concurrently --names \"pyodide-server,fe\" --prefix-colors \"green,blue\" --kill-others-on-fail false \"uv run pyodide/build_and_serve.py\" \"cd frontend && cross-env PYODIDE=true VITE_MARIMO_VERSION=0.19.2 pnpm dev\"",
     "start:server": "uv run marimo edit --no-token --headless --port 2718 %TEMP%",
-    "start:electron": "wait-on http-get://localhost:3000 --timeout 60000 -v && cross-env NODE_ENV=development pnpm exec electron .",
+    "start:electron": "wait-on http-get://localhost:3000 http-get://localhost:2718 --timeout 60000 -v && cross-env NODE_ENV=development pnpm exec electron .",
     "start": "pnpm clean:processes && concurrently --names \"dev,electron\" --prefix-colors \"blue,cyan\" --kill-others-on-fail false \"pnpm dev\" \"pnpm start:electron\"",
     "build:electron-py": "uv run pyinstaller --clean --noconfirm marimo.spec",
     "dist:electron": "pnpm build && electron-builder"
