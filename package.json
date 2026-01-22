@@ -54,7 +54,16 @@
       "allowedVersions": {
         "vite": "7"
       }
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "electron",
+      "electron-winstaller",
+      "es5-ext",
+      "esbuild",
+      "msw",
+      "spawn-sync"
+    ]
   },
   "build": {
     "appId": "com.marimo.app",
@@ -73,11 +82,15 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "electron/build/icon.ico",
@@ -85,7 +98,9 @@
         {
           "from": "dist/marimo-server.exe",
           "to": "marimo-server.exe",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         }
       ]
     },
@@ -93,7 +108,10 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "electron/build/icon.icns",
@@ -102,7 +120,9 @@
         {
           "from": "dist/marimo-server",
           "to": "marimo-server",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         }
       ]
     },
@@ -110,11 +130,15 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "deb",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "electron/build/icon.png",
@@ -124,7 +148,9 @@
         {
           "from": "dist/marimo-server",
           "to": "marimo-server",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         }
       ]
     },
