@@ -8,7 +8,7 @@ import { WasmFileSystem } from "./fs";
 // Use the same directory as marimo home dir so files appear in FILES panel
 // and are persisted to IndexedDB
 const BACKCASTPRO_CACHE_DIR = WasmFileSystem.HOME_DIR;
-const DATA_BASE_URL = "./data"; // Relative to the deployed site
+const DATA_BASE_URL = "./assets/data"; // Relative to the deployed site
 
 // Stock codes to load (must match deploy-pages.yml)
 const STOCK_CODES = [
@@ -32,21 +32,11 @@ interface DataFile {
 function getDataFilesToLoad(): DataFile[] {
   const files: DataFile[] = [];
 
-  // listed_info.duckdb
-  files.push({
-    remotePath: `${DATA_BASE_URL}/listed_info.duckdb`,
-    localPath: `${BACKCASTPRO_CACHE_DIR}/listed_info.duckdb`,
-  });
-
-  // Per-stock data files
+  // Per-stock data files (stocks_daily only)
   for (const code of STOCK_CODES) {
     files.push({
       remotePath: `${DATA_BASE_URL}/stocks_daily/${code}.duckdb`,
       localPath: `${BACKCASTPRO_CACHE_DIR}/stocks_daily/${code}.duckdb`,
-    });
-    files.push({
-      remotePath: `${DATA_BASE_URL}/stocks_board/${code}.duckdb`,
-      localPath: `${BACKCASTPRO_CACHE_DIR}/stocks_board/${code}.duckdb`,
     });
   }
 
@@ -98,7 +88,6 @@ export async function setupBackcastProData(
   // Create cache directory structure
   ensureDirectoryExists(pyodide, BACKCASTPRO_CACHE_DIR);
   ensureDirectoryExists(pyodide, `${BACKCASTPRO_CACHE_DIR}/stocks_daily`);
-  ensureDirectoryExists(pyodide, `${BACKCASTPRO_CACHE_DIR}/stocks_board`);
 
   // Set environment variable for BackcastPro
   pyodide.runPython(`
