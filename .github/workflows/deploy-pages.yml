@@ -39,8 +39,8 @@ jobs:
           FTP_USER: ${{ secrets.FTP_USER }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          # データディレクトリ作成 (フロントエンドが期待する /assets/data/ パス)
-          mkdir -p frontend/dist/assets/data/stocks_daily
+          # データディレクトリ作成
+          mkdir -p frontend/dist/data/stocks_daily
 
           # 主要銘柄コード
           STOCK_CODES="7203 9984 6758 8306 9432 6861 7267 4502 6501 8035"
@@ -51,13 +51,13 @@ jobs:
             curl -s --ftp-create-dirs \
               -u "${FTP_USER}:${FTP_PASSWORD}" \
               "ftp://${FTP_HOST}/StockData/jp/stocks_daily/${code}.duckdb" \
-              -o "frontend/dist/assets/data/stocks_daily/${code}.duckdb" \
+              -o "frontend/dist/data/stocks_daily/${code}.duckdb" \
               || echo "Failed to download: ${code}.duckdb"
           done
 
           # ダウンロード結果確認
           echo "Downloaded files:"
-          find frontend/dist/assets/data -name "*.duckdb" -ls
+          find frontend/dist/data -name "*.duckdb" -ls
 
       - name: Verify build output
         run: |
