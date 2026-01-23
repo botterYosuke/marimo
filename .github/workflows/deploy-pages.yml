@@ -33,6 +33,61 @@ jobs:
           VITE_MARIMO_VERSION: "0.19.2"
         run: pnpm build
 
+      - name: Download DuckDB data files from FTP
+        env:
+          FTP_HOST: backcast.i234.me
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          # データディレクトリ作成
+          mkdir -p frontend/dist/data/stocks_daily
+          mkdir -p frontend/dist/data/stocks_board
+
+          # 主要銘柄コード
+          STOCK_CODES="7203 9984 6758 8306 9432 6861 7267 4502 6501 8035"
+
+          # FTPダウンロード用スクリプト
+          cat > /tmp/ftp_download.sh << 'SCRIPT'
+          #!/bin/bash
+          set -e
+          HOST=$1
+          USER=$2
+          PASS=$3
+          REMOTE_FILE=$4
+          LOCAL_FILE=$5
+
+          curl -s --ftp-create-dirs \
+            -u "${USER}:${PASS}" \
+            "ftp://${HOST}${REMOTE_FILE}" \
+            -o "${LOCAL_FILE}" || echo "Failed to download: ${REMOTE_FILE}"
+          SCRIPT
+          chmod +x /tmp/ftp_download.sh
+
+          # listed_info.duckdb のダウンロード
+          echo "Downloading listed_info.duckdb..."
+          /tmp/ftp_download.sh "$FTP_HOST" "$FTP_USER" "$FTP_PASSWORD" \
+            "/StockData/jp/listed_info.duckdb" \
+            "frontend/dist/data/listed_info.duckdb"
+
+          # 各銘柄のデータをダウンロード
+          for code in $STOCK_CODES; do
+            echo "Downloading data for stock code: $code"
+
+            # stocks_daily
+            /tmp/ftp_download.sh "$FTP_HOST" "$FTP_USER" "$FTP_PASSWORD" \
+              "/StockData/jp/stocks_daily/${code}.duckdb" \
+              "frontend/dist/data/stocks_daily/${code}.duckdb"
+
+            # stocks_board
+            /tmp/ftp_download.sh "$FTP_HOST" "$FTP_USER" "$FTP_PASSWORD" \
+              "/StockData/jp/stocks_board/${code}.duckdb" \
+              "frontend/dist/data/stocks_board/${code}.duckdb"
+          done
+
+          # ダウンロード結果確認
+          echo "Downloaded files:"
+          find frontend/dist/data -name "*.duckdb" -ls
+
       - name: Verify build output
         run: |
           echo "Checking build output..."
