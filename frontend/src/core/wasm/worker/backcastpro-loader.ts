@@ -2,9 +2,12 @@
 import type { PyodideInterface } from "pyodide";
 import { getFS } from "./getFS";
 import { Logger } from "../../../utils/Logger";
+import { WasmFileSystem } from "./fs";
 
 // BackcastPro data configuration
-const BACKCASTPRO_CACHE_DIR = "/tmp/backcastpro_data";
+// Use the same directory as marimo home dir so files appear in FILES panel
+// and are persisted to IndexedDB
+const BACKCASTPRO_CACHE_DIR = WasmFileSystem.HOME_DIR;
 const DATA_BASE_URL = "./data"; // Relative to the deployed site
 
 // Stock codes to load (must match deploy-pages.yml)
