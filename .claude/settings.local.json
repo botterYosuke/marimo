@@ -15,7 +15,10 @@
       "Bash(powershell.exe -Command \"Get-ChildItem -Path ''C:\\\\Users\\\\sasai\\\\Documents'' | Select-Object Name\")",
       "Bash(powershell.exe:*)",
       "Bash(gzip:*)",
-      "Bash(where:*)"
+      "Bash(where:*)",
+      "Bash(\"C:\\\\Users\\\\sasai\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\python.exe\" -c \"print\\(''hello''\\)\")",
+      "Bash(py:*)",
+      "Bash(pip install:*)"
     ]
   }
 }
