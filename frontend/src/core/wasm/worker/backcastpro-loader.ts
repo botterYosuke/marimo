@@ -8,7 +8,8 @@ import { WasmFileSystem } from "./fs";
 // Use the same directory as marimo home dir so files appear in FILES panel
 // and are persisted to IndexedDB
 const BACKCASTPRO_CACHE_DIR = WasmFileSystem.HOME_DIR;
-const DATA_BASE_URL = "./data"; // Relative to the deployed site
+// Worker runs from /assets/, so ./data resolves to /assets/data/
+const DATA_BASE_URL = "./data";
 
 // Stock codes to load (must match deploy-pages.yml)
 const STOCK_CODES = [
