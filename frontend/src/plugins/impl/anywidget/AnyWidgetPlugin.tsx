@@ -302,6 +302,31 @@ const LoadedSlot = ({
     model.current.setOnModelUpdate(handleModelUpdate);
   }, [handleModelUpdate]);
 
+  // Suppress "Object is disposed" errors from widgets like lightweight-charts
+  // These errors occur when requestAnimationFrame callbacks execute after chart disposal
+  // This is a known issue with lightweight-charts and similar libraries that use rAF
+  // Using window.onerror for lower-level error interception
+  useEffect(() => {
+    const originalOnError = window.onerror;
+    window.onerror = (message, _source, _lineno, _colno, _error) => {
+      if (message === "Object is disposed" || message === "Uncaught Object is disposed") {
+        // Suppress the error - return true to prevent default handling
+        Logger.debug(
+          "[AnyWidget] Suppressed 'Object is disposed' error (widget cleanup race condition)",
+        );
+        return true;
+      }
+      // Call original handler if exists
+      if (originalOnError) {
+        return originalOnError(message, _source, _lineno, _colno, _error);
+      }
+      return false;
+    };
+    return () => {
+      window.onerror = originalOnError;
+    };
+  }, []);
+
   // Listen for global model updates from MODEL_MANAGER
   // This handles the case where WebSocket messages go directly to MODEL_MANAGER
   // (when uiElement is not set in the message)
