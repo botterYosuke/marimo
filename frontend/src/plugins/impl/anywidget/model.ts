@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AnyModel } from "@anywidget/types";
-import { debounce } from "lodash-es";
+import { debounce, isEqual } from "lodash-es";
 import { z } from "zod";
 import { getRequestClient } from "@/core/network/requests";
 import { assertNever } from "@/utils/assertNever";
@@ -13,6 +13,19 @@ import type { Base64String } from "@/utils/json/base64";
 import { Logger } from "@/utils/Logger";
 
 export type EventHandler = (...args: any[]) => void;
+
+// Global callbacks for when any model is updated (used by React components)
+type GlobalUpdateCallback = (modelId: string) => void;
+const globalUpdateCallbacks = new Set<GlobalUpdateCallback>();
+
+export function registerGlobalModelUpdateCallback(callback: GlobalUpdateCallback): () => void {
+  globalUpdateCallbacks.add(callback);
+  return () => globalUpdateCallbacks.delete(callback);
+}
+
+export function notifyGlobalModelUpdate(modelId: string): void {
+  globalUpdateCallbacks.forEach((cb) => cb(modelId));
+}
 
 class ModelManager {
   private models = new Map<string, Deferred<Model<any>>>();
@@ -71,6 +84,11 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
     content: unknown;
     buffers: Base64String[];
   }) => Promise<null | undefined>;
+  // Callback to notify React when model data changes (for re-rendering)
+  private onModelUpdate?: () => void;
+  // Flag to indicate the model has been disposed (component unmounted)
+  // When true, all emit calls are skipped to prevent "Object is disposed" errors
+  private disposed = false;
 
   constructor(
     data: T,
@@ -89,10 +107,21 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
     );
   }
 
+  /**
+   * Set a callback to be notified when model data changes.
+   * Used by React to trigger re-renders for widgets that don't use listeners.
+   */
+  setOnModelUpdate(callback: () => void): void {
+    this.onModelUpdate = callback;
+  }
+
   private listeners: Record<string, Set<EventHandler>> = {};
 
   off(eventName?: string | null, callback?: EventHandler | null): void {
     if (!eventName) {
+      // Clear all listeners but don't set disposed flag
+      // The model instance may be reused (e.g., when useEffect re-runs)
+      // Setting disposed = true would prevent future updates on the same instance
       this.listeners = {};
       return;
     }
@@ -103,6 +132,16 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
     }
 
     this.listeners[eventName]?.delete(callback);
+  }
+
+  /**
+   * Mark this model as disposed. After calling this,
+   * all emit calls will be silently skipped.
+   * Used when the component is fully unmounted and won't be reused.
+   */
+  dispose(): void {
+    this.disposed = true;
+    this.listeners = {};
   }
 
   send(
@@ -164,13 +203,22 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
       return;
     }
 
+    let hasChanges = false;
     Object.keys(value).forEach((key) => {
       const k = key as keyof T;
-      // Shallow equal since these can be large objects
-      if (this.data[k] !== value[k]) {
+      // Use deep comparison for consistency with AnyWidgetPlugin.tsx
+      // This prevents false positives when object/array references change
+      // but content remains identical
+      if (!isEqual(this.data[k], value[k])) {
         this.set(k, value[k]);
+        hasChanges = true;
       }
     });
+
+    // Notify React to re-render (for widgets that don't use model.on() listeners)
+    if (hasChanges && this.onModelUpdate) {
+      this.onModelUpdate();
+    }
   }
 
   /**
@@ -229,15 +277,52 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
   }
 
   private emit<K extends keyof T>(event: `change:${K & string}`, value: T[K]) {
-    if (!this.listeners[event]) {
+    // Skip emit if model has been disposed (component unmounted)
+    if (this.disposed) {
       return;
     }
-    this.listeners[event].forEach((cb) => cb(value));
+    const listeners = this.listeners[event];
+    if (!listeners || listeners.size === 0) {
+      return;
+    }
+    listeners.forEach((cb) => {
+      // Double-check disposed flag before each callback (in case it changed during iteration)
+      if (this.disposed) {
+        return;
+      }
+      // Wrap in try-catch to handle "Object is disposed" errors
+      // from widgets (e.g., lightweight-charts) when component unmounts
+      try {
+        cb(value);
+      } catch (err) {
+        Logger.debug(
+          "[anywidget] Error in change listener (widget may be disposed):",
+          err,
+        );
+      }
+    });
   }
 
   // Debounce 0 to send off one request in a single frame
   private emitAnyChange = debounce(() => {
-    this.listeners[this.ANY_CHANGE_EVENT]?.forEach((cb) => cb());
+    // Skip emit if model has been disposed (component unmounted)
+    if (this.disposed) {
+      return;
+    }
+    this.listeners[this.ANY_CHANGE_EVENT]?.forEach((cb) => {
+      // Double-check disposed flag before each callback
+      if (this.disposed) {
+        return;
+      }
+      try {
+        cb();
+      } catch (err) {
+        Logger.debug(
+          "[anywidget] Error in change listener (widget may be disposed):",
+          err,
+        );
+      }
+    });
   }, 0);
 }
 
@@ -340,6 +425,8 @@ export async function handleWidgetMessage({
   if (method === "update") {
     const model = await modelManager.get(modelId);
     model.updateAndEmitDiffs(stateWithBuffers);
+    // Notify global listeners that this model was updated
+    notifyGlobalModelUpdate(modelId);
     return;
   }
 

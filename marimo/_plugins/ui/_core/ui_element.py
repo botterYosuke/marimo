@@ -207,9 +207,13 @@ class UIElement(Html, Generic[S, T]):
         # with the element in the kernel.
         # We use a fixed seed so that we can reproduce the same random ids
         # across multiple runs (useful when exporting as html or in tests)
-        self._random_id = str(
-            uuid.UUID(int=self._random_seed.getrandbits(128))
-        )
+        #
+        # Subclasses may pre-set _random_id to a stable value (e.g., anywidget
+        # uses js_hash to prevent flickering when only timing changes).
+        if not hasattr(self, "_random_id") or self._random_id is None:
+            self._random_id = str(
+                uuid.UUID(int=self._random_seed.getrandbits(128))
+            )
 
         # Stable ID
         #

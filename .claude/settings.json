@@ -2,5 +2,10 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "include": [
     ".claude/rules/*.md"
-  ]
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)"
+    ]
+  }
 }
