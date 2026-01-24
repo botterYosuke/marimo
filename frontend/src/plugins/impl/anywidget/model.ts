@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AnyModel } from "@anywidget/types";
-import { debounce } from "lodash-es";
+import { debounce, isEqual } from "lodash-es";
 import { z } from "zod";
 import { getRequestClient } from "@/core/network/requests";
 import { assertNever } from "@/utils/assertNever";
@@ -206,8 +206,10 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
     let hasChanges = false;
     Object.keys(value).forEach((key) => {
       const k = key as keyof T;
-      // Shallow equal since these can be large objects
-      if (this.data[k] !== value[k]) {
+      // Use deep comparison for consistency with AnyWidgetPlugin.tsx
+      // This prevents false positives when object/array references change
+      // but content remains identical
+      if (!isEqual(this.data[k], value[k])) {
         this.set(k, value[k]);
         hasChanges = true;
       }

@@ -1,10 +1,24 @@
 # BackcastPro リプレイ機能 CPU負荷最適化計画
 
-## 現状の問題
+> **ステータス: 完了** - Plotly廃止、Lightweight Charts採用 (2025-01-25)
+>
+> 最新の状況は [README.md](README.md) を参照してください。
 
-- **LCP (Largest Contentful Paint)**: 6.10s（非常に遅い）
-- **refresh インターバル**: 100ms でチャート全体を再描画
+## 解決済みの問題
+
+- ~~**LCP (Largest Contentful Paint)**: 6.10s（非常に遅い）~~ → Lightweight Charts採用で改善
+- ~~**refresh インターバル**: 100ms でチャート全体を再描画~~ → 差分更新で解決
 - **データ量**: 6084 ステップ（約24年分の日足データ）
+
+### 採用した解決策
+
+| 項目 | Before (Plotly) | After (Lightweight Charts) |
+|------|-----------------|---------------------------|
+| レンダリング | SVG全再描画 | Canvas差分更新 |
+| 100ms更新 | 全データ再描画 | `series.update()` で最後のバーのみ |
+| CPU負荷 | 高 | 低 |
+
+詳細: [lightweight-charts-anywidget.md](lightweight-charts-anywidget.md)
 
 ---
 
@@ -51,9 +65,15 @@ def _(bt, get_step, play_switch, refresh, set_step):
 
 ---
 
-## 最適化案
+## ~~最適化案~~ → Plotly廃止により不要
 
-### Phase 1: チャート描画の最適化（効果: 高）
+> 以下はPlotlyベースの最適化案でしたが、Lightweight Chartsへの移行により不要となりました。
+> 履歴として残しています。
+
+### ~~Phase 1: チャート描画の最適化（効果: 高）~~ → 不要
+
+<details>
+<summary>アーカイブ: Plotly最適化案</summary>
 
 #### 1.1 表示範囲の制限
 ```python
@@ -91,6 +111,8 @@ pio.renderers.default = 'browser'  # または 'notebook'
 # チャート生成時
 fig.show(renderer='browser', config={'staticPlot': True})
 ```
+
+</details>
 
 ### Phase 2: BackcastPro の最適化（効果: 中）
 
@@ -137,13 +159,14 @@ df_weekly = df.resample('W').agg({
 
 ---
 
-## 実装優先順位
+## ~~実装優先順位~~ → 完了
 
-| 優先度 | 施策 | 工数 | 効果 |
-|--------|------|------|------|
-| 1 | チャート表示範囲の制限（window=100） | 小 | 高 |
-| 2 | Plotly 軽量化設定 | 小 | 中 |
-| 3 | スナップショット機能 | 大 | 中 |
+| 優先度 | 施策 | 工数 | 効果 | ステータス |
+|--------|------|------|------|----------|
+| ~~1~~ | ~~チャート表示範囲の制限（window=100）~~ | - | - | **廃止** (Plotly→LWC移行) |
+| ~~2~~ | ~~Plotly 軽量化設定~~ | - | - | **廃止** (Plotly→LWC移行) |
+| **1** | **Lightweight Charts 採用** | 中 | 高 | **完了** |
+| 3 | スナップショット機能 | 大 | 中 | 将来検討 |
 
 ---
 
@@ -183,4 +206,11 @@ current_step セル再実行
     └── mo.vstack([chart, info]) ← DOM 更新
 ```
 
-**ボトルネック推定**: `bt.chart()` の Plotly 描画が最も重い
+~~**ボトルネック推定**: `bt.chart()` の Plotly 描画が最も重い~~ → **解決済み** (Lightweight Charts採用)
+
+---
+
+## 更新履歴
+
+- **2025-01-25**: Plotly廃止、Lightweight Charts採用で問題解決
+- 初版: Plotlyベースの最適化計画を策定

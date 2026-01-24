@@ -231,6 +231,8 @@ class anywidget(UIElement[WireFormat, T]):
         # re-executes but the ESM content hasn't changed.
         # This is respected by UIElement._initialize() which checks for
         # pre-existing _random_id before generating a new random one.
+        # Note: Using id(widget) would cause flickering on re-execution,
+        # so we intentionally use only js_hash for stable IDs.
         self._random_id = js_hash
 
         # Store plain state with bytes for merging

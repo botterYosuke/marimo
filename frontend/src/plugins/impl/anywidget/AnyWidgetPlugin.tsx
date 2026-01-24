@@ -305,25 +305,29 @@ const LoadedSlot = ({
   // Suppress "Object is disposed" errors from widgets like lightweight-charts
   // These errors occur when requestAnimationFrame callbacks execute after chart disposal
   // This is a known issue with lightweight-charts and similar libraries that use rAF
-  // Using window.onerror for lower-level error interception
+  // Using addEventListener with capture phase for targeted error interception
   useEffect(() => {
-    const originalOnError = window.onerror;
-    window.onerror = (message, _source, _lineno, _colno, _error) => {
-      if (message === "Object is disposed" || message === "Uncaught Object is disposed") {
-        // Suppress the error - return true to prevent default handling
+    const handler = (event: ErrorEvent) => {
+      // Only suppress errors that match the specific pattern from lightweight-charts
+      // Check both message content and optionally the source file
+      const isDisposedError =
+        event.message === "Object is disposed" ||
+        event.message === "Uncaught Object is disposed";
+      const isFromLightweightCharts =
+        event.filename?.includes("lightweight-charts") ?? true; // Default to true if no filename
+
+      if (isDisposedError && isFromLightweightCharts) {
+        event.preventDefault();
+        event.stopPropagation();
         Logger.debug(
           "[AnyWidget] Suppressed 'Object is disposed' error (widget cleanup race condition)",
         );
-        return true;
+        return;
       }
-      // Call original handler if exists
-      if (originalOnError) {
-        return originalOnError(message, _source, _lineno, _colno, _error);
-      }
-      return false;
     };
+    window.addEventListener("error", handler, { capture: true });
     return () => {
-      window.onerror = originalOnError;
+      window.removeEventListener("error", handler, { capture: true });
     };
   }, []);
 
@@ -438,9 +442,11 @@ const LoadedSlot = ({
       unsubRef.current = unsub;
     });
     return () => {
-      // Clear all model listeners to prevent "Object is disposed" errors
-      // from widgets (e.g., lightweight-charts) after component unmounts
-      model.current.off();
+      // Dispose the model to prevent "Object is disposed" errors
+      // from widgets (e.g., lightweight-charts) after component unmounts.
+      // dispose() sets the disposed flag and clears all listeners,
+      // ensuring emit() calls are silently skipped after unmount.
+      model.current.dispose();
       unsubPromise.then((unsub) => unsub());
     };
     // Only re-run on jsHash change (ESM content change)
@@ -482,8 +488,8 @@ const LoadedSlot = ({
     }
 
     // Re-render widget for widgets that don't use model.on() listeners.
-    // DON'T call cleanup (unsubRef) - that would destroy the chart and cause flickering.
-    // The render function should be able to update the existing chart.
+    // DON'T call cleanup (unsubRef) before new render - that would destroy the chart
+    // and cause flickering. The render function should be able to update the existing chart.
     if (htmlRef.current) {
       runAnyWidgetModule(
         widget,
@@ -491,7 +497,7 @@ const LoadedSlot = ({
         htmlRef.current,
         false, // Don't clear element - prevents flickering
       ).then((unsub) => {
-        // Clean up previous subscription before storing new one
+        // Clean up previous subscription AFTER new render completes
         unsubRef.current?.();
         unsubRef.current = unsub;
       });
