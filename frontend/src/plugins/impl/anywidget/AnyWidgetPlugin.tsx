@@ -280,6 +280,13 @@ const LoadedSlot = ({
   // Counter to force re-render when model is updated via WebSocket
   const [modelUpdateCount, setModelUpdateCount] = useState(0);
 
+  // Track if update came from WebSocket to avoid double-processing
+  const updateSourceRef = useRef<"websocket" | "props">("props");
+
+  // Ref to access current value in async callbacks (fixes stale closure issue)
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
   // value is already decoded from wire format
   const model = useRef<Model<T>>(
     new Model(value, setValue, functions.send_to_widget, new Set()),
@@ -287,6 +294,7 @@ const LoadedSlot = ({
 
   // Set up callback to be notified when model is updated via WebSocket
   const handleModelUpdate = useCallback(() => {
+    updateSourceRef.current = "websocket";
     setModelUpdateCount((c) => c + 1);
   }, []);
 
@@ -298,28 +306,44 @@ const LoadedSlot = ({
   // This handles the case where WebSocket messages go directly to MODEL_MANAGER
   // (when uiElement is not set in the message)
   useEffect(() => {
+    let mounted = true;
     const jsHash = data.jsHash;
 
     const unsubscribe = registerGlobalModelUpdateCallback((modelId) => {
       // Check if this update is for our widget (modelId matches jsHash)
-      if (modelId === jsHash) {
-        // Get the model from MODEL_MANAGER and sync data to local model
-        MODEL_MANAGER.get(modelId).then((managerModel) => {
-          // Sync the updated data to our local model
-          const keys = Object.keys(value) as Array<keyof T>;
+      if (!mounted || modelId !== jsHash) {
+        return;
+      }
+
+      // Get the model from MODEL_MANAGER and sync data to local model
+      MODEL_MANAGER.get(modelId)
+        .then((managerModel) => {
+          // Guard against unmounted update
+          if (!mounted) {
+            return;
+          }
+          // Use valueRef.current to get latest value (fixes stale closure)
+          const keys = Object.keys(valueRef.current) as Array<keyof T>;
           const updatedValue: Partial<T> = {};
           for (const key of keys) {
             updatedValue[key] = managerModel.get(key);
           }
           model.current.updateAndEmitDiffs(updatedValue as T);
-        }).catch(() => {
-          // Model not found in MODEL_MANAGER, ignore
+        })
+        .catch((err) => {
+          // Model not found in MODEL_MANAGER
+          Logger.debug(
+            `[AnyWidget] Model not found in MODEL_MANAGER for ${modelId}:`,
+            err,
+          );
         });
-      }
     });
 
-    return unsubscribe;
-  }, [data.jsHash, value, handleModelUpdate]);
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, [data.jsHash]); // Only re-subscribe when jsHash changes
 
   // Listen to incoming messages
   useEventListener(
@@ -364,10 +388,12 @@ const LoadedSlot = ({
   const valueMemo = useDeepCompareMemoize(value);
   useEffect(() => {
     // Update the model with latest value - emits change events for any diffs
-    // (Skip this if update came from WebSocket - model already has latest data)
-    if (modelUpdateCount === 0 || valueMemo !== value) {
+    // Skip if update came from WebSocket - model already has latest data
+    if (updateSourceRef.current !== "websocket") {
       model.current.updateAndEmitDiffs(valueMemo);
     }
+    // Reset update source for next update
+    updateSourceRef.current = "props";
 
     // Skip re-render on first mount (already rendered above)
     if (isFirstRender.current) {
@@ -385,7 +411,8 @@ const LoadedSlot = ({
         htmlRef.current,
         false, // Don't clear element - prevents flickering
       ).then((unsub) => {
-        // Store the new cleanup function (replacing old one)
+        // Clean up previous subscription before storing new one
+        unsubRef.current?.();
         unsubRef.current = unsub;
       });
     }

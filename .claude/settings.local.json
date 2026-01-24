@@ -35,7 +35,9 @@
       "Bash(pnpm build:*)",
       "Bash(cmd /c \"cd /d c:\\\\Users\\\\sasai\\\\Documents\\\\marimo\\\\frontend && pnpm tsc --noEmit\")",
       "Bash(cmd /c \"cd /d c:\\\\Users\\\\sasai\\\\Documents\\\\marimo\\\\frontend && pnpm tsc --noEmit 2>&1 | head -20\")",
-      "Bash(pnpm exec tsc:*)"
+      "Bash(pnpm exec tsc:*)",
+      "Bash(make fe-check:*)",
+      "Bash(pnpm run typecheck:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\sasai\\Documents\\BackcastPro\\src\\BackcastPro\\widgets"

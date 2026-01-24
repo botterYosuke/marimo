@@ -89,6 +89,7 @@ class MarimoComm:
         data: DataType = None,
         metadata: MetadataType = None,
         buffers: BufferType = None,
+        defer_open: bool = False,
         **keys: object,
     ) -> None:
         self._msg_callback: Optional[MsgCallback] = None
@@ -101,7 +102,15 @@ class MarimoComm:
         self.target_name = target_name
         self.ui_element_id: Optional[str] = None
         self._publish_message_buffer: list[MessageBufferData] = []
-        self.open(data=data, metadata=metadata, buffers=buffers, **keys)
+        # Store open args for deferred open
+        self._deferred_open_args: Optional[
+            tuple[DataType, MetadataType, BufferType, dict[str, object]]
+        ] = None
+        if defer_open:
+            # Store args for later open() call
+            self._deferred_open_args = (data, metadata, buffers, keys)
+        else:
+            self.open(data=data, metadata=metadata, buffers=buffers, **keys)
 
     def open(
         self,
@@ -125,6 +134,14 @@ class MarimoComm:
         except Exception:
             self.comm_manager.unregister_comm(self)
             raise
+
+    def complete_deferred_open(self) -> None:
+        """Complete a deferred open. Call after ui_element_id is set."""
+        if self._deferred_open_args is None:
+            return
+        data, metadata, buffers, keys = self._deferred_open_args
+        self._deferred_open_args = None
+        self.open(data=data, metadata=metadata, buffers=buffers, **keys)
 
     # Inform client of any mutation(s) to the model
     # (e.g., add a marker to a map, without a full redraw)

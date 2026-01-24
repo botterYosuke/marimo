@@ -1,8 +1,8 @@
 # Copyright 2026 Marimo. All rights reserved.
 from __future__ import annotations
 
-import hashlib
 from typing import TYPE_CHECKING, cast
+from uuid import uuid4
 
 if TYPE_CHECKING:
     import ipywidgets  # type: ignore
@@ -26,22 +26,16 @@ def init_marimo_widget(w: ipywidgets.Widget) -> None:
     # Get the initial state of the widget
     state, buffer_paths, buffers = extract_buffer_paths(w.get_state())
 
-    # Use js_hash as model_id so it's stable across re-executions and matches
-    # the frontend's jsHash. This allows the frontend to look up the model
-    # in MODEL_MANAGER using the same key.
+    # Generate a unique model_id for each widget instance.
+    # This ensures multiple instances of the same widget type don't share
+    # the same model in MODEL_MANAGER.
     if getattr(w, "_model_id", None) is None:
-        # Compute js_hash from _esm (same as from_anywidget.py)
-        js: str = w._esm if hasattr(w, "_esm") else ""  # type: ignore
-        if js:
-            w._model_id = hashlib.md5(
-                js.encode("utf-8"), usedforsecurity=False
-            ).hexdigest()
-        else:
-            # Fallback for widgets without _esm
-            from uuid import uuid4
-            w._model_id = uuid4().hex
+        w._model_id = uuid4().hex
 
-    # Initialize the comm...this will also send the initial state of the widget
+    # Initialize the comm with defer_open=True.
+    # The "open" message will be sent later when ui_element_id is set
+    # (in anywidget._initialize). This ensures the frontend can correctly
+    # route messages to the right React component using ui_element_id.
     w.comm = MarimoComm(
         comm_id=w._model_id,  # pyright: ignore
         comm_manager=WIDGET_COMM_MANAGER,
@@ -50,6 +44,7 @@ def init_marimo_widget(w: ipywidgets.Widget) -> None:
         buffers=cast(BufferType, buffers),
         # TODO: should this be hard-coded?
         metadata={"version": __protocol_version__},
+        defer_open=True,  # Defer until ui_element_id is set
         # html_deps=session._process_ui(TagList(widget_dep))["deps"],
     )
 
