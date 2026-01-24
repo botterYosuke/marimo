@@ -22,7 +22,23 @@
       "Bash(pnpm typecheck:*)",
       "Bash(pnpm tsc:*)",
       "Bash(pnpm lint:*)",
-      "Bash(pnpm lint:biome:*)"
+      "Bash(pnpm lint:biome:*)",
+      "Bash(.venv/Scripts/python -m pytest tests/test_lightweight_chart_widget.py -v --tb=short)",
+      "Bash(.venv/Scripts/pip install:*)",
+      "Bash(uv add:*)",
+      "Bash(uv build:*)",
+      "Bash(pwsh -Command:*)",
+      "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\sasai\\\\Documents\\\\BackcastPro && python -m pytest tests/test_lightweight_chart_widget.py -v\")",
+      "Bash(cmd.exe /c:*)",
+      "Bash(pytest:*)",
+      "Bash(pushd:*)",
+      "Bash(pnpm build:*)",
+      "Bash(cmd /c \"cd /d c:\\\\Users\\\\sasai\\\\Documents\\\\marimo\\\\frontend && pnpm tsc --noEmit\")",
+      "Bash(cmd /c \"cd /d c:\\\\Users\\\\sasai\\\\Documents\\\\marimo\\\\frontend && pnpm tsc --noEmit 2>&1 | head -20\")",
+      "Bash(pnpm exec tsc:*)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\sasai\\Documents\\BackcastPro\\src\\BackcastPro\\widgets"
     ]
   }
 }

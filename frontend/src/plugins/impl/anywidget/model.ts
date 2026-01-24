@@ -14,6 +14,19 @@ import { Logger } from "@/utils/Logger";
 
 export type EventHandler = (...args: any[]) => void;
 
+// Global callbacks for when any model is updated (used by React components)
+type GlobalUpdateCallback = (modelId: string) => void;
+const globalUpdateCallbacks = new Set<GlobalUpdateCallback>();
+
+export function registerGlobalModelUpdateCallback(callback: GlobalUpdateCallback): () => void {
+  globalUpdateCallbacks.add(callback);
+  return () => globalUpdateCallbacks.delete(callback);
+}
+
+export function notifyGlobalModelUpdate(modelId: string): void {
+  globalUpdateCallbacks.forEach((cb) => cb(modelId));
+}
+
 class ModelManager {
   private models = new Map<string, Deferred<Model<any>>>();
   private timeout: number;
@@ -71,6 +84,8 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
     content: unknown;
     buffers: Base64String[];
   }) => Promise<null | undefined>;
+  // Callback to notify React when model data changes (for re-rendering)
+  private onModelUpdate?: () => void;
 
   constructor(
     data: T,
@@ -87,6 +102,14 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
     this.dirtyFields = new Map(
       [...initialDirtyFields].map((key) => [key, this.data[key]]),
     );
+  }
+
+  /**
+   * Set a callback to be notified when model data changes.
+   * Used by React to trigger re-renders for widgets that don't use listeners.
+   */
+  setOnModelUpdate(callback: () => void): void {
+    this.onModelUpdate = callback;
   }
 
   private listeners: Record<string, Set<EventHandler>> = {};
@@ -164,13 +187,20 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
       return;
     }
 
+    let hasChanges = false;
     Object.keys(value).forEach((key) => {
       const k = key as keyof T;
       // Shallow equal since these can be large objects
       if (this.data[k] !== value[k]) {
         this.set(k, value[k]);
+        hasChanges = true;
       }
     });
+
+    // Notify React to re-render (for widgets that don't use model.on() listeners)
+    if (hasChanges && this.onModelUpdate) {
+      this.onModelUpdate();
+    }
   }
 
   /**
@@ -229,10 +259,13 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
   }
 
   private emit<K extends keyof T>(event: `change:${K & string}`, value: T[K]) {
-    if (!this.listeners[event]) {
+    const listeners = this.listeners[event];
+    if (!listeners || listeners.size === 0) {
       return;
     }
-    this.listeners[event].forEach((cb) => cb(value));
+    listeners.forEach((cb) => {
+      cb(value);
+    });
   }
 
   // Debounce 0 to send off one request in a single frame
@@ -340,6 +373,8 @@ export async function handleWidgetMessage({
   if (method === "update") {
     const model = await modelManager.get(modelId);
     model.updateAndEmitDiffs(stateWithBuffers);
+    // Notify global listeners that this model was updated
+    notifyGlobalModelUpdate(modelId);
     return;
   }
 

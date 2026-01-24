@@ -3,7 +3,7 @@
 
 import type { AnyWidget, Experimental } from "@anywidget/types";
 import { isEqual } from "lodash-es";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useEvent from "react-use-event-hook";
 import { z } from "zod";
 import { MarimoIncomingMessageEvent } from "@/core/dom/events";
@@ -27,7 +27,7 @@ import { prettyError } from "@/utils/errors";
 import type { Base64String } from "@/utils/json/base64";
 import { Logger } from "@/utils/Logger";
 import { ErrorBanner } from "../common/error-banner";
-import { MODEL_MANAGER, Model } from "./model";
+import { MODEL_MANAGER, Model, registerGlobalModelUpdateCallback } from "./model";
 
 interface Data {
   jsUrl: string;
@@ -175,7 +175,9 @@ const AnyWidgetSlot = (
 
   // Find the closest parent element with an attribute of `random-id`
   const randomId = props.host.closest("[random-id]")?.getAttribute("random-id");
-  const key = randomId ?? jsUrl;
+  // Use jsHash instead of jsUrl to prevent re-mounting when only the URL changes
+  // but the content remains the same (jsHash is content-based)
+  const key = randomId ?? jsHash ?? jsUrl;
 
   return (
     <LoadedSlot
@@ -196,11 +198,13 @@ const AnyWidgetSlot = (
  *
  * @param widgetDef - The anywidget definition
  * @param model - The model to pass to the widget
+ * @param clearElement - Whether to clear the element before rendering (default: true)
  */
 async function runAnyWidgetModule(
   widgetDef: AnyWidget,
   model: Model<T>,
   el: HTMLElement,
+  clearElement = true,
 ): Promise<() => void> {
   const experimental: Experimental = {
     invoke: async (_name, _msg, _options) => {
@@ -210,8 +214,11 @@ async function runAnyWidgetModule(
       throw new Error(message);
     },
   };
-  // Clear the element, in case the widget is re-rendering
-  el.innerHTML = "";
+  // Clear the element only on initial render, not on re-renders
+  // This prevents flickering when data changes but ESM stays the same
+  if (clearElement) {
+    el.innerHTML = "";
+  }
   const widget =
     typeof widgetDef === "function" ? await widgetDef() : widgetDef;
   await widget.initialize?.({ model, experimental });
@@ -267,11 +274,52 @@ const LoadedSlot = ({
   host,
 }: Props & { widget: AnyWidget }) => {
   const htmlRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
+  const unsubRef = useRef<(() => void) | null>(null);
+
+  // Counter to force re-render when model is updated via WebSocket
+  const [modelUpdateCount, setModelUpdateCount] = useState(0);
 
   // value is already decoded from wire format
   const model = useRef<Model<T>>(
     new Model(value, setValue, functions.send_to_widget, new Set()),
   );
+
+  // Set up callback to be notified when model is updated via WebSocket
+  const handleModelUpdate = useCallback(() => {
+    setModelUpdateCount((c) => c + 1);
+  }, []);
+
+  useEffect(() => {
+    model.current.setOnModelUpdate(handleModelUpdate);
+  }, [handleModelUpdate]);
+
+  // Listen for global model updates from MODEL_MANAGER
+  // This handles the case where WebSocket messages go directly to MODEL_MANAGER
+  // (when uiElement is not set in the message)
+  useEffect(() => {
+    const jsHash = data.jsHash;
+
+    const unsubscribe = registerGlobalModelUpdateCallback((modelId) => {
+      // Check if this update is for our widget (modelId matches jsHash)
+      if (modelId === jsHash) {
+        // Get the model from MODEL_MANAGER and sync data to local model
+        MODEL_MANAGER.get(modelId).then((managerModel) => {
+          // Sync the updated data to our local model
+          const keys = Object.keys(value) as Array<keyof T>;
+          const updatedValue: Partial<T> = {};
+          for (const key of keys) {
+            updatedValue[key] = managerModel.get(key);
+          }
+          model.current.updateAndEmitDiffs(updatedValue as T);
+        }).catch(() => {
+          // Model not found in MODEL_MANAGER, ignore
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [data.jsHash, value, handleModelUpdate]);
 
   // Listen to incoming messages
   useEventListener(
@@ -280,39 +328,68 @@ const LoadedSlot = ({
     (e) => {
       const message = e.detail.message;
       if (hasModelId(message)) {
-        MODEL_MANAGER.get(message.model_id).then((model) => {
-          model.receiveCustomMessage(message, e.detail.buffers);
+        // Update MODEL_MANAGER's model (for ipywidgets compatibility)
+        MODEL_MANAGER.get(message.model_id).then((m) => {
+          m.receiveCustomMessage(message, e.detail.buffers);
         });
-      } else {
-        model.current.receiveCustomMessage(message, e.detail.buffers);
       }
+      // Always update local model to trigger re-render via onModelUpdate callback
+      model.current.receiveCustomMessage(message, e.detail.buffers);
     },
   );
 
+  // Initial render - clear element and render widget
   useEffect(() => {
     if (!htmlRef.current) {
       return;
     }
+    isFirstRender.current = true;
     const unsubPromise = runAnyWidgetModule(
       widget,
       model.current,
       htmlRef.current,
+      true, // clearElement on initial render
     );
+    unsubPromise.then((unsub) => {
+      unsubRef.current = unsub;
+    });
     return () => {
       unsubPromise.then((unsub) => unsub());
     };
-    // We re-run the widget when the jsUrl changes, which means the cell
-    // that created the Widget has been re-run.
-    // We need to re-run the widget because it may contain initialization code
-    // that could be reset by the new widget.
-    // See example: https://github.com/marimo-team/marimo/issues/3962#issuecomment-2703184123
-  }, [widget, data.jsUrl]);
+    // Only re-run on jsHash change (ESM content change)
+  }, [widget, data.jsHash]);
 
-  // When the value changes, update the model
+  // When value changes OR model is updated via WebSocket, re-render the widget.
+  // Some widgets use model.on() listeners, others expect render() to be called again.
   const valueMemo = useDeepCompareMemoize(value);
   useEffect(() => {
-    model.current.updateAndEmitDiffs(valueMemo);
-  }, [valueMemo]);
+    // Update the model with latest value - emits change events for any diffs
+    // (Skip this if update came from WebSocket - model already has latest data)
+    if (modelUpdateCount === 0 || valueMemo !== value) {
+      model.current.updateAndEmitDiffs(valueMemo);
+    }
+
+    // Skip re-render on first mount (already rendered above)
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    // Re-render widget for widgets that don't use model.on() listeners.
+    // DON'T call cleanup (unsubRef) - that would destroy the chart and cause flickering.
+    // The render function should be able to update the existing chart.
+    if (htmlRef.current) {
+      runAnyWidgetModule(
+        widget,
+        model.current,
+        htmlRef.current,
+        false, // Don't clear element - prevents flickering
+      ).then((unsub) => {
+        // Store the new cleanup function (replacing old one)
+        unsubRef.current = unsub;
+      });
+    }
+  }, [valueMemo, widget, modelUpdateCount]);
 
   return <div ref={htmlRef} />;
 };

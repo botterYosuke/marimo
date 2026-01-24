@@ -1,8 +1,8 @@
 # Copyright 2026 Marimo. All rights reserved.
 from __future__ import annotations
 
+import hashlib
 from typing import TYPE_CHECKING, cast
-from uuid import uuid4
 
 if TYPE_CHECKING:
     import ipywidgets  # type: ignore
@@ -26,9 +26,20 @@ def init_marimo_widget(w: ipywidgets.Widget) -> None:
     # Get the initial state of the widget
     state, buffer_paths, buffers = extract_buffer_paths(w.get_state())
 
-    # Generate a random model_id so we can assign the same id to the comm
+    # Use js_hash as model_id so it's stable across re-executions and matches
+    # the frontend's jsHash. This allows the frontend to look up the model
+    # in MODEL_MANAGER using the same key.
     if getattr(w, "_model_id", None) is None:
-        w._model_id = uuid4().hex
+        # Compute js_hash from _esm (same as from_anywidget.py)
+        js: str = w._esm if hasattr(w, "_esm") else ""  # type: ignore
+        if js:
+            w._model_id = hashlib.md5(
+                js.encode("utf-8"), usedforsecurity=False
+            ).hexdigest()
+        else:
+            # Fallback for widgets without _esm
+            from uuid import uuid4
+            w._model_id = uuid4().hex
 
     # Initialize the comm...this will also send the initial state of the widget
     w.comm = MarimoComm(

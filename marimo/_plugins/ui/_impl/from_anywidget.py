@@ -227,6 +227,12 @@ class anywidget(UIElement[WireFormat, T]):
             js.encode("utf-8"), usedforsecurity=False
         ).hexdigest()
 
+        # Pre-set _random_id to js_hash to prevent flickering when cell
+        # re-executes but the ESM content hasn't changed.
+        # This is respected by UIElement._initialize() which checks for
+        # pre-existing _random_id before generating a new random one.
+        self._random_id = js_hash
+
         # Store plain state with bytes for merging
         self._prev_state = json_args
 
