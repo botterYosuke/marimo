@@ -44,6 +44,7 @@ export class CharacterComponent {
   private maxDistanceRatio = 0.8; // 最大距離の比率
   private orbitEnabled = true; // 旋回機能の有効/無効
   private currentVelocity = new THREE.Vector3(); // 現在の進行方向（慣性を考慮）
+  private _isAnimating = false; // アニメーション更新が発生したかどうか
   private velocityInertia = 0.85; // 速度の慣性係数（0.0-1.0、大きいほど慣性が強い）
   private rotationSpeed = 1.2; // 回転速度（ラジアン/秒）
   private maxRotationSpeed = 2.0; // 最大回転速度（ラジアン/秒）
@@ -140,22 +141,38 @@ export class CharacterComponent {
   }
 
   /**
+   * アニメーションが更新されたかどうかを取得します
+   * SceneManagerがWebGLレンダリングを最適化するために使用
+   */
+  get isAnimating(): boolean {
+    return this._isAnimating;
+  }
+
+  /**
    * アニメーションを更新します
    * アニメーションループ内で毎フレーム呼び出されます
    */
   update(): void {
+    // アニメーション状態をリセット
+    this._isAnimating = false;
+
     const delta = this.clock.getDelta();
 
     if (this.mixer) {
       this.mixer.update(delta);
+      this._isAnimating = true;
     }
 
     // ローターを回転させる
-    this.updateRotors(delta);
+    if (this.rotors.length > 0) {
+      this.updateRotors(delta);
+      this._isAnimating = true;
+    }
 
     // 旋回機能の更新
     if (this.orbitEnabled && this.camera && this.controls && this.model) {
       this.updateOrbit(delta);
+      this._isAnimating = true;
     }
   }
 

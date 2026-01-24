@@ -18,7 +18,11 @@
       "Bash(where:*)",
       "Bash(\"C:\\\\Users\\\\sasai\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\python.exe\" -c \"print\\(''hello''\\)\")",
       "Bash(py:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm lint:biome:*)"
     ]
   }
 }

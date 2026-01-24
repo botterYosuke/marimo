@@ -9,7 +9,7 @@ import type { AppMode } from "@/core/mode";
 import type { CellId } from "@/core/cells/ids";
 import type { Theme } from "@/theme/useTheme";
 import type { CellCSS2DService } from "@/core/three/cell-css2d-service";
-import { CellDragManager } from "@/core/three/cell-drag-manager";
+import type { CellDragManager } from "@/core/three/cell-drag-manager";
 import * as THREE from "three";
 import {
   useCellData,

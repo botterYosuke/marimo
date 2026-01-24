@@ -22,11 +22,15 @@ export class SceneManager {
   private resizeHandler?: () => void;
   private hostElement?: HTMLDivElement;
   private needsRender = true;
+  private needsCSS2DRender = true; // CSS2Dレンダリング専用フラグ
   private readonly MIN_FRAME_INTERVAL = 16; // 約60FPS
   private lastRenderTime = 0;
   private gridCSS2DService?: GridCSS2DService;
   private cellCSS2DService?: CellCSS2DService;
   private characterComponent?: CharacterComponent;
+  // カメラ位置追跡（CSS2D最適化用）
+  private lastCameraPosition = new THREE.Vector3();
+  private lastCameraTarget = new THREE.Vector3();
 
   /**
    * Three.jsシーンを初期化します
@@ -101,6 +105,16 @@ export class SceneManager {
     // パン制限を設定
     this.controls.enablePan = true;
 
+    // カメラ操作時のイベントリスナー（CSS2D最適化）
+    this.controls.addEventListener("change", () => {
+      this.needsRender = true;
+      this.needsCSS2DRender = true;
+    });
+
+    // 初期カメラ位置を記録
+    this.lastCameraPosition.copy(this.camera.position);
+    this.lastCameraTarget.copy(this.controls.target);
+
     // ライトの追加
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     this.scene.add(ambientLight);
@@ -163,33 +177,32 @@ export class SceneManager {
       }
 
       // OrbitControlsの更新
+      // changeイベントでneedsRenderが設定されるため、ここでは設定しない
       if (this.controls) {
         this.controls.update();
-        // 操作中はレンダリングが必要
-        // ダンピングが有効な場合、update()が内部で動きを検知するため
-        // 常にレンダリングが必要になる可能性がある
-        if (this.controls.enabled) {
+      }
+
+      // キャラクターコンポーネントのアニメーション更新
+      // 3Dモデルのアニメーションのみ、WebGLレンダリングが必要
+      // CSS2Dはカメラ移動時のみ更新（パフォーマンス最適化）
+      if (this.characterComponent) {
+        this.characterComponent.update();
+        // 3Dモデルのアニメーションが実際に動いている場合のみWebGLレンダリングが必要
+        if (this.characterComponent.isAnimating) {
           this.needsRender = true;
         }
       }
 
-      // キャラクターコンポーネントのアニメーション更新
-      if (this.characterComponent) {
-        this.characterComponent.update();
-        // アニメーションが再生されている場合はレンダリングが必要
-        this.needsRender = true;
+      // WebGLレンダリング（3Dモデル、z-index: 10）
+      if (this.needsRender) {
+        this.renderer.render(this.scene, this.camera);
+        this.needsRender = false;
       }
 
-      // レンダリング
-      if (this.needsRender) {
-        // CSS2Dレンダリング（1回だけ実行）
-        // 1つのCSS2DRendererでGridとCellの両方のCSS2DObjectをレンダリング
-        if (this.css2DRenderer && this.scene && this.camera) {
-          this.css2DRenderer.render(this.scene, this.camera);
-        }
-
-        // WebGLレンダリング（3Dモデル、z-index: 10）
-        this.renderer.render(this.scene, this.camera);
+      // CSS2Dレンダリング（カメラ移動時のみ実行 - パフォーマンス最適化）
+      // Plotly等の重いDOM要素を含むため、不要な更新を避ける
+      if (this.needsCSS2DRender && this.css2DRenderer && this.scene && this.camera) {
+        this.css2DRenderer.render(this.scene, this.camera);
 
         // 各サービスのスケール更新（レンダリング後）
         // CSS2DRenderer.render()が全CSS2DObjectのtransformを再計算・上書きするため、
@@ -201,7 +214,13 @@ export class SceneManager {
           this.cellCSS2DService.forceUpdateCellContainerScale(this.camera);
         }
 
-        this.needsRender = false;
+        // カメラ位置を記録
+        this.lastCameraPosition.copy(this.camera.position);
+        if (this.controls) {
+          this.lastCameraTarget.copy(this.controls.target);
+        }
+
+        this.needsCSS2DRender = false;
       }
     };
 
@@ -262,9 +281,20 @@ export class SceneManager {
 
   /**
    * レンダリングが必要であることをマークします
+   * @param includeCSS2D CSS2Dレンダリングも必要な場合はtrue（デフォルト: true）
    */
-  markNeedsRender(): void {
+  markNeedsRender(includeCSS2D = true): void {
     this.needsRender = true;
+    if (includeCSS2D) {
+      this.needsCSS2DRender = true;
+    }
+  }
+
+  /**
+   * CSS2Dレンダリングのみが必要であることをマークします
+   */
+  markNeedsCSS2DRender(): void {
+    this.needsCSS2DRender = true;
   }
 
   /**
@@ -334,7 +364,10 @@ export class SceneManager {
     this.camera = undefined;
     this.hostElement = undefined;
     this.needsRender = true;
+    this.needsCSS2DRender = true;
     this.lastRenderTime = 0;
+    this.lastCameraPosition = new THREE.Vector3();
+    this.lastCameraTarget = new THREE.Vector3();
     this.gridCSS2DService = undefined;
     this.cellCSS2DService = undefined;
   }
