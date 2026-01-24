@@ -27,7 +27,54 @@ import { prettyError } from "@/utils/errors";
 import type { Base64String } from "@/utils/json/base64";
 import { Logger } from "@/utils/Logger";
 import { ErrorBanner } from "../common/error-banner";
-import { MODEL_MANAGER, Model, registerGlobalModelUpdateCallback } from "./model";
+import {
+  MODEL_MANAGER,
+  Model,
+  registerGlobalModelUpdateCallback,
+} from "./model";
+
+// Global error suppression for "Object is disposed" errors from lightweight-charts.
+// These errors occur when requestAnimationFrame callbacks execute after chart disposal.
+// Set up once at module load time to ensure it's always active.
+//
+// IMPORTANT: We use window.onerror because returning `true` fully suppresses the error.
+// addEventListener's preventDefault() doesn't prevent console output.
+//
+// NOTE: We filter by source to avoid suppressing legitimate errors from other libraries.
+//
+// HMR SUPPORT: Use a global flag to prevent re-registration during hot module replacement.
+const HANDLER_KEY = "__marimo_anywidget_error_handler__";
+if (!(window as Record<string, unknown>)[HANDLER_KEY]) {
+  (window as Record<string, unknown>)[HANDLER_KEY] = true;
+  const originalOnError = window.onerror;
+  window.onerror = (message, source, lineno, colno, error) => {
+    // Only suppress "Object is disposed" errors from known widget libraries
+    // Limited to exact matches and "Object is disposed" substring to avoid
+    // suppressing unrelated errors from other libraries
+    const isDisposedError =
+      message === "Object is disposed" ||
+      message === "Uncaught Object is disposed" ||
+      (typeof message === "string" && message.includes("Object is disposed"));
+
+    // Filter by source - only suppress errors from lightweight-charts or anywidget modules
+    // If source is undefined, we still suppress as it's likely from minified code
+    const isFromKnownSource =
+      !source ||
+      source.includes("lightweight-charts") ||
+      source.includes("anywidget");
+
+    if (isDisposedError && isFromKnownSource) {
+      Logger.debug(
+        "[AnyWidget] Suppressed 'Object is disposed' error (widget cleanup race condition)",
+      );
+      return true; // Suppress the error
+    }
+    if (originalOnError) {
+      return originalOnError(message, source, lineno, colno, error);
+    }
+    return false;
+  };
+}
 
 interface Data {
   jsUrl: string;
@@ -301,35 +348,6 @@ const LoadedSlot = ({
   useEffect(() => {
     model.current.setOnModelUpdate(handleModelUpdate);
   }, [handleModelUpdate]);
-
-  // Suppress "Object is disposed" errors from widgets like lightweight-charts
-  // These errors occur when requestAnimationFrame callbacks execute after chart disposal
-  // This is a known issue with lightweight-charts and similar libraries that use rAF
-  // Using addEventListener with capture phase for targeted error interception
-  useEffect(() => {
-    const handler = (event: ErrorEvent) => {
-      // Only suppress errors that match the specific pattern from lightweight-charts
-      // Check both message content and optionally the source file
-      const isDisposedError =
-        event.message === "Object is disposed" ||
-        event.message === "Uncaught Object is disposed";
-      const isFromLightweightCharts =
-        event.filename?.includes("lightweight-charts") ?? true; // Default to true if no filename
-
-      if (isDisposedError && isFromLightweightCharts) {
-        event.preventDefault();
-        event.stopPropagation();
-        Logger.debug(
-          "[AnyWidget] Suppressed 'Object is disposed' error (widget cleanup race condition)",
-        );
-        return;
-      }
-    };
-    window.addEventListener("error", handler, { capture: true });
-    return () => {
-      window.removeEventListener("error", handler, { capture: true });
-    };
-  }, []);
 
   // Listen for global model updates from MODEL_MANAGER
   // This handles the case where WebSocket messages go directly to MODEL_MANAGER

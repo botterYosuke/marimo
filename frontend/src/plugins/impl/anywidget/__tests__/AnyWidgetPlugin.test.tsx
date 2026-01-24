@@ -162,7 +162,8 @@ describe("LoadedSlot", () => {
     // Still only called once
     expect(mockWidget.render).toHaveBeenCalledTimes(1);
 
-    // Change the jsUrl
+    // Change jsUrl but NOT jsHash - should NOT re-render
+    // (jsHash is content-based, jsUrl may change without content changing)
     rerender(
       <LoadedSlot
         {...mockProps}
@@ -174,7 +175,22 @@ describe("LoadedSlot", () => {
     );
     await TestUtils.nextTick();
 
-    // Wait a render
+    // Should still be 1 - jsUrl change alone doesn't trigger re-render
+    expect(mockWidget.render).toHaveBeenCalledTimes(1);
+
+    // Change the jsHash - this should trigger re-render
+    rerender(
+      <LoadedSlot
+        {...mockProps}
+        data={{
+          ...mockProps.data,
+          jsHash: "xyz789",
+        }}
+      />,
+    );
+    await TestUtils.nextTick();
+
+    // Wait a render - jsHash change triggers re-render
     await waitFor(() => {
       expect(mockWidget.render).toHaveBeenCalledTimes(2);
     });
