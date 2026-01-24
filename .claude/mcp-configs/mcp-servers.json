@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_PAT_HERE"
+      },
+      "description": "GitHub operations - PRs, issues, repos"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory across sessions"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Chain-of-thought reasoning"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@context7/mcp-server"],
+      "description": "Live documentation lookup (React, Python, etc.)"
+    }
+  },
+  "_comments": {
+    "usage": "Copy the servers you need to your ~/.claude.json mcpServers section",
+    "env_vars": "Replace YOUR_*_HERE placeholders with actual values",
+    "marimo_note": "marimo uses pixi/hatch for Python, pnpm for frontend - no cloud services needed"
+  }
+}
