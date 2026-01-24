@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"make dev\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.error('[Hook] INFO: make dev starts both frontend (port 3000) and backend (port 2718)');console.error('[Hook] Access the UI at http://localhost:3000')\""
+          }
+        ],
+        "description": "Info about make dev ports"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"(make (test|py-test|fe-test|e2e|check)|hatch run|pytest|pnpm test|playwright)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.error('[Hook] Running tests/checks - this may take a while')\""
+          }
+        ],
+        "description": "Info for long-running test commands"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"git push\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.error('[Hook] Review changes before push...');console.error('[Hook] Ensure make check passes before pushing')\""
+          }
+        ],
+        "description": "Reminder before git push to run checks"
+      },
+      {
+        "matcher": "tool == \"Write\" && tool_input.file_path matches \"\\\\.(md|txt)$\" && !(tool_input.file_path matches \"README\\\\.md|CLAUDE\\\\.md|AGENTS\\\\.md|CONTRIBUTING\\\\.md\")",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const p=i.tool_input?.file_path||'';if(/\\.(md|txt)$/.test(p)&&!/(README|CLAUDE|AGENTS|CONTRIBUTING)\\.md$/.test(p)&&!/docs[\\\\/]/.test(p)&&!/development_docs[\\\\/]/.test(p)){console.error('[Hook] BLOCKED: Unnecessary documentation file creation');console.error('[Hook] File: '+p);console.error('[Hook] Use docs/ or development_docs/ for documentation');process.exit(1)}console.log(d)})\""
+          }
+        ],
+        "description": "Block creation of random .md files outside docs directories"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "tool == \"Bash\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/gh pr create/.test(cmd)){const out=i.tool_output?.output||'';const m=out.match(/https:\\/\\/github.com\\/[^/]+\\/[^/]+\\/pull\\/\\d+/);if(m){console.error('[Hook] PR created: '+m[0]);console.error('[Hook] CI will run: lint, typecheck, and tests')}}console.log(d)})\""
+          }
+        ],
+        "description": "Log PR URL after PR creation"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.(ts|tsx|js|jsx)$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const p=i.tool_input?.file_path;if(p&&fs.existsSync(p)){const c=fs.readFileSync(p,'utf8');const lines=c.split('\\n');const matches=[];lines.forEach((l,idx)=>{if(/console\\.log/.test(l)&&!/\\/\\//.test(l.split('console.log')[0]))matches.push((idx+1)+': '+l.trim())});if(matches.length){console.error('[Hook] WARNING: console.log found in '+p);matches.slice(0,5).forEach(m=>console.error(m));console.error('[Hook] Remove console.log before committing')}}console.log(d)})\""
+          }
+        ],
+        "description": "Warn about console.log statements after edits"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.py$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const p=i.tool_input?.file_path;if(p&&fs.existsSync(p)){const c=fs.readFileSync(p,'utf8');const lines=c.split('\\n');const matches=[];lines.forEach((l,idx)=>{if(/^\\s*print\\(/.test(l)&&!/^\\s*#/.test(l))matches.push((idx+1)+': '+l.trim())});if(matches.length>0){console.error('[Hook] WARNING: print() found in '+p);matches.slice(0,5).forEach(m=>console.error(m));console.error('[Hook] Consider using LOGGER instead of print')}}console.log(d)})\""
+          }
+        ],
+        "description": "Warn about print() statements in Python files"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const{execSync}=require('child_process');const fs=require('fs');let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{execSync('git rev-parse --git-dir',{stdio:'pipe'})}catch{console.log(d);process.exit(0)}try{const files=execSync('git diff --name-only HEAD',{encoding:'utf8',stdio:['pipe','pipe','pipe']}).split('\\n').filter(f=>/\\.(ts|tsx|js|jsx)$/.test(f)&&fs.existsSync(f));let hasConsole=false;for(const f of files){if(fs.readFileSync(f,'utf8').includes('console.log')){console.error('[Hook] WARNING: console.log found in '+f);hasConsole=true}}if(hasConsole)console.error('[Hook] Remove console.log statements before committing')}catch(e){}console.log(d)})\""
+          }
+        ],
+        "description": "Check for console.log in modified files after each response"
+      }
+    ]
+  }
+}
