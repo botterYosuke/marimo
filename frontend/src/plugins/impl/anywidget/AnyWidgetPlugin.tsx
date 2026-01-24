@@ -49,12 +49,12 @@ if (!(window as Record<string, unknown>)[HANDLER_KEY]) {
   const originalOnError = window.onerror;
   window.onerror = (message, source, lineno, colno, error) => {
     // Only suppress "Object is disposed" errors from known widget libraries
-    // Extended to catch variations: "Object is disposed", "Uncaught Object is disposed",
-    // or any message containing "disposed" (handles minified/different error formats)
+    // Limited to exact matches and "Object is disposed" substring to avoid
+    // suppressing unrelated errors from other libraries
     const isDisposedError =
       message === "Object is disposed" ||
       message === "Uncaught Object is disposed" ||
-      (typeof message === "string" && message.includes("disposed"));
+      (typeof message === "string" && message.includes("Object is disposed"));
 
     // Filter by source - only suppress errors from lightweight-charts or anywidget modules
     // If source is undefined, we still suppress as it's likely from minified code

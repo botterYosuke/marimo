@@ -88,6 +88,7 @@ Plotly から Lightweight Charts への移行により、CPU負荷の大幅な�
 |------|------|------|
 | HMR対応 | `window.onerror` にグローバルフラグ追加 | 開発モードでの重複登録防止 |
 | sourceフィルタ | lightweight-charts/anywidgetからのエラーのみ抑制 | 他ライブラリのエラーを隠さない |
+| エラーパターン限定 | `includes("disposed")` → `includes("Object is disposed")` | 無関係なdisposedエラーを抑制しない |
 | `dispose()` | `off()` → `dispose()` | disposed フラグを適切に設定 |
 | `isEqual` | 浅い比較 → 深い比較 | オブジェクト/配列の変更検出を改善 |
 

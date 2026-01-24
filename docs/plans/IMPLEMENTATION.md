@@ -32,7 +32,7 @@ VirtualFileLifecycleItem.create() で random_filename() を呼び出し
 js-url が変わる（例: "./@file/1234-abc.js" → "./@file/1234-xyz.js"）
   ↓
 フロントエンド: AnyWidgetSlot の key が変わる
-  const key = randomId ?? jsUrl;  // jsUrlがキーとして使用
+  const key = randomId ?? jsHash ?? jsUrl;  // jsHashがキーとして使用（コンテンツベース）
   ↓
 React: キー変更 → LoadedSlot を完全再マウント
   ↓
@@ -172,10 +172,11 @@ if (!(window as Record<string, unknown>)[HANDLER_KEY]) {
   (window as Record<string, unknown>)[HANDLER_KEY] = true;
   const originalOnError = window.onerror;
   window.onerror = (message, source, lineno, colno, error) => {
+    // "Object is disposed" エラーのみを対象（他のdisposedエラーは抑制しない）
     const isDisposedError =
       message === "Object is disposed" ||
       message === "Uncaught Object is disposed" ||
-      (typeof message === "string" && message.includes("disposed"));
+      (typeof message === "string" && message.includes("Object is disposed"));
 
     const isFromKnownSource =
       !source ||
@@ -268,6 +269,7 @@ runAnyWidgetModule(widget, model.current, htmlRef.current, false);
 | 修正 | 内容 | 理由 |
 |------|------|------|
 | **CRITICAL-1** | `window.onerror` にHMR対応とsourceフィルタ追加 | より安全なエラーハンドリング |
+| **CRITICAL-1b** | `message.includes("disposed")` → `message.includes("Object is disposed")` | 無関係なdisposedエラーを抑制しない |
 | **HIGH-3** | `off()` → `dispose()` | disposed フラグを適切に設定 |
 | **HIGH-6** | 浅い比較 → `isEqual` | オブジェクト/配列の変更検出を改善 |
 
