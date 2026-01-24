@@ -19,7 +19,7 @@ marimoノートブックで100msごとにセルが再実行されると、anywid
 
 ## 現在の問題
 
-ログ（`.claude/plans/browser.devtool.log`）より：
+ログ（`browser.devtool.log`）より：
 - モデルは`change:options/data/markers`イベントを発火している
 - `render()`は`clearElement=false`で呼ばれている
 - しかしチャートが更新されない
@@ -45,6 +45,6 @@ marimoノートブックで100msごとにセルが再実行されると、anywid
 - `C:\Users\sasai\AppData\Local\Temp\fintech1.py`
 
 ## 参照ドキュメント
-- `.claude/plans/chart-flickering-analysis.md` - 根本原因分析
-- `.claude/plans/chart-flickering-fix-plan.md` - 修正プラン一覧
-- `.claude/plans/chart-flickering-handoff.md` - 前回の引継ぎ
+- `chart-flickering-analysis.md` - 根本原因分析
+- `chart-flickering-fix-plan.md` - 修正プラン一覧
+- `chart-flickering-handoff.md` - 前回の引継ぎ

@@ -322,13 +322,48 @@ const LoadedSlot = ({
           if (!mounted) {
             return;
           }
+          // Note: We don't check document.contains() here because:
+          // 1. ShadowDOM elements may not be detected correctly by document.contains()
+          // 2. The mounted flag is sufficient to track component lifecycle
+          // 3. Any errors from disposed widgets are caught by try-catch below
           // Use valueRef.current to get latest value (fixes stale closure)
           const keys = Object.keys(valueRef.current) as Array<keyof T>;
           const updatedValue: Partial<T> = {};
+          let hasChanges = false;
           for (const key of keys) {
-            updatedValue[key] = managerModel.get(key);
+            const newVal = managerModel.get(key);
+            const oldVal = model.current.get(key);
+            // Use deep comparison for objects/arrays to avoid false positives
+            // Reference comparison (===) would treat new array/object refs as changes
+            // even when content is identical, causing unnecessary re-renders
+            if (!isEqual(newVal, oldVal)) {
+              updatedValue[key] = newVal;
+              hasChanges = true;
+              Logger.debug(
+                `[AnyWidget] Global callback: key=${String(key)} changed`,
+              );
+            }
           }
-          model.current.updateAndEmitDiffs(updatedValue as T);
+          if (hasChanges) {
+            Logger.debug(
+              "[AnyWidget] Global callback: updating local model with",
+              updatedValue,
+            );
+            // Wrap in try-catch to handle "Object is disposed" errors
+            // from widgets (e.g., lightweight-charts) when component unmounts
+            try {
+              model.current.updateAndEmitDiffs(updatedValue as T);
+            } catch (err) {
+              Logger.debug(
+                "[AnyWidget] Error updating model (widget may be disposed):",
+                err,
+              );
+            }
+          } else {
+            Logger.debug(
+              "[AnyWidget] Global callback: no changes detected, skipping update",
+            );
+          }
         })
         .catch((err) => {
           // Model not found in MODEL_MANAGER
@@ -378,6 +413,9 @@ const LoadedSlot = ({
       unsubRef.current = unsub;
     });
     return () => {
+      // Clear all model listeners to prevent "Object is disposed" errors
+      // from widgets (e.g., lightweight-charts) after component unmounts
+      model.current.off();
       unsubPromise.then((unsub) => unsub());
     };
     // Only re-run on jsHash change (ESM content change)
@@ -387,10 +425,27 @@ const LoadedSlot = ({
   // Some widgets use model.on() listeners, others expect render() to be called again.
   const valueMemo = useDeepCompareMemoize(value);
   useEffect(() => {
+    // Skip if element ref is not available
+    if (!htmlRef.current) {
+      return;
+    }
+    // Note: We don't check document.contains() because:
+    // 1. ShadowDOM elements may not be detected correctly
+    // 2. React handles cleanup via the return function
+    // 3. Errors from disposed widgets are caught by try-catch
     // Update the model with latest value - emits change events for any diffs
     // Skip if update came from WebSocket - model already has latest data
     if (updateSourceRef.current !== "websocket") {
-      model.current.updateAndEmitDiffs(valueMemo);
+      // Wrap in try-catch to handle "Object is disposed" errors
+      // from widgets (e.g., lightweight-charts) when component unmounts
+      try {
+        model.current.updateAndEmitDiffs(valueMemo);
+      } catch (err) {
+        Logger.debug(
+          "[AnyWidget] Error updating model (widget may be disposed):",
+          err,
+        );
+      }
     }
     // Reset update source for next update
     updateSourceRef.current = "props";

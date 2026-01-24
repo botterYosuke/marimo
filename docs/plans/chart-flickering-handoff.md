@@ -172,8 +172,8 @@ def get_stable_random_id(js_hash: str) -> str:
 
 ## 分析ドキュメント
 
-- `.claude/plans/chart-flickering-analysis.md` - 根本原因の詳細分析
-- `.claude/plans/chart-flickering-fix-plan.md` - 改修プラン一覧
+- `chart-flickering-analysis.md` - 根本原因の詳細分析
+- `chart-flickering-fix-plan.md` - 改修プラン一覧
 
 ## テスト用ファイル
 

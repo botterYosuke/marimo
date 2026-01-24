@@ -86,6 +86,9 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
   }) => Promise<null | undefined>;
   // Callback to notify React when model data changes (for re-rendering)
   private onModelUpdate?: () => void;
+  // Flag to indicate the model has been disposed (component unmounted)
+  // When true, all emit calls are skipped to prevent "Object is disposed" errors
+  private disposed = false;
 
   constructor(
     data: T,
@@ -116,6 +119,9 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
 
   off(eventName?: string | null, callback?: EventHandler | null): void {
     if (!eventName) {
+      // Clear all listeners but don't set disposed flag
+      // The model instance may be reused (e.g., when useEffect re-runs)
+      // Setting disposed = true would prevent future updates on the same instance
       this.listeners = {};
       return;
     }
@@ -126,6 +132,16 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
     }
 
     this.listeners[eventName]?.delete(callback);
+  }
+
+  /**
+   * Mark this model as disposed. After calling this,
+   * all emit calls will be silently skipped.
+   * Used when the component is fully unmounted and won't be reused.
+   */
+  dispose(): void {
+    this.disposed = true;
+    this.listeners = {};
   }
 
   send(
@@ -259,18 +275,52 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
   }
 
   private emit<K extends keyof T>(event: `change:${K & string}`, value: T[K]) {
+    // Skip emit if model has been disposed (component unmounted)
+    if (this.disposed) {
+      return;
+    }
     const listeners = this.listeners[event];
     if (!listeners || listeners.size === 0) {
       return;
     }
     listeners.forEach((cb) => {
-      cb(value);
+      // Double-check disposed flag before each callback (in case it changed during iteration)
+      if (this.disposed) {
+        return;
+      }
+      // Wrap in try-catch to handle "Object is disposed" errors
+      // from widgets (e.g., lightweight-charts) when component unmounts
+      try {
+        cb(value);
+      } catch (err) {
+        Logger.debug(
+          "[anywidget] Error in change listener (widget may be disposed):",
+          err,
+        );
+      }
     });
   }
 
   // Debounce 0 to send off one request in a single frame
   private emitAnyChange = debounce(() => {
-    this.listeners[this.ANY_CHANGE_EVENT]?.forEach((cb) => cb());
+    // Skip emit if model has been disposed (component unmounted)
+    if (this.disposed) {
+      return;
+    }
+    this.listeners[this.ANY_CHANGE_EVENT]?.forEach((cb) => {
+      // Double-check disposed flag before each callback
+      if (this.disposed) {
+        return;
+      }
+      try {
+        cb();
+      } catch (err) {
+        Logger.debug(
+          "[anywidget] Error in change listener (widget may be disposed):",
+          err,
+        );
+      }
+    });
   }, 0);
 }
 

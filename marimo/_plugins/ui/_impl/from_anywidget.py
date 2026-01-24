@@ -264,12 +264,9 @@ class anywidget(UIElement[WireFormat, T]):
     ) -> None:
         super()._initialize(initialization_args)
         # Add the ui_element_id after the widget is initialized
-        # and complete the deferred open to send the "open" message
-        # with the correct ui_element_id
         comm = self.widget.comm
         if isinstance(comm, MarimoComm):
             comm.ui_element_id = self._id
-            comm.complete_deferred_open()
 
     def _receive_from_frontend(self, args: SendToWidgetArgs) -> None:
         state = decode_from_wire(
