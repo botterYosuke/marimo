@@ -3,7 +3,7 @@
 ## 現状の問題
 
 - **LCP (Largest Contentful Paint)**: 6.10s（非常に遅い）
-- **refresh インターバル**: 200ms でチャート全体を再描画
+- **refresh インターバル**: 100ms でチャート全体を再描画
 - **データ量**: 6084 ステップ（約24年分の日足データ）
 
 ---
@@ -124,43 +124,6 @@ class Backtest:
             ...
 ```
 
-### Phase 3: marimo UI の最適化（効果: 中）
-
-#### 3.1 refresh インターバルの動的調整
-```python
-@app.cell
-def _(mo):
-    speed = mo.ui.slider(start=50, stop=1000, value=200, label="速度(ms)")
-    play_switch = mo.ui.switch(label="自動再生")
-    refresh = mo.ui.refresh(default_interval=f"{speed.value}ms")
-    mo.hstack([play_switch, speed, refresh])
-    return play_switch, refresh, speed
-```
-
-#### 3.2 チャート更新の間引き
-```python
-@app.cell
-def _(current_step, mo):
-    # 10ステップごとにチャートを更新
-    display_step = (current_step // 10) * 10
-    return (display_step,)
-
-@app.cell
-def _(bt, code, display_step, mo):
-    bt.goto(display_step, strategy=my_strategy)
-    chart = bt.chart(code=code)
-    # ...
-```
-
-### Phase 4: データ量の削減（効果: 高）
-
-#### 4.1 期間フィルタリング
-```python
-# 直近1年のみ使用
-df = df[df.index >= datetime.now() - timedelta(days=365)]
-```
-
-#### 4.2 サンプリング
 ```python
 # 週足に変換してリプレイ
 df_weekly = df.resample('W').agg({
@@ -180,9 +143,7 @@ df_weekly = df.resample('W').agg({
 |--------|------|------|------|
 | 1 | チャート表示範囲の制限（window=100） | 小 | 高 |
 | 2 | Plotly 軽量化設定 | 小 | 中 |
-| 3 | refresh インターバル調整 UI | 小 | 中 |
-| 4 | チャート更新の間引き | 小 | 高 |
-| 5 | スナップショット機能 | 大 | 中 |
+| 3 | スナップショット機能 | 大 | 中 |
 
 ---
 
