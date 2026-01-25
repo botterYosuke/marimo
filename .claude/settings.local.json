@@ -38,7 +38,8 @@
       "Bash(pnpm exec tsc:*)",
       "Bash(make fe-check:*)",
       "Bash(pnpm run typecheck:*)",
-      "Bash(uvx hatch run:*)"
+      "Bash(uvx hatch run:*)",
+      "Bash(git merge:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\sasai\\Documents\\BackcastPro\\src\\BackcastPro\\widgets"
