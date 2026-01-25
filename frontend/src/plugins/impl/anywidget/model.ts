@@ -89,6 +89,10 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
   // Flag to indicate the model has been disposed (component unmounted)
   // When true, all emit calls are skipped to prevent "Object is disposed" errors
   private disposed = false;
+  // Keys that should update directly via model.on() without triggering React re-renders
+  // This is useful for high-frequency updates (e.g., chart last_bar at 100ms intervals)
+  // where the widget handles updates internally and React re-renders are unnecessary overhead
+  private directUpdateKeys: Set<keyof T> = new Set();
 
   constructor(
     data: T,
@@ -113,6 +117,29 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
    */
   setOnModelUpdate(callback: () => void): void {
     this.onModelUpdate = callback;
+  }
+
+  /**
+   * marimo-specific extension: Set keys that should bypass React re-renders.
+   *
+   * Use this for high-frequency updates (e.g., chart last_bar at 100ms intervals)
+   * where the widget handles updates internally via model.on() listeners.
+   * The model will still emit change events, but won't trigger React re-renders.
+   *
+   * @note This method is NOT part of the standard AnyModel interface.
+   * Check for existence before calling: `if (model.setDirectUpdateKeys) { ... }`
+   *
+   * @example
+   * ```javascript
+   * // In widget ESM
+   * if (model.setDirectUpdateKeys) {
+   *   model.setDirectUpdateKeys(['last_bar']);
+   * }
+   * model.on('change:last_bar', (bar) => series.update(bar));
+   * ```
+   */
+  setDirectUpdateKeys(keys: (keyof T)[]): void {
+    this.directUpdateKeys = new Set(keys);
   }
 
   private listeners: Record<string, Set<EventHandler>> = {};
@@ -203,7 +230,7 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
       return;
     }
 
-    let hasChanges = false;
+    let hasReactRelevantChanges = false;
     Object.keys(value).forEach((key) => {
       const k = key as keyof T;
       // Use deep comparison for consistency with AnyWidgetPlugin.tsx
@@ -211,12 +238,17 @@ export class Model<T extends Record<string, any>> implements AnyModel<T> {
       // but content remains identical
       if (!isEqual(this.data[k], value[k])) {
         this.set(k, value[k]);
-        hasChanges = true;
+        // Only mark for React re-render if NOT a direct-update key
+        // Direct-update keys are handled by model.on() listeners and
+        // don't need React re-renders (reduces CPU overhead for high-frequency updates)
+        if (!this.directUpdateKeys.has(k)) {
+          hasReactRelevantChanges = true;
+        }
       }
     });
 
     // Notify React to re-render (for widgets that don't use model.on() listeners)
-    if (hasChanges && this.onModelUpdate) {
+    if (hasReactRelevantChanges && this.onModelUpdate) {
       this.onModelUpdate();
     }
   }
