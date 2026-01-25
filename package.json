@@ -14,11 +14,12 @@
     "build": "pnpm turbo build",
     "codegen": "pnpm turbo run codegen",
     "lint": "pnpm biome check --write && pnpm run -r lint",
-    "dev": "concurrently --names \"fe,server\" --prefix-colors \"blue,green\" --kill-others-on-fail false \"pnpm run --filter @marimo-team/frontend dev\" \"pnpm start:server\"",
+    "clean:processes": "powershell -NoProfile -Command \"try { Get-Process -Name marimo -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue } catch { }; exit 0\"",
+    "dev": "pnpm clean:processes && concurrently --names \"fe,server\" --prefix-colors \"blue,green\" --kill-others-on-fail false \"pnpm run --filter @marimo-team/frontend dev\" \"pnpm start:server\"",
     "dev:pyodide": "concurrently --names \"pyodide-server,fe\" --prefix-colors \"green,blue\" --kill-others-on-fail false \"uv run pyodide/build_and_serve.py\" \"cd frontend && cross-env PYODIDE=true VITE_MARIMO_VERSION=0.19.2 pnpm dev\"",
     "start:server": "uv run marimo edit --no-token --headless --port 2718 %TEMP%",
-    "start:electron": "wait-on http-get://localhost:3000 --timeout 60000 -v && cross-env NODE_ENV=development pnpm exec electron .",
-    "start": "concurrently --names \"dev,electron\" --prefix-colors \"blue,cyan\" --kill-others-on-fail false \"pnpm dev\" \"pnpm start:electron\"",
+    "start:electron": "wait-on http-get://localhost:3000 http-get://localhost:2718 --timeout 60000 -v && cross-env NODE_ENV=development pnpm exec electron .",
+    "start": "pnpm clean:processes && concurrently --names \"dev,electron\" --prefix-colors \"blue,cyan\" --kill-others-on-fail false \"pnpm dev\" \"pnpm start:electron\"",
     "build:electron-py": "uv run pyinstaller --clean --noconfirm marimo.spec",
     "dist:electron": "pnpm build && electron-builder"
   },
@@ -53,7 +54,16 @@
       "allowedVersions": {
         "vite": "7"
       }
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "electron",
+      "electron-winstaller",
+      "es5-ext",
+      "esbuild",
+      "msw",
+      "spawn-sync"
+    ]
   },
   "build": {
     "appId": "com.marimo.app",
@@ -72,11 +82,15 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "electron/build/icon.ico",
@@ -84,7 +98,9 @@
         {
           "from": "dist/marimo-server.exe",
           "to": "marimo-server.exe",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         }
       ]
     },
@@ -92,7 +108,10 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "electron/build/icon.icns",
@@ -101,7 +120,9 @@
         {
           "from": "dist/marimo-server",
           "to": "marimo-server",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         }
       ]
     },
@@ -109,11 +130,15 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "deb",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "electron/build/icon.png",
@@ -123,7 +148,9 @@
         {
           "from": "dist/marimo-server",
           "to": "marimo-server",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         }
       ]
     },

@@ -1,7 +1,7 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import * as THREE from "three";
-import { CellCSS2DService } from "./cell-css2d-service";
+import type { CellCSS2DService } from "./cell-css2d-service";
 
 /**
  * CellDragManager

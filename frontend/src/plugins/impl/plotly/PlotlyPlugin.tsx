@@ -16,6 +16,8 @@ import { useScript } from "@/hooks/useScript";
 import { Arrays } from "@/utils/arrays";
 import { Objects } from "@/utils/objects";
 import { createParser, type PlotlyTemplateParser } from "./parse-from-template";
+import { useAtomValue } from "jotai";
+import { is3DModeAtom } from "@/core/mode";
 
 interface Data {
   figure: Figure;
@@ -116,6 +118,9 @@ export const PlotlyComponent = memo(
       return structuredClone(originalFigure);
     });
 
+    // 3Dモード検出（CSS2DRenderer上でのパフォーマンス最適化用）
+    const is3DMode = useAtomValue(is3DModeAtom);
+
     // Used for rendering LaTeX. TODO: Serve this library from Marimo
     const scriptStatus = useScript(
       "https://cdn.jsdelivr.net/npm/mathjax-full@3.2.2/es5/tex-mml-svg.min.js",
@@ -150,6 +155,9 @@ export const PlotlyComponent = memo(
     const plotlyConfig = useMemo((): Partial<Plotly.Config> => {
       return {
         displaylogo: false,
+        // 3Dモード時はstaticPlotを有効化（CSS2DRenderer上でのパフォーマンス最適化）
+        // hover/zoom/selectなどのイベント処理を無効化し、CPU負荷を大幅に削減
+        ...(is3DMode ? { staticPlot: true } : {}),
         modeBarButtonsToAdd: [
           // Custom button to reset the state
           {
@@ -169,7 +177,7 @@ export const PlotlyComponent = memo(
         // Prioritize user's config
         ...configMemo,
       };
-    }, [handleReset, configMemo]);
+    }, [handleReset, configMemo, is3DMode]);
 
     const prevFigure = usePrevious(figure) ?? figure;
 

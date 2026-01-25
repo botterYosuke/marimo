@@ -1,0 +1,47 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/test_db_stocks_board.py -v)",
+      "Bash(python -m pip:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command \"Get-ChildItem ''S:\\\\j-quants'' -Filter ''equities_trades*'' | Select-Object -First 10 Name\")",
+      "Bash(powershell:*)",
+      "Bash(python:*)",
+      "Bash(uv run python:*)",
+      "Bash(powershell.exe -Command \"Get-ChildItem -Path ''C:\\\\Users\\\\sasai\\\\Documents\\\\jp'' -Filter ''*.duckdb'' | Select-Object -First 5\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem -Path ''C:\\\\Users\\\\sasai\\\\Documents\\\\j-quants'' -Filter ''*minute*'' | Select-Object -First 10\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem -Path ''C:\\\\Users\\\\sasai\\\\Documents'' | Select-Object Name\")",
+      "Bash(powershell.exe:*)",
+      "Bash(gzip:*)",
+      "Bash(where:*)",
+      "Bash(\"C:\\\\Users\\\\sasai\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\python.exe\" -c \"print\\(''hello''\\)\")",
+      "Bash(py:*)",
+      "Bash(pip install:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm lint:biome:*)",
+      "Bash(.venv/Scripts/python -m pytest tests/test_lightweight_chart_widget.py -v --tb=short)",
+      "Bash(.venv/Scripts/pip install:*)",
+      "Bash(uv add:*)",
+      "Bash(uv build:*)",
+      "Bash(pwsh -Command:*)",
+      "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\sasai\\\\Documents\\\\BackcastPro && python -m pytest tests/test_lightweight_chart_widget.py -v\")",
+      "Bash(cmd.exe /c:*)",
+      "Bash(pytest:*)",
+      "Bash(pushd:*)",
+      "Bash(pnpm build:*)",
+      "Bash(cmd /c \"cd /d c:\\\\Users\\\\sasai\\\\Documents\\\\marimo\\\\frontend && pnpm tsc --noEmit\")",
+      "Bash(cmd /c \"cd /d c:\\\\Users\\\\sasai\\\\Documents\\\\marimo\\\\frontend && pnpm tsc --noEmit 2>&1 | head -20\")",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(make fe-check:*)",
+      "Bash(pnpm run typecheck:*)",
+      "Bash(uvx hatch run:*)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\sasai\\Documents\\BackcastPro\\src\\BackcastPro\\widgets"
+    ]
+  }
+}

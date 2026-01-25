@@ -9,6 +9,7 @@ import { WasmFileSystem } from "./fs";
 import { getMarimoWheel } from "./getMarimoWheel";
 import { t } from "./tracer";
 import type { SerializedBridge, WasmController } from "./types";
+import { setupBackcastProData } from "./backcastpro-loader";
 
 const MAKE_SNAPSHOT = false;
 
@@ -87,6 +88,10 @@ export class DefaultWasmController implements WasmController {
     WasmFileSystem.createHomeDir(this.requirePyodide);
     WasmFileSystem.mountFS(this.requirePyodide);
     await WasmFileSystem.populateFilesToMemory(this.requirePyodide);
+
+    // Load BackcastPro data files from deployed assets to virtual filesystem
+    await setupBackcastProData(this.requirePyodide);
+
     span.end("ok");
     return WasmFileSystem.initNotebookCode({
       pyodide: this.requirePyodide,

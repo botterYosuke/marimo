@@ -253,10 +253,13 @@ class UvPackageManager(PypiPackageManager):
         return self._uv_bin != "uv" or super().is_manager_installed()
 
     def install_command(
-        self, package: str, *, upgrade: bool, dev: bool = False
+        self, package: str, *, upgrade: bool, dev: bool = False, force_pip_install: bool = False
     ) -> list[str]:
         install_cmd: list[str]
-        if self.is_in_uv_project:
+        # Use 'uv pip install' instead of 'uv add' when force_pip_install is True
+        # or when not in a uv project. This prevents rebuilding local editable packages
+        # (like marimo) that may be locked when marimo.exe is running.
+        if self.is_in_uv_project and not force_pip_install:
             install_cmd = [self._uv_bin, "add"]
             if dev:
                 install_cmd.append("--dev")
@@ -292,17 +295,13 @@ class UvPackageManager(PypiPackageManager):
             f"Installing in {package} with 'uv {'add' if self.is_in_uv_project else 'pip install'}'"
         )
 
-        # For uv projects, use the standard install flow without fallback
-        if self.is_in_uv_project:
-            return await super()._install(
-                package,
-                upgrade=upgrade,
-                dev=dev,
-                log_callback=log_callback,
-            )
-
+        # Always use 'uv pip install' instead of 'uv add' to avoid rebuilding local
+        # editable packages (like marimo) that may be locked when marimo.exe is running.
+        # This prevents the "failed to remove file marimo.exe" error when installing packages
+        # in a development environment where marimo is installed as an editable package.
         # For uv pip install, try with output capture to enable fallback
-        cmd = self.install_command(package, upgrade=upgrade, dev=dev)
+        # Force using 'uv pip install' instead of 'uv add' to avoid rebuilding local packages
+        cmd = self.install_command(package, upgrade=upgrade, dev=dev, force_pip_install=True)
 
         # Run the command and capture output
         proc = subprocess.Popen(  # noqa: ASYNC220
