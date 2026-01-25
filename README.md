@@ -1,338 +1,161 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/marimo-logotype-thick.svg">
-</p>
+# Strategy Replay Simulator
 
-<p align="center">
-  <em>A reactive Python notebook that's reproducible, git-friendly, and deployable as scripts or apps.</em>
-</p>
+*— 戦略が「生き残る」様子を観測する、トレード・オートバトラー —*
 
-<p align="center">
-  <a href="https://docs.marimo.io" target="_blank"><strong>Docs</strong></a> ·
-  <a href="https://marimo.io/discord?ref=readme" target="_blank"><strong>Discord</strong></a> ·
-  <a href="https://docs.marimo.io/examples/" target="_blank"><strong>Examples</strong></a> ·
-  <a href="https://marimo.io/gallery/" target="_blank"><strong>Gallery</strong></a> ·
-  <a href="https://www.youtube.com/@marimo-team/" target="_blank"><strong>YouTube</strong></a>
-</p>
+---
 
-<p align="center">
-  <b>English</b>
-  <b> | </b>
-  <a href="https://github.com/marimo-team/marimo/blob/main/README_Traditional_Chinese.md" target="_blank"><b>繁體中文</b></a>
-  <b> | </b>
-  <a href="https://github.com/marimo-team/marimo/blob/main/README_Chinese.md" target="_blank"><b>简体中文</b></a>
-  <b> | </b>
-  <a href="https://github.com/marimo-team/marimo/blob/main/README_Japanese.md" target="_blank"><b>日本語</b></a>
-  <b> | </b>
-  <a href="https://github.com/marimo-team/marimo/blob/main/README_Spanish.md" target="_blank"><b>Español</b></a>
-</p>
+## 概要
 
-<p align="center">
-  <a href="https://pypi.org/project/marimo/"><img src="https://img.shields.io/pypi/v/marimo?color=%2334D058&label=pypi"/></a>
-  <a href="https://anaconda.org/conda-forge/marimo"><img src="https://img.shields.io/conda/vn/conda-forge/marimo.svg"/></a>
-  <a href="https://marimo.io/discord?ref=readme"><img src="https://shields.io/discord/1059888774789730424" alt="discord"/></a>
-  <img alt="Pepy Total Downloads" src="https://img.shields.io/pepy/dt/marimo?label=pypi%20%7C%20downloads"/>
-  <img alt="Conda Downloads" src="https://img.shields.io/conda/d/conda-forge/marimo"/>
-  <a href="https://github.com/marimo-team/marimo/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/marimo"/></a>
-</p>
+本作は、トレーディング戦略を**速く評価するためのツール**ではありません。
+また、プレイヤーが売買ボタンを連打するゲームでもありません。
 
-**marimo** is a reactive Python notebook: run a cell or interact with a UI
-element, and marimo automatically runs dependent cells (or <a href="#expensive-notebooks">marks them as stale</a>), keeping code and outputs
-consistent. marimo notebooks are stored as pure Python (with first-class SQL support), executable as scripts,
-and deployable as apps.
-
-**Highlights**.
-
-- 🚀 **batteries-included:** replaces `jupyter`, `streamlit`, `jupytext`, `ipywidgets`, `papermill`, and more
-- ⚡️ **reactive**: run a cell, and marimo reactively [runs all dependent cells](https://docs.marimo.io/guides/reactivity.html) or <a href="#expensive-notebooks">marks them as stale</a>
-- 🖐️ **interactive:** [bind sliders, tables, plots, and more](https://docs.marimo.io/guides/interactivity.html) to Python — no callbacks required
-- 🐍 **git-friendly:** stored as `.py` files
-- 🛢️ **designed for data**: query dataframes, databases, warehouses, or lakehouses [with SQL](https://docs.marimo.io/guides/working_with_data/sql.html), filter and search [dataframes](https://docs.marimo.io/guides/working_with_data/dataframes.html)
-- 🤖 **AI-native**: [generate cells with AI](https://docs.marimo.io/guides/generate_with_ai/) tailored for data work
-- 🔬 **reproducible:** [no hidden state](https://docs.marimo.io/guides/reactivity.html#no-hidden-state), deterministic execution, [built-in package management](https://docs.marimo.io/guides/package_management/)
-- 🏃 **executable:** [execute as a Python script](https://docs.marimo.io/guides/scripts.html), parameterized by CLI args
-- 🛜 **shareable**: [deploy as an interactive web app](https://docs.marimo.io/guides/apps.html) or [slides](https://docs.marimo.io/guides/apps.html#slides-layout), [run in the browser via WASM](https://docs.marimo.io/guides/wasm.html)
-- 🧩 **reusable:** [import functions and classes](https://docs.marimo.io/guides/reusing_functions/) from one notebook to another
-- 🧪 **testable:** [run pytest](https://docs.marimo.io/guides/testing/) on notebooks
-- ⌨️ **a modern editor**: [GitHub Copilot](https://docs.marimo.io/guides/editor_features/ai_completion.html#github-copilot), [AI assistants](https://docs.marimo.io/guides/editor_features/ai_completion.html), vim keybindings, variable explorer, and [more](https://docs.marimo.io/guides/editor_features/index.html)
-- 🧑‍💻 **use your favorite editor**: run in [VS Code or Cursor](https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo), or edit in neovim, Zed, [or any other text editor](https://docs.marimo.io/guides/editor_features/watching/)
+このゲームでプレイヤーが最初に書くのは、たった一行です。
 
 ```python
-pip install marimo && marimo tutorial intro
+while bt.is_surviving():
 ```
 
-_Try marimo at [our online playground](https://marimo.app/l/c7h6pz), which runs entirely in the browser!_
+この一行は、
+「市場が開いている限り戦う」という宣言ではありません。
+**「資金が生きている限り、この戦略は市場に立ち続ける」**という覚悟です。
 
-_Jump to the [quickstart](#quickstart) for a primer on our CLI._
+本作は、あなたが書いたコード（信条）が、
+市場という環境の中で**どのように振る舞い、迷い、耐え、そして死ぬのか**を
+**1バーずつ、時間をかけて観察するための戦略鑑賞シミュレーター**です。
 
-## A reactive programming environment
+---
 
-marimo guarantees your notebook code, outputs, and program state are consistent. This [solves many problems](https://docs.marimo.io/faq.html#faq-problems) associated with traditional notebooks like Jupyter.
+## コアコンセプト
 
-**A reactive programming environment.**
-Run a cell and marimo _reacts_ by automatically running the cells that
-reference its variables, eliminating the error-prone task of manually
-re-running cells. Delete a cell and marimo scrubs its variables from program
-memory, eliminating hidden state.
+### 1. 戦略はコードではなく「生命体」である
 
-<img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/reactive.gif" width="700px" />
+このゲームにおいて、戦略は単なるアルゴリズムではありません。
+それは**資金を命とする、思考するエージェント**です。
 
-<a name="expensive-notebooks"></a>
+* 書かれたコードは「人格」
+* if 文は「判断基準」
+* ループは「生き方」
+* 破産は「死」
 
-**Compatible with expensive notebooks.** marimo lets you [configure the runtime
-to be
-lazy](https://docs.marimo.io/guides/configuration/runtime_configuration.html),
-marking affected cells as stale instead of automatically running them. This
-gives you guarantees on program state while preventing accidental execution of
-expensive cells.
+バグはエラーとして扱われません。
+それは**性格の欠陥**として、市場の中で露呈します。
 
-**Synchronized UI elements.** Interact with [UI
-elements](https://docs.marimo.io/guides/interactivity.html) like [sliders](https://docs.marimo.io/api/inputs/slider.html#slider),
-[dropdowns](https://docs.marimo.io/api/inputs/dropdown.html), [dataframe
-transformers](https://docs.marimo.io/api/inputs/dataframe.html), and [chat
-interfaces](https://docs.marimo.io/api/inputs/chat.html), and the cells that
-use them are automatically re-run with their latest values.
+> 「臆病すぎて何もしない」
+> 「欲張りすぎて耐えきれない」
+> 「一貫性があり、最後まで信条を貫いた」
 
-<img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/readme-ui.gif" width="700px" />
+本作が評価するのは、
+**最終損益だけでなく、その戦略が“どう生きたか”**です。
 
-**Interactive dataframes.** [Page through, search, filter, and
-sort](https://docs.marimo.io/guides/working_with_data/dataframes.html)
-millions of rows blazingly fast, no code required.
+---
 
-<img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/docs-df.gif" width="700px" />
+### 2. プレイヤーは「書き、放ち、見守る」
 
-**Generate cells with data-aware AI.** [Generate code with an AI
-assistant](https://docs.marimo.io/guides/editor_features/ai_completion/) that is highly
-specialized for working with data, with context about your variables in memory;
-[zero-shot entire notebooks](https://docs.marimo.io/guides/generate_with_ai/text_to_notebook/).
-Customize the system prompt, bring your own API keys, or use local models.
+プレイヤーはリアルタイムで売買を操作しません。
+しかし、**最初からプログラミングを避けることもしません。**
 
-<img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/readme-generate-with-ai.gif" width="700px" />
+あなたが行うのは、以下の行為です。
 
-**Query data with SQL.** Build [SQL](https://docs.marimo.io/guides/working_with_data/sql.html) queries
-that depend on Python values and execute them against dataframes, databases, lakehouses,
-CSVs, Google Sheets, or anything else using our built-in SQL engine, which
-returns the result as a Python dataframe.
+1. 意味論が極端に絞られた、本物のコードを書く
+2. そのコードを市場に放つ
+3. 1バーずつ進む時間の中で、戦略の判断を観察する
+4. 違和感・失敗・美しさを感じ取り、書き直す
 
-<img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/readme-sql-cell.png" width="700px" />
+この体験は、
+**The Farmer Was Replaced** に近い構造を持っています。
 
-Your notebooks are still pure Python, even if they use SQL.
+ただし舞台は農場ではなく、
+**資金が削られ続ける、市場という環境**です。
 
-**Dynamic markdown.** Use markdown parametrized by Python variables to tell
-dynamic stories that depend on Python data.
+---
 
-**Built-in package management.** marimo has built-in support for all major
-package managers, letting you [install packages on import](https://docs.marimo.io/guides/editor_features/package_management.html). marimo can even
-[serialize package
-requirements](https://docs.marimo.io/guides/package_management/inlining_dependencies/)
-in notebook files, and auto install them in
-isolated venv sandboxes.
+### 3. 高速化しない。なぜなら、時間こそがゲームだから
 
-**Deterministic execution order.** Notebooks are executed in a deterministic
-order, based on variable references instead of cells' positions on the page.
-Organize your notebooks to best fit the stories you'd like to tell.
+本作のシミュレーションは、あえて高速化しません。
 
-**Performant runtime.** marimo runs only those cells that need to be run by
-statically analyzing your code.
+* 市場は 1バーずつ進む
+* 含み損益は揺れる
+* 判断は取り消せない
+* 生きている限り、戦略は動き続ける
 
-**Batteries-included.** marimo comes with GitHub Copilot, AI assistants, Ruff
-code formatting, HTML export, fast code completion, a [VS Code
-extension](https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo),
-an interactive dataframe viewer, and [many more](https://docs.marimo.io/guides/editor_features/index.html)
-quality-of-life features.
+これはバックテストではありません。
+**戦略が市場と「対話」する過程を鑑賞するゲーム**です。
 
-## Quickstart
+> 「今は耐えろ」
+> 「なぜそこで逃げた？」
+> 「その一貫性は、美しい」
 
-_The [marimo concepts
-playlist](https://www.youtube.com/watch?v=3N6lInzq5MI&list=PLNJXGo8e1XT9jP7gPbRdm1XwloZVFvLEq)
-on our [YouTube channel](https://www.youtube.com/@marimo-team) gives an
-overview of many features._
+プレイヤーは結果ではなく、
+**その過程に感情移入することになります。**
 
-**Installation.** In a terminal, run
+---
 
-```bash
-pip install marimo  # or conda install -c conda-forge marimo
-marimo tutorial intro
-```
+### 4. これは「トレード版オートバトラー」である
 
-To install with additional dependencies that unlock SQL cells, AI completion, and more,
-run
+本作は、以下のジャンルの交差点に立っています。
 
-```bash
-pip install "marimo[recommended]"
-```
+* オートバトラー（直接操作しない）
+* プログラミングゲーム（意味のあるコードを書く）
+* トレードシミュレーター（資金という有限資源）
 
-**Create notebooks.**
+しかし、最適化や勝率競争が目的ではありません。
 
-Create or edit notebooks with
+**観戦に値する戦略を育てること**
+それが、このゲームの勝ち方です。
 
-```bash
-marimo edit
-```
+---
 
-**Run apps.** Run your notebook as a web app, with Python
-code hidden and uneditable:
+## ゲームループ（要約）
 
-```bash
-marimo run your_notebook.py
-```
+1. 覚悟の一行を書く
+2. 戦略の「態度」をコードで定義する
+3. 市場に放つ
+4. 1バーずつ、戦略の判断を観察する
+5. 生き様を評価する
+6. 書き直す
 
-<img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/docs-model-comparison.gif" style="border-radius: 8px" width="450px" />
+---
 
-**Execute as scripts.** Execute a notebook as a script at the
-command line:
+## このゲームが約束する体験
 
-```bash
-python your_notebook.py
-```
+* 勝てるかどうかよりも、**納得できるか**
+* 速さよりも、**一貫性**
+* 数値よりも、**人格**
 
-**Automatically convert Jupyter notebooks.** Automatically convert Jupyter
-notebooks to marimo notebooks with the CLI
+あなたの書いた一行は、
+市場の中で「意志」になります。
 
-```bash
-marimo convert your_notebook.ipynb > your_notebook.py
-```
+---
 
-or use our [web interface](https://marimo.io/convert).
+## ステータス
 
-**Tutorials.**
-List all tutorials:
+* 構想〜初期実装段階
+* ゲームループ・導入体験設計中
+* 実装は段階的に進行予定
 
-```bash
-marimo tutorial --help
-```
+---
 
-**Share cloud-based notebooks.** Use
-[molab](https://molab.marimo.io/notebooks), a cloud-based marimo notebook
-service similar to Google Colab, to create and share notebook links.
+## ライセンス
 
-## Questions?
+TBD
 
-See the [FAQ](https://docs.marimo.io/faq.html) at our docs.
+---
 
-## Learn more
+## 補足
 
-marimo is easy to get started with, with lots of room for power users.
-For example, here's an embedding visualizer made in marimo
-([video](https://marimo.io/videos/landing/full.mp4)):
+本 README は、機能一覧ではありません。
+これは**ゲームが何を体験させるかの宣言**です。
 
-<img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/embedding.gif" width="700px" />
+---
 
-Check out our [docs](https://docs.marimo.io),
-[usage examples](https://docs.marimo.io/examples/), and our [gallery](https://marimo.io/gallery) to learn more.
+### 次の分岐点（重要）
 
-<table border="0">
-  <tr>
-    <td>
-      <a target="_blank" href="https://docs.marimo.io/getting_started/key_concepts.html">
-        <img src="https://docs.marimo.io/_static/reactive.gif" style="max-height: 150px; width: auto; display: block" />
-      </a>
-    </td>
-    <td>
-      <a target="_blank" href="https://docs.marimo.io/api/inputs/index.html">
-        <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/readme-ui.gif" style="max-height: 150px; width: auto; display: block" />
-      </a>
-    </td>
-    <td>
-      <a target="_blank" href="https://docs.marimo.io/guides/working_with_data/plotting.html">
-        <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/docs-intro.gif" style="max-height: 150px; width: auto; display: block" />
-      </a>
-    </td>
-    <td>
-      <a target="_blank" href="https://docs.marimo.io/api/layouts/index.html">
-        <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/outputs.gif" style="max-height: 150px; width: auto; display: block" />
-      </a>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <a target="_blank" href="https://docs.marimo.io/getting_started/key_concepts.html"> Tutorial </a>
-    </td>
-    <td>
-      <a target="_blank" href="https://docs.marimo.io/api/inputs/index.html"> Inputs </a>
-    </td>
-    <td>
-      <a target="_blank" href="https://docs.marimo.io/guides/working_with_data/plotting.html"> Plots </a>
-    </td>
-    <td>
-      <a target="_blank" href="https://docs.marimo.io/api/layouts/index.html"> Layout </a>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <a target="_blank" href="https://marimo.app/l/c7h6pz">
-        <img src="https://marimo.io/shield.svg"/>
-      </a>
-    </td>
-    <td>
-      <a target="_blank" href="https://marimo.app/l/0ue871">
-        <img src="https://marimo.io/shield.svg"/>
-      </a>
-    </td>
-    <td>
-      <a target="_blank" href="https://marimo.app/l/lxp1jk">
-        <img src="https://marimo.io/shield.svg"/>
-      </a>
-    </td>
-    <td>
-      <a target="_blank" href="https://marimo.app/l/14ovyr">
-        <img src="https://marimo.io/shield.svg"/>
-      </a>
-    </td>
-  </tr>
-</table>
+ここまで来ると、次に決めるべきは一つだけです。
 
-## Contributing
+> **「このゲームで、最も美しい“死に方”とは何か？」**
 
-We appreciate all contributions! You don't need to be an expert to help out.
-Please see [CONTRIBUTING.md](https://github.com/marimo-team/marimo/blob/main/CONTRIBUTING.md) for more details on how to get
-started.
+それが定義できた瞬間、
+評価軸・演出・SNSで語られる物語が確定します。
 
-> Questions? Reach out to us [on Discord](https://marimo.io/discord?ref=readme).
-
-## Community
-
-We're building a community. Come hang out with us!
-
-- 🌟 [Star us on GitHub](https://github.com/marimo-team/marimo)
-- 💬 [Chat with us on Discord](https://marimo.io/discord?ref=readme)
-- 📧 [Subscribe to our Newsletter](https://marimo.io/newsletter)
-- ☁️ [Join our Cloud Waitlist](https://marimo.io/cloud)
-- ✏️ [Start a GitHub Discussion](https://github.com/marimo-team/marimo/discussions)
-- 🦋 [Follow us on Bluesky](https://bsky.app/profile/marimo.io)
-- 🐦 [Follow us on Twitter](https://twitter.com/marimo_io)
-- 🎥 [Subscribe on YouTube](https://www.youtube.com/@marimo-team)
-- 🕴️ [Follow us on LinkedIn](https://www.linkedin.com/company/marimo-io)
-
-**A NumFOCUS affiliated project.** marimo is a core part of the broader Python
-ecosystem and is a member of the NumFOCUS community, which includes projects
-such as NumPy, SciPy, and Matplotlib.
-
-<img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/numfocus_affiliated_project.png" height="40px" />
-
-
-## Inspiration ✨
-
-marimo is a **reinvention** of the Python notebook as a reproducible, interactive,
-and shareable Python program, instead of an error-prone JSON scratchpad.
-
-We believe that the tools we use shape the way we think — better tools, for
-better minds. With marimo, we hope to provide the Python community with a
-better programming environment to do research and communicate it; to experiment
-with code and share it; to learn computational science and teach it.
-
-Our inspiration comes from many places and projects, especially
-[Pluto.jl](https://github.com/fonsp/Pluto.jl),
-[ObservableHQ](https://observablehq.com/tutorials), and
-[Bret Victor's essays](http://worrydream.com/). marimo is part of
-a greater movement toward reactive dataflow programming. From
-[IPyflow](https://github.com/ipyflow/ipyflow), [streamlit](https://github.com/streamlit/streamlit),
-[TensorFlow](https://github.com/tensorflow/tensorflow),
-[PyTorch](https://github.com/pytorch/pytorch/tree/main),
-[JAX](https://github.com/google/jax), and
-[React](https://github.com/facebook/react), the ideas of functional,
-declarative, and reactive programming are transforming a broad range of tools
-for the better.
-
-<p align="right">
-  <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/marimo-logotype-horizontal.png" height="200px">
-</p>
+ここは、かなり面白い領域に入っています。
+続けましょう。
