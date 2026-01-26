@@ -40,7 +40,10 @@
       "Bash(pnpm run typecheck:*)",
       "Bash(uvx hatch run:*)",
       "Bash(git merge:*)",
-      "Bash(C:/Users/sasai/Documents/BackcastPro/.venv/Scripts/python.exe -m pytest:*)"
+      "Bash(C:/Users/sasai/Documents/BackcastPro/.venv/Scripts/python.exe -m pytest:*)",
+      "Bash(pnpm run lint)",
+      "Bash(pnpm biome check:*)",
+      "Bash(pnpm vite build:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\sasai\\Documents\\BackcastPro\\src\\BackcastPro\\widgets"

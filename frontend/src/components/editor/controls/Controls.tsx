@@ -9,6 +9,7 @@ import {
   Undo2Icon,
 } from "lucide-react";
 import type { JSX } from "react";
+import { BacktestHud } from "@/components/editor/controls/backtest-hud";
 import { KeyboardShortcuts } from "@/components/editor/controls/keyboard-shortcuts";
 import { NotebookMenuDropdown } from "@/components/editor/controls/notebook-menu-dropdown";
 import { ShutdownButton } from "@/components/editor/controls/shutdown-button";
@@ -84,6 +85,12 @@ export const Controls = ({
   return (
     <>
       {!presenting && <FindReplace />}
+
+      {!closed && (
+        <div className={topLeftControls}>
+          <BacktestHud />
+        </div>
+      )}
 
       {!closed && (
         <div className={topRightControls}>
@@ -210,6 +217,9 @@ const StopControlButton = ({
     </Tooltip>
   );
 };
+
+const topLeftControls =
+  "absolute top-3 left-5 m-0 flex items-center gap-2 min-h-[28px] no-print pointer-events-auto z-30 print:hidden";
 
 const topRightControls =
   "absolute top-3 right-5 m-0 flex items-center gap-2 min-h-[28px] no-print pointer-events-auto z-30 print:hidden";

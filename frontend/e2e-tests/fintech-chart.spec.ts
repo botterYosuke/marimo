@@ -66,10 +66,10 @@ test.describe("Fintech Chart Sync Issue", () => {
       (msg) =>
         msg.text.includes("UIElement") || msg.text.includes("truth value")
     );
-    console.log(`[TEST] UIElement related console messages:`, uiElementErrors);
+    console.log("[TEST] UIElement related console messages:", uiElementErrors);
 
     // Check for page errors
-    console.log(`[TEST] Page errors:`, pageErrors);
+    console.log("[TEST] Page errors:", pageErrors);
 
     // Wait and observe for 30 seconds to see if chart updates
     console.log("[TEST] Observing for 30 seconds...");
