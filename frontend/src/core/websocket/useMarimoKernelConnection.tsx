@@ -152,6 +152,9 @@ export function useMarimoKernelConnection(opts: {
             msg: message,
             buffers,
             modelManager: MODEL_MANAGER,
+            // Always use global callback for updates - broadcastMessage is unreliable
+            // because UIElement entries can be removed when cells re-run
+            skipGlobalNotify: false,
           });
         }
 

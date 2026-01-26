@@ -270,7 +270,6 @@ x = as_marimo_element.count
         }
 
     @staticmethod
-    @staticmethod
     async def test_frontend_changes(
         k: Kernel, exec_req: ExecReqProvider
     ) -> None:
@@ -548,6 +547,83 @@ x = as_marimo_element.count
         # Test KeyError propagation
         with pytest.raises(KeyError):
             _ = wrapped["nonexistent"]
+
+    @staticmethod
+    async def test_backend_trait_change_sends_to_frontend() -> None:
+        """Test that changing a trait from Python sends update to frontend.
+
+        This verifies the fix for the _should_send_property issue where
+        backend trait changes were incorrectly blocked.
+        """
+        from unittest.mock import MagicMock
+
+        from marimo._plugins.ui._impl.anywidget.init import init_marimo_widget
+
+        class TestWidget(_anywidget.AnyWidget):
+            _esm = ""
+            count = traitlets.Int(0).tag(sync=True)
+
+        widget = TestWidget()
+
+        # Initialize the widget with marimo comm
+        init_marimo_widget(widget)
+
+        # Mock the comm.send method AFTER init (to capture subsequent changes)
+        mock_send = MagicMock()
+        original_send = widget.comm.send
+        widget.comm.send = mock_send
+
+        # Change trait from Python - this should trigger send
+        widget.count = 42
+
+        # Verify send was called with update message
+        assert mock_send.called, "comm.send() should be called when trait changes"
+        call_args = mock_send.call_args
+        assert call_args is not None
+        # Extract data from call_args (could be positional or keyword)
+        data = call_args.kwargs.get("data") or call_args.args[0]
+        assert data["method"] == "update"
+        assert "count" in data["state"]
+        assert data["state"]["count"] == 42
+
+        # Restore original send
+        widget.comm.send = original_send
+
+    @staticmethod
+    async def test_property_lock_prevents_echo() -> None:
+        """Test that _property_lock prevents sending echoes back to frontend.
+
+        When the frontend sends a trait change to Python, ipywidgets sets
+        _property_lock[name] = value to prevent echoing the change back.
+        """
+        from unittest.mock import MagicMock
+
+        from marimo._plugins.ui._impl.anywidget.init import init_marimo_widget
+
+        class TestWidget(_anywidget.AnyWidget):
+            _esm = ""
+            count = traitlets.Int(0).tag(sync=True)
+
+        widget = TestWidget()
+
+        # Initialize the widget with marimo comm
+        init_marimo_widget(widget)
+
+        # Mock the comm.send method
+        mock_send = MagicMock()
+        widget.comm.send = mock_send
+
+        # Simulate frontend update by setting _property_lock
+        # This is what ipywidgets does when processing frontend->backend updates
+        widget._property_lock = {"count": 42}
+
+        # Change trait while lock is active (simulating echo scenario)
+        widget.count = 42
+
+        # send should NOT be called due to property lock (echo prevention)
+        assert not mock_send.called, (
+            "comm.send() should NOT be called when property is locked (echo)"
+        )
 
 
 @pytest.mark.skipif(not HAS_DEPS, reason="optional dependencies not installed")

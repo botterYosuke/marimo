@@ -116,7 +116,10 @@ _cache: WeakCache[AnyWidget, UIElement[Any, Any]] = WeakCache()  # type: ignore[
 
 def from_anywidget(widget: AnyWidget) -> UIElement[Any, Any]:
     """Create a UIElement from an AnyWidget."""
-    if not (el := _cache.get(widget)):
+    # Use explicit None check to avoid triggering UIElement.__bool__()
+    # which prints a warning message to stderr
+    el = _cache.get(widget)
+    if el is None:
         el = anywidget(widget)
         _cache.add(widget, el)  # type: ignore[no-untyped-call, unused-ignore, assignment]  # noqa: E501
     return el
@@ -167,6 +170,18 @@ class anywidget(UIElement[WireFormat, T]):
         self.widget = widget
         # This gets set to True in super().__init__()
         self._initialized = False
+
+        # Ensure the widget is initialized with MarimoComm.
+        # This is a safety net in case the IPyWidgetsFormatter callback
+        # wasn't triggered (e.g., due to import order issues).
+        # Check for MarimoComm specifically since ipywidgets may set a DummyComm
+        # when no kernel context is available.
+        if not isinstance(widget.comm, MarimoComm):
+            from marimo._plugins.ui._impl.anywidget.init import (
+                init_marimo_widget,
+            )
+
+            init_marimo_widget(widget)
 
         # Get state with custom serializers properly applied
         state: dict[str, Any] = widget.get_state()

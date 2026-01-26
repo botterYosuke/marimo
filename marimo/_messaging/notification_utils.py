@@ -45,7 +45,6 @@ def broadcast_notification(
         try:
             ctx = get_context()
         except ContextNotInitializedError:
-            LOGGER.debug("No context initialized.")
             return
         else:
             stream = ctx.stream

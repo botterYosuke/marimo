@@ -60,7 +60,12 @@ class ModelManager {
 
   set(key: string, model: Model<any>): void {
     let deferred = this.models.get(key);
-    if (!deferred) {
+    // If the deferred already exists and is resolved/rejected,
+    // we need to create a new one to handle kernel restarts
+    // where new widgets with the same js_hash are created.
+    // A Promise can only be resolved once, so calling resolve()
+    // on an already-settled Deferred has no effect.
+    if (!deferred || deferred.status !== "pending") {
       deferred = new Deferred<Model<any>>();
       this.models.set(key, deferred);
     }
@@ -401,11 +406,13 @@ export async function handleWidgetMessage({
   msg,
   buffers,
   modelManager,
+  skipGlobalNotify = false,
 }: {
   modelId: string;
   msg: AnyWidgetMessage;
   buffers: readonly DataView[];
   modelManager: ModelManager;
+  skipGlobalNotify?: boolean;
 }): Promise<void> {
   if (msg.method === "echo_update") {
     // We don't need to do anything with this message
@@ -457,8 +464,12 @@ export async function handleWidgetMessage({
   if (method === "update") {
     const model = await modelManager.get(modelId);
     model.updateAndEmitDiffs(stateWithBuffers);
-    // Notify global listeners that this model was updated
-    notifyGlobalModelUpdate(modelId);
+    // Only notify global listeners if not skipped
+    // When uiElement is set, broadcastMessage handles the update via MarimoIncomingMessageEvent
+    // so we skip the global callback to prevent double-processing
+    if (!skipGlobalNotify) {
+      notifyGlobalModelUpdate(modelId);
+    }
     return;
   }
 

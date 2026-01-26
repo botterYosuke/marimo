@@ -39,7 +39,8 @@
       "Bash(make fe-check:*)",
       "Bash(pnpm run typecheck:*)",
       "Bash(uvx hatch run:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(C:/Users/sasai/Documents/BackcastPro/.venv/Scripts/python.exe -m pytest:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\sasai\\Documents\\BackcastPro\\src\\BackcastPro\\widgets"
