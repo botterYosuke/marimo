@@ -6,6 +6,7 @@ import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import type { GridCSS2DService } from "./grid-css2d-service";
 import type { CellCSS2DService } from "./cell-css2d-service";
 import { CharacterComponent } from "./character-component";
+import { MoneyMissileEffect } from "./money-missile-effect";
 
 /**
  * SceneManager
@@ -28,6 +29,8 @@ export class SceneManager {
   private gridCSS2DService?: GridCSS2DService;
   private cellCSS2DService?: CellCSS2DService;
   private characterComponent?: CharacterComponent;
+  private moneyMissileEffect?: MoneyMissileEffect;
+  private tradeEventChannel?: BroadcastChannel;
   // カメラ位置追跡（CSS2D最適化用）
   private lastCameraPosition = new THREE.Vector3();
   private lastCameraTarget = new THREE.Vector3();
@@ -154,8 +157,54 @@ export class SceneManager {
       this.characterComponent.load(this.scene, this.camera, this.controls);
     }
 
+    // マネーミサイルエフェクトの初期化
+    if (this.scene) {
+      this.moneyMissileEffect = new MoneyMissileEffect(this.scene);
+      this.setupTradeEventListener();
+    }
+
     // アニメーションループの開始
     this.startAnimationLoop();
+  }
+
+  /**
+   * 取引イベントリスナーを設定します
+   * BroadcastChannelを通じてバックテストの取引イベントを受信
+   */
+  private setupTradeEventListener(): void {
+    this.tradeEventChannel = new BroadcastChannel("trade_event_channel");
+
+    this.tradeEventChannel.onmessage = (event: MessageEvent) => {
+      try {
+        if (!event.data || typeof event.data !== "object") {
+          return;
+        }
+        if (event.data.type !== "trade_event") {
+          return;
+        }
+        if (!event.data.data) {
+          return;
+        }
+
+        const { event_type, size } = event.data.data;
+        const dronePosition = this.characterComponent?.getPosition();
+
+        if (!dronePosition || !this.moneyMissileEffect) {
+          return;
+        }
+
+        if (event_type === "BUY") {
+          this.moneyMissileEffect.triggerBuy(dronePosition, size);
+        } else if (event_type === "SELL") {
+          this.moneyMissileEffect.triggerSell(dronePosition, size);
+        }
+
+        // エフェクトが発生したのでレンダリングが必要
+        this.needsRender = true;
+      } catch {
+        // Silently ignore errors
+      }
+    };
   }
 
   /**
@@ -189,6 +238,15 @@ export class SceneManager {
         this.characterComponent.update();
         // 3Dモデルのアニメーションが実際に動いている場合のみWebGLレンダリングが必要
         if (this.characterComponent.isAnimating) {
+          this.needsRender = true;
+        }
+      }
+
+      // マネーミサイルエフェクトの更新
+      if (this.moneyMissileEffect) {
+        const delta = elapsed / 1000; // ミリ秒から秒に変換
+        const isAnimating = this.moneyMissileEffect.update(delta);
+        if (isAnimating) {
           this.needsRender = true;
         }
       }
@@ -338,6 +396,18 @@ export class SceneManager {
     if (this.characterComponent && this.scene) {
       this.characterComponent.dispose(this.scene);
       this.characterComponent = undefined;
+    }
+
+    // マネーミサイルエフェクトのクリーンアップ
+    if (this.moneyMissileEffect) {
+      this.moneyMissileEffect.dispose();
+      this.moneyMissileEffect = undefined;
+    }
+
+    // 取引イベントチャンネルのクリーンアップ
+    if (this.tradeEventChannel) {
+      this.tradeEventChannel.close();
+      this.tradeEventChannel = undefined;
     }
 
     if (this.scene) {

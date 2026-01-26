@@ -49,6 +49,8 @@ def _(AutoRefresh, bt):
     _ = AutoRefresh()  # 依存関係
     # 状態公開（BroadcastChannel経由で外部iframeに配信）
     bt.state_publisher()
+    # 取引イベント公開（BroadcastChannel経由でThree.jsにエフェクトをトリガー）
+    bt.trade_event_publisher()
     return
 
 

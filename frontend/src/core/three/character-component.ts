@@ -149,6 +149,15 @@ export class CharacterComponent {
   }
 
   /**
+   * ドローンの現在位置を取得します
+   *
+   * @returns ドローンの位置、またはモデルが読み込まれていない場合はnull
+   */
+  getPosition(): THREE.Vector3 | null {
+    return this.model?.position.clone() ?? null;
+  }
+
+  /**
    * アニメーションを更新します
    * アニメーションループ内で毎フレーム呼び出されます
    */
