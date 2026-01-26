@@ -49,6 +49,12 @@ def _(AutoRefresh, bt):
     _ = AutoRefresh()  # 依存関係
     # 状態公開（BroadcastChannel経由で外部iframeに配信）
     bt.state_publisher()
+    return
+
+
+@app.cell
+def _(AutoRefresh, bt):
+    _ = AutoRefresh()  # 依存関係
     # 取引イベント公開（BroadcastChannel経由でThree.jsにエフェクトをトリガー）
     bt.trade_event_publisher()
     return
@@ -97,14 +103,14 @@ def _(bt, code):
 
 
 @app.cell
-def _(run):
-    run()
+def _(bt, code):
+    bt.chart(code=code)
     return
 
 
 @app.cell
-def _(bt, code):
-    bt.chart(code=code)
+def _(run):
+    run()
     return
 
 
