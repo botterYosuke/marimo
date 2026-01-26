@@ -8,6 +8,7 @@ export interface BacktestState {
   equity: number;
   cash: number;
   position: number;
+  positions: Record<string, number>;
   closed_trades: number;
   step_index: number;
   total_steps: number;

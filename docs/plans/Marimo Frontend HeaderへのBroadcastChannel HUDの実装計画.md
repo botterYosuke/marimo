@@ -56,7 +56,8 @@ interface BacktestState {
   progress: number;       // 進捗率 (0.0 - 1.0)
   equity: number;         // 総資産
   cash: number;           // 現金残高
-  position: number;       // 保有株数
+  position: number;       // 保有株数（全銘柄合計）
+  positions: Record<string, number>;  // 各銘柄のポジション
   closed_trades: number;  // 決済済み取引数
   step_index: number;     // 現在のステップ
   total_steps: number;    // 総ステップ数
@@ -112,6 +113,7 @@ Python 側 (`BacktestStatePublisher`) から送信されるメッセージ:
     equity: 125000.0,
     cash: 50000.0,
     position: 100,
+    positions: { "7203": 100, "9984": -50 },
     closed_trades: 15,
     step_index: 75,
     total_steps: 100,
@@ -133,7 +135,7 @@ Python 側 (`BacktestStatePublisher`) から送信されるメッセージ:
 
 使用例:
 ```python
-publisher = bt.state_publisher(code)  # セルに配置して BroadcastChannel 配信開始
+publisher = bt.state_publisher()  # セルに配置して BroadcastChannel 配信開始
 ```
 
 ---
