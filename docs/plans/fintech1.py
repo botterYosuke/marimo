@@ -21,60 +21,47 @@ def _():
     )
 
     # state管理
-    get_playing, set_playing = mo.state(False)
+    get_playing, set_playing = mo.state(True)
     AutoRefresh, set_step = mo.state(0)  # チャート更新トリガー用
 
     # ゲームループ
     def _game_loop():
-        while not bt.is_finished:
-            if not get_playing():
-                break
-            if not bt.step():
-                break
+        while bt.is_finished == False:
+            if get_playing() == False:
+                break  # run関数がもう一度呼ばれたら終了
+            if bt.step() == False:
+                break  # ステップ実行に問題があったら終了
             set_step(bt._step_index)
-            time.sleep(0.5)
+            time.sleep(0.4)
 
-    def toggle_run():
+    def run():
         """ループ開始/停止を制御"""
-        if not get_playing():
+        if get_playing() == False:
             set_playing(True)
             mo.Thread(target=_game_loop).start()
         else:
             set_playing(False)
-    return AutoRefresh, bt, get_stock_daily, mo, pd, toggle_run
+    return AutoRefresh, bt, get_stock_daily, run
 
 
 @app.cell
-def _(AutoRefresh, bt, code, mo):
-    _ = AutoRefresh()  # 依存関係を作る
-    # 情報パネル
-    info = mo.md(f"""
-    ## 状況
-
-    | 項目 | 値 |
-    |------|-----|
-    | 日時 | {bt.current_time} |
-    | 進捗 | {bt.progress * 100:.1f}% ({bt._step_index}/{len(bt.index)}) |
-    | 資産 | ¥{bt.equity:,.0f} |
-    | 現金 | ¥{bt.cash:,.0f} |
-    | ポジション | {bt.position_of(code)} 株 |
-    | 決済済取引 | {len(bt.closed_trades)} 件 |
-    """)
-
-    info
+def _(AutoRefresh, bt):
+    _ = AutoRefresh()  # 依存関係
+    # 状態公開（BroadcastChannel経由で外部iframeに配信）
+    bt.state_publisher()
     return
 
 
 @app.cell
 def _(bt, get_stock_daily):
     code = "7203"  # トヨタ
-    df = get_stock_daily(code)
+    toyota=get_stock_daily(code)
 
     bt.set_data({
-        code: df
+        code: toyota
     })
 
-    print(f"データ取得完了: {code} ({len(df)} 件)")
+    print(f"データ取得完了: {code} ({len(toyota)} 件)")
     return (code,)
 
 
@@ -108,44 +95,14 @@ def _(bt, code):
 
 
 @app.cell
-def _(toggle_run):
-    toggle_run()
+def _(run):
+    run()
     return
 
 
 @app.cell
-def _(AutoRefresh, bt, code):
-    AutoRefresh()  # 依存関係を作る（state更新で再実行される）
-    # チャート生成
-    chart = bt.chart(code=code, height=500, show_tags=True)
-    chart
-    return
-
-
-@app.cell
-def _(AutoRefresh, bt, mo, pd):
-    _ = AutoRefresh()  # 依存関係を作る
-    # 取引履歴テーブル
-    if bt.closed_trades:
-        trades_data = []
-        for t in bt.closed_trades:
-            trades_data.append({
-                "銘柄": t.code,
-                "方向": "買" if t.size > 0 else "売",
-                "数量": abs(t.size),
-                "エントリー": t.entry_time,
-                "エントリー価格": f"¥{t.entry_price:,.0f}",
-                "イグジット": t.exit_time,
-                "イグジット価格": f"¥{t.exit_price:,.0f}",
-                "損益": f"¥{t.pl:+,.0f}",
-                "理由": t.tag or "-",
-            })
-
-        trades_df = pd.DataFrame(trades_data)
-        mo.md("## 取引履歴")
-        mo.ui.table(trades_df)
-    else:
-        mo.md("_まだ取引がありません_")
+def _(bt, code):
+    bt.chart(code=code)
     return
 
 
