@@ -3,9 +3,12 @@ import marimo
 __generated_with = "0.19.6"
 app = marimo.App(width="grid", layout_file="layouts/fintech1.grid.json")
 
-
-@app.cell
-def _():
+with app.setup:
+    """
+    シンプルな戦略:
+    - 前日比下落 → 買い
+    - 前日比上昇 & ポジションあり → 売り
+    """
     import marimo as mo
     import pandas as pd
     import pandas_datareader.data as web
@@ -50,8 +53,6 @@ def _():
         bt.reset()          # BackcastProの状態をリセット
         set_step(0)         # UIの更新トリガーをリセット
         print('リセットした')
-    return AutoRefresh, bt, get_stock_daily, reset, run
-
 
 @app.cell
 def _(AutoRefresh, bt):
@@ -68,30 +69,27 @@ def _(AutoRefresh, bt):
     bt.trade_event_publisher()
     return
 
-
 @app.cell
-def _(bt, get_stock_daily):
+def _():
     code = "7203"  # トヨタ
-    toyota=get_stock_daily(code)
+    toyota = get_stock_daily(code)
 
-    bt.set_data({
-        code: toyota
-    })
+    bt.set_data({code: toyota})
 
     print(f"データ取得完了: {code} ({len(toyota)} 件)")
     return (code,)
 
 
 @app.cell
-def _(bt, code):
-    # 戦略定義: 前日比で売買
-    def my_strategy(bt):
+def _(code):
+    # 戦略定義: あなたの戦略をここに書いてください！
+    def my_strategy(bt_inner):
         """
         シンプルな戦略:
         - 前日比下落 → 買い
         - 前日比上昇 & ポジションあり → 売り
         """
-        df = bt.data[code]
+        df = bt_inner.data[code]
 
         if len(df) < 2:
             return
@@ -99,12 +97,12 @@ def _(bt, code):
         c0 = df["Close"].iloc[-2]
         c1 = df["Close"].iloc[-1]
 
-        pos = bt.position_of(code)
+        pos = bt_inner.position_of(code)
 
         if pos == 0 and c1 < c0:
-            bt.buy(code=code, tag="dip_buy")
+            bt_inner.buy(code=code, tag="dip_buy")
         elif pos > 0 and c1 > c0:
-            bt.sell(code=code, tag="profit_take")
+            bt_inner.sell(code=code, tag="profit_take")
 
     # 戦略を登録
     bt.set_strategy(my_strategy)
@@ -112,19 +110,19 @@ def _(bt, code):
 
 
 @app.cell
-def _(bt, code):
+def _(code):
     bt.chart(code=code)
     return
 
 
 @app.cell
-def _(run):
+def _():
     run()
     return
 
 
 @app.cell
-def _(reset):
+def _():
     reset()
     return
 

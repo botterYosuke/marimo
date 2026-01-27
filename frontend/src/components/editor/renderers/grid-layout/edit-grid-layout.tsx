@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { outputIsLoading } from "@/core/cells/cell";
-import type { CellId } from "@/core/cells/ids";
+import { SETUP_CELL_ID, type CellId } from "@/core/cells/ids";
 import type { AppMode } from "@/core/mode";
 import { useIsDragging } from "@/hooks/useIsDragging";
 import { cn } from "@/utils/cn";
@@ -400,7 +400,9 @@ export const EditGridLayoutRenderer: React.FC<Props> = ({
     </ReactGridLayout>
   );
 
-  const notInGrid = cells.filter((cell) => !inGridIds.has(cell.id));
+  const notInGrid = cells.filter(
+    (cell) => !inGridIds.has(cell.id) && cell.id !== SETUP_CELL_ID,
+  );
 
   if (isReading) {
     if (layout.bordered) {
