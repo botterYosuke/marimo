@@ -44,7 +44,10 @@
       "Bash(pnpm run lint)",
       "Bash(pnpm biome check:*)",
       "Bash(pnpm vite build:*)",
-      "Bash(VITE_MARIMO_VERSION=0.19.6 concurrently:*)"
+      "Bash(VITE_MARIMO_VERSION=0.19.6 concurrently:*)",
+      "Bash(pnpm exec node -e \"import\\(''lz-string''\\).then\\(LZString => { const fs = require\\(''fs''\\); const code = fs.readFileSync\\(''C:/Users/sasai/Documents/marimo/docs/plans/fintech1.py'', ''utf8''\\); const compressed = LZString.default.compressToEncodedURIComponent\\(code\\); console.log\\(''https://botteryosuke.github.io/marimo/#code/'' + compressed\\); }\\)\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\sasai\\Documents\\BackcastPro\\src\\BackcastPro\\widgets"

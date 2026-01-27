@@ -5,7 +5,6 @@ app = marimo.App(width="grid")
 
 with app.setup:
     import marimo as mo
-    import time
     from BackcastPro import Backtest
     from BackcastPro import get_stock_daily
 
@@ -16,40 +15,57 @@ with app.setup:
         finalize_trades=True,
     )
 
-    # state管理
-    get_playing, set_playing = mo.state(True)
-    AutoRefresh, set_step = mo.state(0)  # チャート更新トリガー用
+    # state管理（refresher は state に入れない）
+    get_playing, set_playing = mo.state(False)
 
     def run():
-        """ループ開始/停止を制御"""
-        if get_playing() == False:
-            set_playing(True)
-            mo.Thread(target=do_step).start()
-            print('スタート')
-        else:
+        """開始/停止をトグル"""
+        if get_playing():
             set_playing(False)
             print('ストップ')
+        else:
+            if bt.is_finished:
+                print('バックテストは既に終了しています')
+                return
+            bt.enable_headless_trade_events()
+            set_playing(True)
+            print('スタート')
 
     def reset():
-        """バックテストをリセットして最初から"""
-        set_playing(False)  # ゲームループを停止
-        bt.reset()          # BackcastProの状態をリセット
-        set_step(0)         # UIの更新トリガーをリセット
+        """リセット"""
+        set_playing(False)
+        bt.reset()
         print('リセットした')
 
-   # ゲームループ
     def do_step():
-        # ヘッドレス取引イベントを有効化（ループ開始時に1回）
-        bt.enable_headless_trade_events()
-        while bt.is_finished == False:
-            if get_playing() == False:
-                break  # run関数がもう一度呼ばれたら終了
-            if bt.step() == False:
-                break  # ステップ実行に問題があったら終了
-            # ヘッドレス版で状態公開（BroadcastChannel経由）
-            bt.publish_state_headless()
-            set_step(bt._step_index)
-            time.sleep(0.4)
+        """1ステップ実行（playing時のみ）"""
+        if not get_playing():
+            return False
+        if bt.is_finished or bt.step() == False:
+            set_playing(False)
+            return False
+        bt.publish_state_headless()
+        return True
+
+
+@app.cell(hide_code=True)
+def _():
+    # refresher を静的に定義（常に表示）
+    refresher = mo.ui.refresh(
+        options=["400ms", "1s", "2s"],
+        default_interval="400ms"
+    )
+    refresher  # これで表示される
+    return (refresher,)
+
+
+@app.cell(hide_code=True)
+def _(refresher):
+    # refresher.value の変化でこのセルが再実行される
+    _ = refresher.value
+    do_step()
+    return
+
 
 @app.cell
 def _():
@@ -63,9 +79,9 @@ def _():
 
 
 @app.cell
-def _(code):
+def _(code, refresher):
     # 戦略定義: あなたの戦略をここに書いてください！
-    AutoRefresh()
+    _ = refresher.value  # refresh トリガーで再実行
 
     """
     シンプルな戦略:
