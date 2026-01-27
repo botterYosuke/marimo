@@ -43,7 +43,8 @@
       "Bash(C:/Users/sasai/Documents/BackcastPro/.venv/Scripts/python.exe -m pytest:*)",
       "Bash(pnpm run lint)",
       "Bash(pnpm biome check:*)",
-      "Bash(pnpm vite build:*)"
+      "Bash(pnpm vite build:*)",
+      "Bash(VITE_MARIMO_VERSION=0.19.6 concurrently:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\sasai\\Documents\\BackcastPro\\src\\BackcastPro\\widgets"

@@ -6,7 +6,7 @@ import type { JsonString } from "@/utils/json/base64";
 import { invariant } from "../../../utils/invariant";
 import { Logger } from "../../../utils/Logger";
 import { WasmFileSystem } from "./fs";
-import { getMarimoWheel } from "./getMarimoWheel";
+import { getCustomWheelUrl, getMarimoWheel } from "./getMarimoWheel";
 import { t } from "./tracer";
 import type { SerializedBridge, WasmController } from "./types";
 import { setupBackcastProData } from "./backcastpro-loader";
@@ -55,12 +55,21 @@ export class DefaultWasmController implements WasmController {
     // Load pyodide and packages
     const span = t.startSpan("loadPyodide");
     try {
+      const marimoWheel = getMarimoWheel(opts.version);
+      const useLocalWheel =
+        import.meta.env.DEV && marimoWheel.startsWith("http://localhost");
+      const useCustomWheel = marimoWheel === "custom-wheel";
+
+      // Determine if we need to install marimo via micropip after loading
+      const installViaMicropip = useLocalWheel || useCustomWheel;
+
       const pyodide = await loadPyodide({
         // Perf: These get loaded while pyodide is being bootstrapped
+        // When using local/custom wheel, don't include marimo here - install via micropip after
         packages: [
           "micropip",
           "msgspec",
-          getMarimoWheel(opts.version),
+          ...(installViaMicropip ? [] : [marimoWheel]),
           "Markdown",
           "pymdown-extensions",
           "narwhals",
@@ -73,6 +82,25 @@ export class DefaultWasmController implements WasmController {
         // This fixes for Firefox and does not break Chrome/others
         indexURL: `https://cdn.jsdelivr.net/pyodide/${opts.pyodideVersion}/full/`,
       });
+
+      // Install marimo wheel via micropip to override any cached version from lockfile
+      if (useLocalWheel) {
+        Logger.log(`Installing local marimo wheel: ${marimoWheel}`);
+        await pyodide.runPythonAsync(`
+import micropip
+await micropip.install("${marimoWheel}", deps=False)
+print("Local marimo wheel installed")
+`);
+      } else if (useCustomWheel) {
+        const customWheelUrl = await getCustomWheelUrl();
+        Logger.log(`Installing custom marimo wheel: ${customWheelUrl}`);
+        await pyodide.runPythonAsync(`
+import micropip
+await micropip.install("${customWheelUrl}", deps=False)
+print("Custom marimo wheel installed")
+`);
+      }
+
       this.pyodide = pyodide;
       span.end("ok");
       return pyodide;

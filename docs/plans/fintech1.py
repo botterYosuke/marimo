@@ -5,8 +5,6 @@ app = marimo.App(width="grid")
 
 with app.setup:
     import marimo as mo
-    import pandas as pd
-    import pandas_datareader.data as web
     import time
     from BackcastPro import Backtest
     from BackcastPro import get_stock_daily

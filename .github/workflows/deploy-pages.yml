@@ -25,13 +25,30 @@ jobs:
       - name: Generate LLM info TypeScript files
         run: pnpm --filter @marimo-team/llm-info codegen
 
+      - name: Build marimo wheel
+        run: |
+          pip install hatch
+          hatch build -t wheel
+          echo "Built wheel:"
+          ls -la dist/*.whl
+
       - name: Build Pyodide frontend
         working-directory: ./frontend
         env:
           NODE_ENV: production
           PYODIDE: "true"
           VITE_MARIMO_VERSION: "0.19.2"
+          VITE_USE_CUSTOM_WHEEL: "true"
         run: pnpm build
+
+      - name: Copy wheel to dist
+        run: |
+          mkdir -p frontend/dist/wheels
+          cp dist/marimo-*.whl frontend/dist/wheels/
+          # Create a version file for the wheel
+          WHEEL_FILE=$(ls dist/marimo-*.whl | head -1 | xargs basename)
+          echo "$WHEEL_FILE" > frontend/dist/wheels/latest.txt
+          echo "Copied wheel: $WHEEL_FILE"
 
       - name: Download DuckDB data files from FTP
         env:
