@@ -29,11 +29,15 @@ with app.setup:
 
     # ゲームループ
     def _game_loop():
+        # ヘッドレス取引イベントを有効化（ループ開始時に1回）
+        bt.enable_headless_trade_events()
         while bt.is_finished == False:
             if get_playing() == False:
                 break  # run関数がもう一度呼ばれたら終了
             if bt.step() == False:
                 break  # ステップ実行に問題があったら終了
+            # ヘッドレス版で状態公開（BroadcastChannel経由）
+            bt.publish_state_headless()
             set_step(bt._step_index)
             time.sleep(0.4)
 
@@ -54,20 +58,6 @@ with app.setup:
         set_step(0)         # UIの更新トリガーをリセット
         print('リセットした')
 
-@app.cell
-def _(AutoRefresh, bt):
-    _ = AutoRefresh()  # 依存関係
-    # 状態公開（BroadcastChannel経由で外部iframeに配信）
-    bt.state_publisher()
-    return
-
-
-@app.cell
-def _(AutoRefresh, bt):
-    _ = AutoRefresh()  # 依存関係
-    # 取引イベント公開（BroadcastChannel経由でThree.jsにエフェクトをトリガー）
-    bt.trade_event_publisher()
-    return
 
 @app.cell
 def _():
