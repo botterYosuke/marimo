@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.19.6"
-app = marimo.App(width="grid", layout_file="layouts/fintech1.grid.json")
+app = marimo.App(width="grid")
 
 with app.setup:
     import marimo as mo
@@ -68,29 +68,26 @@ def _():
 @app.cell
 def _(code):
     # 戦略定義: あなたの戦略をここに書いてください！
-    def my_strategy(bt_inner):
-        """
-        シンプルな戦略:
-        - 前日比下落 → 買い
-        - 前日比上昇 & ポジションあり → 売り
-        """
-        df = bt_inner.data[code]
+    AutoRefresh()
 
-        if len(df) < 2:
-            return
+    """
+    シンプルな戦略:
+    - 前日比下落 → 買い
+    - 前日比上昇 & ポジションあり → 売り
+    """
+    df = bt.data[code]
+
+    if len(df) > 1:
 
         c0 = df["Close"].iloc[-2]
         c1 = df["Close"].iloc[-1]
 
-        pos = bt_inner.position_of(code)
+        pos = bt.position_of(code)
 
         if pos == 0 and c1 < c0:
-            bt_inner.buy(code=code, tag="dip_buy")
+            bt.buy(code=code, tag="dip_buy")
         elif pos > 0 and c1 > c0:
-            bt_inner.sell(code=code, tag="profit_take")
-
-    # 戦略を登録
-    bt.set_strategy(my_strategy)
+            bt.sell(code=code, tag="profit_take")
     return
 
 

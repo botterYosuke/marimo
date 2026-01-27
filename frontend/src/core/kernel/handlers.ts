@@ -8,11 +8,16 @@ import { type CellData, createCell } from "../cells/types";
 import { type AppConfig, AppConfigSchema } from "../config/config-schema";
 import { UI_ELEMENT_REGISTRY } from "../dom/uiregistry";
 import {
+  addCellToGridLayout,
   initialLayoutState,
+  isCellInGrid,
   type LayoutData,
   type LayoutState,
+  layoutStateAtom,
 } from "../layout/layout";
+import { isVisualOutput } from "../layout/visual-output-detector";
 import { getRequestClient } from "../network/requests";
+import { store } from "../state/jotai";
 import { VirtualFileTracker } from "../static/virtual-file-tracker";
 import type {
   Capabilities,
@@ -214,4 +219,53 @@ export function handleCellNotificationeration(
    */
   handleCellMessage(data);
   VirtualFileTracker.INSTANCE.track(data);
+
+  // Auto-place visual outputs in grid layout
+  autoPlaceVisualOutput(data);
+}
+
+/**
+ * Auto-place a cell in the grid layout if it has visual output
+ * and auto-layout is enabled.
+ */
+function autoPlaceVisualOutput(data: NotificationMessageData<"cell-op">) {
+  const cellId = data.cell_id as CellId;
+  const output = data.output;
+
+  // Skip if no output
+  if (!output) {
+    return;
+  }
+
+  // Check layout state
+  const layoutState = store.get(layoutStateAtom);
+
+  // Only auto-place in grid layout mode
+  if (layoutState.selectedLayout !== "grid") {
+    return;
+  }
+
+  // Only auto-place if auto-layout is enabled
+  if (!layoutState.autoLayoutEnabled) {
+    Logger.log(`[autoPlace] Cell ${cellId}: autoLayout disabled, skipping`);
+    return;
+  }
+
+  // Skip if cell is already in the grid
+  if (isCellInGrid(cellId)) {
+    return;
+  }
+
+  // Check if output is visual
+  const visual = isVisualOutput(output);
+  Logger.log(
+    `[autoPlace] Cell ${cellId}: isVisual=${visual}, mimetype=${output.mimetype}`,
+  );
+  if (!visual) {
+    return;
+  }
+
+  // Add cell to grid layout
+  Logger.log(`[autoPlace] Cell ${cellId}: adding to grid layout`);
+  addCellToGridLayout(cellId);
 }
