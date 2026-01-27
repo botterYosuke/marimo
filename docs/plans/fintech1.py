@@ -39,9 +39,18 @@ def _():
         if get_playing() == False:
             set_playing(True)
             mo.Thread(target=_game_loop).start()
+            print('スタート')
         else:
             set_playing(False)
-    return AutoRefresh, bt, get_stock_daily, run
+            print('ストップ')
+
+    def reset():
+        """バックテストをリセットして最初から"""
+        set_playing(False)  # ゲームループを停止
+        bt.reset()          # BackcastProの状態をリセット
+        set_step(0)         # UIの更新トリガーをリセット
+        print('リセットした')
+    return AutoRefresh, bt, get_stock_daily, reset, run
 
 
 @app.cell
@@ -111,6 +120,12 @@ def _(bt, code):
 @app.cell
 def _(run):
     run()
+    return
+
+
+@app.cell
+def _(reset):
+    reset()
     return
 
 
