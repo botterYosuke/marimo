@@ -7,17 +7,16 @@ import { Logger } from "@/utils/Logger";
 
 import "./plotly.css";
 import "./mapbox.css";
-import { usePrevious } from "@uidotdev/usehooks";
-import { isEqual, pick, set } from "lodash-es";
-import { type JSX, lazy, memo, useEffect, useMemo, useState } from "react";
+import { pick, set } from "lodash-es";
+import { type JSX, lazy, memo, useMemo } from "react";
 import useEvent from "react-use-event-hook";
 import { useDeepCompareMemoize } from "@/hooks/useDeepCompareMemoize";
 import { useScript } from "@/hooks/useScript";
 import { Arrays } from "@/utils/arrays";
-import { Objects } from "@/utils/objects";
 import { createParser, type PlotlyTemplateParser } from "./parse-from-template";
 import { useAtomValue } from "jotai";
 import { is3DModeAtom } from "@/core/mode";
+import { usePlotlyLayout } from "./usePlotlyLayout";
 
 interface Data {
   figure: Figure;
@@ -82,18 +81,6 @@ export const LazyPlot = lazy(() =>
   }),
 );
 
-function initialLayout(figure: Figure): Partial<Plotly.Layout> {
-  // Enable autosize if width is not specified
-  const shouldAutoSize = figure.layout.width === undefined;
-  return {
-    autosize: shouldAutoSize,
-    dragmode: "select",
-    height: 540,
-    // Prioritize user's config
-    ...figure.layout,
-  };
-}
-
 const SUNBURST_DATA_KEYS: (keyof Plotly.SunburstPlotDatum)[] = [
   "color",
   "curveNumber",
@@ -113,11 +100,6 @@ const TREE_MAP_DATA_KEYS = SUNBURST_DATA_KEYS;
 
 export const PlotlyComponent = memo(
   ({ figure: originalFigure, value, setValue, config }: PlotlyPluginProps) => {
-    const [figure, setFigure] = useState(() => {
-      // We clone the figure since Plotly mutates the figure in place
-      return structuredClone(originalFigure);
-    });
-
     // 3Dモード検出（CSS2DRenderer上でのパフォーマンス最適化用）
     const is3DMode = useAtomValue(is3DModeAtom);
 
@@ -127,27 +109,14 @@ export const PlotlyComponent = memo(
     );
     const isScriptLoaded = scriptStatus === "ready";
 
-    useEffect(() => {
-      const nextFigure = structuredClone(originalFigure);
-      setFigure(nextFigure);
-      setLayout((prev) => ({
-        ...initialLayout(nextFigure),
-        ...prev,
-      }));
-    }, [originalFigure, isScriptLoaded]);
-
-    const [layout, setLayout] = useState<Partial<Plotly.Layout>>(() => {
-      return {
-        ...initialLayout(figure),
-        // Override with persisted values (dragmode, xaxis, yaxis)
-        ...value,
-      };
+    const { figure, layout, handleReset } = usePlotlyLayout({
+      originalFigure,
+      initialValue: value,
+      isScriptLoaded,
     });
 
-    const handleReset = useEvent(() => {
-      const nextFigure = structuredClone(originalFigure);
-      setFigure(nextFigure);
-      setLayout(initialLayout(nextFigure));
+    const handleResetWithClear = useEvent(() => {
+      handleReset();
       setValue({});
     });
 
@@ -171,37 +140,13 @@ export const PlotlyComponent = memo(
                 <path d="M3 3v5h5" />
               </svg>`,
             },
-            click: handleReset,
+            click: handleResetWithClear,
           },
         ],
         // Prioritize user's config
         ...configMemo,
       };
-    }, [handleReset, configMemo, is3DMode]);
-
-    const prevFigure = usePrevious(figure) ?? figure;
-
-    useEffect(() => {
-      const omitKeys = new Set<keyof Plotly.Layout>([
-        "autosize",
-        "dragmode",
-        "xaxis",
-        "yaxis",
-      ]);
-
-      // If the key was updated externally (e.g. can be specifically passed in the config)
-      // then we need to update the layout
-      for (const key of omitKeys) {
-        if (!isEqual(figure.layout[key], prevFigure.layout[key])) {
-          omitKeys.delete(key);
-        }
-      }
-
-      // Update layout when figure.layout changes
-      // Omit keys that we don't want to override
-      const layout = Objects.omit(figure.layout, omitKeys);
-      setLayout((prev) => ({ ...prev, ...layout }));
-    }, [figure.layout, prevFigure.layout]);
+    }, [handleResetWithClear, configMemo, is3DMode]);
 
     return (
       <LazyPlot
