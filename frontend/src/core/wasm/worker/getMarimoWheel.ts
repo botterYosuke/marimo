@@ -24,13 +24,31 @@ export function getMarimoWheel(_version: string) {
 }
 
 /**
+ * Get the base URL for the application.
+ * In a worker context, we derive it from self.location.
+ * Worker is at /assets/worker-xxx.js, so we go up one level.
+ */
+function getBaseUrl(): string {
+  // Worker location is like: https://botteryosuke.github.io/marimo/assets/worker-xxx.js
+  // We need: https://botteryosuke.github.io/marimo/
+  const workerUrl = self.location.href;
+  const assetsIndex = workerUrl.lastIndexOf("/assets/");
+  if (assetsIndex !== -1) {
+    return workerUrl.substring(0, assetsIndex + 1);
+  }
+  // Fallback: use origin + BASE_URL
+  return self.location.origin + (import.meta.env.BASE_URL || "/");
+}
+
+/**
  * Get the URL for the custom wheel hosted on GitHub Pages.
  * This is called from bootstrap.ts to fetch the actual wheel file.
  */
 export async function getCustomWheelUrl(): Promise<string> {
-  // Fetch the latest wheel filename from the server
-  const baseUrl = import.meta.env.BASE_URL || "/";
+  const baseUrl = getBaseUrl();
   const latestUrl = `${baseUrl}wheels/latest.txt`;
+
+  Logger.log(`Fetching wheel info from: ${latestUrl}`);
 
   try {
     const response = await fetch(latestUrl);
@@ -38,7 +56,9 @@ export async function getCustomWheelUrl(): Promise<string> {
       throw new Error(`Failed to fetch latest.txt: ${response.status}`);
     }
     const wheelFilename = (await response.text()).trim();
-    return `${baseUrl}wheels/${wheelFilename}`;
+    const wheelUrl = `${baseUrl}wheels/${wheelFilename}`;
+    Logger.log(`Resolved wheel URL: ${wheelUrl}`);
+    return wheelUrl;
   } catch (error) {
     Logger.error("Failed to get custom wheel URL:", error);
     throw error;
