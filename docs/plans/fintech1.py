@@ -4,11 +4,6 @@ __generated_with = "0.19.6"
 app = marimo.App(width="grid", layout_file="layouts/fintech1.grid.json")
 
 with app.setup:
-    """
-    シンプルな戦略:
-    - 前日比下落 → 買い
-    - 前日比上昇 & ポジションあり → 売り
-    """
     import marimo as mo
     import pandas as pd
     import pandas_datareader.data as web
@@ -66,7 +61,7 @@ def _():
 
     bt.set_data({code: toyota})
 
-    print(f"データ取得完了: {code} ({len(toyota)} 件)")
+    bt.chart(code=code)
     return (code,)
 
 
@@ -96,12 +91,6 @@ def _(code):
 
     # 戦略を登録
     bt.set_strategy(my_strategy)
-    return
-
-
-@app.cell
-def _(code):
-    bt.chart(code=code)
     return
 
 
