@@ -2,9 +2,8 @@
 
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
-import os from "node:os";
 import { spawn, ChildProcess } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, copyFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { initLogger, logInfo, logError } from "./utils/logger.js";
 import { getAppRoot, getMarimoServerExecutable } from "./utils/paths.js";
@@ -59,9 +58,9 @@ function createWindow() {
   }
 
   // Open DevTools in development
-  if (!app.isPackaged) {
-    mainWindow.webContents.openDevTools();
-  }
+  // if (!app.isPackaged) {
+  //   mainWindow.webContents.openDevTools();
+  // }
 
   mainWindow.on("closed", () => {
     mainWindow = null;
@@ -104,9 +103,19 @@ function startServer() {
       return;
     }
 
-    // Get temp directory for notebook files
-    const tempDir = process.env.TEMP || process.env.TMP || os.tmpdir();
-    const notebookDir = path.join(tempDir, "marimo");
+    // Get the startup notebook file path (backcast.py)
+    // Source: bundled template (read-only)
+    const templateNotebook = path.join(getAppRoot(), "frontend", "dist", "files", "backcast.py");
+    // Destination: user's documents folder (writable)
+    const userNotebookDir = path.join(app.getPath("documents"), "marimo-game");
+    const startupNotebook = path.join(userNotebookDir, "backcast.py");
+
+    // Copy template to writable location if not exists
+    if (!existsSync(startupNotebook)) {
+      logInfo(`Copying template notebook to ${startupNotebook}`);
+      mkdirSync(userNotebookDir, { recursive: true });
+      copyFileSync(templateNotebook, startupNotebook);
+    }
 
     // Spawn the server process
     serverProcess = spawn(serverExecutable, [
@@ -115,7 +124,7 @@ function startServer() {
       "--headless",
       "--port",
       String(SERVER_PORT),
-      notebookDir,
+      startupNotebook,
     ], {
       stdio: ["ignore", "pipe", "pipe"],
       env: {
