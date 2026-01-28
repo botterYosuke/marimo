@@ -108,7 +108,7 @@ pnpm dist:electron
 
 2. Steam にアップロード
 ```
-C:\SteamCMD\steamcmd.exe +login YOUR_STEAM_USERNAME +run_app_build "c:\Users\sasai\Documents\marimo\steam\vdf\app_build_4228740.vdf" +quit
+C:\Users\sasai\Documents\marimo\steam\steamcmd.exe +login sasaco1105 +run_app_build "c:\Users\sasai\Documents\marimo\steam\vdf\app_build_4228740.vdf" +quit
 ```
 YOUR_STEAM_USERNAME を Steamworks パートナーアカウントのユーザー名に置き換えてください。
 
