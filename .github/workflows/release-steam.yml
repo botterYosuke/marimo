@@ -104,14 +104,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📤 Upload Windows artifacts
+      - name: 📤 Upload Windows artifacts (Steam)
         uses: actions/upload-artifact@v4
         with:
-          name: electron-windows-${{ env.MARIMO_VERSION }}
-          path: |
-            dist-electron/*.exe
-            dist-electron/*.blockmap
-          retention-days: 30
+          name: steam-windows-${{ env.MARIMO_VERSION }}
+          path: dist-electron/win-unpacked/
+          retention-days: 7
 
   build_macos:
     name: 🍎 Build macOS
@@ -203,15 +201,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false  # Skip code signing for now
 
-      - name: 📤 Upload macOS artifacts
+      - name: 📤 Upload macOS artifacts (Steam)
         uses: actions/upload-artifact@v4
         with:
-          name: electron-macos-${{ env.MARIMO_VERSION }}
-          path: |
-            dist-electron/*.dmg
-            dist-electron/*.zip
-            dist-electron/*.blockmap
-          retention-days: 30
+          name: steam-macos-${{ env.MARIMO_VERSION }}
+          path: dist-electron/mac/
+          retention-days: 7
 
   build_linux:
     name: 🐧 Build Linux
@@ -302,19 +297,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📤 Upload Linux artifacts
+      - name: 📤 Upload Linux artifacts (Steam)
         uses: actions/upload-artifact@v4
         with:
-          name: electron-linux-${{ env.MARIMO_VERSION }}
-          path: |
-            dist-electron/*.AppImage
-            dist-electron/*.deb
-            dist-electron/*.blockmap
-          retention-days: 30
+          name: steam-linux-${{ env.MARIMO_VERSION }}
+          path: dist-electron/linux-unpacked/
+          retention-days: 7
 
-  # Create GitHub Release with all artifacts
-  create_release:
-    name: 📦 Create Release
+  # Deploy to Steam
+  deploy_steam:
+    name: 🚂 Deploy to Steam
     needs: [build_windows, build_macos, build_linux]
     runs-on: ubuntu-latest
 
@@ -332,86 +324,33 @@ jobs:
         run: |
           version=$(uv version --short)
           echo "marimo_version=$version" >> $GITHUB_OUTPUT
-          echo "tag=v$version-electron" >> $GITHUB_OUTPUT
 
-      - name: 🔍 Check if release already exists
-        id: check_release
-        run: |
-          # Use GitHub API to check if release exists
-          response=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_version.outputs.tag }}")
-
-          if [ "$response" = "200" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "⚠️ Release ${{ steps.get_version.outputs.tag }} already exists"
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "✅ Release ${{ steps.get_version.outputs.tag }} does not exist"
-          fi
-
-      - name: 📥 Download Windows artifacts
+      - name: 📥 Download Windows build
         uses: actions/download-artifact@v4
         with:
-          name: electron-windows-${{ steps.get_version.outputs.marimo_version }}
-          path: artifacts/windows
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: steam-windows-${{ steps.get_version.outputs.marimo_version }}
+          path: dist-electron/win-unpacked/
 
-      - name: 📥 Download macOS artifacts
+      - name: 📥 Download macOS build
         uses: actions/download-artifact@v4
         with:
-          name: electron-macos-${{ steps.get_version.outputs.marimo_version }}
-          path: artifacts/macos
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: steam-macos-${{ steps.get_version.outputs.marimo_version }}
+          path: dist-electron/mac/
 
-      - name: 📥 Download Linux artifacts
+      - name: 📥 Download Linux build
         uses: actions/download-artifact@v4
         with:
-          name: electron-linux-${{ steps.get_version.outputs.marimo_version }}
-          path: artifacts/linux
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: steam-linux-${{ steps.get_version.outputs.marimo_version }}
+          path: dist-electron/linux-unpacked/
 
-      - name: 📝 Create Release
-        if: steps.check_release.outputs.exists == 'false'
-        uses: softprops/action-gh-release@v1
+      - name: 🚂 Deploy to Steam
+        uses: game-ci/steam-deploy@v3
         with:
-          tag_name: ${{ steps.get_version.outputs.tag }}
-          name: "marimo Electron App ${{ steps.get_version.outputs.marimo_version }}"
-          body: |
-            ## Electron App Release ${{ steps.get_version.outputs.marimo_version }}
-
-            This release contains the Electron desktop application for marimo.
-
-            ### Downloads
-
-            #### Windows
-            - **Installer**: `marimo Setup ${{ steps.get_version.outputs.marimo_version }}.exe`
-            - **Portable**: `marimo ${{ steps.get_version.outputs.marimo_version }}.exe`
-
-            #### macOS
-            - **DMG**: `marimo-${{ steps.get_version.outputs.marimo_version }}.dmg`
-            - **Zip**: `marimo-${{ steps.get_version.outputs.marimo_version }}-mac.zip`
-
-            #### Linux
-            - **AppImage**: `marimo-${{ steps.get_version.outputs.marimo_version }}.AppImage`
-            - **Debian**: `marimo_${{ steps.get_version.outputs.marimo_version }}_amd64.deb`
-
-            ### Installation
-
-            - **Windows**: Run the installer or use the portable executable
-            - **macOS**: Open the DMG file and drag marimo to Applications
-            - **Linux**: Make the AppImage executable (`chmod +x`) and run it, or install the .deb package
-
-          files: |
-            artifacts/**/*
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: ⚠️ Skip release (already exists)
-        if: steps.check_release.outputs.exists == 'true'
-        run: |
-          echo "⚠️ Release ${{ steps.get_version.outputs.tag }} already exists. Skipping release creation."
-          exit 0
+          username: ${{ secrets.STEAM_USERNAME }}
+          configVdf: ${{ secrets.STEAM_CONFIG_VDF }}
+          appId: 4228740
+          buildDescription: "v${{ steps.get_version.outputs.marimo_version }}"
+          rootPath: steam/vdf
+          depot1Path: ../../dist-electron/win-unpacked
+          depot2Path: ../../dist-electron/mac
+          depot3Path: ../../dist-electron/linux-unpacked
