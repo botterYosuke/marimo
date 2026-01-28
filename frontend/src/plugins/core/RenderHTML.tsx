@@ -107,6 +107,35 @@ const replaceSrcScripts = (domNode: DOMNode): JSX.Element | undefined => {
   }
 };
 
+/**
+ * Handle marimo-broadcast elements in two formats:
+ * 1. Custom element: <marimo-broadcast channel="..." type="..." payload="...">
+ * 2. Data attribute: <div data-marimo-broadcast="channel" data-marimo-type="..." data-marimo-payload="...">
+ *
+ * Note: Broadcast messages are now sent at WebSocket receive time in handlers.ts
+ * to ensure all messages are processed even when React batches state updates.
+ * This function just returns an empty fragment to prevent rendering the elements.
+ */
+const handleMarimoBroadcast = (domNode: DOMNode): JSX.Element | undefined => {
+  if (!(domNode instanceof Element)) {
+    return;
+  }
+
+  // Format 1: <marimo-broadcast> custom element
+  if (domNode.name === "marimo-broadcast") {
+    // Message already sent by handlers.ts at WebSocket receive time
+    // biome-ignore lint/complexity/noUselessFragments: intentional empty render
+    return <></>;
+  }
+
+  // Format 2: <div data-marimo-broadcast="channel"> with data attributes
+  if (domNode.attribs["data-marimo-broadcast"]) {
+    // Message already sent by handlers.ts at WebSocket receive time
+    // biome-ignore lint/complexity/noUselessFragments: intentional empty render
+    return <></>;
+  }
+};
+
 const preserveQueryParamsInAnchorLinks: TransformFn = (
   reactNode: ReactNode,
   domNode: DOMNode,
@@ -218,6 +247,7 @@ function parseHtml({
     replaceValidTags,
     replaceValidIframes,
     replaceSrcScripts,
+    handleMarimoBroadcast,
     ...additionalReplacements,
   ];
 

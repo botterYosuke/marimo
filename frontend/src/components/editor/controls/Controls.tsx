@@ -37,6 +37,7 @@ import { useShouldShowInterrupt } from "../cell/useShouldShowInterrupt";
 import { HideInKioskMode } from "../kiosk-mode";
 import { LayoutSelect } from "../renderers/layout-select";
 import { CommandPaletteButton } from "./command-palette-button";
+import { useBroadcastChannelRelay } from "@/hooks/useBroadcastChannelRelay";
 
 interface ControlsProps {
   presenting: boolean;
@@ -56,6 +57,9 @@ export const Controls = ({
   connectionState,
   running,
 }: ControlsProps): JSX.Element => {
+  // Relay postMessage from iframes to BroadcastChannel (for Pyodide mode)
+  useBroadcastChannelRelay();
+
   const undoAvailable = useAtomValue(canUndoDeletesAtom);
   const needsRun = useAtomValue(needsRunAtom);
   const { undoDeleteCell } = useCellActions();

@@ -1,6 +1,7 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 import { deserializeLayout } from "@/components/editor/renderers/plugins";
 import type { LayoutType } from "@/components/editor/renderers/types";
+import { sendBroadcastMessage } from "@/utils/broadcastChannel";
 import { Logger } from "@/utils/Logger";
 import { Objects } from "@/utils/objects";
 import type { CellId, UIElementId } from "../cells/ids";
@@ -206,6 +207,48 @@ export function handleRemoveUIElements(
   VirtualFileTracker.INSTANCE.removeForCellId(cellId);
 }
 
+/**
+ * Extract and send marimo-broadcast messages from HTML output.
+ * This is called at WebSocket receive time to ensure all messages are processed,
+ * even when React batches state updates and only renders the final state.
+ */
+function extractAndSendBroadcastMessages(html: string): void {
+  // Quick check before running regex
+  if (!html.includes("marimo-broadcast")) {
+    return;
+  }
+
+  // Pattern 1: Match <marimo-broadcast> tag and extract attributes (any order)
+  const tagRegex = /<marimo-broadcast([^>]*)>/gi;
+  let match = tagRegex.exec(html);
+  while (match) {
+    const attrString = match[1];
+    const channelMatch = /channel="([^"]+)"/.exec(attrString);
+    const typeMatch = /type="([^"]+)"/.exec(attrString);
+    const payloadMatch = /payload="([^"]+)"/.exec(attrString);
+
+    if (channelMatch && typeMatch && payloadMatch) {
+      sendBroadcastMessage(channelMatch[1], typeMatch[1], payloadMatch[1]);
+    }
+    match = tagRegex.exec(html);
+  }
+
+  // Pattern 2: Match data-marimo-broadcast attribute (any order)
+  const divRegex = /<[^>]+data-marimo-broadcast="([^"]+)"[^>]*>/gi;
+  match = divRegex.exec(html);
+  while (match) {
+    const fullMatch = match[0];
+    const channel = match[1];
+    const typeMatch = /data-marimo-type="([^"]+)"/.exec(fullMatch);
+    const payloadMatch = /data-marimo-payload="([^"]+)"/.exec(fullMatch);
+
+    if (typeMatch && payloadMatch) {
+      sendBroadcastMessage(channel, typeMatch[1], payloadMatch[1]);
+    }
+    match = divRegex.exec(html);
+  }
+}
+
 export function handleCellNotificationeration(
   data: NotificationMessageData<"cell-op">,
   handleCellMessage: (message: CellMessage) => void,
@@ -217,6 +260,14 @@ export function handleCellNotificationeration(
    * it may have stopped running. Each of these things
    * affects how the cell should be rendered.
    */
+
+  // Extract broadcast messages from HTML output BEFORE React processes it.
+  // This ensures all messages are sent even when React batches state updates.
+  const output = data.output;
+  if (output?.mimetype === "text/html" && typeof output.data === "string") {
+    extractAndSendBroadcastMessages(output.data);
+  }
+
   handleCellMessage(data);
   VirtualFileTracker.INSTANCE.track(data);
 

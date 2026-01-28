@@ -21,14 +21,32 @@
 
 ### 通信フロー
 
+#### ヘッドレスモード（推奨）
 ```
 Python Backend (BackcastPro)
     │
-    ▼ state_publisher()
+    ▼ bt.publish_state_headless()
+mo.output.replace(<marimo-broadcast ...>)
+    │
+    ▼ WebSocket (cell-op)
+handlers.ts: extractAndSendBroadcastMessages()
+    │
+    ▼ BroadcastChannel: 'backtest_channel'
+useBroadcastChannel hook
+    │
+    ▼
+BacktestHud Component (Controls.tsx 内)
+```
+
+#### AnyWidget モード（従来）
+```
+Python Backend (BackcastPro)
+    │
+    ▼ bt.state_publisher()
 AnyWidget (BacktestStatePublisher)
     │
     ▼ BroadcastChannel: 'backtest_channel'
-React Frontend (useBroadcastChannel hook)
+useBroadcastChannel hook
     │
     ▼
 BacktestHud Component (Controls.tsx 内)
@@ -97,6 +115,42 @@ HUD の表示を担当する React コンポーネント。
   </div>
 )}
 ```
+
+### 4. handlers.ts（WebSocket メッセージ処理）
+
+**ファイル**: `frontend/src/core/kernel/handlers.ts`
+
+WebSocket で受信した HTML 出力から `<marimo-broadcast>` 要素を抽出し、React のレンダリングを待たずに BroadcastChannel へ送信する。
+
+**追加関数**:
+- `extractAndSendBroadcastMessages(html: string)`: HTML から broadcast メッセージを抽出・送信
+
+**設計ポイント**:
+- React のステートバッチ処理を回避するため、WebSocket 受信時点で即座に処理
+- 正規表現で属性順序に依存しない抽出
+- `html.includes("marimo-broadcast")` で早期リターン（パフォーマンス最適化）
+
+### 5. broadcastChannel.ts（シングルトン管理）
+
+**ファイル**: `frontend/src/utils/broadcastChannel.ts`
+
+BroadcastChannel インスタンスをシングルトンで管理し、メッセージ送信を行う。
+
+```typescript
+export function sendBroadcastMessage(
+  channelName: string,
+  type: string,
+  payload: string,  // Base64 エンコード済み JSON
+): boolean
+```
+
+### 6. RenderHTML.tsx（HTML パーサー）
+
+**ファイル**: `frontend/src/plugins/core/RenderHTML.tsx`
+
+`handleMarimoBroadcast()` 関数で `<marimo-broadcast>` 要素を検出し、空のフラグメントを返す（表示しない）。
+
+**注意**: メッセージ送信は handlers.ts で行うため、ここでは送信しない（重複防止）。
 
 ---
 
@@ -180,8 +234,75 @@ cd frontend && pnpm vite build --mode development
 
 ---
 
+## トラブルシューティング
+
+### HUD が表示されるが更新されない問題 (2026-01-28 修正)
+
+#### 症状
+- HUD がたまに表示される（intermittent）
+- 表示されても更新されない
+- Python 側のログでは正常に HTML が生成されている
+
+#### 原因
+`mo.output.replace()` が高速で連続呼び出しされた場合、React がステート更新をバッチ処理し、最終状態のみをレンダリングするため。
+
+```
+Python: メッセージ 1, 2, 3, ... 40 を生成
+         ↓
+WebSocket: すべてのメッセージを送信
+         ↓
+React: バッチ処理で最終状態のみレンダリング
+         ↓
+RenderHTML: 1 メッセージのみ処理 → 39 メッセージが欠落
+```
+
+#### 解決策
+WebSocket メッセージ受信時点で `<marimo-broadcast>` 要素を抽出し、React のレンダリングに依存せずにメッセージを送信する。
+
+**修正ファイル:**
+
+1. `frontend/src/core/kernel/handlers.ts`
+   - `extractAndSendBroadcastMessages()` 関数を追加
+   - `handleCellNotificationeration()` で HTML 出力から broadcast メッセージを抽出
+
+```typescript
+function extractAndSendBroadcastMessages(html: string): void {
+  if (!html.includes("marimo-broadcast")) {
+    return;
+  }
+
+  // <marimo-broadcast> タグを抽出（属性順序非依存）
+  const tagRegex = /<marimo-broadcast([^>]*)>/gi;
+  let match = tagRegex.exec(html);
+  while (match) {
+    const attrString = match[1];
+    const channelMatch = /channel="([^"]+)"/.exec(attrString);
+    const typeMatch = /type="([^"]+)"/.exec(attrString);
+    const payloadMatch = /payload="([^"]+)"/.exec(attrString);
+    if (channelMatch && typeMatch && payloadMatch) {
+      sendBroadcastMessage(channelMatch[1], typeMatch[1], payloadMatch[1]);
+    }
+    match = tagRegex.exec(html);
+  }
+  // ... data-marimo-broadcast 属性も同様に処理
+}
+```
+
+2. `frontend/src/plugins/core/RenderHTML.tsx`
+   - `handleMarimoBroadcast()` から送信ロジックを削除（重複防止）
+   - 空のフラグメントを返すのみに簡略化
+
+#### 設計意図
+- **React のバッチ処理を回避**: WebSocket メッセージ受信時点で即座に処理
+- **重複送信の防止**: RenderHTML 側では送信せず、handlers.ts のみで処理
+- **パフォーマンス最適化**: `html.includes("marimo-broadcast")` で早期リターン
+- **属性順序非依存**: 個別の正規表現で各属性を抽出
+
+---
+
 ## 変更履歴
 
 | 日付 | 変更内容 |
 |------|----------|
 | 2026-01-26 | 初期実装完了 |
+| 2026-01-28 | HUD 更新問題を修正: WebSocket 受信時に broadcast メッセージを抽出するよう変更 |
