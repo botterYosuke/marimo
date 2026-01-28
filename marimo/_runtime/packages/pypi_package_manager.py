@@ -275,8 +275,8 @@ class UvPackageManager(PypiPackageManager):
             install_cmd.append("--upgrade")
 
         return install_cmd + [
-            # trade installation time for faster start time
-            "--compile",
+            # we don't set --compile-bytecode or --no-compile-bytecode because we want
+            # to respect the user's env (e.g. UV_COMPILE_BYTECODE)
             *split_packages(package),
             "-p",
             PY_EXE,
@@ -302,6 +302,8 @@ class UvPackageManager(PypiPackageManager):
         # For uv pip install, try with output capture to enable fallback
         # Force using 'uv pip install' instead of 'uv add' to avoid rebuilding local packages
         cmd = self.install_command(package, upgrade=upgrade, dev=dev, force_pip_install=True)
+
+        LOGGER.info(f"Running command: {cmd}")
 
         # Run the command and capture output
         proc = subprocess.Popen(  # noqa: ASYNC220
