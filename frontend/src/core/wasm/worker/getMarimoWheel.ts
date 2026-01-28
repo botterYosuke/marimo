@@ -65,31 +65,3 @@ export async function getCustomWheelUrl(): Promise<string> {
   }
 }
 
-/**
- * Get the URL for the BackcastPro wheel hosted on GitHub Pages.
- */
-export async function getBackcastProWheelUrl(): Promise<string | null> {
-  const baseUrl = getBaseUrl();
-  const wheelsUrl = `${baseUrl}wheels/`;
-
-  try {
-    const response = await fetch(wheelsUrl);
-    if (!response.ok) {
-      Logger.log("Could not access wheels directory");
-      return null;
-    }
-    const html = await response.text();
-    // Find BackcastPro wheel filename in directory listing
-    const match = html.match(/BackcastPro-[\d.]+-py3-none-any\.whl/);
-    if (match) {
-      const wheelUrl = `${wheelsUrl}${match[0]}`;
-      Logger.log(`Found BackcastPro wheel: ${wheelUrl}`);
-      return wheelUrl;
-    }
-    Logger.log("BackcastPro wheel not found in wheels directory");
-    return null;
-  } catch (error) {
-    Logger.log("Failed to find BackcastPro wheel:", error);
-    return null;
-  }
-}

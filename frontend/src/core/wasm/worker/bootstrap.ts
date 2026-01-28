@@ -6,11 +6,7 @@ import type { JsonString } from "@/utils/json/base64";
 import { invariant } from "../../../utils/invariant";
 import { Logger } from "../../../utils/Logger";
 import { WasmFileSystem } from "./fs";
-import {
-  getBackcastProWheelUrl,
-  getCustomWheelUrl,
-  getMarimoWheel,
-} from "./getMarimoWheel";
+import { getCustomWheelUrl, getMarimoWheel } from "./getMarimoWheel";
 import { t } from "./tracer";
 import type { SerializedBridge, WasmController } from "./types";
 import { setupBackcastProData } from "./backcastpro-loader";
@@ -104,20 +100,17 @@ await micropip.install("${customWheelUrl}", deps=False)
 print("Custom marimo wheel installed")
 `);
 
-        // Install BackcastPro from wheels directory
-        const backcastProWheelUrl = await getBackcastProWheelUrl();
-        if (backcastProWheelUrl) {
-          Logger.log(`Installing BackcastPro wheel: ${backcastProWheelUrl}`);
-          await pyodide
-            .runPythonAsync(`
+        // Install BackcastPro from PyPI
+        Logger.log("Installing BackcastPro from PyPI...");
+        await pyodide
+          .runPythonAsync(`
 import micropip
-await micropip.install("${backcastProWheelUrl}", deps=False)
-print("BackcastPro wheel installed")
+await micropip.install("BackcastPro")
+print("BackcastPro installed from PyPI")
 `)
-            .catch((error) => {
-              Logger.error("Failed to install BackcastPro:", error);
-            });
-        }
+          .catch((error) => {
+            Logger.error("Failed to install BackcastPro:", error);
+          });
       }
 
       this.pyodide = pyodide;
