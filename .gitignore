@@ -139,3 +139,4 @@ dist-electron/
 
 # Steam development
 steam_appid.txt
+steam/
