@@ -268,6 +268,14 @@ export default defineConfig({
         target: TARGET,
         changeOrigin: true,
       },
+      "/mpl": {
+        target: TARGET,
+        ws: true,
+        changeOrigin: true,
+        headers: {
+          origin: TARGET,
+        },
+      },
       "/custom.css": {
         target: TARGET,
         changeOrigin: true,
