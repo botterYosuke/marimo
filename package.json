@@ -69,6 +69,9 @@
   "build": {
     "appId": "com.marimo.app",
     "productName": "marimo",
+    "asarUnpack": [
+      "node_modules/steamworks.js/**/*"
+    ],
     "directories": {
       "output": "dist-electron",
       "buildResources": "electron/build"
@@ -161,5 +164,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     }
+  },
+  "dependencies": {
+    "steamworks.js": "^0.4.0"
   }
 }

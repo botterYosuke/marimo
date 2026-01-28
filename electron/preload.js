@@ -1,12 +1,15 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { contextBridge, ipcRenderer } from "electron";
+import { ipcRenderer } from "electron";
 
 /**
  * Expose protected methods that allow the renderer process to use
- * the ipcRenderer without exposing the entire object
+ * the ipcRenderer without exposing the entire object.
+ *
+ * Note: With contextIsolation: false (required for Steam Overlay),
+ * we attach directly to window instead of using contextBridge.
  */
-contextBridge.exposeInMainWorld("electronAPI", {
+window.electronAPI = {
   /**
    * Check if running in Electron
    */
@@ -44,5 +47,4 @@ contextBridge.exposeInMainWorld("electronAPI", {
    * Get server logs
    */
   getServerLogs: () => ipcRenderer.invoke("server:get-logs"),
-});
-
+};

@@ -5,6 +5,7 @@ import path from "node:path";
 import { spawn, ChildProcess } from "node:child_process";
 import { existsSync, copyFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import { initLogger, logInfo, logError } from "./utils/logger.js";
 import { getAppRoot, getMarimoServerExecutable } from "./utils/paths.js";
 
@@ -13,6 +14,67 @@ const __dirname = path.dirname(__filename);
 
 // Initialize logger
 initLogger();
+
+// Steam integration (CommonJS module loaded via createRequire)
+const require = createRequire(import.meta.url);
+let steamworks = null;
+let steamClient = null;
+let steamInitialized = false;
+
+// Steam App ID - configurable via environment variable
+const STEAM_APP_ID = parseInt(process.env.STEAM_APP_ID, 10) || 4228740;
+
+/**
+ * Initialize Steam SDK
+ * Must be called before app.whenReady() for overlay support
+ */
+function initSteam() {
+  try {
+    steamworks = require("steamworks.js");
+
+    // Enable Steam Overlay before windows are created
+    // This adds command-line switches and sets up frame invalidation
+    steamworks.electronEnableSteamOverlay();
+
+    logInfo("Steam Overlay enabled");
+    return true;
+  } catch (error) {
+    logError("Failed to load steamworks.js", error);
+    return false;
+  }
+}
+
+/**
+ * Connect to Steam after app is ready
+ */
+function connectSteam() {
+  if (!steamworks) {
+    logInfo("Steam SDK not loaded, skipping connection");
+    return false;
+  }
+
+  try {
+    steamClient = steamworks.init(STEAM_APP_ID);
+    steamInitialized = true;
+
+    const playerName = steamClient.localplayer?.getName() || "Unknown";
+    const steamId = steamClient.localplayer?.getSteamId()?.steamId64 || "Unknown";
+
+    logInfo(`Steam initialized successfully`);
+    logInfo(`Player: ${playerName} (${steamId})`);
+    logInfo(`Steam App ID: ${STEAM_APP_ID}`);
+
+    return true;
+  } catch (error) {
+    logError("Steam initialization failed", error);
+    logInfo("Running in non-Steam mode");
+    steamInitialized = false;
+    return false;
+  }
+}
+
+// Initialize Steam early (before app.whenReady)
+initSteam();
 
 let mainWindow = null;
 
@@ -41,8 +103,8 @@ function createWindow() {
     height: 800,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
-      nodeIntegration: false,
-      contextIsolation: true,
+      nodeIntegration: true, // Required for Steam Overlay
+      contextIsolation: false, // Required for Steam Overlay
       sandbox: false, // Required for preload script
     },
     icon: path.join(getAppRoot(), "frontend", "public", "logo.png"),
@@ -284,6 +346,10 @@ ipcMain.handle("server:get-logs", () => {
 // App event handlers
 app.whenReady().then(async () => {
   logInfo("App ready");
+
+  // Connect to Steam after app is ready
+  connectSteam();
+
   createWindow();
 
   // Start the server automatically if packaged (production)
@@ -327,6 +393,18 @@ app.on("window-all-closed", () => {
 });
 
 app.on("before-quit", () => {
+  // Shutdown Steam client
+  if (steamClient && steamInitialized) {
+    try {
+      steamClient.runCallbacks(); // Flush pending callbacks
+      logInfo("Steam client shutdown");
+    } catch (e) {
+      // Ignore errors during shutdown
+    }
+    steamClient = null;
+    steamInitialized = false;
+  }
+
   // Ensure server is stopped before quitting
   stopServer();
 });

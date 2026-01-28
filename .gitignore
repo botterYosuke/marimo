@@ -136,3 +136,6 @@ site
 .playwright-mcp/
 .cursor/plans/
 dist-electron/
+
+# Steam development
+steam_appid.txt
