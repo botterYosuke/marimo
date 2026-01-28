@@ -1,10 +1,7 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { useEffect } from "react";
-import {
-  broadcastChannelManager,
-  sendBroadcastMessage,
-} from "@/utils/broadcastChannel";
+import { broadcastChannelManager } from "@/utils/broadcastChannel";
 
 interface MarimoBroadcastMessage {
   __marimo_broadcast__: true;
@@ -29,8 +26,8 @@ function isMarimoBroadcastMessage(
 /**
  * Hook to relay broadcast messages to BroadcastChannel.
  *
- * Primary method: marimo-broadcast elements are handled by RenderHTML.tsx
- * during HTML parsing, which calls sendBroadcastMessage().
+ * Primary method: marimo-broadcast elements are handled by handlers.ts
+ * at WebSocket receive time, which calls sendBroadcastMessage().
  *
  * Fallback method: postMessage from iframes (for Pyodide mode with srcdoc)
  * is handled by this hook's message listener.
@@ -57,6 +54,3 @@ export function useBroadcastChannelRelay(): void {
     };
   }, []);
 }
-
-// Re-export for convenience
-export { sendBroadcastMessage };
