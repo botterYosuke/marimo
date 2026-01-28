@@ -50,6 +50,12 @@ jobs:
           echo "$WHEEL_FILE" > frontend/dist/wheels/latest.txt
           echo "Copied wheel: $WHEEL_FILE"
 
+      - name: Download BackcastPro from PyPI
+        run: |
+          pip download BackcastPro --no-deps -d frontend/dist/wheels/
+          echo "Downloaded BackcastPro wheel:"
+          ls -la frontend/dist/wheels/BackcastPro*
+
       - name: Download DuckDB data files from FTP
         env:
           FTP_HOST: backcast.i234.me
