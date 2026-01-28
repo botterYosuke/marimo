@@ -44,17 +44,58 @@ function getDataFilesToLoad(): DataFile[] {
   return files;
 }
 
+/**
+ * DuckDBファイルが有効かどうかを検証
+ * DuckDBファイルヘッダ構造:
+ * - 0-7: チェックサム
+ * - 8-11: マジックバイト "DUCK"
+ * - 12-19: バージョン番号
+ */
+function isValidDuckDBFile(data: Uint8Array): boolean {
+  if (data.length < 20) {
+    return false;
+  }
+  // オフセット8から4バイトのマジックバイト "DUCK" をチェック
+  const magic = new TextDecoder().decode(data.slice(8, 12));
+  return magic === "DUCK";
+}
+
 async function fetchFile(url: string): Promise<Uint8Array | null> {
   try {
+    Logger.log(`[BackcastPro] Fetching ${url}`);
     const response = await fetch(url);
+
+    Logger.log(`[BackcastPro] Response status: ${response.status}`);
+
     if (!response.ok) {
-      Logger.warn(`Failed to fetch ${url}: ${response.status}`);
+      Logger.warn(`[BackcastPro] Failed to fetch ${url}: ${response.status}`);
       return null;
     }
+
+    // Content-Typeチェック: text/html の場合はViteのSPAフォールバックなので拒否
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("text/html")) {
+      Logger.warn(
+        `[BackcastPro] Rejecting ${url}: Content-Type is text/html (likely Vite SPA fallback)`,
+      );
+      return null;
+    }
+
     const buffer = await response.arrayBuffer();
-    return new Uint8Array(buffer);
+    const data = new Uint8Array(buffer);
+
+    // DuckDBファイルバリデーション
+    if (!isValidDuckDBFile(data)) {
+      Logger.warn(
+        `[BackcastPro] Rejecting ${url}: Not a valid DuckDB file (magic bytes mismatch)`,
+      );
+      return null;
+    }
+
+    Logger.log(`[BackcastPro] Successfully fetched valid DuckDB file: ${url}`);
+    return data;
   } catch (error) {
-    Logger.warn(`Error fetching ${url}:`, error);
+    Logger.warn(`[BackcastPro] Error fetching ${url}:`, error);
     return null;
   }
 }
@@ -65,7 +106,7 @@ function ensureDirectoryExists(pyodide: PyodideInterface, path: string): void {
   let currentPath = "";
 
   for (const part of parts) {
-    currentPath += "/" + part;
+    currentPath = `${currentPath}/${part}`;
     try {
       FS.mkdir(currentPath);
     } catch {
@@ -77,6 +118,31 @@ function ensureDirectoryExists(pyodide: PyodideInterface, path: string): void {
 function getDirectoryPath(filePath: string): string {
   const lastSlash = filePath.lastIndexOf("/");
   return lastSlash > 0 ? filePath.substring(0, lastSlash) : "/";
+}
+
+/**
+ * 既存の無効なDuckDBファイルを削除する
+ * IndexedDBに以前保存された不正なファイル（HTMLなど）をクリーンアップ
+ */
+function removeInvalidDuckDBFiles(
+  pyodide: PyodideInterface,
+  files: DataFile[],
+): void {
+  const FS = getFS(pyodide);
+
+  for (const file of files) {
+    try {
+      const existingData = FS.readFile(file.localPath);
+      if (!isValidDuckDBFile(existingData)) {
+        Logger.warn(
+          `[BackcastPro] Removing invalid DuckDB file: ${file.localPath}`,
+        );
+        FS.unlink(file.localPath);
+      }
+    } catch {
+      // ファイルが存在しない場合は無視
+    }
+  }
 }
 
 export async function setupBackcastProData(
@@ -99,6 +165,10 @@ print(f"[BackcastPro] BACKCASTPRO_CACHE_DIR set to: {os.environ['BACKCASTPRO_CAC
 
   // Fetch and write data files
   const files = getDataFilesToLoad();
+
+  // 既存の無効なDuckDBファイルを削除（IndexedDBに残っている不正ファイルをクリーンアップ）
+  removeInvalidDuckDBFiles(pyodide, files);
+
   let successCount = 0;
   let failCount = 0;
 
