@@ -70,6 +70,29 @@ function createWindow() {
 }
 
 /**
+ * Get the startup notebook path (copies template if needed)
+ */
+function getStartupNotebook() {
+  // Destination: user's app data folder (writable)
+  const userNotebookDir = path.join(app.getPath("userData"), "notebooks");
+  const startupNotebook = path.join(userNotebookDir, "backcast.py");
+
+  // Source: template location differs between dev and production
+  const templateNotebook = app.isPackaged
+    ? path.join(getAppRoot(), "frontend", "dist", "files", "backcast.py")
+    : path.join(getAppRoot(), "frontend", "public", "files", "backcast.py");
+
+  // Copy template to writable location if not exists
+  if (!existsSync(startupNotebook)) {
+    logInfo(`Copying template notebook to ${startupNotebook}`);
+    mkdirSync(userNotebookDir, { recursive: true });
+    copyFileSync(templateNotebook, startupNotebook);
+  }
+
+  return startupNotebook;
+}
+
+/**
  * Start the marimo Python server
  */
 function startServer() {
@@ -87,12 +110,16 @@ function startServer() {
     mainWindow.webContents.send("server:status-changed", serverStatus);
   }
 
-  // Get the server executable path
-  const serverExecutable = getMarimoServerExecutable();
-  logInfo(`Server executable: ${serverExecutable}`);
+  // Get the startup notebook (copies template if needed)
+  const startupNotebook = getStartupNotebook();
+  logInfo(`Startup notebook: ${startupNotebook}`);
 
   // Check if we're in production (packaged app)
   if (app.isPackaged) {
+    // Get the server executable path
+    const serverExecutable = getMarimoServerExecutable();
+    logInfo(`Server executable: ${serverExecutable}`);
+
     // In production, use the PyInstaller executable
     if (!existsSync(serverExecutable)) {
       logError(`Server executable not found: ${serverExecutable}`);
@@ -103,19 +130,8 @@ function startServer() {
       return;
     }
 
-    // Get the startup notebook file path (backcast.py)
-    // Source: bundled template (read-only)
-    const templateNotebook = path.join(getAppRoot(), "frontend", "dist", "files", "backcast.py");
-    // Destination: user's documents folder (writable)
-    const userNotebookDir = path.join(app.getPath("documents"), "marimo-game");
-    const startupNotebook = path.join(userNotebookDir, "backcast.py");
-
-    // Copy template to writable location if not exists
-    if (!existsSync(startupNotebook)) {
-      logInfo(`Copying template notebook to ${startupNotebook}`);
-      mkdirSync(userNotebookDir, { recursive: true });
-      copyFileSync(templateNotebook, startupNotebook);
-    }
+    // Get the notebook directory for BACKCASTPRO_CACHE_DIR
+    const notebookDir = path.dirname(startupNotebook);
 
     // Spawn the server process
     serverProcess = spawn(serverExecutable, [
@@ -131,12 +147,15 @@ function startServer() {
         ...process.env,
         // Ensure PATH includes necessary directories
         PATH: process.env.PATH || "",
+        // Set BackcastPro cache directory to notebook folder
+        BACKCASTPRO_CACHE_DIR: notebookDir,
       },
     });
   } else {
-    // In development, use the Python command directly
-    // This falls back to the existing behavior for development
+    // In development, server is started externally via pnpm start:server
+    // But we still need to tell it which notebook to open
     logInfo("Development mode: server should be started externally");
+    logInfo(`Expected notebook path: ${startupNotebook}`);
     serverStatus = SERVER_STATUS.STOPPED;
     if (mainWindow) {
       mainWindow.webContents.send("server:status-changed", serverStatus);
