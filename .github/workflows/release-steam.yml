@@ -99,8 +99,8 @@ jobs:
         run: |
           npm version ${{ env.MARIMO_VERSION }} --no-git-tag-version
 
-      - name: 📦 Build Electron app
-        run: pnpm exec electron-builder --win --x64
+      - name: 📦 Build Electron app (Steam - unpacked)
+        run: pnpm exec electron-builder --win --x64 --dir
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -195,8 +195,8 @@ jobs:
         run: |
           npm version ${{ env.MARIMO_VERSION }} --no-git-tag-version
 
-      - name: 📦 Build Electron app
-        run: pnpm exec electron-builder --mac --x64 --arm64
+      - name: 📦 Build Electron app (Steam - unpacked)
+        run: pnpm exec electron-builder --mac --x64 --dir
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false  # Skip code signing for now
@@ -292,8 +292,8 @@ jobs:
         run: |
           npm version ${{ env.MARIMO_VERSION }} --no-git-tag-version
 
-      - name: 📦 Build Electron app
-        run: pnpm exec electron-builder --linux --x64
+      - name: 📦 Build Electron app (Steam - unpacked)
+        run: pnpm exec electron-builder --linux --x64 --dir
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
