@@ -3,7 +3,7 @@ name: Release Electron App
 on:
   push:
     branches:
-      - sasa/steam
+      - game
   workflow_dispatch: {}
 
 concurrency:
