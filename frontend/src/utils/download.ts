@@ -1,5 +1,6 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
+import React from "react";
 import { toast } from "@/components/ui/use-toast";
 import { type CellId, CellOutputId } from "@/core/cells/ids";
 import { getRequestClient } from "@/core/network/requests";
@@ -9,6 +10,8 @@ import { prettyError } from "./errors";
 import { toPng } from "./html-to-image";
 import { captureIframeAsImage } from "./iframe";
 import { Logger } from "./Logger";
+import { ProgressState } from "./progress";
+import { ToastProgress } from "./toast-progress";
 
 /**
  * Show a loading toast while an async operation is in progress.
@@ -16,14 +19,16 @@ import { Logger } from "./Logger";
  */
 export async function withLoadingToast<T>(
   title: string,
-  fn: () => Promise<T>,
+  fn: (progress: ProgressState) => Promise<T>,
 ): Promise<T> {
+  const progress = ProgressState.indeterminate();
   const loadingToast = toast({
     title,
+    description: React.createElement(ToastProgress, { progress }),
     duration: Infinity,
   });
   try {
-    const result = await fn();
+    const result = await fn(progress);
     loadingToast.dismiss();
     return result;
   } catch (error) {
@@ -42,64 +47,33 @@ function findElementForCell(cellId: CellId): HTMLElement | undefined {
 }
 
 /**
- * Reference counter for body.printing class to handle concurrent screenshot captures.
- * Only adds the class when count goes 0→1, only removes when count goes 1→0.
- */
-let bodyPrintingRefCount = 0;
-
-function acquireBodyPrinting() {
-  bodyPrintingRefCount++;
-  if (bodyPrintingRefCount === 1) {
-    document.body.classList.add("printing");
-  }
-}
-
-function releaseBodyPrinting() {
-  bodyPrintingRefCount--;
-  if (bodyPrintingRefCount === 0) {
-    document.body.classList.remove("printing");
-  }
-}
-
-/**
  * Prepare a cell element for screenshot capture.
  *
  * @param element - The cell output element to prepare
- * @param enablePrintMode - When true, adds a 'printing' class to the body.
- *   This can cause layout shifts that cause the page to scroll.
  * @returns A cleanup function to restore the element's original state
  */
-function prepareCellElementForScreenshot(
-  element: HTMLElement,
-  enablePrintMode: boolean,
-) {
-  element.classList.add("printing-output");
-  if (enablePrintMode) {
-    acquireBodyPrinting();
-  }
+function prepareCellElementForScreenshot(element: HTMLElement) {
   const originalOverflow = element.style.overflow;
-  element.style.overflow = "auto";
+  const maxHeight = element.style.maxHeight;
+  element.style.overflow = "visible";
+  element.style.maxHeight = "none";
 
   return () => {
-    element.classList.remove("printing-output");
-    if (enablePrintMode) {
-      releaseBodyPrinting();
-    }
     element.style.overflow = originalOverflow;
+    element.style.maxHeight = maxHeight;
   };
 }
+
+const THRESHOLD_TIME_MS = 500;
 
 /**
  * Capture a cell output as a PNG data URL.
  *
  * @param cellId - The ID of the cell to capture
- * @param enablePrintMode - When true, enables print mode which adds a 'printing' class to the body.
- *   This can cause layout shifts that cause the page to scroll.
  * @returns The PNG as a data URL, or undefined if the cell element wasn't found
  */
 export async function getImageDataUrlForCell(
   cellId: CellId,
-  enablePrintMode = true,
 ): Promise<string | undefined> {
   const element = findElementForCell(cellId);
   if (!element) {
@@ -111,10 +85,20 @@ export async function getImageDataUrlForCell(
     return iframeDataUrl;
   }
 
-  const cleanup = prepareCellElementForScreenshot(element, enablePrintMode);
+  const cleanup = prepareCellElementForScreenshot(element);
 
   try {
-    return await toPng(element);
+    const startTime = Date.now();
+    const dataUrl = await toPng(element);
+    const timeTaken = Date.now() - startTime;
+    if (timeTaken > THRESHOLD_TIME_MS) {
+      Logger.debug(
+        "toPng operation for element",
+        element,
+        `took ${timeTaken} ms (exceeds threshold)`,
+      );
+    }
+    return dataUrl;
   } finally {
     cleanup();
   }
@@ -127,24 +111,19 @@ export async function downloadCellOutputAsImage(
   cellId: CellId,
   filename: string,
 ) {
-  const element = findElementForCell(cellId);
-  if (!element) {
+  const dataUrl = await getImageDataUrlForCell(cellId);
+  if (!dataUrl) {
     return;
   }
-
-  // Cell outputs that are iframes
-  const iframeDataUrl = await captureIframeAsImage(element);
-  if (iframeDataUrl) {
-    downloadByURL(iframeDataUrl, Filenames.toPNG(filename));
-    return;
-  }
-
-  await downloadHTMLAsImage({
-    element,
-    filename,
-    prepare: () => prepareCellElementForScreenshot(element, true),
-  });
+  return downloadByURL(dataUrl, Filenames.toPNG(filename));
 }
+
+export const ADD_PRINTING_CLASS = (): (() => void) => {
+  document.body.classList.add("printing");
+  return () => {
+    document.body.classList.remove("printing");
+  };
+};
 
 export async function downloadHTMLAsImage(opts: {
   element: HTMLElement;
@@ -160,10 +139,6 @@ export async function downloadHTMLAsImage(opts: {
   let cleanup: (() => void) | undefined;
   if (prepare) {
     cleanup = prepare(element);
-  } else {
-    // When no prepare function is provided (e.g., downloading full notebook),
-    // add body.printing ourselves
-    document.body.classList.add("printing");
   }
 
   try {
