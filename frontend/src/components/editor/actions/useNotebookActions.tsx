@@ -70,6 +70,7 @@ import { createShareableLink } from "@/core/wasm/share";
 import { isWasm } from "@/core/wasm/utils";
 import { copyToClipboard } from "@/utils/copy";
 import {
+  ADD_PRINTING_CLASS,
   downloadAsPDF,
   downloadBlob,
   downloadHTMLAsImage,
@@ -77,6 +78,7 @@ import {
 } from "@/utils/download";
 import { Filenames } from "@/utils/filenames";
 import { Objects } from "@/utils/objects";
+import type { ProgressState } from "@/utils/progress";
 import { newNotebookURL } from "@/utils/urls";
 import { useRunAllCells } from "../cell/useRunCells";
 import { useChromeActions, useChromeState } from "../chrome/state";
@@ -218,6 +220,8 @@ export function useNotebookActions() {
             await downloadHTMLAsImage({
               element: app,
               filename: document.title,
+              // Add body.printing ONLY when converting the whole notebook to a screenshot
+              prepare: ADD_PRINTING_CLASS,
             });
           },
         },
@@ -238,11 +242,11 @@ export function useNotebookActions() {
                 return;
               }
 
-              const downloadPDF = async () => {
-                await updateCellOutputsWithScreenshots(
-                  takeScreenshots,
+              const downloadPDF = async (progress: ProgressState) => {
+                await updateCellOutputsWithScreenshots({
+                  takeScreenshots: () => takeScreenshots({ progress }),
                   updateCellOutputs,
-                );
+                });
                 await downloadAsPDF({
                   filename: filename,
                   webpdf: false,
