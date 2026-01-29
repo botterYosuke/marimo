@@ -337,6 +337,9 @@ jobs:
           name: steam-linux-${{ steps.get_version.outputs.marimo_version }}
           path: dist-electron/linux-unpacked/
 
+      - name: 📁 Create Steam VDF directory
+        run: mkdir -p steam/vdf
+
       - name: 🚂 Deploy to Steam
         uses: game-ci/steam-deploy@v3
         with:

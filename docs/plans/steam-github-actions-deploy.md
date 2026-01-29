@@ -1,71 +1,66 @@
-# Steam GitHub Actions デプロイ計画
+# Steam GitHub Actions デプロイ - 実装完了
 
 ## 概要
 
-現在の `.github/workflows/release-steam.yml` を修正し、GitHub Releases の代わりに Steam へ自動デプロイするワークフローに変更する。
+`.github/workflows/release-steam.yml` で Windows/macOS/Linux の Electron アプリをビルドし、Steam へ自動デプロイするワークフロー。
 
 ## 現状
 
 | 項目 | 状態 |
 |------|------|
-| Windows/macOS/Linux ビルド | ✅ 動作中 |
-| VDF ファイル | ✅ 作成済み (`steam/vdf/`) |
-| GitHub Releases へのアップロード | ✅ 動作中 (変更対象) |
-| Steam ビルダーアカウント | ✅ 作成済み |
-| GitHub Secrets (STEAM_USERNAME, STEAM_CONFIG_VDF) | ✅ 設定済み |
-| Steam へのアップロード (ワークフロー) | ⏳ 次のステップ |
+| Windows ビルド | ✅ 動作中 |
+| macOS ビルド | ✅ 動作中 |
+| Linux ビルド | ✅ 動作中 |
+| VDF ファイル | ✅ 自動生成 (`steam/vdf/` を動的作成) |
+| GitHub Secrets | ✅ 設定済み |
+| Steam へのデプロイ | ✅ 動作中 |
 
-## 使用するアクション
+## ワークフロー構成
 
-**[game-ci/steam-deploy](https://github.com/game-ci/steam-deploy)** v3.2.0
-- GameCI が提供する公式 Steam デプロイアクション
-- TOTP または config.vdf での認証をサポート
+### トリガー
 
-## 必要な GitHub Secrets
-
-| Secret 名 | 説明 |
-|-----------|------|
-| `STEAM_USERNAME` | Steam ビルダーアカウントのユーザー名 |
-| `STEAM_PASSWORD` | Steam ビルダーアカウントのパスワード |
-| `STEAM_TOTP_SECRET` | Steam Guard TOTP のシークレット (推奨) |
-
-### 代替: config.vdf 方式
-
-| Secret 名 | 説明 |
-|-----------|------|
-| `STEAM_CONFIG_VDF` | Base64 エンコードされた config.vdf |
-
----
-
-## ワークフロー変更内容
-
-### 1. ビルドジョブの変更
-
-各ビルドジョブ (Windows/macOS/Linux) で、unpacked ディレクトリもアーティファクトとしてアップロードするように変更。
-
-**変更前** (Windows の例):
 ```yaml
-- name: 📤 Upload Windows artifacts
-  uses: actions/upload-artifact@v4
-  with:
-    name: electron-windows-${{ env.MARIMO_VERSION }}
-    path: |
-      dist-electron/*.exe
-      dist-electron/*.blockmap
+on:
+  push:
+    branches:
+      - sasa/steam
+  workflow_dispatch: {}
 ```
 
-**変更後**:
-```yaml
-- name: 📤 Upload Windows artifacts (Steam)
-  uses: actions/upload-artifact@v4
-  with:
-    name: steam-windows-${{ env.MARIMO_VERSION }}
-    path: dist-electron/win-unpacked/
+### ジョブ構成
+
+```
+build_windows (windows-latest)
+build_macos (macos-latest)      → deploy_steam (ubuntu-latest)
+build_linux (ubuntu-latest)
 ```
 
-### 2. リリースジョブの置き換え
+## ビルドジョブの流れ
 
-`create_release` ジョブを `deploy_steam` ジョブに置き換える。
+各 OS のビルドジョブは以下のステップを実行:
+
+1. **Checkout** - リポジトリをクローン
+2. **Setup pnpm** - pnpm をセットアップ
+3. **Setup Node.js** - Node.js 22 をセットアップ
+4. **Install Node.js dependencies** - `pnpm install`
+5. **Build frontend** - `make fe` でフロントエンドをビルド
+6. **Setup uv** - Python パッケージマネージャをセットアップ
+7. **Get version** - `uv version --short` でバージョン取得
+8. **Create venv** - Python 仮想環境を作成
+9. **Install Python dependencies** - `uv pip install -e ".[electron]"`
+10. **Build Python executable** - PyInstaller で `marimo-server` をビルド
+11. **Build Electron app** - `electron-builder --dir` で unpacked ビルド
+12. **Upload artifacts** - GitHub Actions artifacts にアップロード
+
+### アーティファクト
+
+| OS | アーティファクト名 | パス |
+|----|-------------------|------|
+| Windows | `steam-windows-{version}` | `dist-electron/win-unpacked/` |
+| macOS | `steam-macos-{version}` | `dist-electron/mac/` |
+| Linux | `steam-linux-{version}` | `dist-electron/linux-unpacked/` |
+
+## デプロイジョブ
 
 ```yaml
 deploy_steam:
@@ -104,6 +99,9 @@ deploy_steam:
         name: steam-linux-${{ steps.get_version.outputs.marimo_version }}
         path: dist-electron/linux-unpacked/
 
+    - name: 📁 Create Steam VDF directory
+      run: mkdir -p steam/vdf
+
     - name: 🚂 Deploy to Steam
       uses: game-ci/steam-deploy@v3
       with:
@@ -111,153 +109,66 @@ deploy_steam:
         configVdf: ${{ secrets.STEAM_CONFIG_VDF }}
         appId: 4228740
         buildDescription: "v${{ steps.get_version.outputs.marimo_version }}"
-        rootPath: steam
-        depot1Path: ../dist-electron/win-unpacked
-        depot2Path: ../dist-electron/mac
-        depot3Path: ../dist-electron/linux-unpacked
+        rootPath: steam/vdf
+        depot1Path: ../../dist-electron/win-unpacked
+        depot2Path: ../../dist-electron/mac
+        depot3Path: ../../dist-electron/linux-unpacked
 ```
 
----
+## GitHub Secrets
 
-## VDF ファイルの調整
+| Secret 名 | 説明 |
+|-----------|------|
+| `STEAM_USERNAME` | Steam ビルダーアカウントのユーザー名 |
+| `STEAM_CONFIG_VDF` | Base64 エンコードされた config.vdf |
+| `TURBO_TOKEN` | Turborepo キャッシュトークン |
+| `CODECOV_TOKEN` | Codecov トークン |
 
-現在の VDF ファイルは `game-ci/steam-deploy` のディレクトリ構造に合わせて調整が必要。
+## VDF ファイル構成
 
-### app_build_4228740.vdf
-
-```vdf
-"AppBuild"
-{
-    "AppID" "4228740"
-    "Desc" "$STEAM_BUILD_DESCRIPTION"
-    "ContentRoot" ""
-    "BuildOutput" "output/"
-    "Depots"
-    {
-        "4228742" "depot_build_4228742.vdf"
-        "4228743" "depot_build_4228743.vdf"
-        "4228744" "depot_build_4228744.vdf"
-    }
-}
-```
-
-### depot_build_4228742.vdf (Windows)
-
-```vdf
-"DepotBuild"
-{
-    "DepotID" "4228742"
-    "ContentRoot" "../dist-electron/win-unpacked/"
-    "FileMapping"
-    {
-        "LocalPath" "*"
-        "DepotPath" "."
-        "Recursive" "1"
-    }
-    "FileExclusion" "*.pdb"
-}
-```
-
----
-
-## 実装手順
-
-### Phase 1: Steam ビルダーアカウント設定 ✅ 完了
-
-1. **Steam Partner サイトでビルダーアカウントを作成**
-   - https://partner.steamgames.com/ → ユーザーとパーミッション
-   - 新しいアカウントを作成 (ビルド専用)
-   - 権限: 「Edit App Metadata」「Publish App Changes To Steam」のみ
-
-2. **Steam Guard を設定**
-   - TOTP (推奨): シークレットキーを取得
-   - または: config.vdf を生成して Base64 エンコード
-
-### Phase 2: GitHub Secrets 設定 ✅ 完了
+`game-ci/steam-deploy@v3` がデプロイ時に以下の VDF マニフェストを自動生成する（事前作成不要）:
 
 ```
-Settings → Secrets and variables → Actions → New repository secret
+steam/vdf/                     # ワークフロー内で動的に作成
+├── manifest.vdf               # メインアプリビルド設定 (自動生成)
+├── depot4228741.vdf           # Windows デポ (自動生成)
+├── depot4228742.vdf           # macOS デポ (自動生成)
+└── depot4228743.vdf           # Linux デポ (自動生成)
 ```
 
-- `STEAM_USERNAME`: ビルダーアカウント名
-- `STEAM_CONFIG_VDF`: Base64 エンコードされた config.vdf
+## 解決済みの問題
 
-### Phase 3: ワークフロー修正 ⏳ 次のステップ
+### キャッシュパスエラー (2025-01-29)
 
-1. ビルドジョブのアーティファクト出力を unpacked ディレクトリに変更
-2. `create_release` ジョブを `deploy_steam` ジョブに置き換え
-3. VDF ファイルのパスを調整
-
-### Phase 4: テスト
-
-1. `workflow_dispatch` で手動実行
-2. Steam Partner サイトでビルドを確認
-3. 内部テストブランチにデプロイして動作確認
-
----
-
-## ファイル変更一覧
-
-| ファイル | 変更内容 |
-|----------|----------|
-| `.github/workflows/release-steam.yml` | GitHub Release → Steam deploy に変更 |
-| `steam/vdf/app_build_4228740.vdf` | ContentRoot パス調整 |
-| `steam/vdf/depot_build_4228742.vdf` | ContentRoot パス調整 |
-| `steam/vdf/depot_build_4228743.vdf` | ContentRoot パス調整 |
-| `steam/vdf/depot_build_4228744.vdf` | ContentRoot パス調整 |
-
----
-
-## 次のアクション
-
-### ✅ 完了: Steam ビルダーアカウント作成
-
-### ✅ 完了: GitHub Secrets 設定
-
-### ⏳ 次: ワークフロー修正
-
-#### Step 1: config.vdf を取得
-
-SteamCMD でログインして config.vdf を生成:
-
-```cmd
-cd C:\Users\sasai\Documents\marimo\steam
-steamcmd.exe +login YOUR_BUILDER_USERNAME +quit
+**問題:** macOS/Linux ビルドで以下のエラーが発生
+```
+Error: Path Validation Error: Path(s) specified in the action for caching do(es) not exist
 ```
 
-パスワードと Steam Guard コードを入力後、以下の場所に config.vdf が生成される:
-- Windows: `C:\Users\sasai\Documents\marimo\steam\config\config.vdf`
+**原因:** メインワークフローと `build-frontend` アクションの両方で `setup-node` with `cache: pnpm` が実行され、キャッシュ競合が発生
 
-#### Step 2: Base64 エンコード
+**解決策:**
+1. `setup-node` から `cache: pnpm` を削除
+2. `build-frontend` アクションの代わりに直接 `make fe` を実行
 
-PowerShell で config.vdf を Base64 エンコード:
+詳細: [memoized-hugging-lightning.md](memoized-hugging-lightning.md)
 
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\Users\sasai\Documents\marimo\steam\config\config.vdf")) | Set-Clipboard
+### steam/vdf ディレクトリ不在エラー (2026-01-29)
+
+**問題:** `deploy_steam` ジョブで以下のエラーが発生
+```
+ERROR! Content root folder does not exist: /github/workspace/steam/vdf.
 ```
 
-これでクリップボードに Base64 文字列がコピーされる。
+**原因:** `game-ci/steam-deploy@v3` の `rootPath: steam/vdf` で指定されたディレクトリがリポジトリに存在しない
 
-#### Step 3: GitHub Secrets に追加
+**解決策:** アーティファクトダウンロード後、Steam デプロイ前にディレクトリを動的に作成するステップを追加
+```yaml
+- name: 📁 Create Steam VDF directory
+  run: mkdir -p steam/vdf
+```
 
-1. GitHub リポジトリ → **Settings** → **Secrets and variables** → **Actions**
-2. **New repository secret** をクリック
-3. 以下の Secrets を追加:
-
-| Name | Value |
-|------|-------|
-| `STEAM_USERNAME` | ビルダーアカウントのユーザー名 |
-| `STEAM_CONFIG_VDF` | Step 2 でコピーした Base64 文字列 |
-
-#### Step 4: Claude に報告
-
-Secrets 設定完了後、教えてください。ワークフローを修正します。
-
----
-
-### 待機中: ワークフロー修正 (Claude 作業)
-
----
+**備考:** `game-ci/steam-deploy` アクションは VDF マニフェストファイルを自動生成するため、事前にファイルを配置する必要はない。`rootPath` はマニフェスト生成先のディレクトリとして使用される。
 
 ## 参考リンク
 
