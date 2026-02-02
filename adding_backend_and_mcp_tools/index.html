@@ -1,0 +1,3611 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../adding_lint_rules/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Adding Backend and MCP Tools - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adding-backend-and-mcp-tools-to-marimo" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Adding Backend and MCP Tools
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-by-step-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-Step Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-Step Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-the-tool-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Create the Tool File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-define-input-and-output-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Define Input and Output Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-dataclasses-import-dataclass-field-from-marimo_ai_toolstypes-import-successresult-from-marimo_typesids-import-sessionid-dataclass-class-yourtoolargs-arguments-for-your-tool-session_id-sessionid-add-other-required-parameters-optional_param-str-default_value-dataclass-class-yourtooloutputsuccessresult-output-from-your-tool-add-your-output-fields-data-dict-fielddefault_factorydict-count-int-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from dataclasses import dataclass, field from marimo._ai._tools.types import SuccessResult from marimo._types.ids import SessionId @dataclass class YourToolArgs: &quot;&quot;&quot;Arguments for your tool.&quot;&quot;&quot; session_id: SessionId # Add other required parameters optional_param: str = &quot;default_value&quot; @dataclass class YourToolOutput(SuccessResult): &quot;&quot;&quot;Output from your tool.&quot;&quot;&quot; # Add your output fields data: dict = field(default_factory=dict) count: int = 0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="from dataclasses import dataclass, field from marimo._ai._tools.types import SuccessResult from marimo._types.ids import SessionId @dataclass class YourToolArgs: &#34;&#34;&#34;Arguments for your tool.&#34;&#34;&#34; session_id: SessionId # Add other required parameters optional_param: str = &#34;default_value&#34; @dataclass class YourToolOutput(SuccessResult): &#34;&#34;&#34;Output from your tool.&#34;&#34;&#34; # Add your output fields data: dict = field(default_factory=dict) count: int = 0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-create-the-tool-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Create the Tool Class
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#copyright-2026-marimo-all-rights-reserved-from-__future__-import-annotations-from-dataclasses-import-dataclass-field-from-typing-import-type_checking-from-marimo_ai_toolsbase-import-toolbase-from-marimo_ai_toolstypes-import-successresult-toolguidelines-from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-from-marimo_typesids-import-sessionid-if-type_checking-from-marimo_session-import-session-dataclass-class-yourtoolargs-arguments-for-your-tool-session_id-sessionid-add-parameters-here-dataclass-class-yourtooloutputsuccessresult-output-from-your-tool-add-output-fields-here-sample_dict-dict-fielddefault_factorydict-class-yourtooltoolbaseyourtoolargs-yourtooloutput-brief-description-of-what-this-tool-does-more-detailed-explanation-of-the-tools-purpose-and-functionality-this-docstring-becomes-the-tools-description-shown-to-ai-assistants-args-session_id-the-session-id-of-the-notebook-document-other-args-returns-a-success-result-containing-describe-what-it-returns-guidelines-toolguidelines-when_to_use-when-describe-primary-use-case-prerequisites-you-must-describe-args-that-need-additional-explanation-avoid_if-when-describe-when-not-to-use-additional_info-any-additional-context-or-warnings-about-tool-usage-def-handleself-args-yourtoolargs-yourtooloutput-implement-your-tool-logic-here-toolcontext-provides-access-to-sessions-notebooks-and-all-marimo-state-context-selfcontext-session_id-argssession_id-session-contextget_sessionsession_id-implement-your-logic-sample_dict-self_do_worksession-return-yourtooloutput-sample_dictsample_dict-next_steps-review-the-results-consider-next-actions-messageoptionally-add-this-is-the-results-require-more-explanation-helper-methods-prefix-with-_-def-_do_workself-session-session-dict-private-helper-method-implementation-details-return" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Copyright 2026 Marimo. All rights reserved. from __future__ import annotations from dataclasses import dataclass, field from typing import TYPE_CHECKING from marimo._ai._tools.base import ToolBase from marimo._ai._tools.types import SuccessResult, ToolGuidelines from marimo._ai._tools.utils.exceptions import ToolExecutionError from marimo._types.ids import SessionId if TYPE_CHECKING: from marimo._session import Session @dataclass class YourToolArgs: &quot;&quot;&quot;Arguments for your tool.&quot;&quot;&quot; session_id: SessionId # Add parameters here @dataclass class YourToolOutput(SuccessResult): &quot;&quot;&quot;Output from your tool.&quot;&quot;&quot; # Add output fields here sample_dict: dict = field(default_factory=dict) class YourTool(ToolBase[YourToolArgs, YourToolOutput]): &quot;&quot;&quot;Brief description of what this tool does. More detailed explanation of the tool&#39;s purpose and functionality. This docstring becomes the tool&#39;s description shown to AI assistants. Args: session_id: The session ID of the notebook # Document other args Returns: A success result containing [describe what it returns]. &quot;&quot;&quot; guidelines = ToolGuidelines( when_to_use=[ &quot;When [describe primary use case]&quot;, ], prerequisites=[ &quot;You must [describe args that need additional explanation]&quot;, ], avoid_if=[ &quot;When [describe when not to use]&quot;, ], additional_info=( &quot;Any additional context or warnings about tool usage.&quot; ), ) def handle(self, args: YourToolArgs) -&gt; YourToolOutput: &quot;&quot;&quot;Implement your tool logic here.&quot;&quot;&quot; # ToolContext provides access to sessions, notebooks, and all marimo state context = self.context session_id = args.session_id session = context.get_session(session_id) # Implement your logic sample_dict = self._do_work(session) return YourToolOutput( sample_dict=sample_dict, next_steps=[ &quot;Review the results&quot;, &quot;Consider next actions&quot;, ], message=&quot;Optionally add this is the results require more explanation&quot;, ) # Helper methods (prefix with _) def _do_work(self, session: Session) -&gt; dict: &quot;&quot;&quot;Private helper method.&quot;&quot;&quot; # Implementation details return {}
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Copyright 2026 Marimo. All rights reserved. from __future__ import annotations from dataclasses import dataclass, field from typing import TYPE_CHECKING from marimo._ai._tools.base import ToolBase from marimo._ai._tools.types import SuccessResult, ToolGuidelines from marimo._ai._tools.utils.exceptions import ToolExecutionError from marimo._types.ids import SessionId if TYPE_CHECKING: from marimo._session import Session @dataclass class YourToolArgs: &#34;&#34;&#34;Arguments for your tool.&#34;&#34;&#34; session_id: SessionId # Add parameters here @dataclass class YourToolOutput(SuccessResult): &#34;&#34;&#34;Output from your tool.&#34;&#34;&#34; # Add output fields here sample_dict: dict = field(default_factory=dict) class YourTool(ToolBase[YourToolArgs, YourToolOutput]): &#34;&#34;&#34;Brief description of what this tool does. More detailed explanation of the tool&#39;s purpose and functionality. This docstring becomes the tool&#39;s description shown to AI assistants. Args: session_id: The session ID of the notebook # Document other args Returns: A success result containing [describe what it returns]. &#34;&#34;&#34; guidelines = ToolGuidelines( when_to_use=[ &#34;When [describe primary use case]&#34;, ], prerequisites=[ &#34;You must [describe args that need additional explanation]&#34;, ], avoid_if=[ &#34;When [describe when not to use]&#34;, ], additional_info=( &#34;Any additional context or warnings about tool usage.&#34; ), ) def handle(self, args: YourToolArgs) -&gt; YourToolOutput: &#34;&#34;&#34;Implement your tool logic here.&#34;&#34;&#34; # ToolContext provides access to sessions, notebooks, and all marimo state context = self.context session_id = args.session_id session = context.get_session(session_id) # Implement your logic sample_dict = self._do_work(session) return YourToolOutput( sample_dict=sample_dict, next_steps=[ &#34;Review the results&#34;, &#34;Consider next actions&#34;, ], message=&#34;Optionally add this is the results require more explanation&#34;, ) # Helper methods (prefix with _) def _do_work(self, session: Session) -&gt; dict: &#34;&#34;&#34;Private helper method.&#34;&#34;&#34; # Implementation details return {}">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-understanding-toolcontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Understanding ToolContext
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Understanding ToolContext">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-to-access-toolcontext-in-your-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to access ToolContext in your tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#def-handleself-args-yourtoolargs-yourtooloutput-access-toolcontext-context-selfcontext-use-context-methods-session-contextget_sessionargssession_id-errors-contextget_notebook_errorsargssession_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # Access ToolContext context = self.context # Use context methods session = context.get_session(args.session_id) errors = context.get_notebook_errors(args.session_id)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # Access ToolContext context = self.context # Use context methods session = context.get_session(args.session_id) errors = context.get_notebook_errors(args.session_id)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-to-add-to-toolcontext-vs-a-helper-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to add to ToolContext vs a helper method
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-yourtooltoolbaseyourtoolargs-yourtooloutput-def-handleself-args-yourtoolargs-yourtooloutput-use-toolcontext-for-common-operations-session-selfcontextget_sessionargssession_id-errors-selfcontextget_notebook_errorsargssession_id-use-helper-methods-for-tool-specific-logic-filtered_data-self_filter_by_criteriaerrors-argscriteria-return-yourtooloutputdatafiltered_data-def-_filter_by_criteriaself-errors-list-criteria-str-list-tool-specific-logic-as-a-helper-method-return-e-for-e-in-errors-if-criteria-in-emessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        class YourTool(ToolBase[YourToolArgs, YourToolOutput]): def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # Use ToolContext for common operations session = self.context.get_session(args.session_id) errors = self.context.get_notebook_errors(args.session_id) # Use helper methods for tool-specific logic filtered_data = self._filter_by_criteria(errors, args.criteria) return YourToolOutput(data=filtered_data) def _filter_by_criteria(self, errors: list, criteria: str) -&gt; list: &quot;&quot;&quot;Tool-specific logic as a helper method.&quot;&quot;&quot; return [e for e in errors if criteria in e.message]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="class YourTool(ToolBase[YourToolArgs, YourToolOutput]): def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # Use ToolContext for common operations session = self.context.get_session(args.session_id) errors = self.context.get_notebook_errors(args.session_id) # Use helper methods for tool-specific logic filtered_data = self._filter_by_criteria(errors, args.criteria) return YourToolOutput(data=filtered_data) def _filter_by_criteria(self, errors: list, criteria: str) -&gt; list: &#34;&#34;&#34;Tool-specific logic as a helper method.&#34;&#34;&#34; return [e for e in errors if criteria in e.message]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-toolcontext-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available ToolContext Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-understanding-toolguidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Understanding ToolGuidelines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Error Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-to-use-tryexcept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to Use Try/Except
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-toolexecutionerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using ToolExecutionError
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-raise-structured-errors-raise-toolexecutionerror-clear-description-of-what-went-wrong-codeerror_code-machine-readable-code-is_retryabletrue-can-the-user-retry-suggested_fixhow-to-fix-the-issue-user-friendly-guidance-metasession_id-session_id-additional-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from marimo._ai._tools.utils.exceptions import ToolExecutionError # Raise structured errors raise ToolExecutionError( &quot;Clear description of what went wrong&quot;, code=&quot;ERROR_CODE&quot;, # Machine-readable code is_retryable=True, # Can the user retry? suggested_fix=&quot;How to fix the issue&quot;, # User-friendly guidance meta={&quot;session_id&quot;: session_id}, # Additional context )
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#def-handleself-args-yourtoolargs-yourtooloutput-toolcontext-methods-automatically-raise-toolexecutionerror-if-session-not-found-session-selfcontextget_sessionargssession_id-validate-inputs-raise-toolexecutionerror-directly-for-validation-errors-if-argscount-0-raise-toolexecutionerror-count-must-be-non-negative-codeinvalid_count-is_retryablefalse-suggested_fixprovide-a-count-0-only-use-tryexcept-for-specific-expected-errors-where-you-want-to-guide-the-agent-try-result-self_operation_that_might_fail-except-valueerror-as-e-caught-specific-error-provide-tailored-guidance-raise-toolexecutionerror-finvalid-cell-id-e-codeinvalid_cell_id-is_retryablefalse-suggested_fixuse-get_lightweight_cell_map-to-find-valid-cell-ids-dont-wrap-everything-in-tryexcept-unexpected-errors-are-handled-automatically-return-yourtooloutputdataresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # ToolContext methods automatically raise ToolExecutionError if session not found session = self.context.get_session(args.session_id) # Validate inputs - raise ToolExecutionError directly for validation errors if args.count &lt; 0: raise ToolExecutionError( &quot;Count must be non-negative&quot;, code=&quot;INVALID_COUNT&quot;, is_retryable=False, suggested_fix=&quot;Provide a count &gt;= 0&quot;, ) # Only use try/except for specific expected errors where you want to guide the agent try: result = self._operation_that_might_fail() except ValueError as e: # Caught specific error - provide tailored guidance raise ToolExecutionError( f&quot;Invalid cell ID: {e}&quot;, code=&quot;INVALID_CELL_ID&quot;, is_retryable=False, suggested_fix=&quot;Use get_lightweight_cell_map to find valid cell IDs&quot;, ) # Don&#39;t wrap everything in try/except - unexpected errors are handled automatically return YourToolOutput(data=result)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # ToolContext methods automatically raise ToolExecutionError if session not found session = self.context.get_session(args.session_id) # Validate inputs - raise ToolExecutionError directly for validation errors if args.count &lt; 0: raise ToolExecutionError( &#34;Count must be non-negative&#34;, code=&#34;INVALID_COUNT&#34;, is_retryable=False, suggested_fix=&#34;Provide a count &gt;= 0&#34;, ) # Only use try/except for specific expected errors where you want to guide the agent try: result = self._operation_that_might_fail() except ValueError as e: # Caught specific error - provide tailored guidance raise ToolExecutionError( f&#34;Invalid cell ID: {e}&#34;, code=&#34;INVALID_CELL_ID&#34;, is_retryable=False, suggested_fix=&#34;Use get_lightweight_cell_map to find valid cell IDs&#34;, ) # Don&#39;t wrap everything in try/except - unexpected errors are handled automatically return YourToolOutput(data=result)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#7-register-the-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Register the Tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-marimo_ai_toolstoolsyour_tool-import-yourtool-supported_backend_and_mcp_tools-listtypetoolbaseany-any-getmarimorules-getactivenotebooks-existing-tools-yourtool-add-your-tool-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from marimo._ai._tools.tools.your_tool import YourTool SUPPORTED_BACKEND_AND_MCP_TOOLS: list[type[ToolBase[Any, Any]]] = [ GetMarimoRules, GetActiveNotebooks, # ... existing tools ... YourTool, # Add your tool here ]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="from marimo._ai._tools.tools.your_tool import YourTool SUPPORTED_BACKEND_AND_MCP_TOOLS: list[type[ToolBase[Any, Any]]] = [ GetMarimoRules, GetActiveNotebooks, # ... existing tools ... YourTool, # Add your tool here ]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#8-add-args-and-output-to-msgspec-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Add Args and Output to msgspec tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-marimo_ai_toolstoolsyour_tool-import-yourtoolargs-yourtooloutput-tool_io_classes-existing-classes-yourtoolargs-yourtooloutput" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from marimo._ai._tools.tools.your_tool import ( YourToolArgs, YourToolOutput, ) TOOL_IO_CLASSES = [ # ... existing classes ... YourToolArgs, YourToolOutput, ]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="from marimo._ai._tools.tools.your_tool import ( YourToolArgs, YourToolOutput, ) TOOL_IO_CLASSES = [ # ... existing classes ... YourToolArgs, YourToolOutput, ]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#9-create-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Create Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Create Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-__future__-import-annotations-from-unittestmock-import-mock-import-pytest-from-marimo_ai_toolsbase-import-toolcontext-from-marimo_ai_toolstoolsyour_tool-import-yourtool-yourtoolargs-from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-from-marimo_typesids-import-sessionid-pytestfixture-def-tool-yourtool-create-a-yourtool-instance-return-yourtooltoolcontext-pytestfixture-def-mock_context-mock-create-a-mock-toolcontext-return-mockspectoolcontext-def-test_your_tool_basic_casemock_context-mock-none-test-basic-functionality-setup-mock-mock_session-mock-mock_contextget_sessionreturn_value-mock_session-tool-yourtooltoolcontext-toolcontext-mock_context-execute-tool-result-toolhandleyourtoolargssession_idsessionidtest-assertions-assert-resultstatus-success-assert-resultdata-is-not-none-def-test_your_tool_error_handlingmock_context-mock-none-test-error-handling-setup-mock-to-raise-error-mock_contextget_sessionside_effect-toolexecutionerror-session-not-found-codesession_not_found-tool-yourtooltoolcontext-toolcontext-mock_context-should-raise-toolexecutionerror-with-pytestraisestoolexecutionerror-as-exc_info-toolhandleyourtoolargssession_idsessionidinvalid-assert-exc_infovaluecode-session_not_found-if-necessary-def-test_your_tool_with_edge_casesmock_context-mock-none-test-edge-cases-and-boundary-conditions-test-your-tool-with-edge-cases-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from __future__ import annotations from unittest.mock import Mock import pytest from marimo._ai._tools.base import ToolContext from marimo._ai._tools.tools.your_tool import ( YourTool, YourToolArgs, ) from marimo._ai._tools.utils.exceptions import ToolExecutionError from marimo._types.ids import SessionId @pytest.fixture def tool() -&gt; YourTool: &quot;&quot;&quot;Create a YourTool instance.&quot;&quot;&quot; return YourTool(ToolContext()) @pytest.fixture def mock_context() -&gt; Mock: &quot;&quot;&quot;Create a mock ToolContext.&quot;&quot;&quot; return Mock(spec=ToolContext) def test_your_tool_basic_case(mock_context: Mock) -&gt; None: &quot;&quot;&quot;Test basic functionality.&quot;&quot;&quot; # Setup mock mock_session = Mock() mock_context.get_session.return_value = mock_session tool = YourTool(ToolContext()) tool.context = mock_context # Execute tool result = tool.handle(YourToolArgs(session_id=SessionId(&quot;test&quot;))) # Assertions assert result.status == &quot;success&quot; assert result.data is not None def test_your_tool_error_handling(mock_context: Mock) -&gt; None: &quot;&quot;&quot;Test error handling.&quot;&quot;&quot; # Setup mock to raise error mock_context.get_session.side_effect = ToolExecutionError( &quot;Session not found&quot;, code=&quot;SESSION_NOT_FOUND&quot;, ) tool = YourTool(ToolContext()) tool.context = mock_context # Should raise ToolExecutionError with pytest.raises(ToolExecutionError) as exc_info: tool.handle(YourToolArgs(session_id=SessionId(&quot;invalid&quot;))) assert exc_info.value.code == &quot;SESSION_NOT_FOUND&quot; # if necessary def test_your_tool_with_edge_cases(mock_context: Mock) -&gt; None: &quot;&quot;&quot;Test edge cases and boundary conditions.&quot;&quot;&quot; # Test your tool with edge cases pass
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="from __future__ import annotations from unittest.mock import Mock import pytest from marimo._ai._tools.base import ToolContext from marimo._ai._tools.tools.your_tool import ( YourTool, YourToolArgs, ) from marimo._ai._tools.utils.exceptions import ToolExecutionError from marimo._types.ids import SessionId @pytest.fixture def tool() -&gt; YourTool: &#34;&#34;&#34;Create a YourTool instance.&#34;&#34;&#34; return YourTool(ToolContext()) @pytest.fixture def mock_context() -&gt; Mock: &#34;&#34;&#34;Create a mock ToolContext.&#34;&#34;&#34; return Mock(spec=ToolContext) def test_your_tool_basic_case(mock_context: Mock) -&gt; None: &#34;&#34;&#34;Test basic functionality.&#34;&#34;&#34; # Setup mock mock_session = Mock() mock_context.get_session.return_value = mock_session tool = YourTool(ToolContext()) tool.context = mock_context # Execute tool result = tool.handle(YourToolArgs(session_id=SessionId(&#34;test&#34;))) # Assertions assert result.status == &#34;success&#34; assert result.data is not None def test_your_tool_error_handling(mock_context: Mock) -&gt; None: &#34;&#34;&#34;Test error handling.&#34;&#34;&#34; # Setup mock to raise error mock_context.get_session.side_effect = ToolExecutionError( &#34;Session not found&#34;, code=&#34;SESSION_NOT_FOUND&#34;, ) tool = YourTool(ToolContext()) tool.context = mock_context # Should raise ToolExecutionError with pytest.raises(ToolExecutionError) as exc_info: tool.handle(YourToolArgs(session_id=SessionId(&#34;invalid&#34;))) assert exc_info.value.code == &#34;SESSION_NOT_FOUND&#34; # if necessary def test_your_tool_with_edge_cases(mock_context: Mock) -&gt; None: &#34;&#34;&#34;Test edge cases and boundary conditions.&#34;&#34;&#34; # Test your tool with edge cases pass">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#10-run-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Run Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-all-tool-tests-hatch-run-py312-testtest-tests_aitools-run-your-specific-test-hatch-run-py312-testtest-tests_aitoolstoolstest_your_toolpy-run-with-verbose-output-hatch-run-py312-testtest-tests_aitoolstoolstest_your_toolpy-v" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Run all tool tests hatch run +py=3.12 test:test tests/_ai/tools # Run your specific test hatch run +py=3.12 test:test tests/_ai/tools/tools/test_your_tool.py # Run with verbose output hatch run +py=3.12 test:test tests/_ai/tools/tools/test_your_tool.py -v
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Run all tool tests hatch run +py=3.12 test:test tests/_ai/tools # Run your specific test hatch run +py=3.12 test:test tests/_ai/tools/tools/test_your_tool.py # Run with verbose output hatch run +py=3.12 test:test tests/_ai/tools/tools/test_your_tool.py -v">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-update-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Update Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#available-tools-appropriate-category-tool-description-your_tool_name-brief-description-of-what-the-tool-does-takes-param1-and-param2-parameters-returns-description-of-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ## Available tools ### [Appropriate Category] | Tool | Description | |------|-------------| | **your_tool_name** | Brief description of what the tool does. Takes `param1` and `param2` parameters. Returns description of output. |
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#type-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type Safety
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#return-yourtooloutput-dataresult-provide-actionable-next-steps-next_steps-use-get_cell_runtime_data-to-inspect-cells-check-errors-with-get_notebook_errors-optional-user-facing-message-messagefound-5-items-matching-your-query-optional-metadata-metaquery_time-05" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        return YourToolOutput( data=result, # Provide actionable next steps next_steps=[ &quot;Use get_cell_runtime_data to inspect cells&quot;, &quot;Check errors with get_notebook_errors&quot;, ], # Optional user-facing message message=&quot;Found 5 items matching your query&quot;, # Optional metadata meta={&quot;query_time&quot;: 0.5}, )
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="return YourToolOutput( data=result, # Provide actionable next steps next_steps=[ &#34;Use get_cell_runtime_data to inspect cells&#34;, &#34;Check errors with get_notebook_errors&#34;, ], # Optional user-facing message message=&#34;Found 5 items matching your query&#34;, # Optional metadata meta={&#34;query_time&#34;: 0.5}, )">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#helper-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helper Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-pitfalls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Pitfalls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Pitfalls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dont-duplicate-toolcontext-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Don't: Duplicate ToolContext Logic
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bad-reimplementing-context-logic-def-handleself-args-args-output-session-selfcontextget_sessionargssession_id-cell_notifications-sessionsession_viewcell_notifications-errors-for-cell_id-op-in-cell_notificationsitems-if-opoutput-and-opoutputchannel-cellchannelmarimo_error-errorsappend-duplicating-error-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Bad: Reimplementing context logic def handle(self, args: Args) -&gt; Output: session = self.context.get_session(args.session_id) cell_notifications = session.session_view.cell_notifications errors = [] for cell_id, op in cell_notifications.items(): if op.output and op.output.channel == CellChannel.MARIMO_ERROR: errors.append(...) # Duplicating error extraction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Bad: Reimplementing context logic def handle(self, args: Args) -&gt; Output: session = self.context.get_session(args.session_id) cell_notifications = session.session_view.cell_notifications errors = [] for cell_id, op in cell_notifications.items(): if op.output and op.output.channel == CellChannel.MARIMO_ERROR: errors.append(...) # Duplicating error extraction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do-use-toolcontext-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Do: Use ToolContext Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#good-using-context-methods-def-handleself-args-args-output-errors-selfcontextget_notebook_errors-argssession_id-include_stderrtrue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Good: Using context methods def handle(self, args: Args) -&gt; Output: errors = self.context.get_notebook_errors( args.session_id, include_stderr=True )
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Good: Using context methods def handle(self, args: Args) -&gt; Output: errors = self.context.get_notebook_errors( args.session_id, include_stderr=True )">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dont-raise-generic-exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Don't: Raise Generic Exceptions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bad-using-generic-exceptions-if-not-found-raise-valueerrornot-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Bad: Using generic exceptions if not found: raise ValueError(&quot;Not found&quot;)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Bad: Using generic exceptions if not found: raise ValueError(&#34;Not found&#34;)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do-raise-toolexecutionerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Do: Raise ToolExecutionError
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#good-structured-error-with-metadata-if-not-found-raise-toolexecutionerror-cell-not-found-in-session-codecell_not_found-is_retryablefalse-suggested_fixuse-get_lightweight_cell_map-to-find-valid-cell-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Good: Structured error with metadata if not found: raise ToolExecutionError( &quot;Cell not found in session&quot;, code=&quot;CELL_NOT_FOUND&quot;, is_retryable=False, suggested_fix=&quot;Use get_lightweight_cell_map to find valid cell IDs&quot;, )
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Good: Structured error with metadata if not found: raise ToolExecutionError( &#34;Cell not found in session&#34;, code=&#34;CELL_NOT_FOUND&#34;, is_retryable=False, suggested_fix=&#34;Use get_lightweight_cell_map to find valid cell IDs&#34;, )">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dont-return-unstructured-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Don't: Return Unstructured Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bad-returning-raw-data-def-handleself-args-args-output-return-data-count-5-type-ignore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Bad: Returning raw data def handle(self, args: Args) -&gt; Output: return {&quot;data&quot;: [...], &quot;count&quot;: 5} # type: ignore
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Bad: Returning raw data def handle(self, args: Args) -&gt; Output: return {&#34;data&#34;: [...], &#34;count&#34;: 5} # type: ignore">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do-use-typed-dataclass-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Do: Use Typed Dataclass Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#good-structured-output-with-successresult-def-handleself-args-args-output-return-yourtooloutput-data-count5-next_stepsreview-the-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Good: Structured output with SuccessResult def handle(self, args: Args) -&gt; Output: return YourToolOutput( data=[...], count=5, next_steps=[&quot;Review the results&quot;], )
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Good: Structured output with SuccessResult def handle(self, args: Args) -&gt; Output: return YourToolOutput( data=[...], count=5, next_steps=[&#34;Review the results&#34;], )">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dont-use-typeddict-or-other-type-annotations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Don't: Use TypedDict or Other Type Annotations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bad-using-typeddict-for-tool-inputoutput-from-typing-import-typeddict-class-yourtoolargstypeddict-session_id-str-count-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Bad: Using TypedDict for tool input/output from typing import TypedDict class YourToolArgs(TypedDict): session_id: str count: int
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Bad: Using TypedDict for tool input/output from typing import TypedDict class YourToolArgs(TypedDict): session_id: str count: int">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do-use-dataclasses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Do: Use Dataclasses
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#good-using-dataclasses-as-required-from-dataclasses-import-dataclass-dataclass-class-yourtoolargs-session_id-sessionid-count-int-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Good: Using dataclasses as required from dataclasses import dataclass @dataclass class YourToolArgs: session_id: SessionId count: int = 0
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Topics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Topics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#async-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Async Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-asynctooltoolbaseargs-output-tool-with-async-operations-async-def-handleself-args-args-output-type-ignoreoverride-note-add-type-ignoreoverride-for-async-handle-session-selfcontextget_sessionargssession_id-result-await-self_async_worksession-return-outputresultresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        class AsyncTool(ToolBase[Args, Output]): &quot;&quot;&quot;Tool with async operations.&quot;&quot;&quot; async def handle(self, args: Args) -&gt; Output: # type: ignore[override] &quot;&quot;&quot;Note: Add type: ignore[override] for async handle.&quot;&quot;&quot; session = self.context.get_session(args.session_id) result = await self._async_work(session) return Output(result=result)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="class AsyncTool(ToolBase[Args, Output]): &#34;&#34;&#34;Tool with async operations.&#34;&#34;&#34; async def handle(self, args: Args) -&gt; Output: # type: ignore[override] &#34;&#34;&#34;Note: Add type: ignore[override] for async handle.&#34;&#34;&#34; session = self.context.get_session(args.session_id) result = await self._async_work(session) return Output(result=result)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tools-with-side-effects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tools with Side Effects
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#guidelines-toolguidelines-side_effects-modifies-notebook-cells-triggers-cell-re-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        guidelines = ToolGuidelines( side_effects=[ &quot;Modifies notebook cells&quot;, &quot;Triggers cell re-execution&quot;, ], )
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="guidelines = ToolGuidelines( side_effects=[ &#34;Modifies notebook cells&#34;, &#34;Triggers cell re-execution&#34;, ], )">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complex-return-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complex Return Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dataclass-class-cellinfo-cell_id-str-code-str-dataclass-class-complexoutputsuccessresult-cells-listcellinfo-fielddefault_factorylist-summary-dictstr-any-fielddefault_factorydict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @dataclass class CellInfo: cell_id: str code: str @dataclass class ComplexOutput(SuccessResult): cells: list[CellInfo] = field(default_factory=list) summary: dict[str, Any] = field(default_factory=dict)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#review-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Questions?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pyodide-custom-wheel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../chart-widget-caching-fix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui-switch-state-fix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../anywidget-backend-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../anywidget-performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../frontend-freeze-fix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../grid-layout-auto-placement/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../broadcast-channel-hud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../chart-theme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../skill-tree-panel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../electron-startup-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../steam-deploy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../steam-integration-fixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-by-step-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-Step Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-Step Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-the-tool-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Create the Tool File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-define-input-and-output-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Define Input and Output Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-dataclasses-import-dataclass-field-from-marimo_ai_toolstypes-import-successresult-from-marimo_typesids-import-sessionid-dataclass-class-yourtoolargs-arguments-for-your-tool-session_id-sessionid-add-other-required-parameters-optional_param-str-default_value-dataclass-class-yourtooloutputsuccessresult-output-from-your-tool-add-your-output-fields-data-dict-fielddefault_factorydict-count-int-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from dataclasses import dataclass, field from marimo._ai._tools.types import SuccessResult from marimo._types.ids import SessionId @dataclass class YourToolArgs: &quot;&quot;&quot;Arguments for your tool.&quot;&quot;&quot; session_id: SessionId # Add other required parameters optional_param: str = &quot;default_value&quot; @dataclass class YourToolOutput(SuccessResult): &quot;&quot;&quot;Output from your tool.&quot;&quot;&quot; # Add your output fields data: dict = field(default_factory=dict) count: int = 0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="from dataclasses import dataclass, field from marimo._ai._tools.types import SuccessResult from marimo._types.ids import SessionId @dataclass class YourToolArgs: &#34;&#34;&#34;Arguments for your tool.&#34;&#34;&#34; session_id: SessionId # Add other required parameters optional_param: str = &#34;default_value&#34; @dataclass class YourToolOutput(SuccessResult): &#34;&#34;&#34;Output from your tool.&#34;&#34;&#34; # Add your output fields data: dict = field(default_factory=dict) count: int = 0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-create-the-tool-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Create the Tool Class
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#copyright-2026-marimo-all-rights-reserved-from-__future__-import-annotations-from-dataclasses-import-dataclass-field-from-typing-import-type_checking-from-marimo_ai_toolsbase-import-toolbase-from-marimo_ai_toolstypes-import-successresult-toolguidelines-from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-from-marimo_typesids-import-sessionid-if-type_checking-from-marimo_session-import-session-dataclass-class-yourtoolargs-arguments-for-your-tool-session_id-sessionid-add-parameters-here-dataclass-class-yourtooloutputsuccessresult-output-from-your-tool-add-output-fields-here-sample_dict-dict-fielddefault_factorydict-class-yourtooltoolbaseyourtoolargs-yourtooloutput-brief-description-of-what-this-tool-does-more-detailed-explanation-of-the-tools-purpose-and-functionality-this-docstring-becomes-the-tools-description-shown-to-ai-assistants-args-session_id-the-session-id-of-the-notebook-document-other-args-returns-a-success-result-containing-describe-what-it-returns-guidelines-toolguidelines-when_to_use-when-describe-primary-use-case-prerequisites-you-must-describe-args-that-need-additional-explanation-avoid_if-when-describe-when-not-to-use-additional_info-any-additional-context-or-warnings-about-tool-usage-def-handleself-args-yourtoolargs-yourtooloutput-implement-your-tool-logic-here-toolcontext-provides-access-to-sessions-notebooks-and-all-marimo-state-context-selfcontext-session_id-argssession_id-session-contextget_sessionsession_id-implement-your-logic-sample_dict-self_do_worksession-return-yourtooloutput-sample_dictsample_dict-next_steps-review-the-results-consider-next-actions-messageoptionally-add-this-is-the-results-require-more-explanation-helper-methods-prefix-with-_-def-_do_workself-session-session-dict-private-helper-method-implementation-details-return" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Copyright 2026 Marimo. All rights reserved. from __future__ import annotations from dataclasses import dataclass, field from typing import TYPE_CHECKING from marimo._ai._tools.base import ToolBase from marimo._ai._tools.types import SuccessResult, ToolGuidelines from marimo._ai._tools.utils.exceptions import ToolExecutionError from marimo._types.ids import SessionId if TYPE_CHECKING: from marimo._session import Session @dataclass class YourToolArgs: &quot;&quot;&quot;Arguments for your tool.&quot;&quot;&quot; session_id: SessionId # Add parameters here @dataclass class YourToolOutput(SuccessResult): &quot;&quot;&quot;Output from your tool.&quot;&quot;&quot; # Add output fields here sample_dict: dict = field(default_factory=dict) class YourTool(ToolBase[YourToolArgs, YourToolOutput]): &quot;&quot;&quot;Brief description of what this tool does. More detailed explanation of the tool&#39;s purpose and functionality. This docstring becomes the tool&#39;s description shown to AI assistants. Args: session_id: The session ID of the notebook # Document other args Returns: A success result containing [describe what it returns]. &quot;&quot;&quot; guidelines = ToolGuidelines( when_to_use=[ &quot;When [describe primary use case]&quot;, ], prerequisites=[ &quot;You must [describe args that need additional explanation]&quot;, ], avoid_if=[ &quot;When [describe when not to use]&quot;, ], additional_info=( &quot;Any additional context or warnings about tool usage.&quot; ), ) def handle(self, args: YourToolArgs) -&gt; YourToolOutput: &quot;&quot;&quot;Implement your tool logic here.&quot;&quot;&quot; # ToolContext provides access to sessions, notebooks, and all marimo state context = self.context session_id = args.session_id session = context.get_session(session_id) # Implement your logic sample_dict = self._do_work(session) return YourToolOutput( sample_dict=sample_dict, next_steps=[ &quot;Review the results&quot;, &quot;Consider next actions&quot;, ], message=&quot;Optionally add this is the results require more explanation&quot;, ) # Helper methods (prefix with _) def _do_work(self, session: Session) -&gt; dict: &quot;&quot;&quot;Private helper method.&quot;&quot;&quot; # Implementation details return {}
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Copyright 2026 Marimo. All rights reserved. from __future__ import annotations from dataclasses import dataclass, field from typing import TYPE_CHECKING from marimo._ai._tools.base import ToolBase from marimo._ai._tools.types import SuccessResult, ToolGuidelines from marimo._ai._tools.utils.exceptions import ToolExecutionError from marimo._types.ids import SessionId if TYPE_CHECKING: from marimo._session import Session @dataclass class YourToolArgs: &#34;&#34;&#34;Arguments for your tool.&#34;&#34;&#34; session_id: SessionId # Add parameters here @dataclass class YourToolOutput(SuccessResult): &#34;&#34;&#34;Output from your tool.&#34;&#34;&#34; # Add output fields here sample_dict: dict = field(default_factory=dict) class YourTool(ToolBase[YourToolArgs, YourToolOutput]): &#34;&#34;&#34;Brief description of what this tool does. More detailed explanation of the tool&#39;s purpose and functionality. This docstring becomes the tool&#39;s description shown to AI assistants. Args: session_id: The session ID of the notebook # Document other args Returns: A success result containing [describe what it returns]. &#34;&#34;&#34; guidelines = ToolGuidelines( when_to_use=[ &#34;When [describe primary use case]&#34;, ], prerequisites=[ &#34;You must [describe args that need additional explanation]&#34;, ], avoid_if=[ &#34;When [describe when not to use]&#34;, ], additional_info=( &#34;Any additional context or warnings about tool usage.&#34; ), ) def handle(self, args: YourToolArgs) -&gt; YourToolOutput: &#34;&#34;&#34;Implement your tool logic here.&#34;&#34;&#34; # ToolContext provides access to sessions, notebooks, and all marimo state context = self.context session_id = args.session_id session = context.get_session(session_id) # Implement your logic sample_dict = self._do_work(session) return YourToolOutput( sample_dict=sample_dict, next_steps=[ &#34;Review the results&#34;, &#34;Consider next actions&#34;, ], message=&#34;Optionally add this is the results require more explanation&#34;, ) # Helper methods (prefix with _) def _do_work(self, session: Session) -&gt; dict: &#34;&#34;&#34;Private helper method.&#34;&#34;&#34; # Implementation details return {}">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-understanding-toolcontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Understanding ToolContext
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Understanding ToolContext">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-to-access-toolcontext-in-your-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to access ToolContext in your tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#def-handleself-args-yourtoolargs-yourtooloutput-access-toolcontext-context-selfcontext-use-context-methods-session-contextget_sessionargssession_id-errors-contextget_notebook_errorsargssession_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # Access ToolContext context = self.context # Use context methods session = context.get_session(args.session_id) errors = context.get_notebook_errors(args.session_id)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # Access ToolContext context = self.context # Use context methods session = context.get_session(args.session_id) errors = context.get_notebook_errors(args.session_id)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-to-add-to-toolcontext-vs-a-helper-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to add to ToolContext vs a helper method
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-yourtooltoolbaseyourtoolargs-yourtooloutput-def-handleself-args-yourtoolargs-yourtooloutput-use-toolcontext-for-common-operations-session-selfcontextget_sessionargssession_id-errors-selfcontextget_notebook_errorsargssession_id-use-helper-methods-for-tool-specific-logic-filtered_data-self_filter_by_criteriaerrors-argscriteria-return-yourtooloutputdatafiltered_data-def-_filter_by_criteriaself-errors-list-criteria-str-list-tool-specific-logic-as-a-helper-method-return-e-for-e-in-errors-if-criteria-in-emessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        class YourTool(ToolBase[YourToolArgs, YourToolOutput]): def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # Use ToolContext for common operations session = self.context.get_session(args.session_id) errors = self.context.get_notebook_errors(args.session_id) # Use helper methods for tool-specific logic filtered_data = self._filter_by_criteria(errors, args.criteria) return YourToolOutput(data=filtered_data) def _filter_by_criteria(self, errors: list, criteria: str) -&gt; list: &quot;&quot;&quot;Tool-specific logic as a helper method.&quot;&quot;&quot; return [e for e in errors if criteria in e.message]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="class YourTool(ToolBase[YourToolArgs, YourToolOutput]): def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # Use ToolContext for common operations session = self.context.get_session(args.session_id) errors = self.context.get_notebook_errors(args.session_id) # Use helper methods for tool-specific logic filtered_data = self._filter_by_criteria(errors, args.criteria) return YourToolOutput(data=filtered_data) def _filter_by_criteria(self, errors: list, criteria: str) -&gt; list: &#34;&#34;&#34;Tool-specific logic as a helper method.&#34;&#34;&#34; return [e for e in errors if criteria in e.message]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-toolcontext-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available ToolContext Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-understanding-toolguidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Understanding ToolGuidelines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Error Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-to-use-tryexcept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to Use Try/Except
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-toolexecutionerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using ToolExecutionError
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-raise-structured-errors-raise-toolexecutionerror-clear-description-of-what-went-wrong-codeerror_code-machine-readable-code-is_retryabletrue-can-the-user-retry-suggested_fixhow-to-fix-the-issue-user-friendly-guidance-metasession_id-session_id-additional-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from marimo._ai._tools.utils.exceptions import ToolExecutionError # Raise structured errors raise ToolExecutionError( &quot;Clear description of what went wrong&quot;, code=&quot;ERROR_CODE&quot;, # Machine-readable code is_retryable=True, # Can the user retry? suggested_fix=&quot;How to fix the issue&quot;, # User-friendly guidance meta={&quot;session_id&quot;: session_id}, # Additional context )
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#def-handleself-args-yourtoolargs-yourtooloutput-toolcontext-methods-automatically-raise-toolexecutionerror-if-session-not-found-session-selfcontextget_sessionargssession_id-validate-inputs-raise-toolexecutionerror-directly-for-validation-errors-if-argscount-0-raise-toolexecutionerror-count-must-be-non-negative-codeinvalid_count-is_retryablefalse-suggested_fixprovide-a-count-0-only-use-tryexcept-for-specific-expected-errors-where-you-want-to-guide-the-agent-try-result-self_operation_that_might_fail-except-valueerror-as-e-caught-specific-error-provide-tailored-guidance-raise-toolexecutionerror-finvalid-cell-id-e-codeinvalid_cell_id-is_retryablefalse-suggested_fixuse-get_lightweight_cell_map-to-find-valid-cell-ids-dont-wrap-everything-in-tryexcept-unexpected-errors-are-handled-automatically-return-yourtooloutputdataresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # ToolContext methods automatically raise ToolExecutionError if session not found session = self.context.get_session(args.session_id) # Validate inputs - raise ToolExecutionError directly for validation errors if args.count &lt; 0: raise ToolExecutionError( &quot;Count must be non-negative&quot;, code=&quot;INVALID_COUNT&quot;, is_retryable=False, suggested_fix=&quot;Provide a count &gt;= 0&quot;, ) # Only use try/except for specific expected errors where you want to guide the agent try: result = self._operation_that_might_fail() except ValueError as e: # Caught specific error - provide tailored guidance raise ToolExecutionError( f&quot;Invalid cell ID: {e}&quot;, code=&quot;INVALID_CELL_ID&quot;, is_retryable=False, suggested_fix=&quot;Use get_lightweight_cell_map to find valid cell IDs&quot;, ) # Don&#39;t wrap everything in try/except - unexpected errors are handled automatically return YourToolOutput(data=result)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="def handle(self, args: YourToolArgs) -&gt; YourToolOutput: # ToolContext methods automatically raise ToolExecutionError if session not found session = self.context.get_session(args.session_id) # Validate inputs - raise ToolExecutionError directly for validation errors if args.count &lt; 0: raise ToolExecutionError( &#34;Count must be non-negative&#34;, code=&#34;INVALID_COUNT&#34;, is_retryable=False, suggested_fix=&#34;Provide a count &gt;= 0&#34;, ) # Only use try/except for specific expected errors where you want to guide the agent try: result = self._operation_that_might_fail() except ValueError as e: # Caught specific error - provide tailored guidance raise ToolExecutionError( f&#34;Invalid cell ID: {e}&#34;, code=&#34;INVALID_CELL_ID&#34;, is_retryable=False, suggested_fix=&#34;Use get_lightweight_cell_map to find valid cell IDs&#34;, ) # Don&#39;t wrap everything in try/except - unexpected errors are handled automatically return YourToolOutput(data=result)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#7-register-the-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Register the Tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-marimo_ai_toolstoolsyour_tool-import-yourtool-supported_backend_and_mcp_tools-listtypetoolbaseany-any-getmarimorules-getactivenotebooks-existing-tools-yourtool-add-your-tool-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from marimo._ai._tools.tools.your_tool import YourTool SUPPORTED_BACKEND_AND_MCP_TOOLS: list[type[ToolBase[Any, Any]]] = [ GetMarimoRules, GetActiveNotebooks, # ... existing tools ... YourTool, # Add your tool here ]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="from marimo._ai._tools.tools.your_tool import YourTool SUPPORTED_BACKEND_AND_MCP_TOOLS: list[type[ToolBase[Any, Any]]] = [ GetMarimoRules, GetActiveNotebooks, # ... existing tools ... YourTool, # Add your tool here ]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#8-add-args-and-output-to-msgspec-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Add Args and Output to msgspec tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-marimo_ai_toolstoolsyour_tool-import-yourtoolargs-yourtooloutput-tool_io_classes-existing-classes-yourtoolargs-yourtooloutput" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from marimo._ai._tools.tools.your_tool import ( YourToolArgs, YourToolOutput, ) TOOL_IO_CLASSES = [ # ... existing classes ... YourToolArgs, YourToolOutput, ]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="from marimo._ai._tools.tools.your_tool import ( YourToolArgs, YourToolOutput, ) TOOL_IO_CLASSES = [ # ... existing classes ... YourToolArgs, YourToolOutput, ]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#9-create-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Create Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Create Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-__future__-import-annotations-from-unittestmock-import-mock-import-pytest-from-marimo_ai_toolsbase-import-toolcontext-from-marimo_ai_toolstoolsyour_tool-import-yourtool-yourtoolargs-from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-from-marimo_typesids-import-sessionid-pytestfixture-def-tool-yourtool-create-a-yourtool-instance-return-yourtooltoolcontext-pytestfixture-def-mock_context-mock-create-a-mock-toolcontext-return-mockspectoolcontext-def-test_your_tool_basic_casemock_context-mock-none-test-basic-functionality-setup-mock-mock_session-mock-mock_contextget_sessionreturn_value-mock_session-tool-yourtooltoolcontext-toolcontext-mock_context-execute-tool-result-toolhandleyourtoolargssession_idsessionidtest-assertions-assert-resultstatus-success-assert-resultdata-is-not-none-def-test_your_tool_error_handlingmock_context-mock-none-test-error-handling-setup-mock-to-raise-error-mock_contextget_sessionside_effect-toolexecutionerror-session-not-found-codesession_not_found-tool-yourtooltoolcontext-toolcontext-mock_context-should-raise-toolexecutionerror-with-pytestraisestoolexecutionerror-as-exc_info-toolhandleyourtoolargssession_idsessionidinvalid-assert-exc_infovaluecode-session_not_found-if-necessary-def-test_your_tool_with_edge_casesmock_context-mock-none-test-edge-cases-and-boundary-conditions-test-your-tool-with-edge-cases-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from __future__ import annotations from unittest.mock import Mock import pytest from marimo._ai._tools.base import ToolContext from marimo._ai._tools.tools.your_tool import ( YourTool, YourToolArgs, ) from marimo._ai._tools.utils.exceptions import ToolExecutionError from marimo._types.ids import SessionId @pytest.fixture def tool() -&gt; YourTool: &quot;&quot;&quot;Create a YourTool instance.&quot;&quot;&quot; return YourTool(ToolContext()) @pytest.fixture def mock_context() -&gt; Mock: &quot;&quot;&quot;Create a mock ToolContext.&quot;&quot;&quot; return Mock(spec=ToolContext) def test_your_tool_basic_case(mock_context: Mock) -&gt; None: &quot;&quot;&quot;Test basic functionality.&quot;&quot;&quot; # Setup mock mock_session = Mock() mock_context.get_session.return_value = mock_session tool = YourTool(ToolContext()) tool.context = mock_context # Execute tool result = tool.handle(YourToolArgs(session_id=SessionId(&quot;test&quot;))) # Assertions assert result.status == &quot;success&quot; assert result.data is not None def test_your_tool_error_handling(mock_context: Mock) -&gt; None: &quot;&quot;&quot;Test error handling.&quot;&quot;&quot; # Setup mock to raise error mock_context.get_session.side_effect = ToolExecutionError( &quot;Session not found&quot;, code=&quot;SESSION_NOT_FOUND&quot;, ) tool = YourTool(ToolContext()) tool.context = mock_context # Should raise ToolExecutionError with pytest.raises(ToolExecutionError) as exc_info: tool.handle(YourToolArgs(session_id=SessionId(&quot;invalid&quot;))) assert exc_info.value.code == &quot;SESSION_NOT_FOUND&quot; # if necessary def test_your_tool_with_edge_cases(mock_context: Mock) -&gt; None: &quot;&quot;&quot;Test edge cases and boundary conditions.&quot;&quot;&quot; # Test your tool with edge cases pass
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="from __future__ import annotations from unittest.mock import Mock import pytest from marimo._ai._tools.base import ToolContext from marimo._ai._tools.tools.your_tool import ( YourTool, YourToolArgs, ) from marimo._ai._tools.utils.exceptions import ToolExecutionError from marimo._types.ids import SessionId @pytest.fixture def tool() -&gt; YourTool: &#34;&#34;&#34;Create a YourTool instance.&#34;&#34;&#34; return YourTool(ToolContext()) @pytest.fixture def mock_context() -&gt; Mock: &#34;&#34;&#34;Create a mock ToolContext.&#34;&#34;&#34; return Mock(spec=ToolContext) def test_your_tool_basic_case(mock_context: Mock) -&gt; None: &#34;&#34;&#34;Test basic functionality.&#34;&#34;&#34; # Setup mock mock_session = Mock() mock_context.get_session.return_value = mock_session tool = YourTool(ToolContext()) tool.context = mock_context # Execute tool result = tool.handle(YourToolArgs(session_id=SessionId(&#34;test&#34;))) # Assertions assert result.status == &#34;success&#34; assert result.data is not None def test_your_tool_error_handling(mock_context: Mock) -&gt; None: &#34;&#34;&#34;Test error handling.&#34;&#34;&#34; # Setup mock to raise error mock_context.get_session.side_effect = ToolExecutionError( &#34;Session not found&#34;, code=&#34;SESSION_NOT_FOUND&#34;, ) tool = YourTool(ToolContext()) tool.context = mock_context # Should raise ToolExecutionError with pytest.raises(ToolExecutionError) as exc_info: tool.handle(YourToolArgs(session_id=SessionId(&#34;invalid&#34;))) assert exc_info.value.code == &#34;SESSION_NOT_FOUND&#34; # if necessary def test_your_tool_with_edge_cases(mock_context: Mock) -&gt; None: &#34;&#34;&#34;Test edge cases and boundary conditions.&#34;&#34;&#34; # Test your tool with edge cases pass">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#10-run-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Run Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-all-tool-tests-hatch-run-py312-testtest-tests_aitools-run-your-specific-test-hatch-run-py312-testtest-tests_aitoolstoolstest_your_toolpy-run-with-verbose-output-hatch-run-py312-testtest-tests_aitoolstoolstest_your_toolpy-v" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Run all tool tests hatch run +py=3.12 test:test tests/_ai/tools # Run your specific test hatch run +py=3.12 test:test tests/_ai/tools/tools/test_your_tool.py # Run with verbose output hatch run +py=3.12 test:test tests/_ai/tools/tools/test_your_tool.py -v
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Run all tool tests hatch run +py=3.12 test:test tests/_ai/tools # Run your specific test hatch run +py=3.12 test:test tests/_ai/tools/tools/test_your_tool.py # Run with verbose output hatch run +py=3.12 test:test tests/_ai/tools/tools/test_your_tool.py -v">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-update-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Update Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#available-tools-appropriate-category-tool-description-your_tool_name-brief-description-of-what-the-tool-does-takes-param1-and-param2-parameters-returns-description-of-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ## Available tools ### [Appropriate Category] | Tool | Description | |------|-------------| | **your_tool_name** | Brief description of what the tool does. Takes `param1` and `param2` parameters. Returns description of output. |
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#type-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type Safety
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#return-yourtooloutput-dataresult-provide-actionable-next-steps-next_steps-use-get_cell_runtime_data-to-inspect-cells-check-errors-with-get_notebook_errors-optional-user-facing-message-messagefound-5-items-matching-your-query-optional-metadata-metaquery_time-05" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        return YourToolOutput( data=result, # Provide actionable next steps next_steps=[ &quot;Use get_cell_runtime_data to inspect cells&quot;, &quot;Check errors with get_notebook_errors&quot;, ], # Optional user-facing message message=&quot;Found 5 items matching your query&quot;, # Optional metadata meta={&quot;query_time&quot;: 0.5}, )
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="return YourToolOutput( data=result, # Provide actionable next steps next_steps=[ &#34;Use get_cell_runtime_data to inspect cells&#34;, &#34;Check errors with get_notebook_errors&#34;, ], # Optional user-facing message message=&#34;Found 5 items matching your query&#34;, # Optional metadata meta={&#34;query_time&#34;: 0.5}, )">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#helper-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helper Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-pitfalls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Pitfalls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Pitfalls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dont-duplicate-toolcontext-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Don't: Duplicate ToolContext Logic
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bad-reimplementing-context-logic-def-handleself-args-args-output-session-selfcontextget_sessionargssession_id-cell_notifications-sessionsession_viewcell_notifications-errors-for-cell_id-op-in-cell_notificationsitems-if-opoutput-and-opoutputchannel-cellchannelmarimo_error-errorsappend-duplicating-error-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Bad: Reimplementing context logic def handle(self, args: Args) -&gt; Output: session = self.context.get_session(args.session_id) cell_notifications = session.session_view.cell_notifications errors = [] for cell_id, op in cell_notifications.items(): if op.output and op.output.channel == CellChannel.MARIMO_ERROR: errors.append(...) # Duplicating error extraction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Bad: Reimplementing context logic def handle(self, args: Args) -&gt; Output: session = self.context.get_session(args.session_id) cell_notifications = session.session_view.cell_notifications errors = [] for cell_id, op in cell_notifications.items(): if op.output and op.output.channel == CellChannel.MARIMO_ERROR: errors.append(...) # Duplicating error extraction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do-use-toolcontext-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Do: Use ToolContext Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#good-using-context-methods-def-handleself-args-args-output-errors-selfcontextget_notebook_errors-argssession_id-include_stderrtrue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Good: Using context methods def handle(self, args: Args) -&gt; Output: errors = self.context.get_notebook_errors( args.session_id, include_stderr=True )
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Good: Using context methods def handle(self, args: Args) -&gt; Output: errors = self.context.get_notebook_errors( args.session_id, include_stderr=True )">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dont-raise-generic-exceptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Don't: Raise Generic Exceptions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bad-using-generic-exceptions-if-not-found-raise-valueerrornot-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Bad: Using generic exceptions if not found: raise ValueError(&quot;Not found&quot;)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Bad: Using generic exceptions if not found: raise ValueError(&#34;Not found&#34;)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do-raise-toolexecutionerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Do: Raise ToolExecutionError
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#good-structured-error-with-metadata-if-not-found-raise-toolexecutionerror-cell-not-found-in-session-codecell_not_found-is_retryablefalse-suggested_fixuse-get_lightweight_cell_map-to-find-valid-cell-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Good: Structured error with metadata if not found: raise ToolExecutionError( &quot;Cell not found in session&quot;, code=&quot;CELL_NOT_FOUND&quot;, is_retryable=False, suggested_fix=&quot;Use get_lightweight_cell_map to find valid cell IDs&quot;, )
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Good: Structured error with metadata if not found: raise ToolExecutionError( &#34;Cell not found in session&#34;, code=&#34;CELL_NOT_FOUND&#34;, is_retryable=False, suggested_fix=&#34;Use get_lightweight_cell_map to find valid cell IDs&#34;, )">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dont-return-unstructured-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Don't: Return Unstructured Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bad-returning-raw-data-def-handleself-args-args-output-return-data-count-5-type-ignore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Bad: Returning raw data def handle(self, args: Args) -&gt; Output: return {&quot;data&quot;: [...], &quot;count&quot;: 5} # type: ignore
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Bad: Returning raw data def handle(self, args: Args) -&gt; Output: return {&#34;data&#34;: [...], &#34;count&#34;: 5} # type: ignore">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do-use-typed-dataclass-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Do: Use Typed Dataclass Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#good-structured-output-with-successresult-def-handleself-args-args-output-return-yourtooloutput-data-count5-next_stepsreview-the-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Good: Structured output with SuccessResult def handle(self, args: Args) -&gt; Output: return YourToolOutput( data=[...], count=5, next_steps=[&quot;Review the results&quot;], )
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Good: Structured output with SuccessResult def handle(self, args: Args) -&gt; Output: return YourToolOutput( data=[...], count=5, next_steps=[&#34;Review the results&#34;], )">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dont-use-typeddict-or-other-type-annotations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Don't: Use TypedDict or Other Type Annotations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bad-using-typeddict-for-tool-inputoutput-from-typing-import-typeddict-class-yourtoolargstypeddict-session_id-str-count-int" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Bad: Using TypedDict for tool input/output from typing import TypedDict class YourToolArgs(TypedDict): session_id: str count: int
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="# Bad: Using TypedDict for tool input/output from typing import TypedDict class YourToolArgs(TypedDict): session_id: str count: int">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do-use-dataclasses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Do: Use Dataclasses
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#good-using-dataclasses-as-required-from-dataclasses-import-dataclass-dataclass-class-yourtoolargs-session_id-sessionid-count-int-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        # Good: Using dataclasses as required from dataclasses import dataclass @dataclass class YourToolArgs: session_id: SessionId count: int = 0
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Topics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Topics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#async-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Async Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-asynctooltoolbaseargs-output-tool-with-async-operations-async-def-handleself-args-args-output-type-ignoreoverride-note-add-type-ignoreoverride-for-async-handle-session-selfcontextget_sessionargssession_id-result-await-self_async_worksession-return-outputresultresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        class AsyncTool(ToolBase[Args, Output]): &quot;&quot;&quot;Tool with async operations.&quot;&quot;&quot; async def handle(self, args: Args) -&gt; Output: # type: ignore[override] &quot;&quot;&quot;Note: Add type: ignore[override] for async handle.&quot;&quot;&quot; session = self.context.get_session(args.session_id) result = await self._async_work(session) return Output(result=result)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="class AsyncTool(ToolBase[Args, Output]): &#34;&#34;&#34;Tool with async operations.&#34;&#34;&#34; async def handle(self, args: Args) -&gt; Output: # type: ignore[override] &#34;&#34;&#34;Note: Add type: ignore[override] for async handle.&#34;&#34;&#34; session = self.context.get_session(args.session_id) result = await self._async_work(session) return Output(result=result)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tools-with-side-effects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tools with Side Effects
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#guidelines-toolguidelines-side_effects-modifies-notebook-cells-triggers-cell-re-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        guidelines = ToolGuidelines( side_effects=[ &quot;Modifies notebook cells&quot;, &quot;Triggers cell re-execution&quot;, ], )
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="guidelines = ToolGuidelines( side_effects=[ &#34;Modifies notebook cells&#34;, &#34;Triggers cell re-execution&#34;, ], )">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complex-return-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complex Return Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dataclass-class-cellinfo-cell_id-str-code-str-dataclass-class-complexoutputsuccessresult-cells-listcellinfo-fielddefault_factorylist-summary-dictstr-any-fielddefault_factorydict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @dataclass class CellInfo: cell_id: str code: str @dataclass class ComplexOutput(SuccessResult): cells: list[CellInfo] = field(default_factory=list) summary: dict[str, Any] = field(default_factory=dict)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#review-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Questions?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="adding-backend-and-mcp-tools-to-marimo">Adding Backend and MCP Tools to marimo<a class="headerlink" href="#adding-backend-and-mcp-tools-to-marimo" title="Permanent link">&para;</a></h1>
+<p>This guide explains how to create tools that are accessible via both the backend (chat panel) and MCP (Model Context Protocol) server endpoints.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>marimo provides a unified framework for creating tools that can be used by AI assistants to interact with notebooks. These tools are automatically registered in both:</p>
+<ol>
+<li><strong>Backend Tools</strong>: Used by the marimo chat panel (ask/agent modes)</li>
+<li><strong>MCP Tools</strong>: Exposed via the MCP server endpoint for external AI clients (like Claude Desktop)</li>
+</ol>
+<p>The unified architecture means you write a tool once and it works in both contexts.</p>
+<h2 id="step-by-step-implementation">Step-by-Step Implementation<a class="headerlink" href="#step-by-step-implementation" title="Permanent link">&para;</a></h2>
+<h3 id="1-create-the-tool-file">1. Create the Tool File<a class="headerlink" href="#1-create-the-tool-file" title="Permanent link">&para;</a></h3>
+<p>Create a new file in <code>marimo/_ai/_tools/tools/your_tool.py</code> for your tool implementation.</p>
+<h3 id="2-define-input-and-output-types">2. Define Input and Output Types<a class="headerlink" href="#2-define-input-and-output-types" title="Permanent link">&para;</a></h3>
+<p>Create dataclasses for your tool's arguments and output. Place these at the top of your tool file.</p>
+<p><strong>Template:</strong></p>
+<hr />
+<h2 id="from-dataclasses-import-dataclass-field-from-marimo_ai_toolstypes-import-successresult-from-marimo_typesids-import-sessionid-dataclass-class-yourtoolargs-arguments-for-your-tool-session_id-sessionid-add-other-required-parameters-optional_param-str-default_value-dataclass-class-yourtooloutputsuccessresult-output-from-your-tool-add-your-output-fields-data-dict-fielddefault_factorydict-count-int-0"><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._ai._tools.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SuccessResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._types.ids</span><span class="w"> </span><span class="kn">import</span> <span class="n">SessionId</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">YourToolArgs</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Arguments for your tool.&quot;&quot;&quot;</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="n">SessionId</span>
+    <span class="c1"># Add other required parameters</span>
+    <span class="n">optional_param</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default_value&quot;</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">YourToolOutput</span><span class="p">(</span><span class="n">SuccessResult</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Output from your tool.&quot;&quot;&quot;</span>
+    <span class="c1"># Add your output fields</span>
+    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+</code></pre></div><a class="headerlink" href="#from-dataclasses-import-dataclass-field-from-marimo_ai_toolstypes-import-successresult-from-marimo_typesids-import-sessionid-dataclass-class-yourtoolargs-arguments-for-your-tool-session_id-sessionid-add-other-required-parameters-optional_param-str-default_value-dataclass-class-yourtooloutputsuccessresult-output-from-your-tool-add-your-output-fields-data-dict-fielddefault_factorydict-count-int-0" title="Permanent link">&para;</a></h2>
+<p><strong>Important Type Patterns:</strong></p>
+<ul>
+<li><strong>Naming Convention</strong>: Input dataclasses must end with <code>Args</code>, output dataclasses must end with <code>Output</code></li>
+<li>Input args should use plain dataclasses</li>
+<li>Output should inherit from <code>SuccessResult</code> (provides <code>status</code>, <code>next_steps</code>, <code>message</code>, etc.)</li>
+<li>Use <code>field(default_factory=...)</code> for mutable defaults (lists, dicts)</li>
+<li>Use marimo types like <code>SessionId</code>, <code>CellId_t</code> for consistency</li>
+</ul>
+<h3 id="3-create-the-tool-class">3. Create the Tool Class<a class="headerlink" href="#3-create-the-tool-class" title="Permanent link">&para;</a></h3>
+<p>Implement your tool class in the same file:</p>
+<p><strong>Template:</strong></p>
+<hr />
+<h2 id="copyright-2026-marimo-all-rights-reserved-from-__future__-import-annotations-from-dataclasses-import-dataclass-field-from-typing-import-type_checking-from-marimo_ai_toolsbase-import-toolbase-from-marimo_ai_toolstypes-import-successresult-toolguidelines-from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-from-marimo_typesids-import-sessionid-if-type_checking-from-marimo_session-import-session-dataclass-class-yourtoolargs-arguments-for-your-tool-session_id-sessionid-add-parameters-here-dataclass-class-yourtooloutputsuccessresult-output-from-your-tool-add-output-fields-here-sample_dict-dict-fielddefault_factorydict-class-yourtooltoolbaseyourtoolargs-yourtooloutput-brief-description-of-what-this-tool-does-more-detailed-explanation-of-the-tools-purpose-and-functionality-this-docstring-becomes-the-tools-description-shown-to-ai-assistants-args-session_id-the-session-id-of-the-notebook-document-other-args-returns-a-success-result-containing-describe-what-it-returns-guidelines-toolguidelines-when_to_use-when-describe-primary-use-case-prerequisites-you-must-describe-args-that-need-additional-explanation-avoid_if-when-describe-when-not-to-use-additional_info-any-additional-context-or-warnings-about-tool-usage-def-handleself-args-yourtoolargs-yourtooloutput-implement-your-tool-logic-here-toolcontext-provides-access-to-sessions-notebooks-and-all-marimo-state-context-selfcontext-session_id-argssession_id-session-contextget_sessionsession_id-implement-your-logic-sample_dict-self_do_worksession-return-yourtooloutput-sample_dictsample_dict-next_steps-review-the-results-consider-next-actions-messageoptionally-add-this-is-the-results-require-more-explanation-helper-methods-prefix-with-_-def-_do_workself-session-session-dict-private-helper-method-implementation-details-return"><div class="highlight"><pre><span></span><code><span class="c1"># Copyright 2026 Marimo. All rights reserved.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._ai._tools.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._ai._tools.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SuccessResult</span><span class="p">,</span> <span class="n">ToolGuidelines</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._ai._tools.utils.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolExecutionError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._types.ids</span><span class="w"> </span><span class="kn">import</span> <span class="n">SessionId</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">marimo._session</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">YourToolArgs</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Arguments for your tool.&quot;&quot;&quot;</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="n">SessionId</span>
+    <span class="c1"># Add parameters here</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">YourToolOutput</span><span class="p">(</span><span class="n">SuccessResult</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Output from your tool.&quot;&quot;&quot;</span>
+    <span class="c1"># Add output fields here</span>
+    <span class="n">sample_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">YourTool</span><span class="p">(</span><span class="n">ToolBase</span><span class="p">[</span><span class="n">YourToolArgs</span><span class="p">,</span> <span class="n">YourToolOutput</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Brief description of what this tool does.</span>
+
+<span class="sd">    More detailed explanation of the tool&#39;s purpose and functionality.</span>
+<span class="sd">    This docstring becomes the tool&#39;s description shown to AI assistants.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        session_id: The session ID of the notebook</span>
+<span class="sd">        # Document other args</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A success result containing [describe what it returns].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">guidelines</span> <span class="o">=</span> <span class="n">ToolGuidelines</span><span class="p">(</span>
+        <span class="n">when_to_use</span><span class="o">=</span><span class="p">[</span>
+            <span class="s2">&quot;When [describe primary use case]&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">prerequisites</span><span class="o">=</span><span class="p">[</span>
+            <span class="s2">&quot;You must [describe args that need additional explanation]&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">avoid_if</span><span class="o">=</span><span class="p">[</span>
+            <span class="s2">&quot;When [describe when not to use]&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">additional_info</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Any additional context or warnings about tool usage.&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">YourToolArgs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">YourToolOutput</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Implement your tool logic here.&quot;&quot;&quot;</span>
+        <span class="c1"># ToolContext provides access to sessions, notebooks, and all marimo state</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span>
+        <span class="n">session_id</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">session_id</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">session_id</span><span class="p">)</span>
+
+        <span class="c1"># Implement your logic</span>
+        <span class="n">sample_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_work</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">YourToolOutput</span><span class="p">(</span>
+            <span class="n">sample_dict</span><span class="o">=</span><span class="n">sample_dict</span><span class="p">,</span>
+            <span class="n">next_steps</span><span class="o">=</span><span class="p">[</span>
+                <span class="s2">&quot;Review the results&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Consider next actions&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Optionally add this is the results require more explanation&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Helper methods (prefix with _)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_do_work</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Private helper method.&quot;&quot;&quot;</span>
+        <span class="c1"># Implementation details</span>
+        <span class="k">return</span> <span class="p">{}</span>
+</code></pre></div><a class="headerlink" href="#copyright-2026-marimo-all-rights-reserved-from-__future__-import-annotations-from-dataclasses-import-dataclass-field-from-typing-import-type_checking-from-marimo_ai_toolsbase-import-toolbase-from-marimo_ai_toolstypes-import-successresult-toolguidelines-from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-from-marimo_typesids-import-sessionid-if-type_checking-from-marimo_session-import-session-dataclass-class-yourtoolargs-arguments-for-your-tool-session_id-sessionid-add-parameters-here-dataclass-class-yourtooloutputsuccessresult-output-from-your-tool-add-output-fields-here-sample_dict-dict-fielddefault_factorydict-class-yourtooltoolbaseyourtoolargs-yourtooloutput-brief-description-of-what-this-tool-does-more-detailed-explanation-of-the-tools-purpose-and-functionality-this-docstring-becomes-the-tools-description-shown-to-ai-assistants-args-session_id-the-session-id-of-the-notebook-document-other-args-returns-a-success-result-containing-describe-what-it-returns-guidelines-toolguidelines-when_to_use-when-describe-primary-use-case-prerequisites-you-must-describe-args-that-need-additional-explanation-avoid_if-when-describe-when-not-to-use-additional_info-any-additional-context-or-warnings-about-tool-usage-def-handleself-args-yourtoolargs-yourtooloutput-implement-your-tool-logic-here-toolcontext-provides-access-to-sessions-notebooks-and-all-marimo-state-context-selfcontext-session_id-argssession_id-session-contextget_sessionsession_id-implement-your-logic-sample_dict-self_do_worksession-return-yourtooloutput-sample_dictsample_dict-next_steps-review-the-results-consider-next-actions-messageoptionally-add-this-is-the-results-require-more-explanation-helper-methods-prefix-with-_-def-_do_workself-session-session-dict-private-helper-method-implementation-details-return" title="Permanent link">&para;</a></h2>
+<h3 id="4-understanding-toolcontext">4. Understanding ToolContext<a class="headerlink" href="#4-understanding-toolcontext" title="Permanent link">&para;</a></h3>
+<p><code>ToolContext</code> is your gateway to all marimo state—sessions, notebooks, cells, errors, and more. It's available via <code>self.context</code> in your tool.</p>
+<h4 id="how-to-access-toolcontext-in-your-tool">How to access ToolContext in your tool<a class="headerlink" href="#how-to-access-toolcontext-in-your-tool" title="Permanent link">&para;</a></h4>
+<p>Access via <code>self.context</code> in your <code>handle()</code> method:</p>
+<hr />
+<h2 id="def-handleself-args-yourtoolargs-yourtooloutput-access-toolcontext-context-selfcontext-use-context-methods-session-contextget_sessionargssession_id-errors-contextget_notebook_errorsargssession_id"><div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">YourToolArgs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">YourToolOutput</span><span class="p">:</span>
+    <span class="c1"># Access ToolContext</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span>
+
+    <span class="c1"># Use context methods</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get_notebook_errors</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#def-handleself-args-yourtoolargs-yourtooloutput-access-toolcontext-context-selfcontext-use-context-methods-session-contextget_sessionargssession_id-errors-contextget_notebook_errorsargssession_id" title="Permanent link">&para;</a></h2>
+<h4 id="when-to-add-to-toolcontext-vs-a-helper-method">When to add to ToolContext vs a helper method<a class="headerlink" href="#when-to-add-to-toolcontext-vs-a-helper-method" title="Permanent link">&para;</a></h4>
+<p><strong>Add to ToolContext when:</strong>
+- The functionality will be used by <strong>multiple tools</strong>
+- It accesses core marimo state (sessions, cells, errors)
+- It provides a common pattern that should be consistent across tools</p>
+<p><strong>Use helper methods when:</strong>
+- The logic is specific to <strong>your tool only</strong>
+- It's a one-off data transformation or validation
+- It doesn't need to access marimo state beyond what you already have</p>
+<p><strong>Example:</strong></p>
+<hr />
+<h2 id="class-yourtooltoolbaseyourtoolargs-yourtooloutput-def-handleself-args-yourtoolargs-yourtooloutput-use-toolcontext-for-common-operations-session-selfcontextget_sessionargssession_id-errors-selfcontextget_notebook_errorsargssession_id-use-helper-methods-for-tool-specific-logic-filtered_data-self_filter_by_criteriaerrors-argscriteria-return-yourtooloutputdatafiltered_data-def-_filter_by_criteriaself-errors-list-criteria-str-list-tool-specific-logic-as-a-helper-method-return-e-for-e-in-errors-if-criteria-in-emessage"><div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">YourTool</span><span class="p">(</span><span class="n">ToolBase</span><span class="p">[</span><span class="n">YourToolArgs</span><span class="p">,</span> <span class="n">YourToolOutput</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">YourToolArgs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">YourToolOutput</span><span class="p">:</span>
+        <span class="c1"># Use ToolContext for common operations</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+        <span class="n">errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">get_notebook_errors</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+
+        <span class="c1"># Use helper methods for tool-specific logic</span>
+        <span class="n">filtered_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_by_criteria</span><span class="p">(</span><span class="n">errors</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">criteria</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">YourToolOutput</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">filtered_data</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_filter_by_criteria</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tool-specific logic as a helper method.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">errors</span> <span class="k">if</span> <span class="n">criteria</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">]</span>
+</code></pre></div><a class="headerlink" href="#class-yourtooltoolbaseyourtoolargs-yourtooloutput-def-handleself-args-yourtoolargs-yourtooloutput-use-toolcontext-for-common-operations-session-selfcontextget_sessionargssession_id-errors-selfcontextget_notebook_errorsargssession_id-use-helper-methods-for-tool-specific-logic-filtered_data-self_filter_by_criteriaerrors-argscriteria-return-yourtooloutputdatafiltered_data-def-_filter_by_criteriaself-errors-list-criteria-str-list-tool-specific-logic-as-a-helper-method-return-e-for-e-in-errors-if-criteria-in-emessage" title="Permanent link">&para;</a></h2>
+<h4 id="available-toolcontext-methods">Available ToolContext Methods<a class="headerlink" href="#available-toolcontext-methods" title="Permanent link">&para;</a></h4>
+<p>For the current and complete list of available methods, see <code>marimo/_ai/_tools/base.py</code> in the <code>ToolContext</code> class. Common methods include:
+- <code>get_session(session_id)</code> - Get a notebook session
+- <code>get_notebook_errors(session_id, include_stderr)</code> - Get all errors in a notebook
+- <code>get_cell_errors(session_id, cell_id)</code> - Get errors for a specific cell
+- <code>get_active_sessions_internal()</code> - Get list of active notebook sessions</p>
+<h3 id="5-understanding-toolguidelines">5. Understanding ToolGuidelines<a class="headerlink" href="#5-understanding-toolguidelines" title="Permanent link">&para;</a></h3>
+<p><code>ToolGuidelines</code> help AI assistants understand when and how to use your tool. Customize based on your tool's specific use case.</p>
+<p><strong>Fields:</strong></p>
+<ul>
+<li><strong><code>when_to_use</code></strong>: List specific scenarios where your tool is appropriate</li>
+<li>
+<p>Example: <code>"When the user needs to inspect cell outputs"</code></p>
+</li>
+<li>
+<p><strong><code>avoid_if</code></strong>: List scenarios where your tool should NOT be used</p>
+</li>
+<li>
+<p>Example: <code>"When the session hasn't been started yet"</code></p>
+</li>
+<li>
+<p><strong><code>prerequisites</code></strong>: Required state or information before using the tool</p>
+</li>
+<li>
+<p>Example: <code>"Valid session ID from an active notebook"</code> (only if accessing notebook data)</p>
+</li>
+<li>
+<p><strong><code>side_effects</code></strong>: Any state changes your tool makes</p>
+</li>
+<li>
+<p>Example: <code>"Modifies notebook cells"</code>, <code>"Triggers cell re-execution"</code></p>
+</li>
+<li>
+<p><strong><code>additional_info</code></strong>: Additional context or warnings (single string)</p>
+</li>
+<li>Example: <code>"This tool provides static analysis only"</code></li>
+</ul>
+<p><strong>⚠️ Warning:</strong> Too many guidelines can confuse the AI agent. Less is more—only add guidelines when you clearly understand the use cases. If you're unsure, keep it minimal</p>
+<h3 id="6-error-handling">6. Error Handling<a class="headerlink" href="#6-error-handling" title="Permanent link">&para;</a></h3>
+<h4 id="when-to-use-tryexcept">When to Use Try/Except<a class="headerlink" href="#when-to-use-tryexcept" title="Permanent link">&para;</a></h4>
+<p><strong>Only use try/except when you need to catch a specific error and provide tailored guidance to the AI agent.</strong></p>
+<ul>
+<li>✅ <strong>Use try/except</strong>: For expected errors where you want to guide the agent (e.g., "Use get_lightweight_cell_map to find valid cell IDs")</li>
+<li>❌ <strong>Don't use try/except</strong>: For unexpected errors—they're automatically wrapped in <code>ToolExecutionError</code> and surfaced to the agent</li>
+</ul>
+<h4 id="using-toolexecutionerror">Using ToolExecutionError<a class="headerlink" href="#using-toolexecutionerror" title="Permanent link">&para;</a></h4>
+<p>Use <code>ToolExecutionError</code> for expected failures:</p>
+<hr />
+<h2 id="from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-raise-structured-errors-raise-toolexecutionerror-clear-description-of-what-went-wrong-codeerror_code-machine-readable-code-is_retryabletrue-can-the-user-retry-suggested_fixhow-to-fix-the-issue-user-friendly-guidance-metasession_id-session_id-additional-context"><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">marimo._ai._tools.utils.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolExecutionError</span>
+
+<span class="c1"># Raise structured errors</span>
+<span class="k">raise</span> <span class="n">ToolExecutionError</span><span class="p">(</span>
+    <span class="s2">&quot;Clear description of what went wrong&quot;</span><span class="p">,</span>
+    <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ERROR_CODE&quot;</span><span class="p">,</span>  <span class="c1"># Machine-readable code</span>
+    <span class="n">is_retryable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Can the user retry?</span>
+    <span class="n">suggested_fix</span><span class="o">=</span><span class="s2">&quot;How to fix the issue&quot;</span><span class="p">,</span>  <span class="c1"># User-friendly guidance</span>
+    <span class="n">meta</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;session_id&quot;</span><span class="p">:</span> <span class="n">session_id</span><span class="p">},</span>  <span class="c1"># Additional context</span>
+<span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-raise-structured-errors-raise-toolexecutionerror-clear-description-of-what-went-wrong-codeerror_code-machine-readable-code-is_retryabletrue-can-the-user-retry-suggested_fixhow-to-fix-the-issue-user-friendly-guidance-metasession_id-session_id-additional-context" title="Permanent link">&para;</a></h2>
+<p><strong>Common Error Codes:</strong></p>
+<ul>
+<li><code>SESSION_NOT_FOUND</code>: Session ID doesn't exist</li>
+<li><code>CELL_NOT_FOUND</code>: Cell ID doesn't exist</li>
+<li><code>BAD_ARGUMENTS</code>: Invalid arguments passed</li>
+<li><code>OPERATION_FAILED</code>: Generic operation failure</li>
+<li><code>UNEXPECTED_ERROR</code>: Uncaught exception (handled automatically)</li>
+</ul>
+<p><strong>Error Handling Best Practices:</strong></p>
+<hr />
+<h2 id="def-handleself-args-yourtoolargs-yourtooloutput-toolcontext-methods-automatically-raise-toolexecutionerror-if-session-not-found-session-selfcontextget_sessionargssession_id-validate-inputs-raise-toolexecutionerror-directly-for-validation-errors-if-argscount-0-raise-toolexecutionerror-count-must-be-non-negative-codeinvalid_count-is_retryablefalse-suggested_fixprovide-a-count-0-only-use-tryexcept-for-specific-expected-errors-where-you-want-to-guide-the-agent-try-result-self_operation_that_might_fail-except-valueerror-as-e-caught-specific-error-provide-tailored-guidance-raise-toolexecutionerror-finvalid-cell-id-e-codeinvalid_cell_id-is_retryablefalse-suggested_fixuse-get_lightweight_cell_map-to-find-valid-cell-ids-dont-wrap-everything-in-tryexcept-unexpected-errors-are-handled-automatically-return-yourtooloutputdataresult"><div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">YourToolArgs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">YourToolOutput</span><span class="p">:</span>
+    <span class="c1"># ToolContext methods automatically raise ToolExecutionError if session not found</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+
+    <span class="c1"># Validate inputs - raise ToolExecutionError directly for validation errors</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ToolExecutionError</span><span class="p">(</span>
+            <span class="s2">&quot;Count must be non-negative&quot;</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="s2">&quot;INVALID_COUNT&quot;</span><span class="p">,</span>
+            <span class="n">is_retryable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">suggested_fix</span><span class="o">=</span><span class="s2">&quot;Provide a count &gt;= 0&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Only use try/except for specific expected errors where you want to guide the agent</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operation_that_might_fail</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># Caught specific error - provide tailored guidance</span>
+        <span class="k">raise</span> <span class="n">ToolExecutionError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid cell ID: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="s2">&quot;INVALID_CELL_ID&quot;</span><span class="p">,</span>
+            <span class="n">is_retryable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">suggested_fix</span><span class="o">=</span><span class="s2">&quot;Use get_lightweight_cell_map to find valid cell IDs&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Don&#39;t wrap everything in try/except - unexpected errors are handled automatically</span>
+    <span class="k">return</span> <span class="n">YourToolOutput</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#def-handleself-args-yourtoolargs-yourtooloutput-toolcontext-methods-automatically-raise-toolexecutionerror-if-session-not-found-session-selfcontextget_sessionargssession_id-validate-inputs-raise-toolexecutionerror-directly-for-validation-errors-if-argscount-0-raise-toolexecutionerror-count-must-be-non-negative-codeinvalid_count-is_retryablefalse-suggested_fixprovide-a-count-0-only-use-tryexcept-for-specific-expected-errors-where-you-want-to-guide-the-agent-try-result-self_operation_that_might_fail-except-valueerror-as-e-caught-specific-error-provide-tailored-guidance-raise-toolexecutionerror-finvalid-cell-id-e-codeinvalid_cell_id-is_retryablefalse-suggested_fixuse-get_lightweight_cell_map-to-find-valid-cell-ids-dont-wrap-everything-in-tryexcept-unexpected-errors-are-handled-automatically-return-yourtooloutputdataresult" title="Permanent link">&para;</a></h2>
+<h3 id="7-register-the-tool">7. Register the Tool<a class="headerlink" href="#7-register-the-tool" title="Permanent link">&para;</a></h3>
+<p>Add your tool to the registry in <code>marimo/_ai/_tools/tools_registry.py</code>:</p>
+<hr />
+<h2 id="from-marimo_ai_toolstoolsyour_tool-import-yourtool-supported_backend_and_mcp_tools-listtypetoolbaseany-any-getmarimorules-getactivenotebooks-existing-tools-yourtool-add-your-tool-here"><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">marimo._ai._tools.tools.your_tool</span><span class="w"> </span><span class="kn">import</span> <span class="n">YourTool</span>
+
+<span class="n">SUPPORTED_BACKEND_AND_MCP_TOOLS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">ToolBase</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">GetMarimoRules</span><span class="p">,</span>
+    <span class="n">GetActiveNotebooks</span><span class="p">,</span>
+    <span class="c1"># ... existing tools ...</span>
+    <span class="n">YourTool</span><span class="p">,</span>  <span class="c1"># Add your tool here</span>
+<span class="p">]</span>
+</code></pre></div><a class="headerlink" href="#from-marimo_ai_toolstoolsyour_tool-import-yourtool-supported_backend_and_mcp_tools-listtypetoolbaseany-any-getmarimorules-getactivenotebooks-existing-tools-yourtool-add-your-tool-here" title="Permanent link">&para;</a></h2>
+<p><strong>That's it!</strong> Your tool is now automatically registered in both backend and MCP contexts.</p>
+<h3 id="8-add-args-and-output-to-msgspec-tests">8. Add Args and Output to msgspec tests<a class="headerlink" href="#8-add-args-and-output-to-msgspec-tests" title="Permanent link">&para;</a></h3>
+<p>Add your tool's Args and Output classes to the <code>TOOL_IO_CLASSES</code> list in <code>tests/_utils/test_msgspec_basestruct.py</code>. This ensures type compatibility between our serialization system and pydantic (used by the python mcp sdk).</p>
+<hr />
+<h2 id="from-marimo_ai_toolstoolsyour_tool-import-yourtoolargs-yourtooloutput-tool_io_classes-existing-classes-yourtoolargs-yourtooloutput"><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">marimo._ai._tools.tools.your_tool</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">YourToolArgs</span><span class="p">,</span>
+    <span class="n">YourToolOutput</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">TOOL_IO_CLASSES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ... existing classes ...</span>
+    <span class="n">YourToolArgs</span><span class="p">,</span>
+    <span class="n">YourToolOutput</span><span class="p">,</span>
+<span class="p">]</span>
+</code></pre></div><a class="headerlink" href="#from-marimo_ai_toolstoolsyour_tool-import-yourtoolargs-yourtooloutput-tool_io_classes-existing-classes-yourtoolargs-yourtooloutput" title="Permanent link">&para;</a></h2>
+<h3 id="9-create-tests">9. Create Tests<a class="headerlink" href="#9-create-tests" title="Permanent link">&para;</a></h3>
+<h4 id="unit-tests">Unit Tests<a class="headerlink" href="#unit-tests" title="Permanent link">&para;</a></h4>
+<p>Create <code>tests/_ai/tools/tools/test_your_tool.py</code>:</p>
+<hr />
+<h2 id="from-__future__-import-annotations-from-unittestmock-import-mock-import-pytest-from-marimo_ai_toolsbase-import-toolcontext-from-marimo_ai_toolstoolsyour_tool-import-yourtool-yourtoolargs-from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-from-marimo_typesids-import-sessionid-pytestfixture-def-tool-yourtool-create-a-yourtool-instance-return-yourtooltoolcontext-pytestfixture-def-mock_context-mock-create-a-mock-toolcontext-return-mockspectoolcontext-def-test_your_tool_basic_casemock_context-mock-none-test-basic-functionality-setup-mock-mock_session-mock-mock_contextget_sessionreturn_value-mock_session-tool-yourtooltoolcontext-toolcontext-mock_context-execute-tool-result-toolhandleyourtoolargssession_idsessionidtest-assertions-assert-resultstatus-success-assert-resultdata-is-not-none-def-test_your_tool_error_handlingmock_context-mock-none-test-error-handling-setup-mock-to-raise-error-mock_contextget_sessionside_effect-toolexecutionerror-session-not-found-codesession_not_found-tool-yourtooltoolcontext-toolcontext-mock_context-should-raise-toolexecutionerror-with-pytestraisestoolexecutionerror-as-exc_info-toolhandleyourtoolargssession_idsessionidinvalid-assert-exc_infovaluecode-session_not_found-if-necessary-def-test_your_tool_with_edge_casesmock_context-mock-none-test-edge-cases-and-boundary-conditions-test-your-tool-with-edge-cases-pass"><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mock</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._ai._tools.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._ai._tools.tools.your_tool</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">YourTool</span><span class="p">,</span>
+    <span class="n">YourToolArgs</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._ai._tools.utils.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolExecutionError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._types.ids</span><span class="w"> </span><span class="kn">import</span> <span class="n">SessionId</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tool</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">YourTool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a YourTool instance.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">YourTool</span><span class="p">(</span><span class="n">ToolContext</span><span class="p">())</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mock_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Mock</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a mock ToolContext.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Mock</span><span class="p">(</span><span class="n">spec</span><span class="o">=</span><span class="n">ToolContext</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_your_tool_basic_case</span><span class="p">(</span><span class="n">mock_context</span><span class="p">:</span> <span class="n">Mock</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test basic functionality.&quot;&quot;&quot;</span>
+    <span class="c1"># Setup mock</span>
+    <span class="n">mock_session</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
+    <span class="n">mock_context</span><span class="o">.</span><span class="n">get_session</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">mock_session</span>
+
+    <span class="n">tool</span> <span class="o">=</span> <span class="n">YourTool</span><span class="p">(</span><span class="n">ToolContext</span><span class="p">())</span>
+    <span class="n">tool</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">mock_context</span>
+
+    <span class="c1"># Execute tool</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">YourToolArgs</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">SessionId</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)))</span>
+
+    <span class="c1"># Assertions</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;success&quot;</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_your_tool_error_handling</span><span class="p">(</span><span class="n">mock_context</span><span class="p">:</span> <span class="n">Mock</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test error handling.&quot;&quot;&quot;</span>
+    <span class="c1"># Setup mock to raise error</span>
+    <span class="n">mock_context</span><span class="o">.</span><span class="n">get_session</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">ToolExecutionError</span><span class="p">(</span>
+        <span class="s2">&quot;Session not found&quot;</span><span class="p">,</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;SESSION_NOT_FOUND&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">tool</span> <span class="o">=</span> <span class="n">YourTool</span><span class="p">(</span><span class="n">ToolContext</span><span class="p">())</span>
+    <span class="n">tool</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">mock_context</span>
+
+    <span class="c1"># Should raise ToolExecutionError</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="n">ToolExecutionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc_info</span><span class="p">:</span>
+        <span class="n">tool</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">YourToolArgs</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">SessionId</span><span class="p">(</span><span class="s2">&quot;invalid&quot;</span><span class="p">)))</span>
+
+    <span class="k">assert</span> <span class="n">exc_info</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="s2">&quot;SESSION_NOT_FOUND&quot;</span>
+
+<span class="c1"># if necessary</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_your_tool_with_edge_cases</span><span class="p">(</span><span class="n">mock_context</span><span class="p">:</span> <span class="n">Mock</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test edge cases and boundary conditions.&quot;&quot;&quot;</span>
+    <span class="c1"># Test your tool with edge cases</span>
+    <span class="k">pass</span>
+</code></pre></div><a class="headerlink" href="#from-__future__-import-annotations-from-unittestmock-import-mock-import-pytest-from-marimo_ai_toolsbase-import-toolcontext-from-marimo_ai_toolstoolsyour_tool-import-yourtool-yourtoolargs-from-marimo_ai_toolsutilsexceptions-import-toolexecutionerror-from-marimo_typesids-import-sessionid-pytestfixture-def-tool-yourtool-create-a-yourtool-instance-return-yourtooltoolcontext-pytestfixture-def-mock_context-mock-create-a-mock-toolcontext-return-mockspectoolcontext-def-test_your_tool_basic_casemock_context-mock-none-test-basic-functionality-setup-mock-mock_session-mock-mock_contextget_sessionreturn_value-mock_session-tool-yourtooltoolcontext-toolcontext-mock_context-execute-tool-result-toolhandleyourtoolargssession_idsessionidtest-assertions-assert-resultstatus-success-assert-resultdata-is-not-none-def-test_your_tool_error_handlingmock_context-mock-none-test-error-handling-setup-mock-to-raise-error-mock_contextget_sessionside_effect-toolexecutionerror-session-not-found-codesession_not_found-tool-yourtooltoolcontext-toolcontext-mock_context-should-raise-toolexecutionerror-with-pytestraisestoolexecutionerror-as-exc_info-toolhandleyourtoolargssession_idsessionidinvalid-assert-exc_infovaluecode-session_not_found-if-necessary-def-test_your_tool_with_edge_casesmock_context-mock-none-test-edge-cases-and-boundary-conditions-test-your-tool-with-edge-cases-pass" title="Permanent link">&para;</a></h2>
+<h3 id="10-run-tests">10. Run Tests<a class="headerlink" href="#10-run-tests" title="Permanent link">&para;</a></h3>
+<p>Run tests:</p>
+<hr />
+<h2 id="run-all-tool-tests-hatch-run-py312-testtest-tests_aitools-run-your-specific-test-hatch-run-py312-testtest-tests_aitoolstoolstest_your_toolpy-run-with-verbose-output-hatch-run-py312-testtest-tests_aitoolstoolstest_your_toolpy-v"><div class="highlight"><pre><span></span><code><span class="c1"># Run all tool tests</span>
+hatch<span class="w"> </span>run<span class="w"> </span>+py<span class="o">=</span><span class="m">3</span>.12<span class="w"> </span>test:test<span class="w"> </span>tests/_ai/tools
+
+<span class="c1"># Run your specific test</span>
+hatch<span class="w"> </span>run<span class="w"> </span>+py<span class="o">=</span><span class="m">3</span>.12<span class="w"> </span>test:test<span class="w"> </span>tests/_ai/tools/tools/test_your_tool.py
+
+<span class="c1"># Run with verbose output</span>
+hatch<span class="w"> </span>run<span class="w"> </span>+py<span class="o">=</span><span class="m">3</span>.12<span class="w"> </span>test:test<span class="w"> </span>tests/_ai/tools/tools/test_your_tool.py<span class="w"> </span>-v
+</code></pre></div><a class="headerlink" href="#run-all-tool-tests-hatch-run-py312-testtest-tests_aitools-run-your-specific-test-hatch-run-py312-testtest-tests_aitoolstoolstest_your_toolpy-run-with-verbose-output-hatch-run-py312-testtest-tests_aitoolstoolstest_your_toolpy-v" title="Permanent link">&para;</a></h2>
+<h3 id="11-update-documentation">11. Update Documentation<a class="headerlink" href="#11-update-documentation" title="Permanent link">&para;</a></h3>
+<p>Add your tool to the user-facing documentation in <code>docs/guides/editor_features/tools.md</code>. Add a row to the appropriate category table:</p>
+<hr />
+<h2 id="available-tools-appropriate-category-tool-description-your_tool_name-brief-description-of-what-the-tool-does-takes-param1-and-param2-parameters-returns-description-of-output"><div class="highlight"><pre><span></span><code><span class="gu">## Available tools</span>
+
+<span class="gu">### [Appropriate Category]</span>
+
+| Tool | Description |
+|------|-------------|
+| <span class="gs">**your_tool_name**</span> | Brief description of what the tool does. Takes <span class="sb">`param1`</span> and <span class="sb">`param2`</span> parameters. Returns description of output. |
+</code></pre></div><a class="headerlink" href="#available-tools-appropriate-category-tool-description-your_tool_name-brief-description-of-what-the-tool-does-takes-param1-and-param2-parameters-returns-description-of-output" title="Permanent link">&para;</a></h2>
+<p>Choose the appropriate category:
+- <strong>Inspection</strong>: Tools for exploring notebook structure and runtime
+- <strong>Data</strong>: Tools for accessing variables and database information
+- <strong>Debugging</strong>: Tools for finding and fixing issues
+- <strong>Reference</strong>: Tools for accessing marimo documentation</p>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="type-safety">Type Safety<a class="headerlink" href="#type-safety" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Use dataclasses</strong> for all input/output types</li>
+<li><strong>Add type hints</strong> for all methods and attributes</li>
+<li><strong>Use TYPE_CHECKING</strong> for imports only needed for type checking</li>
+<li><strong>Import from marimo types</strong> (<code>SessionId</code>, <code>CellId_t</code>, etc.)</li>
+<li><strong>Keep types in your tool file</strong> unless they're used by multiple tools—only add to <code>marimo/_ai/_tools/types.py</code> if shared across many files</li>
+</ul>
+<h3 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Write clear docstrings</strong> following the template</li>
+<li><strong>Document all Args</strong> in the class docstring</li>
+<li><strong>Describe Returns</strong> in the class docstring</li>
+<li><strong>Provide ToolGuidelines</strong> to help AI assistants</li>
+<li><strong>Include examples</strong> in docstrings when helpful</li>
+</ul>
+<h3 id="output-design">Output Design<a class="headerlink" href="#output-design" title="Permanent link">&para;</a></h3>
+<p>Design helpful outputs:</p>
+<hr />
+<h2 id="return-yourtooloutput-dataresult-provide-actionable-next-steps-next_steps-use-get_cell_runtime_data-to-inspect-cells-check-errors-with-get_notebook_errors-optional-user-facing-message-messagefound-5-items-matching-your-query-optional-metadata-metaquery_time-05"><div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">YourToolOutput</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">result</span><span class="p">,</span>
+    <span class="c1"># Provide actionable next steps</span>
+    <span class="n">next_steps</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;Use get_cell_runtime_data to inspect cells&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Check errors with get_notebook_errors&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="c1"># Optional user-facing message</span>
+    <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Found 5 items matching your query&quot;</span><span class="p">,</span>
+    <span class="c1"># Optional metadata</span>
+    <span class="n">meta</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;query_time&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#return-yourtooloutput-dataresult-provide-actionable-next-steps-next_steps-use-get_cell_runtime_data-to-inspect-cells-check-errors-with-get_notebook_errors-optional-user-facing-message-messagefound-5-items-matching-your-query-optional-metadata-metaquery_time-05" title="Permanent link">&para;</a></h2>
+<h3 id="helper-methods">Helper Methods<a class="headerlink" href="#helper-methods" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Prefix private methods with <code>_</code></strong></li>
+<li><strong>Keep handle() method focused</strong> on orchestration</li>
+<li><strong>Extract complex logic</strong> into helper methods</li>
+<li><strong>Reuse ToolContext methods</strong> instead of duplicating logic</li>
+</ul>
+<h2 id="common-pitfalls">Common Pitfalls<a class="headerlink" href="#common-pitfalls" title="Permanent link">&para;</a></h2>
+<h3 id="dont-duplicate-toolcontext-logic">❌ Don't: Duplicate ToolContext Logic<a class="headerlink" href="#dont-duplicate-toolcontext-logic" title="Permanent link">&para;</a></h3>
+<hr />
+<h2 id="bad-reimplementing-context-logic-def-handleself-args-args-output-session-selfcontextget_sessionargssession_id-cell_notifications-sessionsession_viewcell_notifications-errors-for-cell_id-op-in-cell_notificationsitems-if-opoutput-and-opoutputchannel-cellchannelmarimo_error-errorsappend-duplicating-error-extraction"><div class="highlight"><pre><span></span><code><span class="c1"># Bad: Reimplementing context logic</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Output</span><span class="p">:</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+    <span class="n">cell_notifications</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">session_view</span><span class="o">.</span><span class="n">cell_notifications</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">cell_id</span><span class="p">,</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">cell_notifications</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">output</span> <span class="ow">and</span> <span class="n">op</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">channel</span> <span class="o">==</span> <span class="n">CellChannel</span><span class="o">.</span><span class="n">MARIMO_ERROR</span><span class="p">:</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># Duplicating error extraction</span>
+</code></pre></div><a class="headerlink" href="#bad-reimplementing-context-logic-def-handleself-args-args-output-session-selfcontextget_sessionargssession_id-cell_notifications-sessionsession_viewcell_notifications-errors-for-cell_id-op-in-cell_notificationsitems-if-opoutput-and-opoutputchannel-cellchannelmarimo_error-errorsappend-duplicating-error-extraction" title="Permanent link">&para;</a></h2>
+<h3 id="do-use-toolcontext-methods">✅ Do: Use ToolContext Methods<a class="headerlink" href="#do-use-toolcontext-methods" title="Permanent link">&para;</a></h3>
+<hr />
+<h2 id="good-using-context-methods-def-handleself-args-args-output-errors-selfcontextget_notebook_errors-argssession_id-include_stderrtrue"><div class="highlight"><pre><span></span><code><span class="c1"># Good: Using context methods</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Output</span><span class="p">:</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">get_notebook_errors</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">session_id</span><span class="p">,</span>
+        <span class="n">include_stderr</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#good-using-context-methods-def-handleself-args-args-output-errors-selfcontextget_notebook_errors-argssession_id-include_stderrtrue" title="Permanent link">&para;</a></h2>
+<h3 id="dont-raise-generic-exceptions">❌ Don't: Raise Generic Exceptions<a class="headerlink" href="#dont-raise-generic-exceptions" title="Permanent link">&para;</a></h3>
+<hr />
+<h2 id="bad-using-generic-exceptions-if-not-found-raise-valueerrornot-found"><div class="highlight"><pre><span></span><code><span class="c1"># Bad: Using generic exceptions</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not found&quot;</span><span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#bad-using-generic-exceptions-if-not-found-raise-valueerrornot-found" title="Permanent link">&para;</a></h2>
+<h3 id="do-raise-toolexecutionerror">✅ Do: Raise ToolExecutionError<a class="headerlink" href="#do-raise-toolexecutionerror" title="Permanent link">&para;</a></h3>
+<hr />
+<h2 id="good-structured-error-with-metadata-if-not-found-raise-toolexecutionerror-cell-not-found-in-session-codecell_not_found-is_retryablefalse-suggested_fixuse-get_lightweight_cell_map-to-find-valid-cell-ids"><div class="highlight"><pre><span></span><code><span class="c1"># Good: Structured error with metadata</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">ToolExecutionError</span><span class="p">(</span>
+        <span class="s2">&quot;Cell not found in session&quot;</span><span class="p">,</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;CELL_NOT_FOUND&quot;</span><span class="p">,</span>
+        <span class="n">is_retryable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">suggested_fix</span><span class="o">=</span><span class="s2">&quot;Use get_lightweight_cell_map to find valid cell IDs&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#good-structured-error-with-metadata-if-not-found-raise-toolexecutionerror-cell-not-found-in-session-codecell_not_found-is_retryablefalse-suggested_fixuse-get_lightweight_cell_map-to-find-valid-cell-ids" title="Permanent link">&para;</a></h2>
+<h3 id="dont-return-unstructured-data">❌ Don't: Return Unstructured Data<a class="headerlink" href="#dont-return-unstructured-data" title="Permanent link">&para;</a></h3>
+<hr />
+<h2 id="bad-returning-raw-data-def-handleself-args-args-output-return-data-count-5-type-ignore"><div class="highlight"><pre><span></span><code><span class="c1"># Bad: Returning raw data</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Output</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>  <span class="c1"># type: ignore</span>
+</code></pre></div><a class="headerlink" href="#bad-returning-raw-data-def-handleself-args-args-output-return-data-count-5-type-ignore" title="Permanent link">&para;</a></h2>
+<h3 id="do-use-typed-dataclass-output">✅ Do: Use Typed Dataclass Output<a class="headerlink" href="#do-use-typed-dataclass-output" title="Permanent link">&para;</a></h3>
+<hr />
+<h2 id="good-structured-output-with-successresult-def-handleself-args-args-output-return-yourtooloutput-data-count5-next_stepsreview-the-results"><div class="highlight"><pre><span></span><code><span class="c1"># Good: Structured output with SuccessResult</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Output</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">YourToolOutput</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span>
+        <span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">next_steps</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Review the results&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#good-structured-output-with-successresult-def-handleself-args-args-output-return-yourtooloutput-data-count5-next_stepsreview-the-results" title="Permanent link">&para;</a></h2>
+<h3 id="dont-use-typeddict-or-other-type-annotations">❌ Don't: Use TypedDict or Other Type Annotations<a class="headerlink" href="#dont-use-typeddict-or-other-type-annotations" title="Permanent link">&para;</a></h3>
+<hr />
+<h2 id="bad-using-typeddict-for-tool-inputoutput-from-typing-import-typeddict-class-yourtoolargstypeddict-session_id-str-count-int"><div class="highlight"><pre><span></span><code><span class="c1"># Bad: Using TypedDict for tool input/output</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">YourToolArgs</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">count</span><span class="p">:</span> <span class="nb">int</span>
+</code></pre></div><a class="headerlink" href="#bad-using-typeddict-for-tool-inputoutput-from-typing-import-typeddict-class-yourtoolargstypeddict-session_id-str-count-int" title="Permanent link">&para;</a></h2>
+<h3 id="do-use-dataclasses">✅ Do: Use Dataclasses<a class="headerlink" href="#do-use-dataclasses" title="Permanent link">&para;</a></h3>
+<hr />
+<h2 id="good-using-dataclasses-as-required-from-dataclasses-import-dataclass-dataclass-class-yourtoolargs-session_id-sessionid-count-int-0"><div class="highlight"><pre><span></span><code><span class="c1"># Good: Using dataclasses as required</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">YourToolArgs</span><span class="p">:</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="n">SessionId</span>
+    <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+</code></pre></div><a class="headerlink" href="#good-using-dataclasses-as-required-from-dataclasses-import-dataclass-dataclass-class-yourtoolargs-session_id-sessionid-count-int-0" title="Permanent link">&para;</a></h2>
+<p><strong>Why?</strong> The tool system requires dataclasses for proper serialization, validation, and compatibility with both backend and MCP contexts.</p>
+<h2 id="advanced-topics">Advanced Topics<a class="headerlink" href="#advanced-topics" title="Permanent link">&para;</a></h2>
+<h3 id="async-tools">Async Tools<a class="headerlink" href="#async-tools" title="Permanent link">&para;</a></h3>
+<p>For operations that need async/await:</p>
+<hr />
+<h2 id="class-asynctooltoolbaseargs-output-tool-with-async-operations-async-def-handleself-args-args-output-type-ignoreoverride-note-add-type-ignoreoverride-for-async-handle-session-selfcontextget_sessionargssession_id-result-await-self_async_worksession-return-outputresultresult"><div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AsyncTool</span><span class="p">(</span><span class="n">ToolBase</span><span class="p">[</span><span class="n">Args</span><span class="p">,</span> <span class="n">Output</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tool with async operations.&quot;&quot;&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Output</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Note: Add type: ignore[override] for async handle.&quot;&quot;&quot;</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_async_work</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Output</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#class-asynctooltoolbaseargs-output-tool-with-async-operations-async-def-handleself-args-args-output-type-ignoreoverride-note-add-type-ignoreoverride-for-async-handle-session-selfcontextget_sessionargssession_id-result-await-self_async_worksession-return-outputresultresult" title="Permanent link">&para;</a></h2>
+<h3 id="tools-with-side-effects">Tools with Side Effects<a class="headerlink" href="#tools-with-side-effects" title="Permanent link">&para;</a></h3>
+<p>Generally it's better to avoid side effects in your tool. If it can't be avoided make sure to document side effects in guidelines:</p>
+<hr />
+<h2 id="guidelines-toolguidelines-side_effects-modifies-notebook-cells-triggers-cell-re-execution"><div class="highlight"><pre><span></span><code><span class="n">guidelines</span> <span class="o">=</span> <span class="n">ToolGuidelines</span><span class="p">(</span>
+    <span class="n">side_effects</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;Modifies notebook cells&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Triggers cell re-execution&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#guidelines-toolguidelines-side_effects-modifies-notebook-cells-triggers-cell-re-execution" title="Permanent link">&para;</a></h2>
+<h3 id="complex-return-types">Complex Return Types<a class="headerlink" href="#complex-return-types" title="Permanent link">&para;</a></h3>
+<p>Use nested dataclasses for complex outputs:</p>
+<hr />
+<h2 id="dataclass-class-cellinfo-cell_id-str-code-str-dataclass-class-complexoutputsuccessresult-cells-listcellinfo-fielddefault_factorylist-summary-dictstr-any-fielddefault_factorydict"><div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CellInfo</span><span class="p">:</span>
+    <span class="n">cell_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">code</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ComplexOutput</span><span class="p">(</span><span class="n">SuccessResult</span><span class="p">):</span>
+    <span class="n">cells</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CellInfo</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+</code></pre></div><a class="headerlink" href="#dataclass-class-cellinfo-cell_id-str-code-str-dataclass-class-complexoutputsuccessresult-cells-listcellinfo-fielddefault_factorylist-summary-dictstr-any-fielddefault_factorydict" title="Permanent link">&para;</a></h2>
+<h2 id="review-checklist">Review Checklist<a class="headerlink" href="#review-checklist" title="Permanent link">&para;</a></h2>
+<p>Before submitting your tool:</p>
+<ul>
+<li>[ ] Tool class inherits from <code>ToolBase[ArgsT, OutT]</code></li>
+<li>[ ] Input args are dataclasses ending with <code>Args</code></li>
+<li>[ ] Output inherits from <code>SuccessResult</code> and ends with <code>Output</code></li>
+<li>[ ] <code>handle()</code> method is implemented</li>
+<li>[ ] Tool is registered in <code>tools_registry.py</code></li>
+<li>[ ] Args and Output added to <code>TOOL_IO_CLASSES</code> in <code>tests/_utils/test_msgspec_basestruct.py</code></li>
+<li>[ ] Comprehensive docstring with Args/Returns</li>
+<li>[ ] <code>ToolGuidelines</code> provided (only if use cases are clear)</li>
+<li>[ ] Error handling uses <code>ToolExecutionError</code> for expected failures only</li>
+<li>[ ] Unit tests cover happy path and errors</li>
+<li>[ ] Tests mock <code>ToolContext</code> appropriately</li>
+<li>[ ] All tests pass</li>
+<li>[ ] Type hints are complete</li>
+<li>[ ] Documentation updated in <code>docs/guides/editor_features/tools.md</code></li>
+</ul>
+<h2 id="additional-resources">Additional Resources<a class="headerlink" href="#additional-resources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Base Tool Class</strong>: <code>marimo/_ai/_tools/base.py</code></li>
+<li><strong>Tool Context</strong>: <code>marimo/_ai/_tools/base.py</code> (<code>ToolContext</code>)</li>
+<li><strong>Exception Handling</strong>: <code>marimo/_ai/_tools/utils/exceptions.py</code></li>
+<li><strong>Type Definitions</strong>: <code>marimo/_ai/_tools/types.py</code></li>
+<li><strong>MCP Server Setup</strong>: <code>marimo/_mcp/server/main.py</code></li>
+<li><strong>Backend Tool Manager</strong>: <code>marimo/_server/ai/tools/tool_manager.py</code></li>
+</ul>
+<h2 id="questions">Questions?<a class="headerlink" href="#questions" title="Permanent link">&para;</a></h2>
+<p>If you have questions or run into issues:</p>
+<ol>
+<li>Check existing tools in <code>marimo/_ai/_tools/tools/</code> for examples</li>
+<li>Review tests in <code>tests/_ai/tools/tools/</code> for testing patterns</li>
+<li>Ask in the marimo community channels</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
