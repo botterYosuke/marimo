@@ -9,6 +9,7 @@ import { createRequire } from "node:module";
 import { initLogger, logInfo, logError } from "./utils/logger.js";
 import { getAppRoot, getMarimoServerExecutable } from "./utils/paths.js";
 import { injectCells, readProgress, updateSetupBlock } from "./utils/notebook-injector.js";
+import { getMostRecentFile, addRecentFile } from "./utils/recent-files.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,11 +78,44 @@ function connectSteam() {
 // Initialize Steam early (before app.whenReady)
 initSteam();
 
-let mainWindow = null;
+// Multi-window support: Map<windowId, WindowInfo>
+// WindowInfo = { window, serverProcess, serverPort, notebookPath, status, logs }
+const windows = new Map();
+let nextWindowId = 1;
+let nextPort = 2718;
 
-// Server configuration
-const SERVER_URL = "http://localhost:2718";
-const SERVER_PORT = 2718;
+/**
+ * Find an available port starting from the given port
+ * @param {number} startPort - The port to start searching from
+ * @returns {Promise<number>} An available port
+ */
+async function findAvailablePort(startPort) {
+  const net = await import("node:net");
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.listen(startPort, "127.0.0.1", () => {
+      const port = server.address().port;
+      server.close(() => resolve(port));
+    });
+    server.on("error", () => {
+      // Port is in use, try next one
+      resolve(findAvailablePort(startPort + 1));
+    });
+  });
+}
+
+/**
+ * Normalize file path for comparison (handles Windows case-insensitivity and slashes)
+ * @param {string} filePath - The file path to normalize
+ * @returns {string} Normalized path
+ */
+function normalizePathForComparison(filePath) {
+  const normalized = path.normalize(filePath);
+  // On Windows, paths are case-insensitive
+  return process.platform === "win32" ? normalized.toLowerCase() : normalized;
+}
+
+// Server status constants
 const SERVER_STATUS = {
   RUNNING: "running",
   STOPPED: "stopped",
@@ -89,21 +123,26 @@ const SERVER_STATUS = {
   ERROR: "error",
 };
 
-let serverStatus = SERVER_STATUS.STOPPED;
-let serverLogs = [];
-let serverProcess = null; // Child process for the Python server
-
 // Notebook management
-let currentNotebookPath = null; // 現在開いているノートブックのパス
 const DEFAULT_NOTEBOOK = "wasm-intro.py"; // 起動時のデフォルト
 
 /**
- * Create the main application window
+ * Create a new notebook window with its own server
+ * @param {string} notebookPath - Path to the notebook file (optional, uses default if not provided)
+ * @returns {Promise<number>} windowId
  */
-function createWindow() {
-  logInfo("Creating main window...");
+async function createNotebookWindow(notebookPath = null) {
+  const windowId = nextWindowId++;
+  const port = await findAvailablePort(nextPort);
+  nextPort = port + 1; // Update for next window
+  const actualNotebookPath = notebookPath || getDefaultNotebook();
 
-  mainWindow = new BrowserWindow({
+  // Add to recent files history
+  addRecentFile(actualNotebookPath);
+
+  logInfo(`Creating window ${windowId} for notebook: ${actualNotebookPath}`);
+
+  const window = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
@@ -115,249 +154,329 @@ function createWindow() {
     icon: path.join(getAppRoot(), "frontend", "public", "logo.png"),
   });
 
-  // Load the app
+  // Store window info
+  const windowInfo = {
+    window,
+    serverProcess: null,
+    serverPort: port,
+    notebookPath: actualNotebookPath,
+    status: SERVER_STATUS.STOPPED,
+    logs: [],
+  };
+  windows.set(windowId, windowInfo);
+
+  // Load the app with windowId and port as query params
   if (app.isPackaged) {
     // Production: load from dist
-    mainWindow.loadFile(path.join(getAppRoot(), "dist", "index.html"));
+    window.loadFile(path.join(getAppRoot(), "dist", "index.html"), {
+      query: { windowId: String(windowId), port: String(port) },
+    });
   } else {
     // Development: load from Vite dev server
-    mainWindow.loadURL("http://localhost:3000");
+    window.loadURL(`http://localhost:3000?windowId=${windowId}&port=${port}`);
   }
 
-  // Open DevTools in development
-  // if (!app.isPackaged) {
-  //   mainWindow.webContents.openDevTools();
-  // }
+  // Start server for this window (production only)
+  if (app.isPackaged) {
+    startServerForWindow(windowId, actualNotebookPath);
+  }
 
-  mainWindow.on("closed", () => {
-    mainWindow = null;
+  // Set window title with notebook name
+  const notebookName = path.basename(actualNotebookPath);
+  window.setTitle(`${notebookName} - marimo`);
+
+  // Handle window close - cleanup this window only
+  window.on("closed", () => {
+    logInfo(`Window ${windowId} closed, cleaning up...`);
+    stopServerForWindow(windowId);
+    windows.delete(windowId);
   });
 
-  logInfo("Main window created");
+  logInfo(`Window ${windowId} created on port ${port}`);
+  return windowId;
+}
+
+/**
+ * Legacy createWindow function for backwards compatibility
+ */
+async function createWindow() {
+  return await createNotebookWindow(null);
 }
 
 /**
  * Get the default startup notebook path.
- * Template copying is handled by scripts/start-server.js
+ * Priority:
+ * 1. Most recently opened file (if exists)
+ * 2. Default template notebook (wasm-intro.py)
  */
 function getDefaultNotebook() {
+  // Try to get the most recently opened file
+  const mostRecent = getMostRecentFile();
+  if (mostRecent && existsSync(mostRecent)) {
+    logInfo(`Using most recent file: ${mostRecent}`);
+    return mostRecent;
+  }
+
+  // Fallback to default notebook
   const userNotebookDir = path.join(app.getPath("userData"), "notebooks");
   return path.join(userNotebookDir, DEFAULT_NOTEBOOK);
 }
 
 /**
- * Open a notebook file (internal helper)
+ * Open a notebook file in a new window
  * @param {string} filePath - Absolute path to the notebook file
+ * @returns {Promise<{success: boolean, windowId?: number, path?: string, error?: string, alreadyOpen?: boolean}>}
  */
-async function openNotebookFile(filePath) {
-  logInfo(`Opening notebook: ${filePath}`);
-  currentNotebookPath = filePath;
+async function openNotebookInNewWindow(filePath) {
+  logInfo(`Opening notebook in new window: ${filePath}`);
 
-  // Stop current server
-  stopServer();
+  // Check if already open (with path normalization for Windows)
+  const normalizedPath = normalizePathForComparison(filePath);
+  for (const [windowId, info] of windows) {
+    const normalizedNotebookPath = normalizePathForComparison(info.notebookPath);
+    if (normalizedNotebookPath === normalizedPath) {
+      // Already open - focus existing window
+      if (info.window && !info.window.isDestroyed()) {
+        info.window.focus();
+        logInfo(`Notebook already open in window ${windowId}, focusing`);
+        return { success: true, windowId, path: filePath, alreadyOpen: true };
+      }
+    }
+  }
 
-  // Wait for server to stop
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Start server with new notebook
-  startServerWithNotebook(filePath);
-
-  return { success: true, path: filePath };
+  // Create new window
+  const windowId = await createNotebookWindow(filePath);
+  return { success: true, windowId, path: filePath };
 }
 
 /**
- * Start the marimo Python server with default notebook
- */
-function startServer() {
-  const notebookPath = getDefaultNotebook();
-  currentNotebookPath = notebookPath;
-  startServerWithNotebook(notebookPath);
-}
-
-/**
- * Start the marimo Python server with a specific notebook
+ * Start the marimo Python server for a specific window
+ * @param {number} windowId - The window ID
  * @param {string} notebookPath - Absolute path to the notebook file
  */
-function startServerWithNotebook(notebookPath) {
+function startServerForWindow(windowId, notebookPath) {
+  const windowInfo = windows.get(windowId);
+  if (!windowInfo) {
+    logError(`Window ${windowId} not found`);
+    return;
+  }
+
   // If server is already starting or running, don't start again
-  if (serverStatus === SERVER_STATUS.STARTING || serverStatus === SERVER_STATUS.RUNNING) {
-    logInfo("Server is already starting or running");
+  if (windowInfo.status === SERVER_STATUS.STARTING || windowInfo.status === SERVER_STATUS.RUNNING) {
+    logInfo(`Server for window ${windowId} is already starting or running`);
     return;
   }
 
-  logInfo("Starting marimo server...");
-  serverStatus = SERVER_STATUS.STARTING;
+  logInfo(`Starting marimo server for window ${windowId}...`);
+  windowInfo.status = SERVER_STATUS.STARTING;
 
-  // Notify the main window
-  if (mainWindow) {
-    mainWindow.webContents.send("server:status-changed", serverStatus);
+  // Notify the window
+  if (windowInfo.window && !windowInfo.window.isDestroyed()) {
+    windowInfo.window.webContents.send("server:status-changed", windowInfo.status);
   }
 
-  logInfo(`Startup notebook: ${notebookPath}`);
+  logInfo(`Window ${windowId} notebook: ${notebookPath}, port: ${windowInfo.serverPort}`);
 
-  // Check if we're in production (packaged app)
-  if (app.isPackaged) {
-    // Get the server executable path
-    const serverExecutable = getMarimoServerExecutable();
-    logInfo(`Server executable: ${serverExecutable}`);
+  // Get the server executable path
+  const serverExecutable = getMarimoServerExecutable();
+  logInfo(`Server executable: ${serverExecutable}`);
 
-    // In production, use the PyInstaller executable
-    if (!existsSync(serverExecutable)) {
-      logError(`Server executable not found: ${serverExecutable}`);
-      serverStatus = SERVER_STATUS.ERROR;
-      if (mainWindow) {
-        mainWindow.webContents.send("server:status-changed", serverStatus);
-      }
-      return;
-    }
-
-    // Get the notebook directory for BACKCASTPRO_CACHE_DIR
-    const notebookDir = path.dirname(notebookPath);
-
-    // Spawn the server process
-    serverProcess = spawn(serverExecutable, [
-      "edit",
-      "--no-token",
-      "--headless",
-      "--port",
-      String(SERVER_PORT),
-      notebookPath,
-    ], {
-      stdio: ["ignore", "pipe", "pipe"],
-      env: {
-        ...process.env,
-        // Ensure PATH includes necessary directories
-        PATH: process.env.PATH || "",
-      },
-    });
-  } else {
-    // In development, server is started externally via pnpm start:server
-    // But we still need to tell it which notebook to open
-    logInfo("Development mode: server should be started externally");
-    logInfo(`Expected notebook path: ${notebookPath}`);
-    serverStatus = SERVER_STATUS.STOPPED;
-    if (mainWindow) {
-      mainWindow.webContents.send("server:status-changed", serverStatus);
+  // In production, use the PyInstaller executable
+  if (!existsSync(serverExecutable)) {
+    logError(`Server executable not found: ${serverExecutable}`);
+    windowInfo.status = SERVER_STATUS.ERROR;
+    if (windowInfo.window && !windowInfo.window.isDestroyed()) {
+      windowInfo.window.webContents.send("server:status-changed", windowInfo.status);
     }
     return;
   }
+
+  // Spawn the server process
+  const serverProcess = spawn(serverExecutable, [
+    "edit",
+    "--no-token",
+    "--headless",
+    "--port",
+    String(windowInfo.serverPort),
+    notebookPath,
+  ], {
+    stdio: ["ignore", "pipe", "pipe"],
+    env: {
+      ...process.env,
+      PATH: process.env.PATH || "",
+    },
+  });
+
+  windowInfo.serverProcess = serverProcess;
 
   // Handle server output
-  if (serverProcess) {
-    serverProcess.stdout?.on("data", (data) => {
-      const message = data.toString();
-      logInfo(`[Server] ${message.trim()}`);
-      serverLogs.push({ timestamp: Date.now(), type: "stdout", message });
+  serverProcess.stdout?.on("data", (data) => {
+    const message = data.toString();
+    logInfo(`[Server ${windowId}] ${message.trim()}`);
+    windowInfo.logs.push({ timestamp: Date.now(), type: "stdout", message });
 
-      // Limit log size
-      if (serverLogs.length > 1000) {
-        serverLogs.shift();
-      }
-    });
+    // Limit log size
+    if (windowInfo.logs.length > 1000) {
+      windowInfo.logs.shift();
+    }
+  });
 
-    serverProcess.stderr?.on("data", (data) => {
-      const message = data.toString();
-      logError(`[Server] ${message.trim()}`);
-      serverLogs.push({ timestamp: Date.now(), type: "stderr", message });
+  serverProcess.stderr?.on("data", (data) => {
+    const message = data.toString();
+    logError(`[Server ${windowId}] ${message.trim()}`);
+    windowInfo.logs.push({ timestamp: Date.now(), type: "stderr", message });
 
-      // Limit log size
-      if (serverLogs.length > 1000) {
-        serverLogs.shift();
-      }
-    });
+    // Limit log size
+    if (windowInfo.logs.length > 1000) {
+      windowInfo.logs.shift();
+    }
+  });
 
-    serverProcess.on("error", (error) => {
-      logError("Failed to start server", error);
-      serverStatus = SERVER_STATUS.ERROR;
-      if (mainWindow) {
-        mainWindow.webContents.send("server:status-changed", serverStatus);
-      }
-      serverProcess = null;
-    });
+  serverProcess.on("error", (error) => {
+    logError(`Failed to start server for window ${windowId}`, error);
+    windowInfo.status = SERVER_STATUS.ERROR;
+    if (windowInfo.window && !windowInfo.window.isDestroyed()) {
+      windowInfo.window.webContents.send("server:status-changed", windowInfo.status);
+    }
+    windowInfo.serverProcess = null;
+  });
 
-    serverProcess.on("exit", (code, signal) => {
-      logInfo(`Server process exited with code ${code} and signal ${signal}`);
-      serverStatus = SERVER_STATUS.STOPPED;
-      if (mainWindow) {
-        mainWindow.webContents.send("server:status-changed", serverStatus);
-      }
-      serverProcess = null;
-    });
+  serverProcess.on("exit", (code, signal) => {
+    logInfo(`Server for window ${windowId} exited with code ${code} and signal ${signal}`);
+    windowInfo.status = SERVER_STATUS.STOPPED;
+    if (windowInfo.window && !windowInfo.window.isDestroyed()) {
+      windowInfo.window.webContents.send("server:status-changed", windowInfo.status);
+    }
+    windowInfo.serverProcess = null;
+  });
+}
+
+/**
+ * Stop the marimo Python server for a specific window
+ * @param {number} windowId - The window ID
+ */
+function stopServerForWindow(windowId) {
+  const windowInfo = windows.get(windowId);
+  if (!windowInfo || !windowInfo.serverProcess) {
+    return;
+  }
+
+  logInfo(`Stopping marimo server for window ${windowId}...`);
+  windowInfo.status = SERVER_STATUS.STOPPED;
+
+  // Kill the server process
+  if (process.platform === "win32") {
+    spawn("taskkill", ["/pid", String(windowInfo.serverProcess.pid), "/f", "/t"]);
+  } else {
+    windowInfo.serverProcess.kill("SIGTERM");
+  }
+
+  windowInfo.serverProcess = null;
+
+  // Notify the window
+  if (windowInfo.window && !windowInfo.window.isDestroyed()) {
+    windowInfo.window.webContents.send("server:status-changed", windowInfo.status);
   }
 }
 
 /**
- * Stop the marimo Python server
+ * Stop all servers
  */
-function stopServer() {
-  if (serverProcess) {
-    logInfo("Stopping marimo server...");
-    serverStatus = SERVER_STATUS.STOPPED;
+function stopAllServers() {
+  for (const [windowId] of windows) {
+    stopServerForWindow(windowId);
+  }
+}
 
-    // Kill the server process
-    if (process.platform === "win32") {
-      // On Windows, use taskkill for a cleaner shutdown
-      spawn("taskkill", ["/pid", String(serverProcess.pid), "/f", "/t"]);
-    } else {
-      serverProcess.kill("SIGTERM");
-    }
+/**
+ * Get window info by window ID from IPC event
+ * @param {Electron.IpcMainInvokeEvent} event
+ * @returns {{windowId: number, windowInfo: object} | null}
+ */
+function getWindowFromEvent(event) {
+  const senderWindow = BrowserWindow.fromWebContents(event.sender);
+  if (!senderWindow) return null;
 
-    serverProcess = null;
-
-    // Notify the main window
-    if (mainWindow) {
-      mainWindow.webContents.send("server:status-changed", serverStatus);
+  for (const [windowId, windowInfo] of windows) {
+    if (windowInfo.window === senderWindow) {
+      return { windowId, windowInfo };
     }
   }
+  return null;
 }
 
 // IPC Handlers
-ipcMain.handle("server:get-url", () => {
-  logInfo("IPC: server:get-url");
-  return SERVER_URL;
-});
-
-ipcMain.handle("server:get-status", async () => {
-  logInfo("IPC: server:get-status");
-  // Check if server is running by making a request
-  try {
-    const response = await fetch(`${SERVER_URL}/healthz`);
-    if (response.ok) {
-      serverStatus = SERVER_STATUS.RUNNING;
-    } else {
-      serverStatus = SERVER_STATUS.ERROR;
-    }
-  } catch (error) {
-    serverStatus = SERVER_STATUS.STOPPED;
+ipcMain.handle("server:get-url", (event) => {
+  const ctx = getWindowFromEvent(event);
+  if (ctx) {
+    const url = `http://localhost:${ctx.windowInfo.serverPort}`;
+    logInfo(`IPC: server:get-url (window ${ctx.windowId}) -> ${url}`);
+    return url;
   }
-  return serverStatus;
+  // Fallback for first window
+  const firstWindow = windows.values().next().value;
+  const url = firstWindow ? `http://localhost:${firstWindow.serverPort}` : "http://localhost:2718";
+  logInfo(`IPC: server:get-url (fallback) -> ${url}`);
+  return url;
 });
 
-ipcMain.handle("server:start", async () => {
-  logInfo("IPC: server:start");
-  startServer();
+ipcMain.handle("server:get-status", async (event) => {
+  const ctx = getWindowFromEvent(event);
+  const port = ctx ? ctx.windowInfo.serverPort : 2718;
+  logInfo(`IPC: server:get-status (port ${port})`);
+
+  try {
+    const response = await fetch(`http://localhost:${port}/healthz`);
+    const status = response.ok ? SERVER_STATUS.RUNNING : SERVER_STATUS.ERROR;
+    if (ctx) {
+      ctx.windowInfo.status = status;
+    }
+    return status;
+  } catch (error) {
+    if (ctx) {
+      ctx.windowInfo.status = SERVER_STATUS.STOPPED;
+    }
+    return SERVER_STATUS.STOPPED;
+  }
+});
+
+ipcMain.handle("server:start", async (event) => {
+  const ctx = getWindowFromEvent(event);
+  if (ctx) {
+    logInfo(`IPC: server:start (window ${ctx.windowId})`);
+    startServerForWindow(ctx.windowId, ctx.windowInfo.notebookPath);
+  }
   return { success: true, message: "Server start requested" };
 });
 
-ipcMain.handle("server:stop", async () => {
-  logInfo("IPC: server:stop");
-  stopServer();
+ipcMain.handle("server:stop", async (event) => {
+  const ctx = getWindowFromEvent(event);
+  if (ctx) {
+    logInfo(`IPC: server:stop (window ${ctx.windowId})`);
+    stopServerForWindow(ctx.windowId);
+  }
   return { success: true, message: "Server stop requested" };
 });
 
-ipcMain.handle("server:restart", async () => {
-  logInfo("IPC: server:restart");
-  stopServer();
-  // Wait a bit before starting again
-  setTimeout(() => {
-    startServer();
-  }, 1000);
+ipcMain.handle("server:restart", async (event) => {
+  const ctx = getWindowFromEvent(event);
+  if (ctx) {
+    logInfo(`IPC: server:restart (window ${ctx.windowId})`);
+    stopServerForWindow(ctx.windowId);
+    setTimeout(() => {
+      startServerForWindow(ctx.windowId, ctx.windowInfo.notebookPath);
+    }, 1000);
+  }
   return { success: true, message: "Server restart requested" };
 });
 
-ipcMain.handle("server:get-logs", () => {
-  logInfo("IPC: server:get-logs");
-  return serverLogs;
+ipcMain.handle("server:get-logs", (event) => {
+  const ctx = getWindowFromEvent(event);
+  if (ctx) {
+    logInfo(`IPC: server:get-logs (window ${ctx.windowId})`);
+    return ctx.windowInfo.logs;
+  }
+  return [];
 });
 
 // Notebook IPC handlers
@@ -379,13 +498,39 @@ ipcMain.handle("notebook:open", async (_event, filePath) => {
     return { success: false, error: `File not found: ${filePath}` };
   }
 
-  return await openNotebookFile(filePath);
+  // Open in a new window
+  return await openNotebookInNewWindow(filePath);
 });
 
-ipcMain.handle("notebook:open-dialog", async () => {
+// New IPC handler for opening notebook in new window
+ipcMain.handle("notebook:open-in-new-window", async (_event, filePath) => {
+  logInfo(`IPC: notebook:open-in-new-window ${filePath}`);
+
+  // Validate file path
+  if (!filePath || typeof filePath !== "string") {
+    return { success: false, error: "Invalid file path" };
+  }
+
+  // Check file extension
+  if (!filePath.endsWith(".py")) {
+    return { success: false, error: "File must be a .py notebook file" };
+  }
+
+  // Check if file exists
+  if (!existsSync(filePath)) {
+    return { success: false, error: `File not found: ${filePath}` };
+  }
+
+  return await openNotebookInNewWindow(filePath);
+});
+
+ipcMain.handle("notebook:open-dialog", async (event) => {
   logInfo("IPC: notebook:open-dialog");
 
-  const result = await dialog.showOpenDialog(mainWindow, {
+  const ctx = getWindowFromEvent(event);
+  const parentWindow = ctx ? ctx.windowInfo.window : null;
+
+  const result = await dialog.showOpenDialog(parentWindow, {
     title: "Open Notebook",
     filters: [
       { name: "Python Notebooks", extensions: ["py"] },
@@ -399,43 +544,50 @@ ipcMain.handle("notebook:open-dialog", async () => {
   }
 
   const filePath = result.filePaths[0];
-  return await openNotebookFile(filePath);
+  return await openNotebookInNewWindow(filePath);
 });
 
-ipcMain.handle("notebook:get-path", () => {
-  logInfo("IPC: notebook:get-path");
-  return currentNotebookPath;
+ipcMain.handle("notebook:get-path", (event) => {
+  const ctx = getWindowFromEvent(event);
+  if (ctx) {
+    logInfo(`IPC: notebook:get-path (window ${ctx.windowId})`);
+    return ctx.windowInfo.notebookPath;
+  }
+  return null;
 });
 
 // Skill-tree notebook injection handlers
-ipcMain.handle("notebook:inject-cells", async (_event, options) => {
+ipcMain.handle("notebook:inject-cells", async (event, options) => {
   logInfo(`IPC: notebook:inject-cells for skill ${options.skillId}`);
 
-  if (!currentNotebookPath) {
+  const ctx = getWindowFromEvent(event);
+  if (!ctx || !ctx.windowInfo.notebookPath) {
     return { success: false, error: "No notebook is currently open" };
   }
 
-  return injectCells(currentNotebookPath, options);
+  return injectCells(ctx.windowInfo.notebookPath, options);
 });
 
-ipcMain.handle("notebook:read-progress", async () => {
+ipcMain.handle("notebook:read-progress", async (event) => {
   logInfo("IPC: notebook:read-progress");
 
-  if (!currentNotebookPath) {
+  const ctx = getWindowFromEvent(event);
+  if (!ctx || !ctx.windowInfo.notebookPath) {
     return { success: false, error: "No notebook is currently open" };
   }
 
-  return readProgress(currentNotebookPath);
+  return readProgress(ctx.windowInfo.notebookPath);
 });
 
-ipcMain.handle("notebook:update-setup", async (_event, newSetupContent) => {
+ipcMain.handle("notebook:update-setup", async (event, newSetupContent) => {
   logInfo("IPC: notebook:update-setup");
 
-  if (!currentNotebookPath) {
+  const ctx = getWindowFromEvent(event);
+  if (!ctx || !ctx.windowInfo.notebookPath) {
     return { success: false, error: "No notebook is currently open" };
   }
 
-  return updateSetupBlock(currentNotebookPath, newSetupContent);
+  return updateSetupBlock(ctx.windowInfo.notebookPath, newSetupContent);
 });
 
 // App event handlers
@@ -445,42 +597,40 @@ app.whenReady().then(async () => {
   // Connect to Steam after app is ready
   connectSteam();
 
-  createWindow();
+  // Create the first window (server starts inside createNotebookWindow for production)
+  await createWindow();
 
-  // Start the server automatically if packaged (production)
-  if (app.isPackaged) {
-    startServer();
-  }
-
-  // Check server status periodically
+  // Check server status periodically for all windows
   setInterval(async () => {
-    try {
-      const response = await fetch(`${SERVER_URL}/healthz`);
-      const newStatus = response.ok
-        ? SERVER_STATUS.RUNNING
-        : SERVER_STATUS.ERROR;
-      if (newStatus !== serverStatus && mainWindow) {
-        serverStatus = newStatus;
-        mainWindow.webContents.send("server:status-changed", serverStatus);
-      }
-    } catch (error) {
-      if (serverStatus !== SERVER_STATUS.STOPPED && mainWindow) {
-        serverStatus = SERVER_STATUS.STOPPED;
-        mainWindow.webContents.send("server:status-changed", serverStatus);
+    for (const [windowId, windowInfo] of windows) {
+      if (!windowInfo.window || windowInfo.window.isDestroyed()) continue;
+
+      try {
+        const response = await fetch(`http://localhost:${windowInfo.serverPort}/healthz`);
+        const newStatus = response.ok ? SERVER_STATUS.RUNNING : SERVER_STATUS.ERROR;
+        if (newStatus !== windowInfo.status) {
+          windowInfo.status = newStatus;
+          windowInfo.window.webContents.send("server:status-changed", newStatus);
+        }
+      } catch (error) {
+        if (windowInfo.status !== SERVER_STATUS.STOPPED) {
+          windowInfo.status = SERVER_STATUS.STOPPED;
+          windowInfo.window.webContents.send("server:status-changed", SERVER_STATUS.STOPPED);
+        }
       }
     }
   }, 5000); // Check every 5 seconds
 
-  app.on("activate", () => {
+  app.on("activate", async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      await createWindow();
     }
   });
 });
 
 app.on("window-all-closed", () => {
-  // Stop the server when the app is closed
-  stopServer();
+  // Stop all servers when all windows are closed
+  stopAllServers();
 
   if (process.platform !== "darwin") {
     app.quit();
@@ -500,8 +650,8 @@ app.on("before-quit", () => {
     steamInitialized = false;
   }
 
-  // Ensure server is stopped before quitting
-  stopServer();
+  // Ensure all servers are stopped before quitting
+  stopAllServers();
 });
 
 // Error handling
