@@ -47,6 +47,9 @@
     /* stylelint-disable-next-line unit-allowed-list */
     --markdown-max-width: 80ch;
 
+    /* Grid bordered background */
+    --grid-bordered-bg: light-dark(#6f8591, #4a5a64);
+
     /* Radix light colors: https://github.com/radix-ui/colors/blob/main/src/light.ts */
 
     /* Radix dark colors: https://github.com/radix-ui/colors/blob/main/src/dark.ts */

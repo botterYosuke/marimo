@@ -35,10 +35,50 @@ const DEFAULT_PANEL_LAYOUT: PanelLayout = {
   ).map((p) => p.type),
 };
 
+/**
+ * Migrate panel layout to include new panels that were added after
+ * the user's layout was saved to localStorage.
+ */
+function migratePanelLayout(layout: PanelLayout): PanelLayout {
+  const existingPanels = new Set([...layout.sidebar, ...layout.developerPanel]);
+
+  // Find panels that exist in PANELS but not in the saved layout
+  const missingSidebarPanels = PANELS.filter(
+    (p) =>
+      !p.hidden &&
+      p.defaultSection === "sidebar" &&
+      !existingPanels.has(p.type),
+  ).map((p) => p.type);
+
+  const missingDevPanels = PANELS.filter(
+    (p) =>
+      !p.hidden &&
+      p.defaultSection === "developer-panel" &&
+      !existingPanels.has(p.type),
+  ).map((p) => p.type);
+
+  if (missingSidebarPanels.length === 0 && missingDevPanels.length === 0) {
+    return layout;
+  }
+
+  return {
+    sidebar: [...layout.sidebar, ...missingSidebarPanels],
+    developerPanel: [...layout.developerPanel, ...missingDevPanels],
+  };
+}
+
+const panelLayoutStorage = {
+  ...jotaiJsonStorage,
+  getItem: (key: string, initialValue: PanelLayout): PanelLayout => {
+    const stored = jotaiJsonStorage.getItem(key, initialValue);
+    return migratePanelLayout(stored);
+  },
+};
+
 export const panelLayoutAtom = atomWithStorage<PanelLayout>(
   "marimo:panel-layout",
   DEFAULT_PANEL_LAYOUT,
-  jotaiJsonStorage,
+  panelLayoutStorage,
   { getOnInit: true },
 );
 

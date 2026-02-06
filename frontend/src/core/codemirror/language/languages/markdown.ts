@@ -132,3 +132,13 @@ export class MarkdownLanguageAdapter
     ];
   }
 }
+
+// Singleton instance for markdown detection
+const markdownAdapter = new MarkdownLanguageAdapter();
+
+/**
+ * Check if the given code is a markdown cell (starts with `mo.md(`).
+ */
+export function isMarkdownCell(code: string): boolean {
+  return markdownAdapter.isSupported(code);
+}

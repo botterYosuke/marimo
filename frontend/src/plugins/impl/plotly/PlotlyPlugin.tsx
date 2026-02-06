@@ -14,6 +14,8 @@ import { useDeepCompareMemoize } from "@/hooks/useDeepCompareMemoize";
 import { useScript } from "@/hooks/useScript";
 import { Arrays } from "@/utils/arrays";
 import { createParser, type PlotlyTemplateParser } from "./parse-from-template";
+import { useAtomValue } from "jotai";
+import { is3DModeAtom } from "@/core/mode";
 import { usePlotlyLayout } from "./usePlotlyLayout";
 
 interface Data {
@@ -98,6 +100,9 @@ const TREE_MAP_DATA_KEYS = SUNBURST_DATA_KEYS;
 
 export const PlotlyComponent = memo(
   ({ figure: originalFigure, value, setValue, config }: PlotlyPluginProps) => {
+    // 3Dモード検出（CSS2DRenderer上でのパフォーマンス最適化用）
+    const is3DMode = useAtomValue(is3DModeAtom);
+
     // Used for rendering LaTeX. TODO: Serve this library from Marimo
     const scriptStatus = useScript(
       "https://cdn.jsdelivr.net/npm/mathjax-full@3.2.2/es5/tex-mml-svg.min.js",
@@ -119,6 +124,9 @@ export const PlotlyComponent = memo(
     const plotlyConfig = useMemo((): Partial<Plotly.Config> => {
       return {
         displaylogo: false,
+        // 3Dモード時はstaticPlotを有効化（CSS2DRenderer上でのパフォーマンス最適化）
+        // hover/zoom/selectなどのイベント処理を無効化し、CPU負荷を大幅に削減
+        ...(is3DMode ? { staticPlot: true } : {}),
         modeBarButtonsToAdd: [
           // Custom button to reset the state
           {
@@ -138,7 +146,7 @@ export const PlotlyComponent = memo(
         // Prioritize user's config
         ...configMemo,
       };
-    }, [handleResetWithClear, configMemo]);
+    }, [handleResetWithClear, configMemo, is3DMode]);
 
     return (
       <LazyPlot

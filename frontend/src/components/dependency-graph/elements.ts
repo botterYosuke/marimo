@@ -7,6 +7,10 @@ import type { CellData } from "@/core/cells/types";
 import { store } from "@/core/state/jotai";
 import type { Variables } from "@/core/variables/types";
 import { Arrays } from "@/utils/arrays";
+import {
+  INPUTS_HANDLE_ID,
+  OUTPUTS_HANDLE_ID,
+} from "@/components/graph-common";
 
 export interface NodeData {
   atom: Atom<CellData>;
@@ -19,9 +23,8 @@ export function getNodeHeight(linesOfCode: number) {
   return Math.min(linesOfCode * LINE_HEIGHT + 35, 200);
 }
 
-// The nodes must have the same handle IDs to ensure edges connect correctly
-export const OUTPUTS_HANDLE_ID = "outputs";
-export const INPUTS_HANDLE_ID = "inputs";
+// Re-export for backwards compatibility
+export { INPUTS_HANDLE_ID, OUTPUTS_HANDLE_ID };
 
 interface ElementsBuilder {
   createElements: (

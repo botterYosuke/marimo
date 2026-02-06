@@ -1,0 +1,237 @@
+/* Cell 3D Wrapper Styles */
+
+.cell-3d-wrapper {
+  position: absolute;
+  background: var(--background, #ffffff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+  min-height: 70px;
+}
+
+.cell-3d-wrapper.dragging {
+  will-change: transform;
+  opacity: 0.9;
+}
+
+/* タイトルバースタイル */
+.window-titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: linear-gradient(
+    180deg,
+    var(--bg-window-titlebar-gradient-start, #f5f5f5) 0%,
+    var(--bg-window-titlebar-gradient-end, #e8e8e8) 100%
+  );
+  border-bottom: 1px solid var(--border-color-dark, #d0d0d0);
+  cursor: grab;
+  height: 32px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.window-titlebar:active {
+  cursor: grabbing;
+}
+
+.titlebar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.window-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-window-title, #333333);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titlebar-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.titlebar-btn {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-window-title, #333333);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.titlebar-btn:hover {
+  background: var(--bg-button-hover, rgba(0, 0, 0, 0.05));
+}
+
+.titlebar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.titlebar-btn.close:hover {
+  background: var(--status-close, #ff4444);
+  color: white;
+}
+
+/* タイトルバー内のToolbarItemのスタイル調整 */
+.titlebar-buttons button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titlebar-buttons button > svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ウィンドウコンテンツ */
+.window-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* テーマ反転: markdownセル以外のみ適用 */
+.window-content:not(.markdown-content) {
+  color-scheme: dark;
+
+  /*
+   * Re-declare light-dark() variables to pick up the inverted color-scheme.
+   * These must be re-declared here because light-dark() is resolved at definition time.
+   */
+  --background: light-dark(hsl(0deg 0% 100%), hsl(150deg 7.7% 10.2%));
+  --foreground: light-dark(hsl(222.2deg 47.4% 11.2%), hsl(155deg 7% 93%));
+  --muted: light-dark(hsl(210deg 40% 96.1%), hsl(180deg 14% 1%));
+  --muted-foreground: light-dark(hsl(215.4deg 16.3% 46.9%), hsl(155deg 5% 68.3%));
+  --border: light-dark(hsl(214.3deg 31.8% 91.4%), hsl(153deg 3.7% 24.2%));
+  --card: light-dark(hsl(0deg 0% 100%), hsl(151deg 5.5% 15.2%));
+  --card-foreground: light-dark(hsl(222.2deg 47.4% 11.2%), hsl(155deg 5% 76.3%));
+}
+
+/* ダークモード時はライトテーマに（markdownセル以外） */
+.dark .window-content:not(.markdown-content) {
+  color-scheme: light;
+
+  /* Re-declare for dark mode document (showing light theme in window) */
+  --background: light-dark(hsl(0deg 0% 100%), hsl(150deg 7.7% 10.2%));
+  --foreground: light-dark(hsl(222.2deg 47.4% 11.2%), hsl(155deg 7% 93%));
+  --muted: light-dark(hsl(210deg 40% 96.1%), hsl(180deg 14% 1%));
+  --muted-foreground: light-dark(hsl(215.4deg 16.3% 46.9%), hsl(155deg 5% 68.3%));
+  --border: light-dark(hsl(214.3deg 31.8% 91.4%), hsl(153deg 3.7% 24.2%));
+  --card: light-dark(hsl(0deg 0% 100%), hsl(151deg 5.5% 15.2%));
+  --card-foreground: light-dark(hsl(222.2deg 47.4% 11.2%), hsl(155deg 5% 76.3%));
+}
+
+/* 3Dモードのフローティングウィンドウ内のoutputを非表示 */
+/* ただしmarkdownセルは除外（ソース + 出力を表示） */
+.cell-3d-wrapper:not(.markdown-cell) .window-content [data-cell-role="output"],
+.cell-3d-wrapper:not(.markdown-cell) .window-content .output-area,
+.cell-3d-wrapper:not(.markdown-cell) .output-area {
+  display: none !important;
+}
+
+/* outputを囲んでいる.relative要素とconsole出力の.relative.group要素も非表示 */
+/* ただしmarkdownセルは除外 */
+.cell-3d-wrapper:not(.markdown-cell) .marimo-cell > .relative:has(.output-area),
+.cell-3d-wrapper:not(.markdown-cell) .marimo-cell > .relative.group {
+  display: none !important;
+}
+
+/* セル内のツールバー（.tray内のabsolute right-2 -top-4 z-10）を非表示 */
+.cell-3d-wrapper .window-content .tray > div.absolute.right-2.z-10 {
+  display: none !important;
+}
+
+/* セルコンテナのスタイル調整 */
+.cells-3d-container-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * Prose Inversion for Floating Windows
+ *
+ * Problem: dark:prose-invert is based on document-level .dark class,
+ * but floating windows invert themes independently via color-scheme.
+ * This causes markdown colors to be incorrect.
+ *
+ * Solution: Manually apply/reset prose-invert CSS variables based on
+ * the opposite condition of document dark mode.
+ */
+
+/* Light mode document -> Dark theme in floating windows -> Apply prose-invert */
+/* Exclude markdown cells which don't have theme inversion */
+:root:not(.dark) .window-content:not(.markdown-content) .prose {
+  --tw-prose-body: var(--tw-prose-invert-body);
+  --tw-prose-headings: var(--tw-prose-invert-headings);
+  --tw-prose-lead: var(--tw-prose-invert-lead);
+  --tw-prose-links: var(--tw-prose-invert-links);
+  --tw-prose-bold: var(--tw-prose-invert-bold);
+  --tw-prose-counters: var(--tw-prose-invert-counters);
+  --tw-prose-bullets: var(--tw-prose-invert-bullets);
+  --tw-prose-hr: var(--tw-prose-invert-hr);
+  --tw-prose-quotes: var(--tw-prose-invert-quotes);
+  --tw-prose-quote-borders: var(--tw-prose-invert-quote-borders);
+  --tw-prose-captions: var(--tw-prose-invert-captions);
+  --tw-prose-kbd: var(--tw-prose-invert-kbd);
+  --tw-prose-kbd-shadows: var(--tw-prose-invert-kbd-shadows);
+  --tw-prose-code: var(--tw-prose-invert-code);
+  --tw-prose-pre-code: var(--tw-prose-invert-pre-code);
+  --tw-prose-pre-bg: var(--tw-prose-invert-pre-bg);
+  --tw-prose-th-borders: var(--tw-prose-invert-th-borders);
+  --tw-prose-td-borders: var(--tw-prose-invert-td-borders);
+}
+
+/*
+ * Dark mode document -> Light theme in floating windows -> Reset to non-inverted
+ * This undoes the dark:prose-invert that would otherwise be applied.
+ *
+ * These values are Tailwind Typography default prose colors (light theme).
+ * Source: @tailwindcss/typography compiled output
+ * If typography plugin is updated, these may need adjustment.
+ */
+/* Exclude markdown cells which don't have theme inversion */
+.dark .window-content:not(.markdown-content) .prose {
+  --tw-prose-body: oklch(37.3% 0.034 259.733);
+  --tw-prose-headings: oklch(21% 0.034 264.665);
+  --tw-prose-lead: oklch(44.6% 0.03 256.802);
+  --tw-prose-links: oklch(21% 0.034 264.665);
+  --tw-prose-bold: oklch(21% 0.034 264.665);
+  --tw-prose-counters: oklch(55.1% 0.027 264.364);
+  --tw-prose-bullets: oklch(87.2% 0.01 258.338);
+  --tw-prose-hr: oklch(92.8% 0.006 264.531);
+  --tw-prose-quotes: oklch(21% 0.034 264.665);
+  --tw-prose-quote-borders: oklch(92.8% 0.006 264.531);
+  --tw-prose-captions: oklch(55.1% 0.027 264.364);
+  --tw-prose-kbd: oklch(21% 0.034 264.665);
+  --tw-prose-kbd-shadows: oklab(21% -0.00316127 -0.0338527 / 0.1);
+  --tw-prose-code: oklch(21% 0.034 264.665);
+  --tw-prose-pre-code: oklch(44.6% 0.03 256.802);
+  --tw-prose-pre-bg: oklch(97.8% 0.004 286.375);
+  --tw-prose-th-borders: oklch(87.2% 0.01 258.338);
+  --tw-prose-td-borders: oklch(92.8% 0.006 264.531);
+}

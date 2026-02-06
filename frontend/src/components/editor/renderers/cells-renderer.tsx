@@ -12,6 +12,7 @@ import {
   useLayoutState,
 } from "@/core/layout/layout";
 import { type AppMode, kioskModeAtom } from "@/core/mode";
+import { EditGridLayoutRenderer } from "./grid-layout/edit-grid-layout";
 import { cellRendererPlugins } from "./plugins";
 import {
   type ICellRendererPlugin,
@@ -29,8 +30,8 @@ export const CellsRenderer: React.FC<PropsWithChildren<Props>> = memo(
     const { selectedLayout, layoutData } = useLayoutState();
     const kioskMode = useAtomValue(kioskModeAtom);
 
-    // Just render children if we are in edit mode
-    if (mode === "edit" && !kioskMode) {
+    // editモードでverticalかつkioskModeでない場合のみchildrenを返す
+    if (mode === "edit" && selectedLayout === "vertical" && !kioskMode) {
       return children;
     }
 
@@ -81,7 +82,12 @@ export const PluginCellRenderer = (props: PluginCellRendererProps) => {
   const { setCurrentLayoutData } = useLayoutActions();
   const cells = flattenTopLevelNotebookCells(notebook);
 
-  const Renderer = plugin.Component;
+  // editモードかつgridプラグインの場合はEditGridLayoutRendererを使用
+  let Renderer = plugin.Component;
+  if (mode === "edit" && plugin.type === "grid") {
+    Renderer = EditGridLayoutRenderer;
+  }
+
   const body = (
     <Renderer
       appConfig={appConfig}

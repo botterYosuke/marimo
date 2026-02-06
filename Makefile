@@ -143,6 +143,21 @@ py-snapshots:
 wheel:
 	hatch build
 
+.PHONY: electron-py
+# 🔨 Build Python executable for Electron app
+electron-py:
+	@echo "Building marimo Python server for Electron..."
+	@command -v uv >/dev/null 2>&1 || { echo "uv is required. See https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
+	uv run pyinstaller --clean --noconfirm marimo.spec
+
+.PHONY: electron-dist
+# 📦 Build Electron app distribution package
+electron-dist: electron-py
+	@echo "Building Electron app distribution package..."
+	@echo "Note: Frontend must be built first (run 'make fe' or 'pnpm build')"
+	pnpm build
+	pnpm dist:electron
+
 
 #################
 # Documentation #

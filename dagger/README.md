@@ -15,5 +15,5 @@ dagger call make <any make task>           # run make task in a dev environment
 dagger call frontend test                  # run frontend tests
 dagger call backend test                   # run backend tests
 # run frontend tests on a remote pull request
-dagger call --src https://github.com/marimo-team/marimo\#pull/2542/head frontend test
+dagger call --src https://github.com/botterYosuke/marimo\#pull/2542/head frontend test
 ```

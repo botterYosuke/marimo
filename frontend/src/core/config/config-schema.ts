@@ -23,6 +23,7 @@ const VALID_APP_WIDTHS = [
   "medium",
   "full",
   "columns",
+  "grid",
 ] as const;
 
 /**
@@ -138,7 +139,7 @@ export const UserConfigSchema = z
         default_table_max_columns: z.number().prefault(50),
         default_width: z
           .enum(VALID_APP_WIDTHS)
-          .prefault("medium")
+          .prefault("grid")
           .transform((width) => {
             if (width === "normal") {
               return "compact";
@@ -261,7 +262,7 @@ export const AppConfigSchema = z
     sql_output: SqlOutputSchema,
   })
   .prefault(() => ({
-    width: "medium" as const,
+    width: "grid" as const,
     auto_download: [],
     sql_output: "auto" as const,
   }));

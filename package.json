@@ -1,4 +1,12 @@
 {
+  "name": "marimo",
+  "version": "0.19.2",
+  "type": "module",
+  "main": "electron/main.js",
+  "author": {
+    "name": "marimo team",
+    "email": "info@marimo.io"
+  },
   "scripts": {
     "typecheck": "pnpm turbo typecheck",
     "format": "pnpm biome format --write",
@@ -6,14 +14,26 @@
     "build": "pnpm turbo build",
     "codegen": "pnpm turbo run codegen",
     "lint": "pnpm biome check --write && pnpm run -r lint",
-    "dev": "pnpm run --filter @marimo-team/frontend dev"
+    "clean:processes": "node scripts/clean-processes.js",
+    "dev": "pnpm clean:processes && concurrently --names \"fe,server\" --prefix-colors \"blue,green\" --kill-others-on-fail false \"pnpm run --filter @marimo-team/frontend dev\" \"pnpm start:server\"",
+    "dev:pyodide": "concurrently --names \"pyodide-server,fe\" --prefix-colors \"green,blue\" --kill-others-on-fail false \"uv run pyodide/build_and_serve.py\" \"cd frontend && cross-env PYODIDE=true VITE_MARIMO_VERSION=0.19.2 pnpm dev\"",
+    "start:server": "node scripts/start-server.js",
+    "start:electron": "wait-on http-get://localhost:3000 http-get://localhost:2718 --timeout 60000 -v && cross-env NODE_ENV=development pnpm exec electron .",
+    "start": "pnpm clean:processes && concurrently --names \"dev,electron\" --prefix-colors \"blue,cyan\" --kill-others-on-fail false \"pnpm dev\" \"pnpm start:electron\"",
+    "build:electron-py": "uv run pyinstaller --clean --noconfirm marimo.spec",
+    "dist:electron": "pnpm build && electron-builder"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.13",
     "@testing-library/jest-dom": "^6.9.1",
     "@typescript/native-preview": "7.0.0-dev.20260201.1",
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
     "turbo": "^2.8.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "wait-on": "^9.0.3"
   },
   "engines": {
     "node": ">=20",
@@ -35,6 +55,117 @@
       "allowedVersions": {
         "vite": "7"
       }
+    },
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "electron",
+      "electron-winstaller",
+      "es5-ext",
+      "esbuild",
+      "msw",
+      "spawn-sync"
+    ]
+  },
+  "build": {
+    "appId": "com.marimo.app",
+    "productName": "marimo",
+    "asarUnpack": [
+      "node_modules/steamworks.js/**/*"
+    ],
+    "directories": {
+      "output": "dist-electron",
+      "buildResources": "electron/build"
+    },
+    "files": [
+      "electron/**/*",
+      "frontend/dist/**/*",
+      "resources/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "electron/build/icon.ico",
+      "extraResources": [
+        {
+          "from": "dist/marimo-server.exe",
+          "to": "marimo-server.exe",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "electron/build/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "extraResources": [
+        {
+          "from": "dist/marimo-server",
+          "to": "marimo-server",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "electron/build/icon.png",
+      "category": "Development",
+      "maintainer": "marimo team <info@marimo.io>",
+      "extraResources": [
+        {
+          "from": "dist/marimo-server",
+          "to": "marimo-server",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     }
+  },
+  "dependencies": {
+    "steamworks.js": "^0.4.0"
   }
 }

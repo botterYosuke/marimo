@@ -19,6 +19,7 @@ import {
 import useEvent from "react-use-event-hook";
 import { waitForConnectionOpen } from "@/core/network/connection";
 import { useRuntimeManager } from "@/core/runtime/config";
+import { isWasm } from "@/core/wasm/utils";
 import { useDebouncedCallback } from "@/hooks/useDebounce";
 import { cn } from "@/utils/cn";
 import { copyToClipboard } from "@/utils/copy";
@@ -247,6 +248,12 @@ const TerminalComponent: React.FC<TerminalComponentProps> = ({
   // Websocket Connection
   useEffect(() => {
     if (initialized) {
+      return;
+    }
+
+    // Skip terminal WebSocket connection in Pyodide/WASM mode
+    // as there is no backend server to connect to
+    if (isWasm()) {
       return;
     }
 

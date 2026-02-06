@@ -9,18 +9,22 @@ export const layoutElements = ({
   nodes,
   edges,
   direction,
+  nodeGap = 150,
+  rankGap = 200,
+  ranker = "longest-path",
 }: {
   nodes: Node[];
   edges: Edge[];
   direction: LayoutDirection;
+  nodeGap?: number;
+  rankGap?: number;
+  ranker?: "network-simplex" | "tight-tree" | "longest-path";
 }) => {
   g.setGraph({
     rankdir: direction,
-    nodesep: 150,
-    ranksep: 200,
-    // So far, longest-path seems to give the best results as trees are
-    // generally quite wide.
-    ranker: "longest-path",
+    nodesep: nodeGap,
+    ranksep: rankGap,
+    ranker,
   });
 
   edges.forEach((edge) => g.setEdge(edge.source, edge.target));

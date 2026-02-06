@@ -36,6 +36,7 @@ import { PyodideRouter } from "./router";
 import { getWorkerRPC } from "./rpc";
 import { createShareableLink } from "./share";
 import { wasmInitializationAtom } from "./state";
+import { filenameAtom } from "../saving/file-state";
 import { fallbackFileStore, notebookFileStore } from "./store";
 import { isWasm } from "./utils";
 import type { SaveWorkerSchema } from "./worker/save-worker";
@@ -146,7 +147,9 @@ export class PyodideBridge implements RunRequests, EditRequests {
 
     const code = await notebookFileStore.readFile();
     const fallbackCode = await fallbackFileStore.readFile();
-    const filename = PyodideRouter.getFilename();
+    // Use filenameAtom (from mount config) instead of URL params
+    // This ensures the filename from mount_config is used for initial load
+    const filename = store.get(filenameAtom) ?? PyodideRouter.getFilename();
     const userConfig = store.get(userConfigAtom);
 
     const queryParameters: Record<string, string | string[]> = {};
