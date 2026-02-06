@@ -231,7 +231,7 @@ class AppScriptRunner:
                         "Unexpected error occurred while running the app. "
                         "Improperly wrapped MarimoMissingRefError exception. "
                         "Please report this issue to "
-                        "https://github.com/marimo-team/marimo/issues"
+                        "https://github.com/botterYosuke/marimo/issues"
                     ) from e.__cause__
                 raise e.__cause__.name_error from e.__cause__
             # For all other exceptions, we raise the wrapped exception

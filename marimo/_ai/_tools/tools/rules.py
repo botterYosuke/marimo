@@ -14,7 +14,7 @@ LOGGER = _loggers.marimo_logger()
 
 # We ship the rules with the package in _static/CLAUDE.md
 # If the file doesn't exist (development or edge cases), we fallback to fetching from the URL
-MARIMO_RULES_URL = "https://docs.marimo.io/CLAUDE.md"
+MARIMO_RULES_URL = "https://backcast-tan.vercel.app/CLAUDE.md"
 MARIMO_RULES_PATH = marimo_package_path() / "_static" / "CLAUDE.md"
 
 

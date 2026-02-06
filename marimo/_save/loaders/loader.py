@@ -26,7 +26,7 @@ INCONSISTENT_CACHE_BOILER_PLATE = (
     "corruption or an incompatible marimo "
     "version. Alternatively, this may be a bug"
     " in marimo. Please file an issue at "
-    "github.com/marimo-team/marimo/issues"
+    "github.com/botterYosuke/marimo/issues"
 )
 
 

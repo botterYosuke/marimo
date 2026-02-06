@@ -13,7 +13,7 @@ marimo tutorial --help
 
 !!! tip "See marimo in action on YouTube"
 
-    The [marimo concepts playlist](https://www.youtube.com/watch?v=3N6lInzq5MI&list=PLNJXGo8e1XT9jP7gPbRdm1XwloZVFvLEq) on our [YouTube channel](https://www.youtube.com/@marimo-team) gives an overview of many features.
+    The [marimo concepts playlist](https://www.youtube.com/watch?v=3N6lInzq5MI&list=PLNJXGo8e1XT9jP7gPbRdm1XwloZVFvLEq) on our [YouTube channel](https://www.youtube.com/@botterYosuke) gives an overview of many features.
 
 ## Edit notebooks
 

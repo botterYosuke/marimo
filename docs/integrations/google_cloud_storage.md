@@ -64,7 +64,7 @@ file_table if items else mo.md("No files found").callout()
 
 ## Example
 
-Check out our full example using Google Cloud Storage [here](https://github.com/marimo-team/marimo/blob/main/examples/cloud/gcp/google_cloud_storage.py)
+Check out our full example using Google Cloud Storage [here](https://github.com/botterYosuke/marimo/blob/main/examples/cloud/gcp/google_cloud_storage.py)
 
 Or run it yourself:
 

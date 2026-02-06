@@ -9,6 +9,7 @@ import {
   Undo2Icon,
 } from "lucide-react";
 import type { JSX } from "react";
+import { BacktestHud } from "@/components/editor/controls/backtest-hud";
 import { KeyboardShortcuts } from "@/components/editor/controls/keyboard-shortcuts";
 import { NotebookMenuDropdown } from "@/components/editor/controls/notebook-menu-dropdown";
 import { ShutdownButton } from "@/components/editor/controls/shutdown-button";
@@ -36,6 +37,8 @@ import { useShouldShowInterrupt } from "../cell/useShouldShowInterrupt";
 import { HideInKioskMode } from "../kiosk-mode";
 import { LayoutSelect } from "../renderers/layout-select";
 import { CommandPaletteButton } from "./command-palette-button";
+import { SkillTreeButton } from "./skill-tree-button";
+import { useBroadcastChannelRelay } from "@/hooks/useBroadcastChannelRelay";
 
 interface ControlsProps {
   presenting: boolean;
@@ -55,6 +58,9 @@ export const Controls = ({
   connectionState,
   running,
 }: ControlsProps): JSX.Element => {
+  // Relay postMessage from iframes to BroadcastChannel (for Pyodide mode)
+  useBroadcastChannelRelay();
+
   const undoAvailable = useAtomValue(canUndoDeletesAtom);
   const needsRun = useAtomValue(needsRunAtom);
   const { undoDeleteCell } = useCellActions();
@@ -84,6 +90,10 @@ export const Controls = ({
   return (
     <>
       {!presenting && <FindReplace />}
+
+      <div className={topLeftControls}>
+        <BacktestHud />
+      </div>
 
       {!closed && (
         <div className={topRightControls}>
@@ -123,6 +133,7 @@ export const Controls = ({
         </Tooltip>
 
         <CommandPaletteButton />
+        <SkillTreeButton />
         <KeyboardShortcuts />
 
         <div />
@@ -210,6 +221,9 @@ const StopControlButton = ({
     </Tooltip>
   );
 };
+
+const topLeftControls =
+  "absolute top-3 left-5 m-0 flex items-center gap-2 min-h-[28px] no-print pointer-events-auto z-30 print:hidden";
 
 const topRightControls =
   "absolute top-3 right-5 m-0 flex items-center gap-2 min-h-[28px] print:hidden pointer-events-auto z-30";

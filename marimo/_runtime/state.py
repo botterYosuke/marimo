@@ -194,8 +194,8 @@ def state(
     Warning: reactive state is an advanced feature that you likely don't need;
     it makes it possible to introduce cycles and hard-to-debug code execution
     paths. **In almost all cases, you should prefer using marimo's built-in
-    [reactive execution](https://docs.marimo.io/guides/reactivity) and
-    [interactivity](https://docs.marimo.io/guides/interactivity).**
+    [reactive execution](https://backcast-tan.vercel.app/guides/reactivity) and
+    [interactivity](https://backcast-tan.vercel.app/guides/interactivity).**
 
     This function takes an initial value and returns:
 
@@ -212,7 +212,7 @@ def state(
     You can use this function with `UIElement` `on_change` handlers to trigger
     side-effects when an element's value is updated; however, you should
     prefer using marimo's built-in [reactive execution for interactive
-    elements](https://docs.marimo.io/guides/interactivity).
+    elements](https://backcast-tan.vercel.app/guides/interactivity).
 
     For example, you can tie multiple UI elements to derive their values from
     shared state.

@@ -6,7 +6,7 @@ app = marimo.App()
 
 @app.cell
 def _(mo):
-    mo.md(r"""[Debounce mo.ui.text and mo.ui.text_area #2218](https://github.com/marimo-team/marimo/issues/2218)""")
+    mo.md(r"""[Debounce mo.ui.text and mo.ui.text_area #2218](https://github.com/botterYosuke/marimo/issues/2218)""")
     return
 
 

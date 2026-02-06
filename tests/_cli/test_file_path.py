@@ -80,8 +80,8 @@ def test_validate_name_with_directory_true() -> None:
 
 def test_github_issue_reader() -> None:
     reader = GitHubIssueReader()
-    valid_url = "https://github.com/marimo-team/marimo/issues/1"
-    invalid_url = "https://github.com/marimo-team/marimo/pull/1"
+    valid_url = "https://github.com/botterYosuke/marimo/issues/1"
+    invalid_url = "https://github.com/botterYosuke/marimo/pull/1"
 
     assert reader.can_read(valid_url) is True
     assert reader.can_read(invalid_url) is False
@@ -99,17 +99,17 @@ def test_github_issue_reader() -> None:
 
 
 def test_is_github_src_with_valid_url() -> None:
-    valid_url = "https://github.com/marimo-team/marimo/blob/main/example.py"
+    valid_url = "https://github.com/botterYosuke/marimo/blob/main/example.py"
     assert is_github_src(valid_url, ext=".py") is True
 
-    invalid_url = "https://github.com/marimo-team/marimo/blob/main/example.txt"
+    invalid_url = "https://github.com/botterYosuke/marimo/blob/main/example.txt"
     assert is_github_src(invalid_url, ext=".py") is False
 
 
 def test_github_source_reader() -> None:
     reader = GitHubSourceReader()
-    valid_url = "https://github.com/marimo-team/marimo/blob/main/example.py"
-    invalid_url = "https://github.com/marimo-team/marimo/blob/main/example.txt"
+    valid_url = "https://github.com/botterYosuke/marimo/blob/main/example.py"
+    invalid_url = "https://github.com/botterYosuke/marimo/blob/main/example.txt"
 
     assert reader.can_read(valid_url) is True
     assert reader.can_read(invalid_url) is False
@@ -173,10 +173,10 @@ def test_file_content_reader() -> None:
 
         assert reader.read_file("local.py") == ("local content", "local.py")
         assert reader.read_file(
-            "https://github.com/marimo-team/marimo/issues/1"
+            "https://github.com/botterYosuke/marimo/issues/1"
         ) == ("issue content", "issue.py")
         assert reader.read_file(
-            "https://github.com/marimo-team/marimo/blob/main/example.py"
+            "https://github.com/botterYosuke/marimo/blob/main/example.py"
         ) == ("github content", "github.py")
         assert reader.read_file(
             "https://gist.github.com/marimo-team/gist_id/example.py"
@@ -241,7 +241,7 @@ def test_validate_name_with_markdown_file():
 
 
 def test_validate_name_with_markdown_file_remote() -> None:
-    markdown_tutorial = "https://github.com/marimo-team/marimo/blob/main/marimo/_tutorials/markdown_format.md"
+    markdown_tutorial = "https://github.com/botterYosuke/marimo/blob/main/marimo/_tutorials/markdown_format.md"
     assert validate_name(
         markdown_tutorial, allow_new_file=True, allow_directory=False
     )[0].endswith("markdown_format.md")
@@ -293,7 +293,7 @@ def test_static_notebook_reader_url_formats():
 
 def test_github_issue_reader_nonexistent_issue():
     reader = GitHubIssueReader()
-    url = "https://github.com/marimo-team/marimo/issues/999999"  # noqa: E501
+    url = "https://github.com/botterYosuke/marimo/issues/999999"  # noqa: E501
     with patch("marimo._utils.requests.get") as mock_get:
         mock_get.side_effect = urllib.error.HTTPError(
             url,
@@ -309,8 +309,8 @@ def test_github_issue_reader_nonexistent_issue():
 def test_github_source_reader_different_extensions():
     reader = GitHubSourceReader()
     urls = [
-        "https://github.com/marimo-team/marimo/blob/main/example.py",
-        "https://github.com/marimo-team/marimo/blob/main/README.md",
+        "https://github.com/botterYosuke/marimo/blob/main/example.py",
+        "https://github.com/botterYosuke/marimo/blob/main/README.md",
     ]
     for url in urls:
         assert reader.can_read(url) is True
@@ -447,7 +447,7 @@ def test_generic_url_reader_with_edge_case_filenames(
     [
         ("https://gist.github.com/user/12345", True),
         ("https://gist.githubusercontent.com/user/123/raw/file.py", True),
-        ("https://github.com/marimo-team/marimo", False),
+        ("https://github.com/botterYosuke/marimo", False),
     ],
 )
 def test_is_gist_src(url: str, expected: bool) -> None:
@@ -510,7 +510,7 @@ def test_get_gist_src_url_no_matching_files():
 def test_gist_source_reader() -> None:
     reader = GistSourceReader()
     valid_url = "https://gist.github.com/user/12345"
-    invalid_url = "https://github.com/marimo-team/marimo"
+    invalid_url = "https://github.com/botterYosuke/marimo"
 
     assert reader.can_read(valid_url) is True
     assert reader.can_read(invalid_url) is False

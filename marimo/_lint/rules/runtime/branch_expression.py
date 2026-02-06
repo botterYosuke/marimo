@@ -87,8 +87,8 @@ class BranchExpressionRule(LintRule):
 
     ## References
 
-    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
-    - [Reactivity](https://docs.marimo.io/guides/reactivity/)
+    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
+    - [Reactivity](https://backcast-tan.vercel.app/guides/reactivity/)
     """
 
     code = "MR002"

@@ -19,7 +19,7 @@ class routes(UIElement[str, str]):
 
     Routes currently don't support nested routes, or dynamic routes (e.g. `#/user/:id`).
     If you'd like to see these features, please let us know on GitHub:
-    https://github.com/marimo-team/marimo/issues
+    https://github.com/botterYosuke/marimo/issues
 
     For a simple-page-application (SPA) experience, you should use hash-based routing.
     For example, prefix your routes with `#/`.

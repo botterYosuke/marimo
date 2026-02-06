@@ -36,7 +36,7 @@
 - name: marimo
   id: marimo
   description: marimo's hosted models.
-  url: https://docs.marimo.io/guides/editor_features/ai_completion/
+  url: https://backcast-tan.vercel.app/guides/editor_features/ai_completion/
 
 - name: DeepSeek
   id: deepseek

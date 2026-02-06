@@ -252,7 +252,7 @@ function getSuggestion(
   // suggestion: world")
   // we need to remove the closing ") since we already have it
   //
-  // See https://github.com/marimo-team/marimo/issues/830
+  // See https://github.com/botterYosuke/marimo/issues/830
 
   // Loop through from the whole word to the end of the suggestion
   // if we find a match, we trim it off the end of the suggestion

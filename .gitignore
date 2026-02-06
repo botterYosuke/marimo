@@ -3,6 +3,7 @@
 *.pdf
 *.txt
 !tests/**/*.txt
+!requirements-docs.txt
 
 node_modules/
 .turbo/
@@ -42,6 +43,7 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+!marimo.spec
 
 # Installer logs
 pip-log.txt
@@ -132,3 +134,13 @@ pixi.lock
 
 # mkdocs
 site
+development_docs_site/
+.playwright-mcp/
+.cursor/plans/
+dist-electron/
+
+# Steam development
+steam_appid.txt
+steam/
+nul
+frontend/e2e-tests/

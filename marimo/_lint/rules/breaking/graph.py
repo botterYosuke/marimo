@@ -43,8 +43,8 @@ class GraphRule(LintRule):
     and enforce constraints that make notebooks reliable and shareable.
 
     See Also:
-        - https://docs.marimo.io/guides/understanding_errors/ (Understanding errors)
-        - https://docs.marimo.io/guides/editor_features/understanding_dataflow/ (Dataflow)
+        - https://backcast-tan.vercel.app/guides/understanding_errors/ (Understanding errors)
+        - https://backcast-tan.vercel.app/guides/editor_features/understanding_dataflow/ (Dataflow)
     """
 
     def _get_cell_from_id(
@@ -183,8 +183,8 @@ class MultipleDefinitionsRule(GraphRule):
 
     ## References
 
-    - [Multiple Definitions Guide](https://docs.marimo.io/guides/understanding_errors/multiple_definitions/)
-    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+    - [Multiple Definitions Guide](https://backcast-tan.vercel.app/guides/understanding_errors/multiple_definitions/)
+    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
     """
 
     code = "MB002"
@@ -281,8 +281,8 @@ class CycleDependenciesRule(GraphRule):
 
     ## References
 
-    - [Cycles Guide](https://docs.marimo.io/guides/understanding_errors/cycles/)
-    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+    - [Cycles Guide](https://backcast-tan.vercel.app/guides/understanding_errors/cycles/)
+    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
     """
 
     code = "MB003"
@@ -378,8 +378,8 @@ class SetupCellDependenciesRule(GraphRule):
 
     ## References
 
-    - [Setup References Guide](https://docs.marimo.io/guides/understanding_errors/setup/)
-    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+    - [Setup References Guide](https://backcast-tan.vercel.app/guides/understanding_errors/setup/)
+    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
     """
 
     code = "MB004"

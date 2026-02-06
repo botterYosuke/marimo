@@ -111,5 +111,5 @@ fi
 # Final success message
 echo -e "\n${BOLD}${GREEN}🎉 Release $NEW_VERSION completed successfully! 🎉${NC}\n"
 echo -e "${YELLOW}Don't forget to:${NC}"
-echo "  1. Monitor the release: https://github.com/marimo-team/marimo/actions/workflows/release.yml"
-echo "  2. Draft the release notes: https://github.com/marimo-team/marimo/releases/new?tag=$NEW_VERSION"
+echo "  1. Monitor the release: https://github.com/botterYosuke/marimo/actions/workflows/release.yml"
+echo "  2. Draft the release notes: https://github.com/botterYosuke/marimo/releases/new?tag=$NEW_VERSION"

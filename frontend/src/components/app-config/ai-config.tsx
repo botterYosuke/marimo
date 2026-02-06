@@ -400,7 +400,7 @@ const renderCopilotProvider = ({
       <>
         <p className="text-sm text-muted-secondary">
           To get a Windsurf API key, follow{" "}
-          <ExternalLink href="https://docs.marimo.io/guides/editor_features/ai_completion.html#windsurf-copilot">
+          <ExternalLink href="https://backcast-tan.vercel.app/guides/editor_features/ai_completion.html#windsurf-copilot">
             these instructions
           </ExternalLink>
           .
@@ -863,7 +863,7 @@ export const AiProvidersConfig: React.FC<AiConfigProps> = ({
       <p className="text-sm text-muted-secondary">
         Add your API keys below or to <Kbd className="inline">marimo.toml</Kbd>{" "}
         to set up a provider for the Code Completion and Assistant features; see{" "}
-        <ExternalLink href="https://docs.marimo.io/guides/editor_features/ai_completion/#connecting-to-an-llm">
+        <ExternalLink href="https://backcast-tan.vercel.app/guides/editor_features/ai_completion/#connecting-to-an-llm">
           docs
         </ExternalLink>{" "}
         for more info.
@@ -1088,7 +1088,7 @@ export const AiProvidersConfig: React.FC<AiConfigProps> = ({
           <p className="text-sm text-muted-secondary mb-2">
             To use AWS Bedrock, you need to configure AWS credentials and
             region. See the{" "}
-            <ExternalLink href="https://docs.marimo.io/guides/editor_features/ai_completion.html#aws-bedrock">
+            <ExternalLink href="https://backcast-tan.vercel.app/guides/editor_features/ai_completion.html#aws-bedrock">
               documentation
             </ExternalLink>{" "}
             for more details.

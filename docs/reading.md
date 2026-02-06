@@ -20,7 +20,7 @@ See [our blog](https://marimo.io/blog) for more.
 
 ## YouTube
 
-Our [YouTube channel](https://www.youtube.com/@marimo-team) shows you the ins and outs of using marimo for many applications,
+Our [YouTube channel](https://www.youtube.com/@botterYosuke) shows you the ins and outs of using marimo for many applications,
 including AI, ML, data engineering, and more. You can also get started with the
 [marimo concepts](https://www.youtube.com/watch?v=3N6lInzq5MI&list=PLNJXGo8e1XT9jP7gPbRdm1XwloZVFvLEq) playlist, which tours many of our features.
 

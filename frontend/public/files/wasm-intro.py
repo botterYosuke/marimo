@@ -10,7 +10,7 @@ app = marimo.App()
 def __():
     import marimo as mo
 
-    mo.md("# Welcome to [marimo](https://github.com/marimo-team/marimo)! 🌊🍃")
+    mo.md("# Welcome to [marimo](https://github.com/botterYosuke/marimo)! 🌊🍃")
     return mo,
 
 
@@ -350,7 +350,7 @@ def __(mo):
         ```
 
         In addition to tutorials, we have examples in our
-        [our GitHub repo](https://www.github.com/marimo-team/marimo/tree/main/examples).
+        [our GitHub repo](https://www.github.com/botterYosuke/marimo/tree/main/examples).
         """
     )
     return

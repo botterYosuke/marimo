@@ -9,7 +9,7 @@ export const ExternalLink = ({
     | `https://aistudio.google.com/${string}`
     | `https://github.com/${string}`
     | `https://openrouter.ai/${string}`
-    | `https://docs.marimo.io/${string}`
+    | `https://backcast-tan.vercel.app/${string}`
     | `https://docs.python.org/${string}`
     | `https://marimo.io/${string}`
     | `https://links.marimo.app/${string}`

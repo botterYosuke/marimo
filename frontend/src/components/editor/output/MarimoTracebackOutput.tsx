@@ -163,7 +163,7 @@ export const MarimoTracebackOutput = ({
               <DropdownMenuItem asChild={true}>
                 <a
                   target="_blank"
-                  href="https://marimo.io/discord?ref=notebook"
+                  href="https://discord.com/invite/5mR3Gmff"
                   rel="noopener"
                 >
                   <MessageCircleIcon className="h-4 w-4 mr-2" />

@@ -382,7 +382,7 @@ def to_top_functiondef(
     assert toplevel_var, "Cell is not a top-level function"
     if cell.code:
         assert toplevel_var.kind in ("function", "class"), (
-            "Unexpected cell kind, please report an issue to github.com/marimo-team/marimo"
+            "Unexpected cell kind, please report an issue to github.com/botterYosuke/marimo"
         )
         if toplevel_var.kind == "class":
             decorator = to_decorator(cell.config, fn="class_definition")

@@ -143,7 +143,7 @@ export const SQLEngineSelect: React.FC<SelectProps> = ({
 
 const HELP_KEY = "__help__";
 const HELP_URL =
-  "http://docs.marimo.io/guides/working_with_data/sql/#connecting-to-a-custom-database";
+  "http://backcast-tan.vercel.app/guides/working_with_data/sql/#connecting-to-a-custom-database";
 
 export const SQLModeSelect: React.FC = () => {
   const { sqlMode, setSQLMode } = useSQLMode();

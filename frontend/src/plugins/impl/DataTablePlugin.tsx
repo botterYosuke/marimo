@@ -527,7 +527,7 @@ export const LoadingDataTableComponent = memo(
       if (canShowInitialPage) {
         // We still want to run the search,
         // so the backend knows the current state for selection
-        // see https://github.com/marimo-team/marimo/issues/2756
+        // see https://github.com/botterYosuke/marimo/issues/2756
         // But we should catch errors; this may happen for static exports.
         void searchResultsPromise.catch((error) => {
           Logger.error(error);

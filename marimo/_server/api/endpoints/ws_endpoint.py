@@ -496,7 +496,7 @@ class WebSocketHandler(SessionConsumer):
             title = (
                 f"Update available {current_version} → {state.latest_version}"
             )
-            release_url = "https://github.com/marimo-team/marimo/releases"
+            release_url = "https://github.com/botterYosuke/marimo/releases"
 
             # Build description with notices if present
             description = f"Check out the <a class='underline' target='_blank' href='{release_url}'>latest release on GitHub.</a>"  # noqa: E501

@@ -7,7 +7,7 @@ are the main approaches:
 * Host on [GitHub Pages](github_pages.md) or [self-host WASM HTML](self_host_wasm.md),
   and `<iframe>` the published notebook.
 * `<iframe>` a [playground](playground.md) notebook, and [customize the embedding](playground.md#embedding-in-other-web-pages) with query params.
-  (This is what we do throughout https://docs.marimo.io.)
+  (This is what we do throughout https://backcast-tan.vercel.app.)
 * Use the [marimo snippets](from_code_snippets.md) plugin to replace code snippets in HTML or markdown with interactive notebooks.
 
 ## Iframe Sandbox Configuration

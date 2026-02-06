@@ -273,7 +273,7 @@ def _(datasets, mo, render_dataframe_editor):
                 """
     ## Dataframe Editor
 
-    You can explore the dataset using the dataframe editor below. The dataframe editor is powered by [mo.ui.dataframe](https://docs.marimo.io/api/inputs/dataframe.html)
+    You can explore the dataset using the dataframe editor below. The dataframe editor is powered by [mo.ui.dataframe](https://backcast-tan.vercel.app/api/inputs/dataframe.html)
     """
             ),
             df_editor,

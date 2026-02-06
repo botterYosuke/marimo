@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { initLogger, logInfo, logError } from "./utils/logger.js";
 import { getAppRoot, getMarimoServerExecutable } from "./utils/paths.js";
+import { injectCells, readProgress, updateSetupBlock } from "./utils/notebook-injector.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -94,7 +95,7 @@ let serverProcess = null; // Child process for the Python server
 
 // Notebook management
 let currentNotebookPath = null; // 現在開いているノートブックのパス
-const DEFAULT_NOTEBOOK = "wasm-intro.py"; // 起動時のデフォルト
+const DEFAULT_NOTEBOOK = "backcast.py"; // 起動時のデフォルト（統一ノートブック）
 
 /**
  * Create the main application window
@@ -227,6 +228,8 @@ function startServerWithNotebook(notebookPath) {
         ...process.env,
         // Ensure PATH includes necessary directories
         PATH: process.env.PATH || "",
+        // Set BackcastPro cache directory to notebook folder
+        BACKCASTPRO_CACHE_DIR: notebookDir,
       },
     });
   } else {
@@ -404,6 +407,37 @@ ipcMain.handle("notebook:open-dialog", async () => {
 ipcMain.handle("notebook:get-path", () => {
   logInfo("IPC: notebook:get-path");
   return currentNotebookPath;
+});
+
+// Skill-tree notebook injection handlers
+ipcMain.handle("notebook:inject-cells", async (_event, options) => {
+  logInfo(`IPC: notebook:inject-cells for skill ${options.skillId}`);
+
+  if (!currentNotebookPath) {
+    return { success: false, error: "No notebook is currently open" };
+  }
+
+  return injectCells(currentNotebookPath, options);
+});
+
+ipcMain.handle("notebook:read-progress", async () => {
+  logInfo("IPC: notebook:read-progress");
+
+  if (!currentNotebookPath) {
+    return { success: false, error: "No notebook is currently open" };
+  }
+
+  return readProgress(currentNotebookPath);
+});
+
+ipcMain.handle("notebook:update-setup", async (_event, newSetupContent) => {
+  logInfo("IPC: notebook:update-setup");
+
+  if (!currentNotebookPath) {
+    return { success: false, error: "No notebook is currently open" };
+  }
+
+  return updateSetupBlock(currentNotebookPath, newSetupContent);
 });
 
 // App event handlers

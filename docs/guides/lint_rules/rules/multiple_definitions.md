@@ -41,6 +41,6 @@ y = 2  # Use different variable name
 
 ## References
 
-- [Multiple Definitions Guide](https://docs.marimo.io/guides/understanding_errors/multiple_definitions/)
-- [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+- [Multiple Definitions Guide](https://backcast-tan.vercel.app/guides/understanding_errors/multiple_definitions/)
+- [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
 

@@ -392,7 +392,7 @@ class Runner:
                     "by reassigning variables to different functions). If "
                     "this failure is not the result of either of these "
                     "cases, please consider reporting this issue to "
-                    "https://github.com/marimo-team/marimo/issues. "
+                    "https://github.com/botterYosuke/marimo/issues. "
                     "Definition expected in cell : ",
                     "NameError",
                     blamed_cell,
@@ -602,7 +602,7 @@ class Runner:
 
                     Please copy this message and paste it in a GitHub issue:
 
-                    https://github.com/marimo-team/marimo/issues
+                    https://github.com/botterYosuke/marimo/issues
 
                     Any additional context of what caused this error, such
                     as sample code to reproduce, will help us debug.
@@ -640,7 +640,7 @@ class Runner:
                     """Internal marimo error. Please copy this message and
                     paste it in a GitHub issue:
 
-                    https://github.com/marimo-team/marimo/issues
+                    https://github.com/botterYosuke/marimo/issues
 
                     An exception raised attempting to continue debugger (%s).
                     """,

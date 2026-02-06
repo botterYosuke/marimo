@@ -155,5 +155,5 @@ implement one of these protocols.
 If it is not possible to implement a renderer protocol on the type
 you want displayed, we will consider contributions to add formatters to the
 marimo codebase. [Look at our codebase for
-examples](https://github.com/marimo-team/marimo/tree/main/marimo/_output/formatters),
+examples](https://github.com/botterYosuke/marimo/tree/main/marimo/_output/formatters),
 then open a pull request.

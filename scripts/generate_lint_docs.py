@@ -397,7 +397,7 @@ def generate_rule_page(rule_details: dict[str, Any]) -> str:
 def _get_github_link(rule_details: dict[str, Any]) -> str:
     """Generate GitHub link for rule implementation."""
     file_path = rule_details['file_path']
-    return f"https://github.com/marimo-team/marimo/blob/main/{file_path}"
+    return f"https://github.com/botterYosuke/marimo/blob/main/{file_path}"
 
 
 def validate_mkdocs_integration(all_rules: dict[str, RuleInfo]) -> list[str]:

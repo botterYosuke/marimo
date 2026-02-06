@@ -1,7 +1,7 @@
 # Capture console outputs
 
 You can capture console outputs with marimo utility functions. Learn
-more in the [API reference](https://docs.marimo.io/api/outputs/#console-outputs).
+more in the [API reference](https://backcast-tan.vercel.app/api/outputs/#console-outputs).
 
 /// marimo-embed-file
     size: xlarge

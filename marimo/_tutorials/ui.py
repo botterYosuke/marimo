@@ -103,7 +103,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md("""
-    marimo has a [large library of simple UI elements](https://docs.marimo.io/api/inputs/index.html). Here are a just few examples:
+    marimo has a [large library of simple UI elements](https://backcast-tan.vercel.app/api/inputs/index.html). Here are a just few examples:
     """)
     return
 
@@ -112,8 +112,8 @@ def _(mo):
 def _(mo):
     mo.md(
         """
-        See our [examples folder](https://github.com/marimo-team/marimo/tree/main/examples/ui) on GitHub for bite-sized notebooks showcasing all our UI elements. For
-        a more detailed reference, see our [API docs](https://docs.marimo.io/api/inputs/).
+        See our [examples folder](https://github.com/botterYosuke/marimo/tree/main/examples/ui) on GitHub for bite-sized notebooks showcasing all our UI elements. For
+        a more detailed reference, see our [API docs](https://backcast-tan.vercel.app/api/inputs/).
         """
     ).callout()
     return
@@ -337,7 +337,7 @@ def _(mo):
     marimo supports third-party UI elements through anywidget — this lets you build
     your own interactive UI elements, or use widgets built by others in the
     community. To learn more, [see our
-    docs](https://docs.marimo.io/guides/integrating_with_marimo/custom_ui_plugins.html).
+    docs](https://backcast-tan.vercel.app/guides/integrating_with_marimo/custom_ui_plugins.html).
     """)
     return
 

@@ -40,6 +40,6 @@ x = y + 1  # Other cells can use setup variables
 
 ## References
 
-- [Setup References Guide](https://docs.marimo.io/guides/understanding_errors/setup/)
-- [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+- [Setup References Guide](https://backcast-tan.vercel.app/guides/understanding_errors/setup/)
+- [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
 

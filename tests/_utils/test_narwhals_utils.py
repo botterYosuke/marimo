@@ -87,7 +87,7 @@ def test_can_narwhalify_with_none_module():
 
     This reproduces the issue with SymPy's dynamically created function classes
     which have __module__ = None
-    See: https://github.com/marimo-team/marimo/issues/7158
+    See: https://github.com/botterYosuke/marimo/issues/7158
     """
 
     # Create a class with __module__ = None

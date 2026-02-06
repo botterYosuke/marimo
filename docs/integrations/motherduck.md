@@ -100,8 +100,8 @@ This example demonstrates how you can use SQL to query your data, then use Pytho
 
 ## Example Notebook
 
-For a full example of using MotherDuck with marimo, check out our [MotherDuck example notebook](https://github.com/marimo-team/marimo/blob/main/examples/sql/connect_to_motherduck.py).
+For a full example of using MotherDuck with marimo, check out our [MotherDuck example notebook](https://github.com/botterYosuke/marimo/blob/main/examples/sql/connect_to_motherduck.py).
 
 ```bash
-marimo edit https://github.com/marimo-team/marimo/blob/main/examples/sql/connect_to_motherduck.py
+marimo edit https://github.com/botterYosuke/marimo/blob/main/examples/sql/connect_to_motherduck.py
 ```

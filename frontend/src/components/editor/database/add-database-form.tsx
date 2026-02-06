@@ -409,7 +409,7 @@ export const AddDatabaseDialogContent: React.FC<{
         <DialogDescription>
           Connect to your database or data catalog to query data directly from
           your notebook. Learn more about how to connect to your database in our{" "}
-          <ExternalLink href="https://docs.marimo.io/guides/working_with_data/sql/#connecting-to-a-custom-database">
+          <ExternalLink href="https://backcast-tan.vercel.app/guides/working_with_data/sql/#connecting-to-a-custom-database">
             docs.
           </ExternalLink>
         </DialogDescription>

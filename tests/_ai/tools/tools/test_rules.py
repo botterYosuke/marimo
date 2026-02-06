@@ -56,7 +56,7 @@ def test_get_rules_bundled_file_read_error_fallback_to_url(
 
     assert result.status == "success"
     assert result.rules_content == "# Marimo Rules\n\nURL content"
-    assert result.source_url == "https://docs.marimo.io/CLAUDE.md"
+    assert result.source_url == "https://backcast-tan.vercel.app/CLAUDE.md"
     mock_path.exists.assert_called_once()
     mock_path.read_text.assert_called_once_with(encoding="utf-8")
     mock_response.raise_for_status.assert_called_once()
@@ -79,7 +79,7 @@ def test_get_rules_success(tool: GetMarimoRules) -> None:
 
     assert result.status == "success"
     assert result.rules_content == "# Marimo Rules\n\nTest content"
-    assert result.source_url == "https://docs.marimo.io/CLAUDE.md"
+    assert result.source_url == "https://backcast-tan.vercel.app/CLAUDE.md"
     assert len(result.next_steps) == 1
     assert "Follow the guidelines" in result.next_steps[0]
     mock_path.exists.assert_called_once()
@@ -104,7 +104,7 @@ def test_get_rules_http_error(tool: GetMarimoRules) -> None:
     assert result.rules_content is None
     assert "Failed to fetch marimo rules" in result.message
     assert "404 Not Found" in result.message
-    assert result.source_url == "https://docs.marimo.io/CLAUDE.md"
+    assert result.source_url == "https://backcast-tan.vercel.app/CLAUDE.md"
     assert len(result.next_steps) == 3
     assert "Check internet connectivity" in result.next_steps[0]
 
