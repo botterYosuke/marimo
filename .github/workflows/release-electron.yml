@@ -415,3 +415,14 @@ jobs:
         run: |
           echo "⚠️ Release ${{ steps.get_version.outputs.tag }} already exists. Skipping release creation."
           exit 0
+
+      - name: 📧 Post to Discord
+        if: steps.check_release.outputs.exists == 'false'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_RELEASE_WEBHOOK_URL }}
+          RELEASE_TAG: ${{ steps.get_version.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.get_version.outputs.marimo_version }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{\"username\": \"GitHub\", \"avatar_url\": \"https://cdn.discordapp.com/icons/1059888774789730424/bc13378b871c363137358a531e1a2f82.png\", \"embeds\": [{\"title\": \"marimo Electron App ${RELEASE_VERSION}\", \"url\": \"https://github.com/${{ github.repository }}/releases/tag/${RELEASE_TAG}\", \"color\": 2105893, \"description\": \"New Electron release is available!\n\n**Downloads:**\n- Windows: \`.exe\`\n- macOS: \`.dmg\`\n- Linux: \`.AppImage\` / \`.deb\`\"}]}" \
+            "$DISCORD_WEBHOOK_URL"

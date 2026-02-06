@@ -421,10 +421,13 @@ const Node = ({ node, style, dragHandle }: NodeRendererProps<FileInfo>) => {
   const handleOpenMarimoFile = async (
     evt: Pick<Event, "stopPropagation" | "preventDefault">,
   ) => {
-    const path = tree
-      ? tree.relativeFromRoot(node.data.path as FilePath)
-      : node.data.path;
-    openMarimoNotebook(evt, path);
+    // Electron IPC requires absolute path; browser uses relative path
+    const filePath = window.electronAPI?.isElectron
+      ? node.data.path
+      : tree
+        ? tree.relativeFromRoot(node.data.path as FilePath)
+        : node.data.path;
+    openMarimoNotebook(evt, filePath);
   };
 
   const handleDeleteFile = async (evt: Event) => {

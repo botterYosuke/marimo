@@ -49,15 +49,22 @@ window.electronAPI = {
   getServerLogs: () => ipcRenderer.invoke("server:get-logs"),
 
   /**
-   * Open a notebook file by path
+   * Open a notebook file by path (opens in new window)
    * @param {string} filePath - Absolute path to the notebook file
-   * @returns {Promise<{success: boolean, path?: string, error?: string}>}
+   * @returns {Promise<{success: boolean, windowId?: number, path?: string, error?: string}>}
    */
   openNotebook: (filePath) => ipcRenderer.invoke("notebook:open", filePath),
 
   /**
-   * Show a file open dialog and open the selected notebook
-   * @returns {Promise<{success: boolean, path?: string, canceled?: boolean, error?: string}>}
+   * Open a notebook in a new independent window
+   * @param {string} filePath - Absolute path to the notebook file
+   * @returns {Promise<{success: boolean, windowId?: number, path?: string, error?: string}>}
+   */
+  openNotebookInNewWindow: (filePath) => ipcRenderer.invoke("notebook:open-in-new-window", filePath),
+
+  /**
+   * Show a file open dialog and open the selected notebook (in new window)
+   * @returns {Promise<{success: boolean, windowId?: number, path?: string, canceled?: boolean, error?: string}>}
    */
   openNotebookDialog: () => ipcRenderer.invoke("notebook:open-dialog"),
 

@@ -11,7 +11,7 @@
  */
 
 import { spawn } from "node:child_process";
-import { cpSync, mkdirSync } from "node:fs";
+import { cpSync, mkdirSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { env, platform } from "node:process";
 
@@ -30,6 +30,37 @@ console.log(`Syncing templates to ${notebookDir}`);
 mkdirSync(notebookDir, { recursive: true });
 cpSync(templateDir, notebookDir, { recursive: true, force: false });
 
+// Get the most recent file from recent-files.json
+const DEFAULT_NOTEBOOK = "wasm-intro.py";
+const recentFilesPath = join(appData, "marimo", "recent-files.json");
+
+function getMostRecentFile() {
+  if (!existsSync(recentFilesPath)) {
+    return null;
+  }
+  try {
+    const content = readFileSync(recentFilesPath, "utf-8");
+    const data = JSON.parse(content);
+    if (!Array.isArray(data.recentFiles) || data.recentFiles.length === 0) {
+      return null;
+    }
+    // Return the first file that exists
+    for (const filePath of data.recentFiles) {
+      if (existsSync(filePath)) {
+        return filePath;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error("Failed to read recent files:", error.message);
+    return null;
+  }
+}
+
+const mostRecent = getMostRecentFile();
+const notebookFile = mostRecent || join(notebookDir, DEFAULT_NOTEBOOK);
+console.log(`Opening notebook: ${notebookFile}`);
+
 // Determine uv executable path
 const uv = platform === "win32"
   ? join(env.USERPROFILE, ".local", "bin", "uv.exe")
@@ -44,7 +75,7 @@ const args = [
   "--no-token",
   "--headless",
   "--port", "2718",
-  "backcast.py"
+  notebookFile
 ];
 
 console.log(`Starting marimo server...`);
