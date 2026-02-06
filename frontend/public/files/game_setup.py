@@ -14,12 +14,12 @@ import functools
 
 import marimo as mo
 
-from BackcastPro import Backtest, get_stock_daily as _get_stock_daily
+from backtest_wrapper import Backtest_Wrapper, get_stock_daily as _get_stock_daily
 from chart import backtest_chart, update_all_backtest_charts
 from headless_broadcast import enable_headless_trade_events, publish_state_headless
 from skill_events import get_triggered_skills, emit_skill
 
-bt = Backtest(
+bt = Backtest_Wrapper(
     cash=100_000,
     commission=0.001,
     finalize_trades=True,
@@ -127,6 +127,7 @@ def reveal_data():
     emit_skill("BRIDGE_001")
     return bt._data
 
+@property
 def trades():
     """保有中の取引を確認"""
     s = get_triggered_skills()
