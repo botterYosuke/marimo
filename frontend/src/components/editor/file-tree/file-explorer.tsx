@@ -48,6 +48,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useCellActions } from "@/core/cells/cells";
 import { useLastFocusedCellId } from "@/core/cells/focus";
 import { disableFileDownloadsAtom } from "@/core/config/config";
+import { marimoVersionAtom } from "@/core/meta/state";
 import { useRequestClient } from "@/core/network/requests";
 import type { FileInfo } from "@/core/network/types";
 import { isWasm } from "@/core/wasm/utils";
@@ -57,6 +58,7 @@ import { cn } from "@/utils/cn";
 import { copyToClipboard } from "@/utils/copy";
 import { downloadBlob } from "@/utils/download";
 import { openNotebook } from "@/utils/links";
+import { generateMarimoTemplate } from "@/utils/marimo-template";
 import type { FilePath } from "@/utils/paths";
 import { fileSplit } from "@/utils/pathUtils";
 import { jotaiJsonStorage } from "@/utils/storage/jotai";
@@ -94,6 +96,7 @@ export const FileExplorer: React.FC<{
   const [openFile, setOpenFile] = useState<FileInfo | null>(null);
   const [showHiddenFiles, setShowHiddenFiles] =
     useAtom<boolean>(hiddenFilesState);
+  const version = useAtomValue(marimoVersionAtom);
 
   const { openPrompt } = useImperativeModal();
   // Keep external state to remember which folders are open
@@ -123,7 +126,12 @@ export const FileExplorer: React.FC<{
     openPrompt({
       title: "File name",
       onConfirm: async (name) => {
-        tree.createFile(name, null);
+        if (name.toLowerCase().endsWith(".py")) {
+          const template = generateMarimoTemplate(version);
+          tree.createFile(name, null, template);
+        } else {
+          tree.createFile(name, null);
+        }
       },
     });
   });
@@ -398,6 +406,7 @@ const Node = ({ node, style, dragHandle }: NodeRendererProps<FileInfo>) => {
   const { openFile, sendCreateFileOrFolder, sendFileDetails } =
     useRequestClient();
   const disableFileDownloads = useAtomValue(disableFileDownloadsAtom);
+  const version = useAtomValue(marimoVersionAtom);
 
   const fileType: FileType = node.data.isDirectory
     ? "directory"
@@ -465,7 +474,12 @@ const Node = ({ node, style, dragHandle }: NodeRendererProps<FileInfo>) => {
     openPrompt({
       title: "File name",
       onConfirm: async (name) => {
-        tree?.createFile(name, node.id);
+        if (name.toLowerCase().endsWith(".py")) {
+          const template = generateMarimoTemplate(version);
+          tree?.createFile(name, node.id, template);
+        } else {
+          tree?.createFile(name, node.id);
+        }
       },
     });
   });
