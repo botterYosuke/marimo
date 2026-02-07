@@ -8,7 +8,7 @@
  */
 
 import { createStore } from "jotai";
-import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   playerProgressAtom,
   completeSkillWithRewardAtom,
@@ -26,21 +26,6 @@ describe("報酬キャッシュ → BacktestHud 同期", () => {
 
   beforeEach(() => {
     store = createStore();
-    // localStorage をモック
-    const mockStorage: Record<string, string> = {};
-    vi.spyOn(Storage.prototype, "getItem").mockImplementation(
-      (key) => mockStorage[key] ?? null,
-    );
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation((key, value) => {
-      mockStorage[key] = value;
-    });
-    vi.spyOn(Storage.prototype, "removeItem").mockImplementation((key) => {
-      delete mockStorage[key];
-    });
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   // ========================================
@@ -136,34 +121,6 @@ describe("報酬キャッシュ → BacktestHud 同期", () => {
       const displayedEquity = backtestEquity + progress.currentCash;
 
       expect(progress.currentCash).toBe(30000); // 二重にならない
-      expect(displayedEquity).toBe(130000);
-    });
-  });
-
-  // ========================================
-  // localStorage 永続性
-  // ========================================
-
-  describe("localStorage 永続性", () => {
-    it("currentCash が localStorage に永続化される", () => {
-      store.set(completeSkillWithRewardAtom, "SANDBOX_001");
-
-      // setItem が呼ばれたことを確認
-      expect(Storage.prototype.setItem).toHaveBeenCalledWith(
-        "backcast:player-progress:v1",
-        expect.stringContaining("30000"),
-      );
-    });
-
-    it("localStorage から復元した currentCash が合算に使える", () => {
-      // localStorage に保存された状態を直接セット
-      store.set(playerProgressAtom, mockProgressAfterFirstSkill);
-      const progress = store.get(playerProgressAtom);
-
-      const backtestEquity = 100000;
-      const displayedEquity = backtestEquity + progress.currentCash;
-
-      expect(progress.currentCash).toBe(30000);
       expect(displayedEquity).toBe(130000);
     });
   });

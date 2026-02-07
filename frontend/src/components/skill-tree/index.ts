@@ -49,6 +49,7 @@ export {
   rewardNotificationAtom,
   clearRewardNotificationAtom,
   completeSkillWithRewardAtom,
+  initProgressFromFileAtom,
 } from "./atoms";
 export type { RewardNotificationData } from "./atoms";
 

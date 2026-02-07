@@ -1,7 +1,7 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { createStore } from "jotai";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   playerProgressAtom,
   skillsWithStatusAtom,
@@ -24,21 +24,6 @@ describe("skill-tree atoms", () => {
 
   beforeEach(() => {
     store = createStore();
-    // localStorage をモック
-    const mockStorage: Record<string, string> = {};
-    vi.spyOn(Storage.prototype, "getItem").mockImplementation(
-      (key) => mockStorage[key] ?? null,
-    );
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation((key, value) => {
-      mockStorage[key] = value;
-    });
-    vi.spyOn(Storage.prototype, "removeItem").mockImplementation((key) => {
-      delete mockStorage[key];
-    });
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   describe("playerProgressAtom", () => {
@@ -426,101 +411,6 @@ describe("skill-tree atoms", () => {
       // 基本報酬220,000円 + マイルストーン50,000円 = 270,000円
       expect(progress.currentCash).toBe(270000);
       expect(progress.earnedTitles).toContain("見習い投資家");
-    });
-  });
-
-  // ========================================
-  // P1-3: localStorage 永続化
-  // ========================================
-  describe("永続化（P1-3）", () => {
-    const STORAGE_KEY = "backcast:player-progress:v1";
-    let mockStorage: Record<string, string>;
-
-    beforeEach(() => {
-      mockStorage = {};
-      vi.spyOn(Storage.prototype, "getItem").mockImplementation(
-        (key) => mockStorage[key] ?? null
-      );
-      vi.spyOn(Storage.prototype, "setItem").mockImplementation((key, value) => {
-        mockStorage[key] = value;
-      });
-    });
-
-    it("進捗がlocalStorageに保存される", () => {
-      store.set(completeSkillAtom, "SANDBOX_001");
-
-      // setItem が呼ばれたことを確認
-      expect(Storage.prototype.setItem).toHaveBeenCalled();
-
-      // 保存されたデータを確認
-      const stored = mockStorage[STORAGE_KEY];
-      expect(stored).toBeDefined();
-
-      const parsed = JSON.parse(stored);
-      expect(parsed.completedSkills).toContain("SANDBOX_001");
-    });
-
-    it("複数スキル完了で進捗が累積保存される", () => {
-      store.set(completeSkillAtom, "SANDBOX_001");
-      store.set(completeSkillAtom, "SANDBOX_002");
-
-      const stored = mockStorage[STORAGE_KEY];
-      const parsed = JSON.parse(stored);
-
-      expect(parsed.completedSkills).toContain("SANDBOX_001");
-      expect(parsed.completedSkills).toContain("SANDBOX_002");
-      expect(parsed.currentCash).toBe(50000); // 30000 + 20000
-    });
-
-    it("atomWithStorageがlocalStorageキーを使用している", () => {
-      // 進捗を設定
-      store.set(completeSkillAtom, "SANDBOX_001");
-
-      // 正しいキーで保存されている
-      expect(mockStorage[STORAGE_KEY]).toBeDefined();
-
-      // キーが正しい形式
-      expect(STORAGE_KEY).toBe("backcast:player-progress:v1");
-    });
-
-    it("破損したlocalStorageデータでエラーにならない", () => {
-      // 破損データを設定
-      mockStorage[STORAGE_KEY] = "invalid json {{{";
-
-      // 新しいストアでアクセスしてもエラーにならない
-      const store2 = createStore();
-      expect(() => store2.get(playerProgressAtom)).not.toThrow();
-    });
-
-    it("保存されたデータの形式が正しい", () => {
-      store.set(completeSkillAtom, "SANDBOX_001");
-
-      const stored = mockStorage[STORAGE_KEY];
-      const parsed = JSON.parse(stored);
-
-      // 必要なフィールドが全て存在
-      expect(parsed).toHaveProperty("completedSkills");
-      expect(parsed).toHaveProperty("currentCash");
-      expect(parsed).toHaveProperty("earnedTitles");
-      expect(parsed).toHaveProperty("rank");
-      expect(parsed).toHaveProperty("sandboxCompleted");
-      expect(parsed).toHaveProperty("bridgeCompleted");
-    });
-
-    it("リセット後もlocalStorageが更新される", () => {
-      // まずスキルを完了
-      store.set(completeSkillAtom, "SANDBOX_001");
-      expect(JSON.parse(mockStorage[STORAGE_KEY]).completedSkills).toContain(
-        "SANDBOX_001"
-      );
-
-      // リセット
-      store.set(resetProgressAtom);
-
-      // リセット後のデータが保存されている
-      const afterReset = JSON.parse(mockStorage[STORAGE_KEY]);
-      expect(afterReset.completedSkills).toEqual([]);
-      expect(afterReset.currentCash).toBe(0);
     });
   });
 

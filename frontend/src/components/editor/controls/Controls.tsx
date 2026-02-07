@@ -39,6 +39,7 @@ import { LayoutSelect } from "../renderers/layout-select";
 import { CommandPaletteButton } from "./command-palette-button";
 import { SkillTreeButton } from "./skill-tree-button";
 import { useBroadcastChannelRelay } from "@/hooks/useBroadcastChannelRelay";
+import { useProgressSync } from "@/hooks/useProgressSync";
 
 interface ControlsProps {
   presenting: boolean;
@@ -60,6 +61,8 @@ export const Controls = ({
 }: ControlsProps): JSX.Element => {
   // Relay postMessage from iframes to BroadcastChannel (for Pyodide mode)
   useBroadcastChannelRelay();
+  // Sync progress from Python-side file to playerProgressAtom
+  useProgressSync();
 
   const undoAvailable = useAtomValue(canUndoDeletesAtom);
   const needsRun = useAtomValue(needsRunAtom);

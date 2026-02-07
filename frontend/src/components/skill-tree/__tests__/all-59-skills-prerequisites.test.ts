@@ -1,7 +1,7 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { createStore } from "jotai";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { skillDefinitions } from "../skill-data";
 import {
   playerProgressAtom,
@@ -20,20 +20,6 @@ describe("all-59-skills-prerequisites", () => {
 
   beforeEach(() => {
     store = createStore();
-    const mockStorage: Record<string, string> = {};
-    vi.spyOn(Storage.prototype, "getItem").mockImplementation(
-      (key) => mockStorage[key] ?? null,
-    );
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation((key, value) => {
-      mockStorage[key] = value;
-    });
-    vi.spyOn(Storage.prototype, "removeItem").mockImplementation((key) => {
-      delete mockStorage[key];
-    });
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   // ========================================

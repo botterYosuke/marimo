@@ -1,47 +1,52 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { atom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
 import type { PlayerProgress, Skill, SkillId, SkillTrack, Milestone } from "./types";
 import { skillDefinitions, milestones } from "./skill-data";
-import { adaptForLocalStorage } from "@/utils/storage/jotai";
 import {
   calculateSkillReward,
+  calculateTotalRewards,
   checkMilestone,
   type RewardResult,
 } from "./rewards/reward-system";
 import { showSkillRewardToast } from "./rewards/skill-reward-toast";
 
-// 初期状態
-const initialProgress: PlayerProgress = {
-  completedSkills: [],
-  currentCash: 0,
-  earnedTitles: [],
-  earnedBadges: [],
-  rank: "bronze",
-  stats: {
-    totalReturn: 0,
-    sharpeRatio: 0,
-    maxDrawdown: 0,
-    totalTrades: 0,
-    winRate: 0,
-  },
-  sandboxCompleted: false,
-  bridgeCompleted: false,
-  hiddenBadgesFound: [],
-};
+/**
+ * completedSkills から PlayerProgress 全体を導出
+ */
+function deriveProgressFromSkills(completedSkills: SkillId[]): PlayerProgress {
+  const rewards = calculateTotalRewards(completedSkills);
+  return {
+    completedSkills,
+    currentCash: rewards.totalCash,
+    earnedTitles: rewards.titles,
+    earnedBadges: [],
+    rank: "bronze",
+    stats: {
+      totalReturn: 0,
+      sharpeRatio: 0,
+      maxDrawdown: 0,
+      totalTrades: 0,
+      winRate: 0,
+    },
+    sandboxCompleted: completedSkills.includes("SANDBOX_006"),
+    bridgeCompleted: completedSkills.includes("BRIDGE_003"),
+    hiddenBadgesFound: [],
+  };
+}
 
-// 永続化されたプレイヤー進捗
-export const playerProgressAtom = atomWithStorage<PlayerProgress>(
-  "backcast:player-progress:v1",
-  initialProgress,
-  adaptForLocalStorage({
-    toSerializable: (value) => value,
-    fromSerializable: (value) => ({
-      ...initialProgress,
-      ...value,
-    }),
-  })
+// 初期状態
+const initialProgress: PlayerProgress = deriveProgressFromSkills([]);
+
+// プレイヤー進捗（Python 側からの初期化に依存）
+export const playerProgressAtom = atom<PlayerProgress>(initialProgress);
+
+// ファイルから読み込んだ進捗で初期化
+export const initProgressFromFileAtom = atom(
+  null,
+  (_get, set, completedSkills: SkillId[]) => {
+    set(playerProgressAtom, deriveProgressFromSkills(completedSkills));
+  }
 );
 
 // スキル定義（読み取り専用）

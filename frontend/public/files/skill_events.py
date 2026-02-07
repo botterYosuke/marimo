@@ -14,7 +14,9 @@ import time
 import marimo as mo
 from marimo._output.hypertext import Html
 
-_triggered_skills: set[str] = set()
+from progress_manager import load_progress, add_completed_skill
+
+_triggered_skills: set[str] = set(load_progress().get("completed_skills", []))
 
 
 def get_triggered_skills() -> set[str]:
@@ -27,6 +29,7 @@ def emit_skill(skill_id: str, context: dict | None = None) -> None:
     if skill_id in _triggered_skills:
         return
     _triggered_skills.add(skill_id)
+    add_completed_skill(skill_id)
 
     event = {
         "skill_id": skill_id,
