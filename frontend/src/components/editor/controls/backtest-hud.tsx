@@ -7,8 +7,10 @@ import {
   TrendingUpIcon,
   WalletIcon,
 } from "lucide-react";
+import { useAtomValue } from "jotai";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { useBroadcastChannel } from "@/hooks/useBroadcastChannel";
+import { playerProgressAtom } from "@/components/skill-tree/atoms";
 import { cn } from "@/utils/cn";
 
 const CHANNEL_NAME = "backtest_channel";
@@ -47,6 +49,7 @@ interface BacktestHudProps {
 
 export const BacktestHud: React.FC<BacktestHudProps> = ({ className }) => {
   const state = useBroadcastChannel(CHANNEL_NAME);
+  const { currentCash: rewardCash } = useAtomValue(playerProgressAtom);
 
   // Show placeholder with "-" values if no data received yet
   if (!state) {
@@ -108,13 +111,13 @@ export const BacktestHud: React.FC<BacktestHudProps> = ({ className }) => {
       <HudItem
         icon={<TrendingUpIcon size={12} />}
         label="Equity"
-        value={formatYen(state.equity)}
+        value={formatYen(state.equity + rewardCash)}
       />
 
       <HudItem
         icon={<WalletIcon size={12} />}
         label="Cash"
-        value={formatYen(state.cash)}
+        value={formatYen(state.cash + rewardCash)}
       />
 
       <HudItem
