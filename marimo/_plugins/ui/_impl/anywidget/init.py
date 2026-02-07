@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     import ipywidgets  # type: ignore
+    from marimo._runtime.context.types import RuntimeContext
 
 from marimo import _loggers
 from marimo._dependencies.dependencies import DependencyManager
@@ -14,6 +15,21 @@ from marimo._plugins.ui._impl.comm import (  # pyright: ignore[reportMissingType
     MarimoComm,
     MarimoCommManager,
 )
+from marimo._runtime.cell_lifecycle_item import CellLifecycleItem
+from marimo._runtime.context import ContextNotInitializedError, get_context
+
+
+class CommLifecycleItem(CellLifecycleItem):
+    def __init__(self, comm: MarimoComm) -> None:
+        self._comm = comm
+
+    def create(self, context: RuntimeContext) -> None:
+        del context
+
+    def dispose(self, context: RuntimeContext, deletion: bool) -> bool:
+        del context, deletion
+        self._comm.close()
+        return True
 
 LOGGER = _loggers.marimo_logger()
 
@@ -123,6 +139,14 @@ def init_marimo_widget(w: ipywidgets.Widget) -> None:
     synced_keys = getattr(w, "keys", None)
     if synced_keys:
         w.observe(on_trait_change, names=list(synced_keys))
+
+    # Register lifecycle item so the comm is closed when the cell is
+    # re-executed or deleted (sends ModelClose to the frontend).
+    try:
+        ctx = get_context()
+        ctx.cell_lifecycle_registry.add(CommLifecycleItem(w.comm))
+    except ContextNotInitializedError:
+        pass
 
 
 WIDGET_COMM_MANAGER = MarimoCommManager()
