@@ -140,7 +140,7 @@ def _():
 
     1. **株を買う**: `bt.buy()` を実行
     2. **時間を進める**: `bt.step()` で次の日に進む
-    3. **株を売る**: `for trade in bt.trades: trade.close()`
+    3. **株を売る**: `for trade in bt.trades(): trade.close()`
     """)
     return
 
@@ -194,7 +194,7 @@ def _(code):
             bt.buy(code=code, tag="golden_cross")
         # デッドクロス → 売り
         elif pos > 0 and sma1_prev >= sma2_prev and sma1_curr < sma2_curr:
-            for trade in bt.trades:
+            for trade in bt.trades():
                 if trade.code == code:
                     trade.close()
     return

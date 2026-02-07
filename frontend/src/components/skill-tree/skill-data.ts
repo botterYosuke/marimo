@@ -62,7 +62,7 @@ export const skillDefinitions: Skill[] = [
 
 \`\`\`python
 # 保有中の取引を確認
-for trade in bt.trades:
+for trade in bt.trades():
     print(f"銘柄: {trade.code}")
     print(f"買値: {trade.entry_price:,.0f}円")
     print(f"株数: {trade.size}株")
@@ -90,7 +90,7 @@ for trade in bt.trades:
 
 \`\`\`python
 # 保有株を売却
-for trade in bt.trades:
+for trade in bt.trades():
     trade.close()
     print("売却完了！")
 \`\`\`
@@ -275,7 +275,7 @@ bt.buy()  # 買える！
 
 \`\`\`python
 # 含み損益を確認
-for trade in bt.trades:
+for trade in bt.trades():
     if trade.pl < 0:
         print(f"含み損: {trade.pl:,.0f}円 ({trade.pl_pct:.1f}%)")
 \`\`\`
@@ -307,7 +307,7 @@ for trade in bt.trades:
 
 \`\`\`python
 # 損切りの実行
-for trade in bt.trades:
+for trade in bt.trades():
     if trade.pl < 0 and trade.pl_pct < -5:  # 5%以上の損失
         trade.close()
         print("損切り完了 - これ以上の損失を防いだ！")

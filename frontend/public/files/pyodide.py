@@ -195,7 +195,7 @@ def _(code, refresher):
             bt.buy(code=code, tag="golden_cross")
         # デッドクロス: 短期SMAが長期SMAを下抜け
         elif pos > 0 and sma1_prev >= sma2_prev and sma1_curr < sma2_curr:
-            for trade in bt.trades:
+            for trade in bt.trades():
                 if trade.code == code:
                     trade.close()
     return

@@ -32,4 +32,3 @@ class Backtest_Wrapper(Backtest):
     def __init__(self, *args, color_theme: str = "dark", **kwargs):
         super().__init__(*args, **kwargs)
         self._chart_state = _ChartState(color_theme)
-        self.start()

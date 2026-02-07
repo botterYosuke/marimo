@@ -225,7 +225,7 @@ def _(bt, code):
             sma5_prev = data["SMA5"].iloc[-2]
             sma20_prev = data["SMA20"].iloc[-2]
             if (sma5_prev >= sma20_prev and sma5 < sma20) or rsi > 80:
-                for trade in bt.trades:
+                for trade in bt.trades():
                     if trade.code == code:
                         trade.close()
     return
