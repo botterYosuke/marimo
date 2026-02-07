@@ -14,7 +14,8 @@ import functools
 
 import marimo as mo
 
-from backtest_wrapper import Backtest_Wrapper, get_stock_daily as _get_stock_daily
+from BackcastPro import get_stock_daily
+from backtest_wrapper import Backtest_Wrapper
 from chart import backtest_chart, update_all_backtest_charts
 from headless_broadcast import enable_headless_trade_events, publish_state_headless
 from skill_events import get_triggered_skills, emit_skill
@@ -63,7 +64,7 @@ def chart(code: str, **kwargs):
         code: 銘柄コード（例: "7203"）
         **kwargs: backtest_chart に渡す追加オプション
     """
-    df = _get_stock_daily(code)
+    df = get_stock_daily(code)
     set_data({code: df})
     # step()  # 1日だけ進める
     s = get_triggered_skills()
@@ -160,6 +161,6 @@ def get_stock_daily(code: str, **kwargs):
     Args:
         code: 銘柄コード（例: "7203", "6758"）
     """
-    result = _get_stock_daily(code, **kwargs)
+    result = get_stock_daily(code, **kwargs)
     emit_skill("BRIDGE_002")
     return result

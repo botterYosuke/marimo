@@ -7,6 +7,7 @@ Plotly から移行し、Canvas 差分更新によりパフォーマンスを大
 """
 from __future__ import annotations
 
+import threading
 from typing import TYPE_CHECKING, TypedDict
 
 import anywidget
@@ -742,8 +743,14 @@ class LightweightChartWidget(anywidget.AnyWidget):
                 // チャートがRAF待機中に破棄された場合のエラーを抑制
                 console.debug('Chart update skipped (disposed):', e);
             } finally {
+                const hadBar = pendingBar !== null;
                 pendingBar = null;
                 rafId = null;
+
+                // ACK 送信（描画完了通知）
+                if (hadBar) {
+                    model.send({ type: 'render_ack' });
+                }
             }
         };
 
@@ -929,6 +936,30 @@ class LightweightChartWidget(anywidget.AnyWidget):
     indicator_series = traitlets.Dict({}).tag(sync=True)  # 指標データ
     indicator_options = traitlets.Dict({}).tag(sync=True)  # 指標表示オプション
     last_indicators = traitlets.Dict({}).tag(sync=True)  # 差分更新用
+
+    def __init__(self):
+        super().__init__()
+        self._ack_event = threading.Event()
+        self.on_msg(self._handle_ack)
+
+    def _handle_ack(self, widget, content, buffers):
+        """JavaScript からの ACK を受信"""
+        if content.get('type') == 'render_ack':
+            self._ack_event.set()
+
+    def update_and_wait(self, bar: dict, timeout: float = 5.0) -> bool:
+        """バーを更新し、JavaScript の描画完了を待機（同期）
+
+        Args:
+            bar: ローソク足バーデータ（time, open, high, low, close）
+            timeout: タイムアウト秒数（デフォルト: 5秒）
+
+        Returns:
+            bool: ACK を受信したら True、タイムアウトしたら False
+        """
+        self._ack_event.clear()
+        self.update_bar_fast(bar)
+        return self._ack_event.wait(timeout=timeout)
 
     def update_bar_fast(self, bar: dict) -> None:
         """バイナリプロトコルで高速更新 (INP改善用)
@@ -1394,13 +1425,17 @@ def update_backtest_chart(bt, widget, code: str = None) -> None:
         widget.markers = trades_to_markers(all_trades, code, show_tags=True, theme_colors=theme_colors)
 
 
-def update_all_backtest_charts(bt) -> None:
+def update_all_backtest_charts(bt, timeout: float = 5.0) -> None:
     """
     Update all chart widgets registered in a Backtest instance.
+
+    JavaScript の描画完了を待機してから次のウィジェットに進む。
+    while ループで連続呼び出ししてもフリーズしない。
 
     Args:
         bt: Backtest instance with _chart_state (ChartStateManager),
             _current_data, _broker_instance
+        timeout: ACK 待機タイムアウト秒数（デフォルト: 5秒）
     """
     for code, widget in bt._chart_state.widgets.items():
         try:
@@ -1411,7 +1446,10 @@ def update_all_backtest_charts(bt) -> None:
             widget.data = df_to_lwc_data(df)
 
             bar = get_last_bar(df)
-            if hasattr(widget, "update_bar_fast"):
+            # ACK 待機版で更新（タイムアウトしても次のウィジェットに進む）
+            if hasattr(widget, "update_and_wait"):
+                widget.update_and_wait(bar, timeout)
+            elif hasattr(widget, "update_bar_fast"):
                 widget.update_bar_fast(bar)
             else:
                 widget.last_bar = bar
