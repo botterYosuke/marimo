@@ -26,5 +26,5 @@ Unhandled log messages may indicate:
 
 ## References
 
-- [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+- [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
 

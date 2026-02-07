@@ -486,7 +486,7 @@ default_sql_output = "native"
 
 ## Example notebook {#example-notebook}
 
-For a comprehensive example of using Polars with marimo, check out our [Polars example notebook](https://github.com/marimo-team/marimo/blob/main/examples/third_party/polars/polars_example.py).
+For a comprehensive example of using Polars with marimo, check out our [Polars example notebook](https://github.com/botterYosuke/marimo/blob/main/examples/third_party/polars/polars_example.py).
 
 Run it with:
 

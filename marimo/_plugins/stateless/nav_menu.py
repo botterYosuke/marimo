@@ -20,7 +20,7 @@ def nav_menu(
 
     This is useful for creating a navigation menu with hyperlinks,
     most used when creating multi-page applications, with
-    `marimo.create_asgi_app` ([docs](https://docs.marimo.io/guides/deploying/programmatically.html)).
+    `marimo.create_asgi_app` ([docs](https://backcast-tan.vercel.app/guides/deploying/programmatically.html)).
 
     Args:
         menu: a dictionary of tab names to tab content;

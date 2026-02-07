@@ -36,7 +36,7 @@ class sidebar(Html):
                         "#contact": f"{mo.icon('lucide:phone')} Contact",
                         "Links": {
                             "https://twitter.com/marimo_io": "Twitter",
-                            "https://github.com/marimo-team/marimo": "GitHub",
+                            "https://github.com/botterYosuke/marimo": "GitHub",
                         },
                     },
                     orientation="vertical",

@@ -17,7 +17,7 @@ IMPORT_STAR_ERROR_MESSAGE = (
 IMPORT_STAR_HINT = (
     "Star imports are incompatible with marimo's reactive execution. Use "
     "'import module' and access members with dot notation instead. See: "
-    "https://docs.marimo.io/guides/understanding_errors/import_star/"
+    "https://backcast-tan.vercel.app/guides/understanding_errors/import_star/"
 )
 
 
@@ -81,7 +81,7 @@ class SyntaxErrorRule(LintRule):
 
     ## References
 
-    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
     - [Python SyntaxError Documentation](https://docs.python.org/3/tutorial/errors.html#syntax-errors)
     """
 

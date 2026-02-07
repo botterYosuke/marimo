@@ -115,7 +115,7 @@ class TestStderr:
 async def test_import_multiprocessing(
     mocked_kernel: MockedKernel, exec_req: ExecReqProvider
 ) -> None:
-    # https://github.com/marimo-team/marimo/issues/684
+    # https://github.com/botterYosuke/marimo/issues/684
     await mocked_kernel.k.run(
         [
             exec_req.get(

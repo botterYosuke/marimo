@@ -85,7 +85,7 @@ cd hello-world
 
 !!! tip "Starter template"
 
-    Get started quickly by cloning our [starter template](https://github.com/marimo-team/marimo-uv-starter-template).
+    Get started quickly by cloning our [starter template](https://github.com/botterYosuke/marimo-uv-starter-template).
     
 
 This creates a pyproject.toml and some starter code.

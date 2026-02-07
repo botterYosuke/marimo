@@ -295,7 +295,7 @@ echo "</ul></body></html>" >> site/index.html
 !!! note "Preview"
 
     Islands are an early feature. While the API likely won't change, there are some improvements we'd like to make before we consider them stable.
-    Please let us know on [GitHub](https://github.com/marimo-team/marimo/issues) if you run into any issues or have any feedback!
+    Please let us know on [GitHub](https://github.com/botterYosuke/marimo/issues) if you run into any issues or have any feedback!
 
 marimo islands are a way to embed marimo outputs and/or python code in your HTML that will become interactive when the page is loaded. This is useful for creating interactive blog posts, tutorials, and educational materials, all powered by marimo's reactive runtime.
 
@@ -368,7 +368,7 @@ Use `MarimoIslandGenerator` to generate HTML for islands
 
     ///
 
-Any relevant `.html` that gets generated can be run through the [`development.md`](https://github.com/marimo-team/marimo/blob/main/frontend/islands/development.md) file instructions.
+Any relevant `.html` that gets generated can be run through the [`development.md`](https://github.com/botterYosuke/marimo/blob/main/frontend/islands/development.md) file instructions.
 
 ### Islands in action
 

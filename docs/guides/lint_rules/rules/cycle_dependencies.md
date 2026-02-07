@@ -42,6 +42,6 @@ b = a + 1  # Unidirectional dependency
 
 ## References
 
-- [Cycles Guide](https://docs.marimo.io/guides/understanding_errors/cycles/)
-- [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+- [Cycles Guide](https://backcast-tan.vercel.app/guides/understanding_errors/cycles/)
+- [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
 

@@ -87,7 +87,7 @@ notebook's dependencies and Python version, and looks something like this:
 !!! example "Example notebooks"
 
     The [example
-    notebooks](https://github.com/marimo-team/marimo/tree/main/examples) in our
+    notebooks](https://github.com/botterYosuke/marimo/tree/main/examples) in our
     GitHub repo were all created using `--sandbox`. Take a look at any of them
     for an example of the full script metadata.
 

@@ -30,7 +30,7 @@ the full documentation.
 
 /// tip | Template repository
 
-Fork our [template repository](https://github.com/marimo-team/marimo-gh-pages-template) for deploying multiple notebooks to GitHub Pages. Once you have forked the repository, add your notebooks to the `notebooks` or `apps` directories,
+Fork our [template repository](https://github.com/botterYosuke/marimo-gh-pages-template) for deploying multiple notebooks to GitHub Pages. Once you have forked the repository, add your notebooks to the `notebooks` or `apps` directories,
 for editable or readonly respectively.
 ///
 

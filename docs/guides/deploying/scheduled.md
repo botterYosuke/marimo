@@ -1,6 +1,6 @@
 # Running marimo notebooks as scheduled jobs
 
-marimo notebooks are stored as Python files, so any system that can schedule a Python script can schedule a marimo notebook. This includes [cron](https://en.wikipedia.org/wiki/Cron), [airflow](https://airflow.apache.org/) or [prefect](https://www.prefect.io/). You can even [pass variables](https://docs.marimo.io/guides/scripts/?h=command+line) from the command line to marimo notebooks, which makes them well-suited to this use-case.
+marimo notebooks are stored as Python files, so any system that can schedule a Python script can schedule a marimo notebook. This includes [cron](https://en.wikipedia.org/wiki/Cron), [airflow](https://airflow.apache.org/) or [prefect](https://www.prefect.io/). You can even [pass variables](https://backcast-tan.vercel.app/guides/scripts/?h=command+line) from the command line to marimo notebooks, which makes them well-suited to this use-case.
 
 ## Github Actions
 
@@ -38,8 +38,8 @@ jobs:
 
 ## Alternatives
 
-For tools like Airflow and Prefect, you can also choose to reuse parts of a marimo notebook in larger Python batch jobs. Check the [docs on reusing functions](https://docs.marimo.io/guides/reusing_functions/) or [this Prefect tutorial on YouTube](https://www.youtube.com/watch?v=CvSbGTFCpF4) if you're interested in that. For Airflow specifically it might make also sense to write a custom operator, see [this tutorial on YouTube](https://www.youtube.com/watch?v=ITuUYW14ToA) for more details.
+For tools like Airflow and Prefect, you can also choose to reuse parts of a marimo notebook in larger Python batch jobs. Check the [docs on reusing functions](https://backcast-tan.vercel.app/guides/reusing_functions/) or [this Prefect tutorial on YouTube](https://www.youtube.com/watch?v=CvSbGTFCpF4) if you're interested in that. For Airflow specifically it might make also sense to write a custom operator, see [this tutorial on YouTube](https://www.youtube.com/watch?v=ITuUYW14ToA) for more details.
 
-Alternatively, you may be interested in having specific cells in marimo run on an automated schedule as you have the notebook open. The simplest way to do that is to use the [mo.ui.refresh](https://docs.marimo.io/api/inputs/refresh/#marimo.ui.refresh) widget to manually specify how often a cell needs to rerun.
+Alternatively, you may be interested in having specific cells in marimo run on an automated schedule as you have the notebook open. The simplest way to do that is to use the [mo.ui.refresh](https://backcast-tan.vercel.app/api/inputs/refresh/#marimo.ui.refresh) widget to manually specify how often a cell needs to rerun.
 
 Finally, if you have very custom needs, you can always use third party Python libraries (like [schedule](https://schedule.readthedocs.io/en/stable/index.html)) to set up something bespoke from your own code.

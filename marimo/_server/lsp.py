@@ -439,7 +439,7 @@ class CopilotLspServer(BaseLspServer):
     def missing_binary_alert(self) -> AlertNotification:
         return AlertNotification(
             title="GitHub Copilot: Connection Error",
-            description="<span><a class='hyperlink' href='https://docs.marimo.io/getting_started/index.html#github-copilot'>Install Node.js</a> to use copilot.</span>",
+            description="<span><a class='hyperlink' href='https://backcast-tan.vercel.app/getting_started/index.html#github-copilot'>Install Node.js</a> to use copilot.</span>",
             variant="danger",
         )
 

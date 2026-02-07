@@ -528,7 +528,7 @@ base_url = "https://api.v0.dev/"  # Verify the endpoint in v0 docs
 ```
 
 See the [LiteLLM provider list](https://litellm.vercel.app/docs/providers) for more options. For non‑compatible APIs, submit a
-[feature request](https://github.com/marimo-team/marimo/issues/new?template=feature_request.yaml).
+[feature request](https://github.com/botterYosuke/marimo/issues/new?template=feature_request.yaml).
 
 
 ### OpenAI-compatible (legacy)

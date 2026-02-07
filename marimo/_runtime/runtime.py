@@ -1889,7 +1889,7 @@ class Kernel:
                         "An exception was raised when updating a UIElement's "
                         "value. This is a bug in marimo. Please copy "
                         "the below traceback and paste it in an "
-                        "issue: https://github.com/marimo-team/marimo/issues\n"
+                        "issue: https://github.com/botterYosuke/marimo/issues\n"
                     )
                     tmpio = io.StringIO()
                     traceback.print_exc(file=tmpio)
@@ -1937,7 +1937,7 @@ class Kernel:
                         f"refer to a UIElement value, for bound name {name}. "
                         "This is a bug in marimo. "
                         "Please copy the below traceback and paste it in an "
-                        "issue: https://github.com/marimo-team/marimo/issues\n"
+                        "issue: https://github.com/botterYosuke/marimo/issues\n"
                     )
                     tmpio = io.StringIO()
                     traceback.print_exc(file=tmpio)
@@ -1971,7 +1971,7 @@ class Kernel:
                     "An exception was raised when completing a UIElement's"
                     "update. This is a bug in marimo. "
                     "Please copy the below traceback and paste it in an "
-                    "issue: https://github.com/marimo-team/marimo/issues\n"
+                    "issue: https://github.com/botterYosuke/marimo/issues\n"
                 )
                 tmpio = io.StringIO()
                 traceback.print_exc(file=tmpio)

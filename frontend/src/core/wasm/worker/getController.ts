@@ -7,7 +7,7 @@ import type { WasmController } from "./types";
 export async function getController(version: string): Promise<WasmController> {
   try {
     const controller = await import(
-      /* @vite-ignore */ `/wasm/controller.js?version=${version}`
+      /* @vite-ignore */ `wasm/controller.js?version=${version}`
     );
     return controller;
   } catch {

@@ -13,9 +13,9 @@ def _():
         r"""
         # @app.function smoke test
 
-        See [2293 for discussion](https://github.com/marimo-team/marimo/issues/2293)[^2293]
+        See [2293 for discussion](https://github.com/botterYosuke/marimo/issues/2293)[^2293]
 
-        [^2293]: https://github.com/marimo-team/marimo/issues/2293
+        [^2293]: https://github.com/botterYosuke/marimo/issues/2293
         """
     )
     return

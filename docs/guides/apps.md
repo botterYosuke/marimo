@@ -72,5 +72,5 @@ Unlike the grid layout, the slides are much less customizable:
 - The slides do not support drag-and-drop rearrangement or resizing.
 - All outputs are shown and all code is hidden.
 
-If you need more control over the layout, please file an issue on [GitHub](https://github.com/marimo-team/marimo/issues),
+If you need more control over the layout, please file an issue on [GitHub](https://github.com/botterYosuke/marimo/issues),
 so we can properly prioritize this feature.

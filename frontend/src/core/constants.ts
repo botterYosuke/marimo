@@ -1,12 +1,12 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 export const Constants = {
-  githubPage: "https://github.com/marimo-team/marimo",
-  releasesPage: "https://github.com/marimo-team/marimo/releases",
-  issuesPage: "https://github.com/marimo-team/marimo/issues",
+  githubPage: "https://github.com/botterYosuke/marimo",
+  releasesPage: "https://github.com/botterYosuke/marimo/releases",
+  issuesPage: "https://github.com/botterYosuke/marimo/issues",
   feedbackForm: "https://marimo.io/feedback",
-  discordLink: "https://marimo.io/discord?ref=notebook",
-  docsPage: "https://docs.marimo.io",
-  youtube: "https://www.youtube.com/@marimo-team",
+  discordLink: "https://discord.com/invite/5mR3Gmff",
+  docsPage: "https://backcast-tan.vercel.app",
+  youtube: "https://www.youtube.com/@botterYosuke",
 };
 
 export const KnownQueryParams = {

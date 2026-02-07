@@ -33,7 +33,7 @@ widget.data_as_polars
 ```
 
 For additional examples, see
-[our repo](https://github.com/marimo-team/marimo/tree/main/examples/third_party/anywidget) or our [widgets gallery](https://marimo.io/gallery/widgets).
+[our repo](https://github.com/botterYosuke/marimo/tree/main/examples/third_party/anywidget) or our [widgets gallery](https://marimo.io/gallery/widgets).
 
 ## Custom widget
 

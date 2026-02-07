@@ -24,7 +24,7 @@ def _(mo):
     mo.md(r"""
     # Using OpenAI
 
-    This example shows how to use [`mo.ui.chat`](https://docs.marimo.io/api/inputs/chat.html#marimo.ui.chat) to make a chatbot backed by OpenAI.
+    This example shows how to use [`mo.ui.chat`](https://backcast-tan.vercel.app/api/inputs/chat.html#marimo.ui.chat) to make a chatbot backed by OpenAI.
     """)
     return
 
@@ -75,7 +75,7 @@ def _(mo, openai_key):
 @app.cell
 def _(mo):
     mo.md("""
-    Access the chatbot's historical messages with [`chatbot.value`](https://docs.marimo.io/api/inputs/chat.html#accessing-chat-history).
+    Access the chatbot's historical messages with [`chatbot.value`](https://backcast-tan.vercel.app/api/inputs/chat.html#accessing-chat-history).
     """)
     return
 

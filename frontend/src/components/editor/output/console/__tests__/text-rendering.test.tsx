@@ -31,14 +31,14 @@ describe("RenderTextWithLinks", () => {
 
     it("should handle multiple URLs in one line", () => {
       render(
-        <RenderTextWithLinks text="Visit https://marimo.io or https://github.com/marimo-team/marimo" />,
+        <RenderTextWithLinks text="Visit https://marimo.io or https://github.com/botterYosuke/marimo" />,
       );
       expect(
         screen.getByRole("link", { name: "https://marimo.io" }),
       ).toBeInTheDocument();
       expect(
         screen.getByRole("link", {
-          name: "https://github.com/marimo-team/marimo",
+          name: "https://github.com/botterYosuke/marimo",
         }),
       ).toBeInTheDocument();
     });

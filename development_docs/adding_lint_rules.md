@@ -94,8 +94,8 @@ class YourNewRule(LintRule):
 
     ## References
 
-    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
-    - [Relevant Guide](https://docs.marimo.io/guides/...)
+    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
+    - [Relevant Guide](https://backcast-tan.vercel.app/guides/...)
     """
 
     code = "MB005"  # Your assigned code
@@ -396,12 +396,12 @@ Before submitting your rule:
 
 ### Simple Rule Implementation
 
-Example of a simple rule that checks for syntax errors: https://github.com/marimo-team/marimo/pull/6384
+Example of a simple rule that checks for syntax errors: https://github.com/botterYosuke/marimo/pull/6384
 
 ### Rule Implementation with `--unsafe-fixes`
 
 Some rules may have "fixes" that mutate the notebook structure.
-An example of a rule that mutates the notebook structure (i.e. an unsafe fix) by removing empty cells: https://github.com/marimo-team/marimo/pull/6398
+An example of a rule that mutates the notebook structure (i.e. an unsafe fix) by removing empty cells: https://github.com/botterYosuke/marimo/pull/6398
 
 ### Rule Implementation with Log Context
 

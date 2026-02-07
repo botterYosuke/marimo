@@ -53,14 +53,14 @@ def _(sys):
 @app.cell
 def _(sys):
     sys.stderr.write(
-        "Here is a link in stderr: https://github.com/marimo-team/marimo\n"
+        "Here is a link in stderr: https://github.com/botterYosuke/marimo\n"
     )
     return
 
 
 @app.cell
 def _():
-    print("Here is a link in a print statement: https://docs.marimo.io")
+    print("Here is a link in a print statement: https://backcast-tan.vercel.app")
     return
 
 

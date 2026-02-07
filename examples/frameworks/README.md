@@ -4,7 +4,7 @@ These examples show how to use marimo with various web/ASGI frameworks, such as 
 
 > [!TIP]
 > Submit a
-> [pull request](https://github.com/marimo-team/marimo/pulls) to add an example!
+> [pull request](https://github.com/botterYosuke/marimo/pulls) to add an example!
 
 ## Running examples
 
