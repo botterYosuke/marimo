@@ -54,6 +54,6 @@ if __name__ == "__main__":
 
 ## References
 
-- [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
-- [File Format Documentation](https://backcast-tan.vercel.app/guides/coming_from/jupyter/#marimo-file-format)
+- [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+- [File Format Documentation](https://docs.marimo.io/guides/coming_from/jupyter/#marimo-file-format)
 

@@ -405,7 +405,7 @@ def _(mo):
 
     ### I want to edit notebooks in a different editor, what do I need to know?
 
-    See the docs on [using your own editor](https://backcast-tan.vercel.app/guides/editor_features/watching/).
+    See the docs on [using your own editor](https://docs.marimo.io/guides/editor_features/watching/).
 
     ### I want to import functions from a marimo notebook, what do I need to know?
 
@@ -414,7 +414,7 @@ def _(mo):
 
     ### I want to run pytest on marimo notebooks, what do I need to know?
 
-    See the docs on [testing](https://backcast-tan.vercel.app/guides/testing/).
+    See the docs on [testing](https://docs.marimo.io/guides/testing/).
     """)
     return
 

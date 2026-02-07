@@ -27,7 +27,7 @@
 !!! note "Preview"
 
     Islands are an early feature. While the API likely won't change, there are some improvements we'd like to make before we consider them stable.
-    Please let us know on [GitHub](https://github.com/botterYosuke/marimo/issues) if you run into any issues or have any feedback!
+    Please let us know on [GitHub](https://github.com/marimo-team/marimo/issues) if you run into any issues or have any feedback!
 
 > This content below is powered by marimo's reactive runtime. It will become interactive after initializing the marimo runtime.
 

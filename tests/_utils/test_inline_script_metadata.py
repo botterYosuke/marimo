@@ -39,7 +39,7 @@ app = marimo.App(width="medium")
 
 
 def test_get_dependencies_github():
-    url = "https://github.com/botterYosuke/marimo/blob/a1e1be3190023a86650904249f911b2e6ffb8fac/examples/third_party/leafmap/leafmap_example.py"
+    url = "https://github.com/marimo-team/marimo/blob/a1e1be3190023a86650904249f911b2e6ffb8fac/examples/third_party/leafmap/leafmap_example.py"
     assert PyProjectReader.from_filename(url).dependencies == [
         "leafmap==0.41.0",
         "marimo",
@@ -105,7 +105,7 @@ def test_pyproject_toml_to_requirements_txt_git_sources():
             "uv": {
                 "sources": {
                     "marimo": {
-                        "git": "https://github.com/botterYosuke/marimo.git",
+                        "git": "https://github.com/marimo-team/marimo.git",
                         "rev": "main",
                     },
                     "numpy": {
@@ -121,7 +121,7 @@ def test_pyproject_toml_to_requirements_txt_git_sources():
         },
     }
     assert _pyproject_toml_to_requirements_txt(pyproject) == [
-        "marimo @ git+https://github.com/botterYosuke/marimo.git@main",
+        "marimo @ git+https://github.com/marimo-team/marimo.git@main",
         "numpy @ git+https://github.com/numpy/numpy.git@main",
         "polars @ git+https://github.com/pola/polars.git@dev",
         "altair",
@@ -138,7 +138,7 @@ def test_pyproject_toml_to_requirements_txt_with_marker():
             "uv": {
                 "sources": {
                     "marimo": {
-                        "git": "https://github.com/botterYosuke/marimo.git",
+                        "git": "https://github.com/marimo-team/marimo.git",
                         "tag": "0.1.0",
                         "marker": "python_version >= '3.12'",
                     }
@@ -147,7 +147,7 @@ def test_pyproject_toml_to_requirements_txt_with_marker():
         },
     }
     assert _pyproject_toml_to_requirements_txt(pyproject) == [
-        "marimo @ git+https://github.com/botterYosuke/marimo.git@0.1.0; python_version >= '3.12'",  # noqa: E501
+        "marimo @ git+https://github.com/marimo-team/marimo.git@0.1.0; python_version >= '3.12'",  # noqa: E501
         "polars",
     ]
 
@@ -162,14 +162,14 @@ def test_pyproject_toml_to_requirements_txt_with_url_sources():
             "uv": {
                 "sources": {
                     "marimo": {
-                        "url": "https://github.com/botterYosuke/marimo/archive/refs/heads/main.zip",
+                        "url": "https://github.com/marimo-team/marimo/archive/refs/heads/main.zip",
                     }
                 }
             }
         },
     }
     assert _pyproject_toml_to_requirements_txt(pyproject) == [
-        "marimo @ https://github.com/botterYosuke/marimo/archive/refs/heads/main.zip",  # noqa: E501
+        "marimo @ https://github.com/marimo-team/marimo/archive/refs/heads/main.zip",  # noqa: E501
         "polars",
     ]
 
@@ -244,7 +244,7 @@ def test_pyproject_toml_to_requirements_txt_with_versioned_dependencies(
             "uv": {
                 "sources": {
                     "marimo": {
-                        "git": "https://github.com/botterYosuke/marimo.git",
+                        "git": "https://github.com/marimo-team/marimo.git",
                         "rev": "main",
                     },
                 }
@@ -252,7 +252,7 @@ def test_pyproject_toml_to_requirements_txt_with_versioned_dependencies(
         },
     }
     assert _pyproject_toml_to_requirements_txt(pyproject) == [
-        "marimo @ git+https://github.com/botterYosuke/marimo.git@main",
+        "marimo @ git+https://github.com/marimo-team/marimo.git@main",
     ]
 
 

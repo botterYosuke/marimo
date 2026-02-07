@@ -67,7 +67,7 @@ export const CellSelectionFeature: TableFeature = {
   ) => {
     // This could be a performance bottleneck if we have a lot of cells.
     // (for each cell, for each selected cell), which is O(n^2)
-    // Perhaps consider using datastructure mentioned in https://github.com/botterYosuke/marimo/pull/3725/files#r1974362428
+    // Perhaps consider using datastructure mentioned in https://github.com/marimo-team/marimo/pull/3725/files#r1974362428
     cell.getIsSelected = () => {
       const state: CellSelectionState = table.getState().cellSelection ?? [];
       return state.some(

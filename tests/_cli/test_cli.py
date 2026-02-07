@@ -1056,7 +1056,7 @@ def test_cli_edit_by_url() -> None:
         [
             "marimo",
             "edit",
-            "https://github.com/botterYosuke/marimo/blob/main/examples/ui/button.py",
+            "https://github.com/marimo-team/marimo/blob/main/examples/ui/button.py",
             "-p",
             str(port),
             "--headless",

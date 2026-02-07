@@ -45,6 +45,7 @@ def broadcast_notification(
         try:
             ctx = get_context()
         except ContextNotInitializedError:
+            LOGGER.debug("No context initialized.")
             return
         else:
             stream = ctx.stream
@@ -94,8 +95,8 @@ class CellNotificationUtils:
 
                 Increasing the max output size may cause performance issues.
                 If you run into problems, please reach out
-                to us on [Discord](https://discord.com/invite/5mR3Gmff) or
-                [GitHub](https://github.com/botterYosuke/marimo/issues).
+                to us on [Discord](https://marimo.io/discord?ref=app) or
+                [GitHub](https://github.com/marimo-team/marimo/issues).
                 """
 
             warning = callout(

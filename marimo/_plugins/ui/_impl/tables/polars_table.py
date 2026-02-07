@@ -138,7 +138,7 @@ class PolarsTableManagerFactory(TableManagerFactory):
                             result = self._convert_time_to_string(
                                 result, column
                             )
-                        # https://github.com/botterYosuke/marimo/issues/7032
+                        # https://github.com/marimo-team/marimo/issues/7032
                         # Polars issue with ordering and write_json for enums, so we convert to strings
                         elif isinstance(dtype, pl.List) and isinstance(
                             dtype.inner, (pl.Enum, pl.Categorical)

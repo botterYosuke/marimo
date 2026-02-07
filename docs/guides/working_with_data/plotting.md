@@ -214,7 +214,7 @@ conda install -c conda-forge "vegafusion-python-embed>=1.4.0" "vegafusion>=1.4.0
     marimo can render any Plotly plot, but [`mo.ui.plotly`][marimo.ui.plotly] only
     supports reactive selections for scatter plots, bar charts, heatmaps,
     treemaps, and sunburst charts. If you require other kinds of selection,
-    please [file an issue](https://github.com/botterYosuke/marimo/issues).
+    please [file an issue](https://github.com/marimo-team/marimo/issues).
 
 /// marimo-embed
     size: large
@@ -294,4 +294,4 @@ Charts are powered by [Vega-Lite](https://vega.github.io/vega-lite/). To save a 
 
 !!! note
 
-    This feature is in active development. Please report any issues or feedback [here](https://github.com/botterYosuke/marimo/issues).
+    This feature is in active development. Please report any issues or feedback [here](https://github.com/marimo-team/marimo/issues).

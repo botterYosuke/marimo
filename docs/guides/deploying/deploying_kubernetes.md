@@ -1,6 +1,6 @@
 # Deploy with Kubernetes
 
-The [marimo-operator](https://github.com/botterYosuke/marimo-operator) is a
+The [marimo-operator](https://github.com/marimo-team/marimo-operator) is a
 Kubernetes operator that manages marimo notebook deployments. It handles
 persistent storage, resource allocation, and lifecycle management for notebooks
 running on Kubernetes clusters.
@@ -165,7 +165,7 @@ The Kubernetes scheduler will place your notebook on an appropriate GPU node.
 
 ## Cloud storage integration
 
-The marimo operator supports mounting cloud storage (S3-compatible buckets, SSHFS, rsync) in your notebooks. See the [operator documentation](https://github.com/botterYosuke/marimo-operator) for mount configuration details.
+The marimo operator supports mounting cloud storage (S3-compatible buckets, SSHFS, rsync) in your notebooks. See the [operator documentation](https://github.com/marimo-team/marimo-operator) for mount configuration details.
 
 ## Deploy with manifests
 
@@ -240,7 +240,7 @@ kubectl delete marimo my-notebook
 
 ## Learn more
 
-- [marimo-operator on GitHub](https://github.com/botterYosuke/marimo-operator)
+- [marimo-operator on GitHub](https://github.com/marimo-team/marimo-operator)
 - [SkyPilot deployment](./deploying_skypilot.md) - For multi-cloud VM deployment without Kubernetes
 - [Docker deployment](./deploying_docker.md) - For container basics
 - [Inlining dependencies](../package_management/inlining_dependencies.md) - For reproducible notebooks

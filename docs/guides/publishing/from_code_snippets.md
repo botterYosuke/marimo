@@ -1,6 +1,6 @@
 # Publish using `marimo-snippets` 
 
-[`marimo-snippets`](https://github.com/botterYosuke/marimo-snippets) is a
+[`marimo-snippets`](https://github.com/marimo-team/marimo-snippets) is a
 single-file JavaScript utility that lets you embed interactive marimo notebooks
 in static web pages, powered by WebAssembly.
 
@@ -73,4 +73,4 @@ You can also configure data attributes per-element.
 </marimo-iframe>
 ```
 
-See the [GitHub repository](https://github.com/botterYosuke/marimo-snippets) for a full example and [documentation on configuration](https://github.com/botterYosuke/marimo-snippets?tab=readme-ov-file#configuration).
+See the [GitHub repository](https://github.com/marimo-team/marimo-snippets) for a full example and [documentation on configuration](https://github.com/marimo-team/marimo-snippets?tab=readme-ov-file#configuration).

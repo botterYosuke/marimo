@@ -465,7 +465,7 @@ class Extractor:
             "Unexpected node type for cell extraction. "
             "Please report this issue to the Marimo team with "
             "your code if possible: "
-            "github.com/botterYosuke/marimo/issues"
+            "github.com/marimo-team/marimo/issues"
         )
 
 

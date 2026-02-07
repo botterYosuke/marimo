@@ -18,7 +18,7 @@ def _(mo):
         r"""
     ## Composite Chart Legend Selection Bug
 
-    Test case for https://github.com/botterYosuke/marimo/issues/6676
+    Test case for https://github.com/marimo-team/marimo/issues/6676
 
     Legend selection should work on composite charts created with the `+` operator.
     Clicking legend items should filter the chart.

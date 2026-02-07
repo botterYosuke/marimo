@@ -529,7 +529,7 @@ def _(mo):
     mo.md(
         """
         # With `transform_filter`
-        > Bug https://github.com/botterYosuke/marimo/issues/727
+        > Bug https://github.com/marimo-team/marimo/issues/727
         """
     )
     return

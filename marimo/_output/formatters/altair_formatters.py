@@ -110,7 +110,7 @@ class AltairFormatter(FormatterFactory):
 
 # This is only needed since it seems that altair does not
 # handle this internally.
-# https://github.com/botterYosuke/marimo/issues/2302
+# https://github.com/marimo-team/marimo/issues/2302
 def _apply_embed_options(chart: AltairChartType) -> AltairChartType:
     import altair as alt
 

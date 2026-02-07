@@ -310,7 +310,7 @@ def _(mo):
     ```
 
     In addition to tutorials, we have examples in our
-    [our GitHub repo](https://www.github.com/botterYosuke/marimo/tree/main/examples).
+    [our GitHub repo](https://www.github.com/marimo-team/marimo/tree/main/examples).
     """)
     return
 

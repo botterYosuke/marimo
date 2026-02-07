@@ -35,5 +35,5 @@ def create_package_manager(
         f"Unknown package manager {name}. "
         "This is a bug in marimo."
         "Please file an issue: "
-        "https://github.com/botterYosuke/marimo/issues"
+        "https://github.com/marimo-team/marimo/issues"
     )

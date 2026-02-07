@@ -210,7 +210,7 @@ def strip_conventional_prefix(title: str) -> str:
 def format_entry(entry: CategorizedEntry) -> str:
     if entry.pr:
         title = strip_conventional_prefix(entry.pr.title)
-        return f"* {title} ([#{entry.pr.number}](https://github.com/botterYosuke/marimo/pull/{entry.pr.number}))"
+        return f"* {title} ([#{entry.pr.number}](https://github.com/marimo-team/marimo/pull/{entry.pr.number}))"
     title = entry.commit.message
     title = strip_conventional_prefix(entry.commit.message)
     return f"* {title} ({entry.commit.sha[:7]})"
@@ -307,7 +307,7 @@ def generate_release_notes(since_tag: str) -> str:
 
     current_tag = "TODO_CURRENT_VERSION"
     notes.append(
-        f"\n**Full Changelog**: https://github.com/botterYosuke/marimo/compare/{since_tag}...{current_tag}"
+        f"\n**Full Changelog**: https://github.com/marimo-team/marimo/compare/{since_tag}...{current_tag}"
     )
 
     return "\n".join(notes)

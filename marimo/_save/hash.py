@@ -187,7 +187,7 @@ def standardize_tensor(tensor: Tensor) -> Optional[Tensor]:
     raise ValueError(
         f"Expected a data primitive object, but got {type(tensor)} instead."
         "This maybe is an internal marimo issue. Please report to "
-        "https://github.com/botterYosuke/marimo/issues."
+        "https://github.com/marimo-team/marimo/issues."
     )
 
 
@@ -1016,7 +1016,7 @@ class BlockHasher:
             "There may be cyclic definitions in the code. "
             f"The unresolved references are: {refs}. "
             "This is unexpected, please report this issue to "
-            "https://github.com/botterYosuke/marimo/issues"
+            "https://github.com/marimo-team/marimo/issues"
         )
 
         ref_cells = set().union(
@@ -1033,13 +1033,13 @@ class BlockHasher:
             "Inconsistent references, cannot determine execution path. "
             f"Got {ref_cells} expected set({self.cell_id}). "
             "This is unexpected, please report this issue to "
-            "https://github.com/botterYosuke/marimo/issues"
+            "https://github.com/marimo-team/marimo/issues"
         )
         assert ref_cells == {self.cell_id}, (
             "Unexpected execution cell residual "
             f"{ref_cells.pop()} expected {self.cell_id}. "
             "This is unexpected, please report this issue to "
-            "https://github.com/botterYosuke/marimo/issues"
+            "https://github.com/marimo-team/marimo/issues"
         )
         self.hash_alg.update(hash_raw_module(context, self.hash_alg.name))
         # refs have been accounted for at this point. Nothing to return

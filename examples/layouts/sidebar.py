@@ -115,7 +115,7 @@ def _(mo, population, year):
                 f"""
             [{mo.icon("lucide:twitter")} Twitter](https://twitter.com/marimo_io)
 
-            [{mo.icon("lucide:github")} GitHub](https://github.com/botterYosuke/marimo)    
+            [{mo.icon("lucide:github")} GitHub](https://github.com/marimo-team/marimo)    
             """
             )
         ],

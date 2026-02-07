@@ -97,7 +97,7 @@ def is_data_primitive(value: Any) -> bool:
             raise err from ValueError(
                 "Unexpected datatype, narwhals was unable to normalize "
                 "dataframe. Please report this to "
-                "github.com/botterYosuke/marimo"
+                "github.com/marimo-team/marimo"
             )
     # Otherwise may be a closely related array object
     return True

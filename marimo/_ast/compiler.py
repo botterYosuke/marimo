@@ -251,7 +251,7 @@ def compile_cell(
     # send nbsp in place of space, which is a syntax error.
     #
     # See https://github.com/pyodide/pyodide/issues/3337,
-    #     https://github.com/botterYosuke/marimo/issues/1546
+    #     https://github.com/marimo-team/marimo/issues/1546
     code = code.replace("\u00a0", " ")
     module = module_compile(code)
 

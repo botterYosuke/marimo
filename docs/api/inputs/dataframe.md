@@ -25,7 +25,7 @@ Supported transforms are:
 
 !!! info "Request a Transform"
 
-    Don't see a transform you need? You can [request a new dataframe transform](https://github.com/botterYosuke/marimo/issues/new?title=New%20dataframe%20transform:&labels=enhancement&template=feature_request.yaml) on our GitHub repository.
+    Don't see a transform you need? You can [request a new dataframe transform](https://github.com/marimo-team/marimo/issues/new?title=New%20dataframe%20transform:&labels=enhancement&template=feature_request.yaml) on our GitHub repository.
 
 /// marimo-embed
     size: large

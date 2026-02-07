@@ -45,7 +45,7 @@ class StdoutRule(LintRule):
 
     ## References
 
-    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
+    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
     """
 
     code = "MF002"
@@ -135,7 +135,7 @@ class StderrRule(LintRule):
 
     ## References
 
-    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
+    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
     - [Python Warning Categories](https://docs.python.org/3/library/warnings.html#warning-categories)
     """
 
@@ -187,8 +187,8 @@ class SqlParseRule(LintRule):
 
     ## References
 
-    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
-    - [SQL Support](https://backcast-tan.vercel.app/guides/sql/)
+    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+    - [SQL Support](https://docs.marimo.io/guides/sql/)
     """
 
     code = "MF005"
@@ -271,7 +271,7 @@ class MiscLogRule(LintRule):
 
     ## References
 
-    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
+    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
     """
 
     code = "MF006"

@@ -576,7 +576,7 @@ export const UserConfigForm: React.FC = () => {
             <SettingGroup title="Language Servers">
               <FormDescription>
                 See the{" "}
-                <ExternalLink href="https://backcast-tan.vercel.app/guides/editor_features/language_server/">
+                <ExternalLink href="https://docs.marimo.io/guides/editor_features/language_server/">
                   docs
                 </ExternalLink>{" "}
                 for more information about language server support.
@@ -1085,14 +1085,14 @@ export const UserConfigForm: React.FC = () => {
                       When marimo comes across a module that is not installed,
                       you will be prompted to install it using your preferred
                       package manager. Learn more in the{" "}
-                      <ExternalLink href="https://backcast-tan.vercel.app/guides/editor_features/package_management.html">
+                      <ExternalLink href="https://docs.marimo.io/guides/editor_features/package_management.html">
                         docs
                       </ExternalLink>
                       .
                       <br />
                       <br />
                       Running marimo in a{" "}
-                      <ExternalLink href="https://backcast-tan.vercel.app/guides/package_management/inlining_dependencies.html">
+                      <ExternalLink href="https://docs.marimo.io/guides/package_management/inlining_dependencies.html">
                         sandboxed environment
                       </ExternalLink>{" "}
                       is only supported by <Kbd className="inline">uv</Kbd>
@@ -1252,7 +1252,7 @@ export const UserConfigForm: React.FC = () => {
 
             <FormDescription>
               Learn more in the{" "}
-              <ExternalLink href="https://backcast-tan.vercel.app/guides/reactivity/#configuring-how-marimo-runs-cells">
+              <ExternalLink href="https://docs.marimo.io/guides/reactivity/#configuring-how-marimo-runs-cells">
                 docs
               </ExternalLink>
               .
@@ -1320,7 +1320,7 @@ export const UserConfigForm: React.FC = () => {
                   <FormDescription>
                     Enable experimental external agents such as Claude Code and
                     Gemini CLI. Learn more in the{" "}
-                    <ExternalLink href="https://backcast-tan.vercel.app/guides/editor_features/agents/">
+                    <ExternalLink href="https://docs.marimo.io/guides/editor_features/agents/">
                       docs
                     </ExternalLink>
                     .
@@ -1353,7 +1353,7 @@ export const UserConfigForm: React.FC = () => {
                     Enable PDF export using{" "}
                     <Kbd className="inline">nbconvert</Kbd> and{" "}
                     <Kbd className="inline">playwright</Kbd>. Refer to{" "}
-                    <ExternalLink href="https://backcast-tan.vercel.app/guides/exporting/#exporting-to-pdf-slides-or-rst">
+                    <ExternalLink href="https://docs.marimo.io/guides/exporting/#exporting-to-pdf-slides-or-rst">
                       the docs
                     </ExternalLink>
                     .

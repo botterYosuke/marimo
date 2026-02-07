@@ -34,7 +34,7 @@ def _():
     *   ✅ **Validation & Type-Safety:** Use Pydantic's validation and Python's type hints to ensure data integrity and make your code robust.
     *   🧠 **Reasoning & Tool Use:** Define output models for complex reasoning tasks and reliable function calling (tool use).
 
-    The following example uses [`mo.ui.chat`](https://backcast-tan.vercel.app/api/inputs/chat.html#marimo.ui.chat) to build a chatbot backed by Pydantic-AI.
+    The following example uses [`mo.ui.chat`](https://docs.marimo.io/api/inputs/chat.html#marimo.ui.chat) to build a chatbot backed by Pydantic-AI.
     """)
     return
 

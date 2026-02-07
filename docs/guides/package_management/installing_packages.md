@@ -10,7 +10,7 @@ You can also install (and remove) packages using the package manager sidebar pan
 
 !!! note "Resolving package names"
 
-    We use a heuristic for guessing the package name in your registry (e.g. PyPI) from the module name. It is possible that the package name is different from the module name. If you encounter an error, please [file an issue](https://github.com/botterYosuke/marimo/issues) or help us by adding your mapping [directly to the codebase](https://github.com/botterYosuke/marimo/blob/main/marimo/_runtime/packages/module_name_to_pypi_name.py).
+    We use a heuristic for guessing the package name in your registry (e.g. PyPI) from the module name. It is possible that the package name is different from the module name. If you encounter an error, please [file an issue](https://github.com/marimo-team/marimo/issues) or help us by adding your mapping [directly to the codebase](https://github.com/marimo-team/marimo/blob/main/marimo/_runtime/packages/module_name_to_pypi_name.py).
 
 **Notes.**
 

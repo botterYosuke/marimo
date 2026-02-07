@@ -33,7 +33,7 @@ def _(mo):
 
     This notebook is a Python version of the seam carving algorithm, but it is also a
     demonstration of marimo's [persistent caching
-    feature](https://backcast-tan.vercel.app/recipes.html#persistent-caching-for-very-expensive-computations),
+    feature](https://docs.marimo.io/recipes.html#persistent-caching-for-very-expensive-computations),
     which is helpful because the algorithm is compute intensive even when you
     use [Numba](https://numba.pydata.org/).
 

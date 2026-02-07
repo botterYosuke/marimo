@@ -20,7 +20,7 @@ def _(mo):
     mo.md(r"""
     # MotherDuck 🧡 marimo
 
-    Throughout this notebook, we will explore using [MotherDuck](https://motherduck.com) inside marimo. If you’re new to marimo, check out our [GitHub](https://github.com/botterYosuke/marimo) repo: marimo is free and open source.
+    Throughout this notebook, we will explore using [MotherDuck](https://motherduck.com) inside marimo. If you’re new to marimo, check out our [GitHub](https://github.com/marimo-team/marimo) repo: marimo is free and open source.
 
     _You can expand the code of any cells to see how the output are being created._
     """)

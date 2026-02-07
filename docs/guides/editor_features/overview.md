@@ -161,7 +161,7 @@ We know keyboard shortcuts are very personal; you can remap them in the
 configuration.
 
 _Missing a shortcut? File a
-[GitHub issue](https://github.com/botterYosuke/marimo/issues)._
+[GitHub issue](https://github.com/marimo-team/marimo/issues)._
 
 
 ## Command palette
@@ -176,7 +176,7 @@ Hit `Cmd/Ctrl+K` to open the command palette.
 </div>
 
 _Missing a command? File a
-[GitHub issue](https://github.com/botterYosuke/marimo/issues)._
+[GitHub issue](https://github.com/marimo-team/marimo/issues)._
 
 ## Editor widths
 
@@ -244,6 +244,6 @@ tiniest quibbles to the biggest blue-sky dreams.
 
 If you'd like your feedback to start a conversation (we'd love to talk with
 you!), please consider posting in our [GitHub
-issues](https://github.com/botterYosuke/marimo/issues) or
-[Discord](https://discord.com/invite/5mR3Gmff). But if you're in a flow state and
+issues](https://github.com/marimo-team/marimo/issues) or
+[Discord](https://marimo.io/discord?ref=docs). But if you're in a flow state and
 can't context switch out, the feedback form has your back.

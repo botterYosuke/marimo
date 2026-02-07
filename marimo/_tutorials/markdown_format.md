@@ -23,7 +23,7 @@ you can also store and edit marimo notebooks as `.md` files, letting you
 work on prose-heavy marimo notebooks in your editor of choice.
 
 _Make sure to look at the markdown
-[source code](https://github.com/botterYosuke/marimo/blob/main/marimo/_tutorials/markdown_format.md)
+[source code](https://github.com/marimo-team/marimo/blob/main/marimo/_tutorials/markdown_format.md)
 of this tutorial!_
 
 ## Running markdown notebooks

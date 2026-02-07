@@ -16,17 +16,17 @@ Before sending a pull request, make sure to do the following:
 
 _Please reach out to the marimo team before starting work on a large
 contribution._ Get in touch at
-[GitHub issues](https://github.com/botterYosuke/marimo/issues)
-or [on Discord](https://discord.com/invite/5mR3Gmff).
+[GitHub issues](https://github.com/marimo-team/marimo/issues)
+or [on Discord](https://marimo.io/discord?ref=contributing).
 
 ## Setup
+_Note: We recommend that Windows developers use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) and clone the marimo repository [into the WSL environment and not the Windows mount](https://learn.microsoft.com/en-us/windows/wsl/filesystems)._
 
 Install [pixi](https://github.com/prefix-dev/pixi) to manage your development environment. The following command uses `pixi` to launch a development shell with all dependencies installed, using `hatch` as the environment manager.
 
 > [!NOTE]
 >
-> As an alternative to installing `pixi`, you can try developing in
-> [Gitpod](https://gitpod.io/#https://github.com/botterYosuke/marimo).
+> As an alternative to installing `pixi`, you can try developing in [Gitpod](https://gitpod.io/#https://github.com/marimo-team/marimo).
 > Note that developing in Gitpod is not officially supported by the marimo team.
 
 ```bash

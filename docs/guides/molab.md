@@ -10,11 +10,11 @@ To create your first notebook, visit:
 !!! tip "Contribute example notebooks!"
     We welcome exciting companies and projects to contribute examples notebooks,
     which are featured on the homepage with an organization's name and logo. To propose an example,
-    [reach out to us on GitHub](https://github.com/botterYosuke/marimo/issues).
+    [reach out to us on GitHub](https://github.com/marimo-team/marimo/issues).
 
 **Highlights**.
 
-- ⚡️ Build powerful notebooks using [marimo](https://github.com/botterYosuke/marimo), a next-gen open-source Python notebook built entirely from scratch that [solves](https://marimo.io/blog/lessons-learned) [long-standing](https://marimo.io/blog/python-not-json) [problems](https://leomurta.github.io/papers/pimentel2019a.pdf) with Jupyter
+- ⚡️ Build powerful notebooks using [marimo](https://github.com/marimo-team/marimo), a next-gen open-source Python notebook built entirely from scratch that [solves](https://marimo.io/blog/lessons-learned) [long-standing](https://marimo.io/blog/python-not-json) [problems](https://leomurta.github.io/papers/pimentel2019a.pdf) with Jupyter
 - ☁️ Use any Python package, thanks to our cloud backend
 - 🤖 Generate code with AI
 - 📦 Upload data files
@@ -74,7 +74,7 @@ Today, this brings just the notebook file down, and does not include your attach
 
 ## FAQ
 
-**What’s the difference between molab and Google Colab?** Google Colab is a hosted Jupyter notebook service provider. molab is a hosted [marimo notebook](https://github.com/botterYosuke/marimo) service with similar compute and sharing capabilities, but powered by marimo notebooks instead of Jupyter.
+**What’s the difference between molab and Google Colab?** Google Colab is a hosted Jupyter notebook service provider. molab is a hosted [marimo notebook](https://github.com/marimo-team/marimo) service with similar compute and sharing capabilities, but powered by marimo notebooks instead of Jupyter.
 
 **Is molab marimo’s enterprise product?** No. If you’re interested in a
 next-generation data platform for modern AI and data workloads — with marimo’s
@@ -83,7 +83,7 @@ for enterprises — [get in touch](mailto:contact@marimo.io).
 
 **Is molab free?** molab is currently free to use, as long as usage is reasonable. Our goal is to make is as easy as possible for our community to use marimo notebooks.
 
-**How do I get more RAM, CPU or GPUs?** [Reach out to us](https://discord.com/invite/5mR3Gmff) and we'll see what we can do!
+**How do I get more RAM, CPU or GPUs?** [Reach out to us](https://marimo.io/discord) and we’ll see what we can do!
 
 **I’m a compute provider.  How do I get plugged into molab as an offered backend?** [Get in touch](mailto:contact@marimo.io).
 

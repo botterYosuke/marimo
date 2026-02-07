@@ -198,7 +198,7 @@ def _get_databases_from_duckdb_internal(
     SKIP_TABLES = ["duckdb_functions()", "duckdb_types()", "duckdb_settings()"]
 
     # Bug with Iceberg catalog tables where there is a single column named "__"
-    # https://github.com/botterYosuke/marimo/issues/6688
+    # https://github.com/marimo-team/marimo/issues/6688
     CATALOG_TABLE_COLUMN_NAME = "__"
 
     for (

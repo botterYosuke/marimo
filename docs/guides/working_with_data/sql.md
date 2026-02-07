@@ -36,7 +36,7 @@ conda install -c conda-forge marimo duckdb polars
 !!! example "Examples"
 
     For example notebooks, check out
-    [`examples/sql/` on GitHub](https://github.com/botterYosuke/marimo/tree/main/examples/sql/).
+    [`examples/sql/` on GitHub](https://github.com/marimo-team/marimo/tree/main/examples/sql/).
 
 ## Example
 
@@ -139,7 +139,7 @@ SELECT * FROM read_parquet('path/to/example.parquet');
 ```
 
 For a full list you can check out the [duckdb extensions](https://duckdb.org/docs/extensions/overview).
-You can also check out our [examples on GitHub](https://github.com/botterYosuke/marimo/tree/main/examples/sql).
+You can also check out our [examples on GitHub](https://github.com/marimo-team/marimo/tree/main/examples/sql).
 
 ## Escaping SQL brackets
 
@@ -166,7 +166,7 @@ Click the "Add Database Connection" button in your notebook to connect to Postgr
   </figure>
 </div>
 
-If you'd like to connect to a database that isn't supported by the UI, you can use the code method below, or submit a [feature request](https://github.com/botterYosuke/marimo/issues/new?title=New%20database%20connection:&labels=enhancement&template=feature_request.yaml).
+If you'd like to connect to a database that isn't supported by the UI, you can use the code method below, or submit a [feature request](https://github.com/marimo-team/marimo/issues/new?title=New%20database%20connection:&labels=enhancement&template=feature_request.yaml).
 
 ### 2. Using Code
 
@@ -411,4 +411,4 @@ at your command-line.
 
 ## Examples
 
-Check out our [examples on GitHub](https://github.com/botterYosuke/marimo/tree/main/examples/sql).
+Check out our [examples on GitHub](https://github.com/marimo-team/marimo/tree/main/examples/sql).

@@ -2,7 +2,7 @@
 
 marimo provides prebuilt containers for running a marimo server.
 
-You can find the containers and tags on [marimo's GitHub packages page](https://github.com/botterYosuke/marimo/pkgs/container/marimo).
+You can find the containers and tags on [marimo's GitHub packages page](https://github.com/marimo-team/marimo/pkgs/container/marimo).
 
 We provide the following variants:
 

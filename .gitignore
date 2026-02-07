@@ -3,7 +3,6 @@
 *.pdf
 *.txt
 !tests/**/*.txt
-!requirements-docs.txt
 
 node_modules/
 .turbo/
@@ -134,13 +133,3 @@ pixi.lock
 # mkdocs
 site
 nul
-development_docs_site/
-.playwright-mcp/
-.cursor/plans/
-dist-electron/
-
-# Steam development
-steam_appid.txt
-steam/
-nul
-frontend/e2e-tests/

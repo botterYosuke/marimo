@@ -21,7 +21,7 @@ providing expressivity and extensibility for power users.
 The marimo community strongly values inclusivity and diversity. Everyone should
 treat others with the utmost respect. Everyone in the community must adhere to
 the Code of Conduct specified in [the marimo GitHub
-repository](https://github.com/botterYosuke/marimo/blob/main/CODE_OF_CONDUCT.md).
+repository](https://github.com/marimo-team/marimo/blob/main/CODE_OF_CONDUCT.md).
 Violations of this code of conduct may be reported confidentially to Project
 Maintainers indicated at that link.
 
@@ -145,7 +145,7 @@ Anyone with commit access to the repository is trusted to use it in a way that
 is consistent with the Decision Making Process. Those with permissions should
 prefer pull requests over direct pushes, ask for feedback on changes if they
 are not sure there is a consensus, and follow marimo’s [style
-guide](https://github.com/botterYosuke/marimo/blob/main/CONTRIBUTING.md) and
+guide](https://github.com/marimo-team/marimo/blob/main/CONTRIBUTING.md) and
 development processes.
 
 ### **Project Maintainers**
@@ -169,7 +169,7 @@ There are three channels that marimo uses to engage with the community.
 
 ### **Discord Server**
 
-Discussions focused on marimo's development are conducted on a [Discord Server](https://discord.com/invite/5mR3Gmff). The server is public but requires email verification.
+Discussions focused on marimo’s development are conducted on a [Discord Server](https://marimo.io/discord?ref=governance). The server is public but requires email verification.
 
 The server consists of several channels with different permissions based on the
 concept of Discord roles. The named roles are “Project Maintainer” and

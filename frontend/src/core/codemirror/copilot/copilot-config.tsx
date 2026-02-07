@@ -211,7 +211,7 @@ export const CopilotConfig = memo(() => {
             </Label>
             <div className="text-sm">
               For troubleshooting, see the{" "}
-              <ExternalLink href="https://backcast-tan.vercel.app/getting_started/index.html#github-copilot">
+              <ExternalLink href="https://docs.marimo.io/getting_started/index.html#github-copilot">
                 docs
               </ExternalLink>
               .

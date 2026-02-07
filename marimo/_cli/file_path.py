@@ -114,7 +114,7 @@ class LocalFileReader(FileReader):
 class GitHubIssueReader(FileReader):
     def can_read(self, name: str) -> bool:
         return is_url(name) and name.startswith(
-            "https://github.com/botterYosuke/marimo/issues/"
+            "https://github.com/marimo-team/marimo/issues/"
         )
 
     def read(self, name: str) -> tuple[str, str]:

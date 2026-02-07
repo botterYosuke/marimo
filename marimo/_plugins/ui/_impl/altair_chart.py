@@ -568,7 +568,7 @@ class altair_chart(UIElement[ChartSelection, ChartDataType]):
             vega_spec = _parse_spec(chart)
         except Exception:
             # Sometimes the changes to width and autosize (above) can cause `.to_dict()` to throw an error
-            # similarly to the issue described in https://github.com/botterYosuke/marimo/issues/6244
+            # similarly to the issue described in https://github.com/marimo-team/marimo/issues/6244
             # so we fallback to the original chart.
             LOGGER.info("Failed to parse spec, using original chart")
             vega_spec = _parse_spec(original_chart)
@@ -620,7 +620,7 @@ class altair_chart(UIElement[ChartSelection, ChartDataType]):
                 "Geoshapes + chart selection is not yet supported in "
                 "marimo.ui.chart.\n"
                 "If you'd like this feature, please file an issue: "
-                "https://github.com/botterYosuke/marimo/issues\n"
+                "https://github.com/marimo-team/marimo/issues\n"
             )
             chart_selection = False
 
@@ -632,7 +632,7 @@ class altair_chart(UIElement[ChartSelection, ChartDataType]):
             sys.stderr.write(
                 "Selection is not yet supported while using vegafusion with mo.ui.altair_chart.\n"
                 "You can follow the progress here: "
-                "https://github.com/botterYosuke/marimo/issues/4601"
+                "https://github.com/marimo-team/marimo/issues/4601"
             )
 
         self.dataframe: Optional[ChartDataType] = (
@@ -873,7 +873,7 @@ def maybe_fix_vegafusion_background(chart: AltairChartType) -> AltairChartType:
     """Fix vegafusion background to be transparent.
 
     Vegafusion defaults to white background, which causes issues in dark mode.
-    See: https://github.com/botterYosuke/marimo/issues/6601
+    See: https://github.com/marimo-team/marimo/issues/6601
     """
     import altair as alt
 

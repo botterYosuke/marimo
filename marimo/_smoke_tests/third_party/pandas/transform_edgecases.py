@@ -26,7 +26,7 @@ def _():
 
 @app.cell
 def _(mo, pd):
-    # https://github.com/botterYosuke/marimo/issues/5445
+    # https://github.com/marimo-team/marimo/issues/5445
     df = pd.read_csv(
         "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv"
     )
@@ -72,7 +72,7 @@ def _(gdf):
 
 @app.cell
 def _(gdf, mo):
-    # https://github.com/botterYosuke/marimo/issues/5447
+    # https://github.com/marimo-team/marimo/issues/5447
     mo.ui.table(gdf)
     return
 
@@ -86,7 +86,7 @@ def _(gdf):
 @app.cell
 def _(gdf, mo):
     # This should not fail
-    # https://github.com/botterYosuke/marimo/issues/5447
+    # https://github.com/marimo-team/marimo/issues/5447
     mo.ui.dataframe(gdf)
     return
 

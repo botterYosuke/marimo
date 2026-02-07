@@ -367,7 +367,7 @@ def test_serialize_notebook_no_cells(session_view: SessionView):
 
 
 # TODO(akshayka): Reconcile this test with
-# https://github.com/botterYosuke/marimo/pull/5377. It appears we
+# https://github.com/marimo-team/marimo/pull/5377. It appears we
 # need to serialize notebook based on the cell manager not
 # session view in order to get correct ordering of cells.
 @pytest.mark.xfail(

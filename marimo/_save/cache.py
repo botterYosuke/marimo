@@ -26,7 +26,7 @@ UNEXPECTED_FAILURE_BOILERPLATE = (
     "— this is"
     " unexpected and is likely a bug in marimo. "
     "Please file an issue at "
-    "https://github.com/botterYosuke/marimo/issues"
+    "https://github.com/marimo-team/marimo/issues"
 )
 
 

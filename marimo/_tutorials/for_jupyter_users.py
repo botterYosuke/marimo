@@ -79,7 +79,7 @@ def _(mo):
     mo.md("""
     ## Interactive elements built-in
 
-    marimo comes with a [large library of UI elements](https://backcast-tan.vercel.app/guides/interactivity.html) that are automatically
+    marimo comes with a [large library of UI elements](https://docs.marimo.io/guides/interactivity.html) that are automatically
     synchronized with Python.
     """)
     return
@@ -283,7 +283,7 @@ def _(mo):
     We believe that the tools we use shape the way we think — better tools, for better minds. With marimo, we hope to provide the Python community with a better programming environment to do research and communicate it; to experiment with code and share it; to learn computational science and teach it.
 
     The marimo editor and library have many features not discussed here.
-    Check out [our docs](https://backcast-tan.vercel.app/) to learn more!
+    Check out [our docs](https://docs.marimo.io/) to learn more!
 
     _This guide was adapted from [Pluto for Jupyter
     users](https://featured.plutojl.org/basic/pluto%20for%20jupyter%20users).

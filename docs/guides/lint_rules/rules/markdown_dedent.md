@@ -46,5 +46,5 @@ Some content here.
 
 ## References
 
-- [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
-- [Best Practices](https://backcast-tan.vercel.app/guides/best_practices/)
+- [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+- [Best Practices](https://docs.marimo.io/guides/best_practices/)

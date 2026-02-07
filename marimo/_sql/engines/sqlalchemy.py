@@ -173,7 +173,7 @@ class SQLAlchemyEngine(SQLConnection["Engine"]):
 
         try:
             default_schema_name = self.inspector.default_schema_name
-            # https://github.com/botterYosuke/marimo/issues/6436.
+            # https://github.com/marimo-team/marimo/issues/6436.
             # Upstream bug where default schema name is not a string.
             if default_schema_name is None or not isinstance(
                 default_schema_name, str

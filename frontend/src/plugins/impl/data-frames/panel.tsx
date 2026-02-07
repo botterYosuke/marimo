@@ -367,7 +367,7 @@ const AddTransformDropdown: React.FC<
             onSelect={(evt) => {
               evt.stopPropagation();
               window.open(
-                "https://github.com/botterYosuke/marimo/issues/new?title=New%20dataframe%20transform:&labels=enhancement&template=feature_request.yaml",
+                "https://github.com/marimo-team/marimo/issues/new?title=New%20dataframe%20transform:&labels=enhancement&template=feature_request.yaml",
                 "_blank",
               );
             }}

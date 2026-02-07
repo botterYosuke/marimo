@@ -428,7 +428,7 @@ def test_auto_export_ipynb_with_new_cell(
 ) -> None:
     """Test that auto-exporting to ipynb works after creating and running a new cell.
 
-    This test addresses the bug in https://github.com/botterYosuke/marimo/issues/3992
+    This test addresses the bug in https://github.com/marimo-team/marimo/issues/3992
     where cell ID inconsistency causes KeyError when auto-exporting as ipynb.
     """
     session = get_session_manager(client).get_session(SESSION_ID)

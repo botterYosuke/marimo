@@ -8,7 +8,7 @@ Once the module is installed, all cells that depend on the module will be rerun.
 
 !!! note "Package Installation"
 
-    We use some heuristic for guessing the package name in your registry (e.g. PyPI) from the module name. It is possible that the package name is different from the module name. If you encounter an error, please file an issue or help us by adding your mapping [directly to the codebase](https://github.com/botterYosuke/marimo/blob/main/marimo/_runtime/packages/module_name_to_pypi_name.py).
+    We use some heuristic for guessing the package name in your registry (e.g. PyPI) from the module name. It is possible that the package name is different from the module name. If you encounter an error, please file an issue or help us by adding your mapping [directly to the codebase](https://github.com/marimo-team/marimo/blob/main/marimo/_runtime/packages/module_name_to_pypi_name.py).
 
 ## Package reproducibility
 

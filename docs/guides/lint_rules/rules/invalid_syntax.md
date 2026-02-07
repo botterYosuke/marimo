@@ -57,6 +57,6 @@ my_list = [1, 2, 3]  # Proper closing bracket
 
 ## References
 
-- [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
+- [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
 - [Python SyntaxError Documentation](https://docs.python.org/3/tutorial/errors.html#syntax-errors)
 

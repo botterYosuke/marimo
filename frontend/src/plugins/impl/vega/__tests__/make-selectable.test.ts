@@ -594,7 +594,7 @@ describe("makeSelectable", () => {
   });
 
   it("should add legend selection to composite charts (issue #6676)", () => {
-    // Test case from https://github.com/botterYosuke/marimo/issues/6676
+    // Test case from https://github.com/marimo-team/marimo/issues/6676
     const spec = {
       layer: [
         {

@@ -273,7 +273,7 @@ function cellKeymaps({
           if (isHidden) {
             ev.contentDOM.blur();
             // Focus on the parent element
-            // https://github.com/botterYosuke/marimo/issues/2941
+            // https://github.com/marimo-team/marimo/issues/2941
             document.getElementById(HTMLCellId.create(cellId))?.focus();
           } else {
             ev.contentDOM.focus();

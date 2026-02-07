@@ -96,7 +96,7 @@ A tutorial notebook should open in your browser.
 /// admonition | Installation issues?
     type: note
 
-Having installation issues? Reach out to us [at GitHub](https://github.com/botterYosuke/marimo/issues) or [on Discord](https://discord.com/invite/5mR3Gmff).
+Having installation issues? Reach out to us [at GitHub](https://github.com/marimo-team/marimo/issues) or [on Discord](https://marimo.io/discord?ref=docs).
 ///
 
 ## Install with recommended dependencies

@@ -85,10 +85,7 @@ console.log(`  Project dir: ${projectDir}`);
 // Start the server
 const server = spawn(uv, args, {
   stdio: "inherit",
-  env: {
-    ...env,
-    BACKCASTPRO_CACHE_DIR: notebookDir
-  }
+  env: { ...env }
 });
 
 server.on("error", (err) => {

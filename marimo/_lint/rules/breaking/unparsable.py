@@ -53,7 +53,7 @@ class UnparsableRule(LintRule):
 
     ## References
 
-    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
+    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
     """
 
     code = "MB001"

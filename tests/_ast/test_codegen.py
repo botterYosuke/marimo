@@ -616,7 +616,7 @@ app._unparsable_cell(
     def test_literal_quote_standardization(self) -> None:
         """Test that Literal type annotations are standardized to double quotes.
 
-        Regression test for https://github.com/botterYosuke/marimo/issues/6446
+        Regression test for https://github.com/marimo-team/marimo/issues/6446
         """
         # Test that single quotes in Literal are standardized to double quotes
         referring = "x: Literal['foo', 'bar'] = 'foo'"

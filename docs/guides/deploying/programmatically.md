@@ -36,7 +36,7 @@ if __name__ == "__main__":
     uvicorn.run(app, host="localhost", port=8000)
 ```
 
-For a more complete example, see the [FastAPI example](https://github.com/botterYosuke/marimo/tree/main/examples/frameworks/fastapi).
+For a more complete example, see the [FastAPI example](https://github.com/marimo-team/marimo/tree/main/examples/frameworks/fastapi).
 
 Note that when run in this mode, marimo will serve its static assets under the name of the notebook (in the example above, that would be `http://hostname/<dashboard|sales>/assets/<assetname.css|js|...>`). If you are using custom authorization middleware, skip authentication for these assets to avoid server round-trips. There are _many_ of them.
 

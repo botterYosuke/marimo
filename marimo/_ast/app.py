@@ -702,7 +702,7 @@ class App:
         """
         del kwargs
         # Enabled specifically for debugging purposes.
-        # see backcast-tan.vercel.app/guides/debugging
+        # see docs.marimo.io/guides/debugging
         if os.environ.get("MARIMO_SCRIPT_EDIT"):
             # unset the env var to avoid recursion
             os.environ.pop("MARIMO_SCRIPT_EDIT")

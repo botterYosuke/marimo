@@ -123,7 +123,7 @@ class data_editor(
 
     This component is experimental and intentionally limited in features,
     if you have any feature requests, please file an issue at
-    https://github.com/botterYosuke/marimo/issues.
+    https://github.com/marimo-team/marimo/issues.
 
     The data can be supplied as:
     1. a Pandas, Polars, or Pyarrow DataFrame

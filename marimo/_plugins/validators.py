@@ -79,7 +79,7 @@ def validate_no_integer_columns(df: Any) -> None:
         )
 
 
-# issue: https://github.com/botterYosuke/marimo/issues/3407
+# issue: https://github.com/marimo-team/marimo/issues/3407
 def validate_page_size(page_size: int) -> None:
     if page_size > 200:
         raise ValueError(

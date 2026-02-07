@@ -209,7 +209,7 @@ Sandboxing requires [uv](https://docs.astral.sh/uv/getting-started/installation/
 
 ## Learn more
 
-- [Slurm examples](https://github.com/botterYosuke/marimo/tree/main/examples/slurm) - Complete working examples
+- [Slurm examples](https://github.com/marimo-team/marimo/tree/main/examples/slurm) - Complete working examples
 - [Slurm documentation](https://slurm.schedmd.com/documentation.html)
 - [SUNK (Slurm on Kubernetes)](https://docs.coreweave.com/docs/products/sunk)
 - [marimo CLI arguments](../../api/cli_args.md)

@@ -13,7 +13,7 @@ hide:
   <img src="_static/marimo-logotype-thick.svg" width="210px">
 </p>
 
-marimo is an [open-source](https://github.com/botterYosuke/marimo) reactive
+marimo is an [open-source](https://github.com/marimo-team/marimo) reactive
 Python notebook: run a cell or interact with a UI element, and marimo
 automatically runs dependent cells (or [marks them as
 stale](guides/reactivity.md#configuring-how-marimo-runs-cells)), keeping code
@@ -68,14 +68,14 @@ reproducibility, maintainability, composability, and shareability.
 - 🖐️ **interactive:** [bind sliders, tables, plots, and more](guides/interactivity.md) to Python — no callbacks required
 - 🐍 **git-friendly:** stored as `.py` files
 - 🛢️ **designed for data**: query dataframes, databases, warehouses, and lakehouses [with SQL](guides/working_with_data/sql.md); filter and search [dataframes](guides/working_with_data/dataframes.md)
-- 🤖 **AI-native**: [generate cells with AI](https://backcast-tan.vercel.app/guides/generate_with_ai/) tailored for data work
+- 🤖 **AI-native**: [generate cells with AI](https://docs.marimo.io/guides/generate_with_ai/) tailored for data work
 - 🔬 **reproducible:** [no hidden state](guides/reactivity.md), deterministic execution, [built-in package management](guides/editor_features/package_management.md)
 - 🏃 **executable:** [execute as a Python script](guides/scripts.md), parameterized by CLI args
 - 🛜 **shareable**: [deploy as an interactive web app](guides/apps.md) or [slides](guides/apps.md#slides-layout), [run in the browser via WASM](guides/wasm.md)
 - 🧩 **reusable:** [import functions and classes](guides/reusing_functions.md) from one notebook to another
 - 🧪 **testable:** [run pytest](guides/testing/index.md) on notebooks
 - ⌨️ **a modern editor**: [GitHub Copilot](guides/editor_features/ai_completion.md#github-copilot), [AI assistants](guides/editor_features/ai_completion.md), [vim keybindings](guides/editor_features/overview.md#vim-keybindings), variable explorer, and [more](guides/editor_features/index.md)
-- 🧑‍💻 **use your favorite editor**: run in [VS Code or Cursor](https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo), or edit in neovim, Zed, [or any other text editor](https://backcast-tan.vercel.app/guides/editor_features/watching/)
+- 🧑‍💻 **use your favorite editor**: run in [VS Code or Cursor](https://marketplace.visualstudio.com/items?itemName=marimo-team.vscode-marimo), or edit in neovim, Zed, [or any other text editor](https://docs.marimo.io/guides/editor_features/watching/)
 
 ## A reactive programming environment
 
@@ -123,16 +123,16 @@ millions of rows blazingly fast, no code required.
 </video>
 
 **Generate cells with data-aware AI.** [Generate code with an AI
-assistant](https://backcast-tan.vercel.app/guides/editor_features/ai_completion/) that is highly
+assistant](https://docs.marimo.io/guides/editor_features/ai_completion/) that is highly
 specialized for working with data, with context about your variables in memory;
-[zero-shot entire notebooks](https://backcast-tan.vercel.app/guides/generate_with_ai/text_to_notebook/).
+[zero-shot entire notebooks](https://docs.marimo.io/guides/generate_with_ai/text_to_notebook/).
 Customize the system prompt, bring your own API keys, or use local models.
 
 <video autoplay muted loop playsinline width="700px" align="center">
   <source src="/_static/readme-generate-with-ai.mp4" type="video/mp4">
 </video>
 
-**Query data with SQL.** Build [SQL](https://backcast-tan.vercel.app/guides/working_with_data/sql.html) queries
+**Query data with SQL.** Build [SQL](https://docs.marimo.io/guides/working_with_data/sql.html) queries
 that depend on Python values and execute them against dataframes, databases, lakehouses,
 CSVs, Google Sheets, or anything else using our built-in SQL engine, which
 returns the result as a Python dataframe.
@@ -168,7 +168,7 @@ quality-of-life features.
 
 _The [marimo concepts
 playlist](https://www.youtube.com/watch?v=3N6lInzq5MI&list=PLNJXGo8e1XT9jP7gPbRdm1XwloZVFvLEq)
-on our [YouTube channel](https://www.youtube.com/@botterYosuke) gives an
+on our [YouTube channel](https://www.youtube.com/@marimo-team) gives an
 overview of many features._
 
 **Installation.** In a terminal, run
@@ -327,23 +327,23 @@ and our [gallery](https://marimo.io/gallery) to learn more.
 ## Contributing
 
 We appreciate all contributions! You don't need to be an expert to help out.
-Please see [CONTRIBUTING.md](https://github.com/botterYosuke/marimo/blob/main/CONTRIBUTING.md) for more details on how to get
+Please see [CONTRIBUTING.md](https://github.com/marimo-team/marimo/blob/main/CONTRIBUTING.md) for more details on how to get
 started.
 
-> Questions? Reach out to us [on Discord](https://discord.com/invite/5mR3Gmff).
+> Questions? Reach out to us [on Discord](https://marimo.io/discord?ref=docs).
 
 ## Community
 
 We're building a community. Come hang out with us!
 
-- 🌟 [Star us on GitHub](https://github.com/botterYosuke/marimo)
-- 💬 [Chat with us on Discord](https://discord.com/invite/5mR3Gmff)
+- 🌟 [Star us on GitHub](https://github.com/marimo-team/marimo)
+- 💬 [Chat with us on Discord](https://marimo.io/discord?ref=docs)
 - 📧 [Subscribe to our Newsletter](https://marimo.io/newsletter)
 - ☁️ [Join our Cloud Waitlist](https://marimo.io/cloud)
-- ✏️ [Start a GitHub Discussion](https://github.com/botterYosuke/marimo/discussions)
+- ✏️ [Start a GitHub Discussion](https://github.com/marimo-team/marimo/discussions)
 - 💬 [Follow us on Bluesky](https://bsky.app/profile/marimo.io)
 - 🐦 [Follow us on Twitter](https://twitter.com/marimo_io)
-- 🎥 [Subscribe on YouTube](https://www.youtube.com/@botterYosuke)
+- 🎥 [Subscribe on YouTube](https://www.youtube.com/@marimo-team)
 - 💬 [Follow us on Mastodon](https://mastodon.social/@marimo_io)
 - 🤖 [Follow us on Reddit](https://www.reddit.com/marimo_notebook)
 - 🕴️ [Follow us on LinkedIn](https://www.linkedin.com/company/marimo-io)

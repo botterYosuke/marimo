@@ -45,6 +45,6 @@ import urllib.request  # Use alternative library
 
 ## References
 
-- [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
+- [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
 - [Python Import System](https://docs.python.org/3/reference/import.html)
 
