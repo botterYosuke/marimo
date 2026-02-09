@@ -99,4 +99,4 @@ Visit the [marimo-themes repository](https://github.com/Haleshot/marimo-themes) 
 
 ## More customizations
 
-We want to hear from you! If you have any suggestions for more customization options, please let us know on [GitHub](https://github.com/marimo-team/marimo/discussions)
+We want to hear from you! If you have any suggestions for more customization options, please let us know on [GitHub](https://github.com/botterYosuke/marimo/discussions)

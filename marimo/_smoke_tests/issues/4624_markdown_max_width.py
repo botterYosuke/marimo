@@ -72,7 +72,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""This cell now contains a link to [marimo](https://docs.marimo.io/), and suddenly all sort of weird things are happening - line widths change, and there is no lie wrap anymore!""")
+    mo.md(r"""This cell now contains a link to [marimo](https://backcast-tan.vercel.app/), and suddenly all sort of weird things are happening - line widths change, and there is no lie wrap anymore!""")
     return
 
 

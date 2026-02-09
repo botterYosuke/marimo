@@ -63,7 +63,7 @@ mo.ui.table(results.to_dataframe(), selection=None)
 
 ## Example
 
-Check out our full example using Google Cloud BigQuery [here](https://github.com/marimo-team/marimo/blob/main/examples/cloud/gcp/google_cloud_bigquery.py)
+Check out our full example using Google Cloud BigQuery [here](https://github.com/botterYosuke/marimo/blob/main/examples/cloud/gcp/google_cloud_bigquery.py)
 
 Or run it yourself:
 

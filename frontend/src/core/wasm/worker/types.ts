@@ -49,6 +49,7 @@ export interface WasmController {
   mountFilesystem(opts: {
     code: string;
     filename: string | null;
+    locale?: string | null;
   }): Promise<{ code: string; filename: string }>;
   /**
    * Start the session

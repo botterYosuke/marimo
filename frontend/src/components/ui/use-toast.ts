@@ -11,6 +11,7 @@ type ToasterToast = Omit<ToastProps, "title"> & {
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
+  onClick?: () => void;
 };
 
 const actionTypes = {

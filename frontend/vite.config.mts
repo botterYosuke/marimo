@@ -1,6 +1,9 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { execSync } from "node:child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import { codecovVitePlugin } from "@codecov/vite-plugin";
 import react from "@vitejs/plugin-react";
 import { JSDOM } from "jsdom";
@@ -56,7 +59,7 @@ const htmlDevPlugin = (): Plugin => {
         html = html.replace(
           "'{{ mount_config }}'",
           JSON.stringify({
-            filename: "notebook.py",
+            filename: "backcast.py",
             mode: modeFromUrl,
             // If VITE_MARIMO_VERSION is defined, pull the local version of marimo
             // Otherwise, pull the latest version of marimo from PyPI
@@ -209,8 +212,71 @@ If the server is already running, make sure it is using port ${SERVER_PORT} with
   };
 };
 
+// Plugin for production build - transforms template variables for Pyodide
+const htmlBuildPlugin = (): Plugin => {
+  return {
+    apply: "build",
+    name: "html-build-transform",
+    transformIndexHtml: async (html) => {
+      if (!isPyodide) {
+        return html;
+      }
+
+      const marimoVersion = process.env.VITE_MARIMO_VERSION ?? "latest";
+      html = html.replace("{{ base_url }}", "");
+      html = html.replace("{{ title }}", "marimo");
+      html = html.replace("{{ filename }}", "backcast.py");
+      html = html.replace('{{ version }}', marimoVersion);
+      html = html.replace('{{ user_config }}', '{}');
+      html = html.replace('{{ server_token }}', '');
+      html = html.replace(
+        "'{{ mount_config }}'",
+        JSON.stringify({
+          filename: "backcast.py",
+          mode: "edit",
+          version: marimoVersion,
+          config: {},
+          configOverrides: {},
+          appConfig: {},
+          serverToken: "",
+        }),
+      );
+      html = html.replace(/<\/head>/, "<marimo-wasm></marimo-wasm></head>");
+      return html;
+    },
+  };
+};
+
 const ReactCompilerConfig = {
   target: "19",
+};
+
+// Get __dirname equivalent for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Plugin to generate manifest.json for Python files in public/files/
+// This enables dynamic file list discovery at runtime without hardcoding
+const generateFilesManifestPlugin = (): Plugin => {
+  return {
+    name: "generate-files-manifest",
+    configResolved() {
+      const filesDir = path.join(__dirname, "public/files");
+      if (!fs.existsSync(filesDir)) {
+        console.log("[generate-files-manifest] public/files directory not found, skipping");
+        return;
+      }
+      const files = fs.readdirSync(filesDir)
+        .filter((f) => f.endsWith(".py"))
+        .sort();
+      const manifest = { files, generated: new Date().toISOString() };
+      fs.writeFileSync(
+        path.join(filesDir, "manifest.json"),
+        JSON.stringify(manifest, null, 2),
+      );
+      console.log(`[generate-files-manifest] Generated manifest with ${files.length} Python files`);
+    },
+  };
 };
 
 // https://vitejs.dev/config/
@@ -292,8 +358,18 @@ export default defineConfig({
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
   },
   build: {
-    minify: isDev ? false : "oxc", // default is "oxc"
+    minify: isDev ? false : "esbuild", // Changed from "oxc" to "esbuild" to fix CJS module issues
     sourcemap: isDev,
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          // Split react-grid-layout into a separate chunk to avoid import resolution issues
+          if (id.includes("react-grid-layout")) {
+            return "react-grid-layout";
+          }
+        },
+      },
+    },
   },
   resolve: {
     tsconfigPaths: true,
@@ -317,7 +393,9 @@ export default defineConfig({
     format: "es",
   },
   plugins: [
+    generateFilesManifestPlugin(),
     htmlDevPlugin(),
+    htmlBuildPlugin(),
     react({
       babel: {
         presets: ["@babel/preset-typescript"],

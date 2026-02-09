@@ -45,7 +45,7 @@ def get_or_create_user_config_path() -> str:
         # Handle OSError that can occur on Windows when os.path.realpath()
         # fails due to issues like deleted directory, permission problems,
         # UNC path issues, or special characters in path.
-        # See https://github.com/marimo-team/marimo/issues/7502
+        # See https://github.com/botterYosuke/marimo/issues/7502
         LOGGER.error(
             "Could not search for config file due to path error: %s. "
             "Falling back to XDG config path.",

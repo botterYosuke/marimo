@@ -64,7 +64,7 @@ class SelfImportRule(GraphRule):
 
     ## References
 
-    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
     - [Python Import System](https://docs.python.org/3/reference/import.html)
     """
 

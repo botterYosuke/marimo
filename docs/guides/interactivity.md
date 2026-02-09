@@ -16,7 +16,7 @@ global variable automatically runs all cells that reference it.**
 
 !!! example "Examples"
     See the [API reference](../api/inputs/index.md) or our [GitHub
-    repo](https://github.com/marimo-team/marimo/tree/main/examples/ui) for
+    repo](https://github.com/botterYosuke/marimo/tree/main/examples/ui) for
     bite-sized examples on using input elements.
 
 ## How interactions run cells

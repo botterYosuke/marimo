@@ -4,6 +4,7 @@ import React, {
   type PropsWithChildren,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
@@ -43,6 +44,7 @@ import { useIsDragging } from "@/hooks/useIsDragging";
 import { cn } from "@/utils/cn";
 import { Maps } from "@/utils/maps";
 import { Objects } from "@/utils/objects";
+import { useAutoResize } from "./grid-layout-utils";
 
 type Props = ICellRendererProps<GridLayout>;
 
@@ -92,6 +94,9 @@ export const GridLayoutRenderer: React.FC<Props> = ({
   }, [layout.bordered]);
 
   const { isDragging, ...dragProps } = useIsDragging();
+
+  const { handleAutoResize, protectAutoResizedHeights, clearAutoResize } =
+    useAutoResize(layout, setLayout);
 
   const enableInteractions = !isReading && !isLocked;
   const layoutByCellId = Maps.keyBy(layout.cells, (cell) => cell.i);
@@ -158,12 +163,12 @@ export const GridLayoutRenderer: React.FC<Props> = ({
       compactType={null}
       preventCollision={true}
       rowHeight={layout.rowHeight}
-      onLayoutChange={(cellLayouts) =>
+      onLayoutChange={(cellLayouts) => {
         setLayout({
           ...layout,
-          cells: cellLayouts,
-        })
-      }
+          cells: protectAutoResizedHeights(cellLayouts),
+        });
+      }}
       droppingItem={
         droppingItem
           ? {
@@ -192,8 +197,8 @@ export const GridLayoutRenderer: React.FC<Props> = ({
       onDragStop={() => {
         dragProps.onDragStop();
       }}
-      onResizeStop={() => {
-        // Dispatch a resize event so widgets know to resize
+      onResizeStop={(_layout, _oldItem, newItem) => {
+        clearAutoResize(newItem.i);
         window.dispatchEvent(new Event("resize"));
       }}
       // When in read mode or locked, disable dragging and resizing
@@ -218,6 +223,8 @@ export const GridLayoutRenderer: React.FC<Props> = ({
               isScrollable={isScrollable}
               side={side}
               hidden={cell.errored || cell.interrupted || cell.stopped}
+              rowHeight={layout.rowHeight}
+              onAutoResize={handleAutoResize}
             />
           );
 
@@ -233,6 +240,7 @@ export const GridLayoutRenderer: React.FC<Props> = ({
                 setIsScrollable={handleMakeScrollable(cell.id)}
                 display={cellLayout?.y === 0 ? "bottom" : "top"}
                 onDelete={() => {
+                  clearAutoResize(cell.id);
                   setLayout({
                     ...layout,
                     cells: layout.cells.filter((c) => c.i !== cell.id),
@@ -371,6 +379,8 @@ interface GridCellProps extends Pick<CellRuntimeState, "output" | "status"> {
   hidden: boolean;
   isScrollable: boolean;
   side?: GridLayoutCellSide;
+  rowHeight?: number;
+  onAutoResize?: (cellId: string, neededRows: number) => void;
 }
 
 const GridCell = memo(
@@ -384,7 +394,60 @@ const GridCell = memo(
     isScrollable,
     side,
     className,
+    rowHeight,
+    onAutoResize,
   }: GridCellProps) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const hasAutoResized = useRef(false);
+
+    // Reset auto-resize flag when output or scrollable state changes
+    useEffect(() => {
+      hasAutoResized.current = false;
+    }, [output, isScrollable]);
+
+    // Detect content overflow and trigger auto-resize
+    useEffect(() => {
+      const el = containerRef.current;
+      if (!el || !onAutoResize || !rowHeight || isScrollable || hasAutoResized.current) {
+        return;
+      }
+
+      const checkOverflow = () => {
+        if (hasAutoResized.current) {
+          return;
+        }
+        if (el.scrollHeight > el.clientHeight + rowHeight) {
+          hasAutoResized.current = true;
+          const neededRows = Math.ceil(el.scrollHeight / rowHeight) + 1;
+          onAutoResize(cellId, neededRows);
+        }
+      };
+
+      // Initial check for synchronous content
+      requestAnimationFrame(checkOverflow);
+
+      // ResizeObserver on children to detect size changes (e.g., canvas-based widgets)
+      const ro = new ResizeObserver(checkOverflow);
+      const observeChildren = () => {
+        for (const child of el.children) {
+          ro.observe(child);
+        }
+      };
+      observeChildren();
+
+      // MutationObserver to register dynamically added children with ResizeObserver
+      const mo = new MutationObserver(() => {
+        observeChildren();
+        checkOverflow();
+      });
+      mo.observe(el, { childList: true, subtree: true });
+
+      return () => {
+        ro.disconnect();
+        mo.disconnect();
+      };
+    }, [output, cellId, onAutoResize, rowHeight, isScrollable]);
+
     const loading = outputIsLoading(status);
 
     const isOutputEmpty = output == null || output.data === "";
@@ -395,6 +458,7 @@ const GridCell = memo(
 
     return (
       <div
+        ref={containerRef}
         className={cn(
           className,
           "h-full w-full p-2 overflow-x-auto",

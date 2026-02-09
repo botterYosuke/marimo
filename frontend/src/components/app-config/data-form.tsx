@@ -201,7 +201,7 @@ export const DataForm = ({
               className="text-link hover:underline"
               rel="noopener noreferrer"
               target="_blank"
-              href="https://docs.marimo.io/guides/working_with_data/sql/?h=database#database-schema-and-table-auto-discovery"
+              href="https://backcast-tan.vercel.app/guides/working_with_data/sql/?h=database#database-schema-and-table-auto-discovery"
             >
               database
             </a>

@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/refs/heads/master/src/schemas/json/github-issue-forms.json
 name: '📚 Documentation'
-description: Suggest a change or new page to be added to docs.marimo.io
+description: Suggest a change or new page to be added to backcast-tan.vercel.app
 labels: [documentation]
 body:
   - type: markdown

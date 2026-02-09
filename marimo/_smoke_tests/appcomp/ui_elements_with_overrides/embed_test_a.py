@@ -6,7 +6,7 @@ app = marimo.App(width="full")
 
 @app.cell
 def _():
-    # https://github.com/marimo-team/marimo/issues/7685
+    # https://github.com/botterYosuke/marimo/issues/7685
     import marimo as mo
     return
 

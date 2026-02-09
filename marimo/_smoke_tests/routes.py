@@ -41,22 +41,22 @@ def _(mo):
     def render_home():
         return mo.md("""
          <p align="center">
-          <img src="https://github.com/marimo-team/marimo/raw/main/docs/_static/marimo-logotype-thick.svg">
+          <img src="https://github.com/botterYosuke/marimo/raw/main/docs/_static/marimo-logotype-thick.svg">
         </p>
 
         <p align="center">
           <em>A reactive Python notebook that's reproducible, git-friendly, and deployable as scripts or apps.</em>
 
         <p align="center">
-          <a href="https://docs.marimo.io" target="_blank"><strong>Docs</strong></a> ·
-          <a href="https://marimo.io/discord" target="_blank"><strong>Discord</strong></a> ·
-          <a href="https://github.com/marimo-team/marimo/tree/main/examples" target="_blank"><strong>Examples</strong></a>
+          <a href="https://backcast-tan.vercel.app" target="_blank"><strong>Docs</strong></a> ·
+          <a href="https://discord.com/invite/5mR3Gmff" target="_blank"><strong>Discord</strong></a> ·
+          <a href="https://github.com/botterYosuke/marimo/tree/main/examples" target="_blank"><strong>Examples</strong></a>
         </p>
 
         <p align="center">
         <a href="https://pypi.org/project/marimo/"><img src="https://img.shields.io/pypi/v/marimo?color=%2334D058&label=pypi" /></a>
         <a href="https://anaconda.org/conda-forge/marimo"/img><img src="https://img.shields.io/conda/vn/conda-forge/marimo.svg"></img></a>
-        <a href="https://github.com/marimo-team/marimo/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/marimo"></img></a>
+        <a href="https://github.com/botterYosuke/marimo/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/marimo"></img></a>
         </p>
 
         """)
@@ -89,11 +89,11 @@ def _(mo):
 
         We're building a community. Come hang out with us!
 
-        - 🌟 [Star us on GitHub](https://github.com/marimo-team/marimo)
-        - 💬 [Chat with us on Discord](https://marimo.io/discord)
+        - 🌟 [Star us on GitHub](https://github.com/botterYosuke/marimo)
+        - 💬 [Chat with us on Discord](https://discord.com/invite/5mR3Gmff)
         - 📧 [Subscribe to our Newsletter](https://marimo.io/newsletter)
         - ☁️ [Join our Cloud Waitlist](https://marimo.io/cloud)
-        - ✏️ [Start a GitHub Discussion](https://github.com/marimo-team/marimo/discussions)
+        - ✏️ [Start a GitHub Discussion](https://github.com/botterYosuke/marimo/discussions)
         - 🐦 [Follow us on Twitter](https://twitter.com/marimo_io)
         - 🕴️ [Follow us on LinkedIn](https://www.linkedin.com/company/marimo-io)
 

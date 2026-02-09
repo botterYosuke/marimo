@@ -18,7 +18,7 @@ def _(mo):
                     "#contact": f"{mo.icon('lucide:phone')} Contact",
                     "Links": {
                         "https://twitter.com/marimo_io": "Twitter",
-                        "https://github.com/marimo-team/marimo": "GitHub",
+                        "https://github.com/botterYosuke/marimo": "GitHub",
                     },
                 },
                 orientation="vertical",
@@ -31,7 +31,7 @@ def _(mo):
         ### Footer
 
         - [Twitter](https://twitter.com/marimo_io)
-        - [GitHub](https://github.com/marimo-team/marimo)
+        - [GitHub](https://github.com/botterYosuke/marimo)
         """
             )
         ],

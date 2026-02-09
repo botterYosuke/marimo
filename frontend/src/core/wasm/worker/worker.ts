@@ -100,6 +100,7 @@ const requestHandler = createRPCRequestHandler({
       await self.controller.mountFilesystem?.({
         code: opts.code,
         filename: opts.filename,
+        locale: opts.userConfig?.display?.locale,
       });
       const startSession = t.wrapAsync(
         self.controller.startSession.bind(self.controller),

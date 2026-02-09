@@ -14,13 +14,13 @@ document.addEventListener("DOMContentLoaded", () => {
   script.setAttribute("data-project-logo", "https://marimo.io/logo.png");
   script.setAttribute(
     "data-modal-disclaimer",
-    "This is a custom LLM for marimo with access to all [documentation](https://docs.marimo.io) and the [API reference](https://docs.marimo.io/api/).",
+    "This is a custom LLM for marimo with access to all [documentation](https://backcast-tan.vercel.app) and the [API reference](https://backcast-tan.vercel.app/api/).",
   );
 
   // Uncertain answer
   script.setAttribute(
     "data-uncertain-answer-callout",
-    "I could not find an answer in my knowledge base. But a human team member can give you more detailed answers directly in our [Discord](https://marimo.io/discord?ref=kapa-widget).",
+    "I could not find an answer in my knowledge base. But a human team member can give you more detailed answers directly in our [Discord](https://discord.com/invite/5mR3Gmff).",
   );
 
   // CTA
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   script.setAttribute(
     "data-answer-cta-button-link",
-    "https://marimo.io/discord?ref=kapa-widget",
+    "https://discord.com/invite/5mR3Gmff",
   );
   script.setAttribute(
     "data-answer-cta-button-text",

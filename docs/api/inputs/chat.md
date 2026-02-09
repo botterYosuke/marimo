@@ -2,7 +2,7 @@
 
 !!! tip "Looking for example notebooks?"
     For example notebooks, check out [`examples/ai/chat` on our
-    GitHub](https://github.com/marimo-team/marimo/tree/main/examples/ai/chat).
+    GitHub](https://github.com/botterYosuke/marimo/tree/main/examples/ai/chat).
 
 /// marimo-embed
     size: large
@@ -240,8 +240,8 @@ the progressively building response in real-time.
 !!! tip "See streaming examples"
     For complete working examples, check out:
 
-    - [`openai_example.py`](https://github.com/marimo-team/marimo/blob/main/examples/ai/chat/openai_example.py) - OpenAI chatbot with streaming (default)
-    - [`streaming_custom.py`](https://github.com/marimo-team/marimo/blob/main/examples/ai/chat/streaming_custom.py) - Custom streaming chatbot
+    - [`openai_example.py`](https://github.com/botterYosuke/marimo/blob/main/examples/ai/chat/openai_example.py) - OpenAI chatbot with streaming (default)
+    - [`streaming_custom.py`](https://github.com/botterYosuke/marimo/blob/main/examples/ai/chat/streaming_custom.py) - Custom streaming chatbot
 
 ## Built-in Models
 
@@ -352,7 +352,7 @@ configuration with a dictionary conforming to the config.
 
 ## Supported Model Providers
 
-We support any OpenAI-compatible endpoint. If you want any specific provider added explicitly (ones that don't abide by the standard OpenAI API format), you can file a [feature request](https://github.com/marimo-team/marimo/issues/new?template=feature_request.yaml).
+We support any OpenAI-compatible endpoint. If you want any specific provider added explicitly (ones that don't abide by the standard OpenAI API format), you can file a [feature request](https://github.com/botterYosuke/marimo/issues/new?template=feature_request.yaml).
 
 Normally, overriding the `base_url` parameter should work. Here are some examples:
 

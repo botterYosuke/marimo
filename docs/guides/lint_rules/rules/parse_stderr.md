@@ -37,6 +37,6 @@ notebook.py:68: SyntaxWarning: invalid escape sequence '\l'
 
 ## References
 
-- [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+- [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
 - [Python Warning Categories](https://docs.python.org/3/library/warnings.html#warning-categories)
 

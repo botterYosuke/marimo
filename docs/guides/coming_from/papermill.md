@@ -175,7 +175,7 @@ marimo notebooks can be easily integrated into workflows:
 
 1. **As Python Scripts**:
    marimo notebooks are Python files, so they can be executed directly in most workflow systems.
-   See [our examples](https://github.com/marimo-team/marimo/tree/main/examples) for integrating with
+   See [our examples](https://github.com/botterYosuke/marimo/tree/main/examples) for integrating with
    popular tools.
 
 2. **Programmatic Execution**:

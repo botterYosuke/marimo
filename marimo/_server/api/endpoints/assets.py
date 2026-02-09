@@ -329,6 +329,7 @@ STATIC_FILES = [
     r"(android-chrome-(192x192|512x512)\.png)",
     r"(apple-touch-icon\.png)",
     r"(logo\.png)",
+    r"(sci-fi-drone/.+)",  # GLTFモデルとテクスチャ
 ]
 
 

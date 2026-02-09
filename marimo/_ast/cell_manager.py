@@ -130,7 +130,7 @@ class CellManager:
                 # If it is not a top-level definition, something is very wrong
                 raise ValueError(
                     "Unexpected failure. Please report this error to "
-                    "github.com/marimo-team/marimo/issues."
+                    "github.com/botterYosuke/marimo/issues."
                 ) from e
 
             cell._cell.configure(cell_config)

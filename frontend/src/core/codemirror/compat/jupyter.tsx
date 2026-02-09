@@ -187,7 +187,7 @@ export function jupyterHelpExtension(): Extension {
           Magic commands are not supported in marimo. Read more about
           replacements in the{" "}
           <a
-            href="https://docs.marimo.io/guides/coming_from/jupyter/#adapting-to-the-absence-of-magic-commands"
+            href="https://backcast-tan.vercel.app/guides/coming_from/jupyter/#adapting-to-the-absence-of-magic-commands"
             target="_blank"
             className="text-link underline cursor-pointer"
             rel="noopener noreferrer"

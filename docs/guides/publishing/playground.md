@@ -52,7 +52,7 @@ Please be aware that marimo permalinks are publicly accessible.
 
 To open notebooks hosted on GitHub in the playground, just
 navigate to `https://marimo.app/path/to/notebook.py`. For example:
-<https://marimo.app/github.com/marimo-team/marimo/blob/main/examples/ui/slider.py>.
+<https://marimo.app/github.com/botterYosuke/marimo/blob/main/examples/ui/slider.py>.
 
 !!! tip "Use our bookmarklet!"
 
@@ -87,7 +87,7 @@ locally and in the playground.
 
     Navigate to
 
-    <https://marimo.app/github.com/marimo-team/marimo/blob/main/examples/misc/notebook_dir.py>
+    <https://marimo.app/github.com/botterYosuke/marimo/blob/main/examples/misc/notebook_dir.py>
 
     and open the file explorer panel to see all the files available to the notebook.
 

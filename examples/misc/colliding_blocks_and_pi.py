@@ -27,7 +27,7 @@ def _(mo):
 
     One of the remarkable things about mathematical constants like $\pi$ is how frequently they arise in nature, in the most surprising of places.
 
-    Inspired by 3Blue1Brown, this [marimo notebook](https://github.com/marimo-team/marimo) shows how the number of collisions incurred in a particular system involving two blocks converges to the digits in $\pi$.
+    Inspired by 3Blue1Brown, this [marimo notebook](https://github.com/botterYosuke/marimo) shows how the number of collisions incurred in a particular system involving two blocks converges to the digits in $\pi$.
     """)
     return
 

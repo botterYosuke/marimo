@@ -17,7 +17,7 @@ def _(mo):
     mo.md(r"""
     # Bayes' Theorem
 
-    _This interactive notebook was made with [marimo](https://github.com/marimo-team/marimo), and is [based on an explanation of Bayes' Theorem by Grant Sanderson](https://www.youtube.com/watch?v=HZGCoVF3YvM&list=PLzq7odmtfKQw2KIbQq0rzWrqgifHKkPG1&index=1&t=3s)_.
+    _This interactive notebook was made with [marimo](https://github.com/botterYosuke/marimo), and is [based on an explanation of Bayes' Theorem by Grant Sanderson](https://www.youtube.com/watch?v=HZGCoVF3YvM&list=PLzq7odmtfKQw2KIbQq0rzWrqgifHKkPG1&index=1&t=3s)_.
 
     Bayes theorem provides a convenient way to calculate the probability
     of a hypothesis event $H$ given evidence $E$:

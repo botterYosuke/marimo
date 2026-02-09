@@ -124,7 +124,7 @@ const SERVER_STATUS = {
 };
 
 // Notebook management
-const DEFAULT_NOTEBOOK = "wasm-intro.py"; // 起動時のデフォルト
+const DEFAULT_NOTEBOOK = "backcast.py"; // 起動時のデフォルト（統一ノートブック）
 
 /**
  * Create a new notebook window with its own server

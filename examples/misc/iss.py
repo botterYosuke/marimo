@@ -22,13 +22,13 @@ def _(chart, iss_df, mo, n_points_slider, refresh_interval_slider, refresher):
             mo.vstack(
                 [
                     mo.md(
-                        "## Settings | [`marimo.ui.slider`](https://docs.marimo.io/api/inputs/slider.html), [`marimo.ui.refresh`](https://docs.marimo.io/recipes.html#run-a-cell-on-a-timer)\n---"
+                        "## Settings | [`marimo.ui.slider`](https://backcast-tan.vercel.app/api/inputs/slider.html), [`marimo.ui.refresh`](https://backcast-tan.vercel.app/recipes.html#run-a-cell-on-a-timer)\n---"
                     ),
                     refresh_interval_slider,
                     n_points_slider,
                     refresher,
                     mo.md(
-                        "## ISS Positions | [`marimo.ui.altair_chart`](https://docs.marimo.io/api/plotting.html#marimo.ui.altair_chart)\n---"
+                        "## ISS Positions | [`marimo.ui.altair_chart`](https://backcast-tan.vercel.app/api/plotting.html#marimo.ui.altair_chart)\n---"
                     ),
                     mo.as_html(chart).style({"width": "700px"}),
                 ],
@@ -37,7 +37,7 @@ def _(chart, iss_df, mo, n_points_slider, refresh_interval_slider, refresher):
             mo.vstack(
                 [
                     mo.md(
-                        "## Data | [`marimo.as_html`](https://docs.marimo.io/api/html.html)`(pd.DataFrame)`\n---"
+                        "## Data | [`marimo.as_html`](https://backcast-tan.vercel.app/api/html.html)`(pd.DataFrame)`\n---"
                     ),
                     mo.as_html(iss_df),
                 ]

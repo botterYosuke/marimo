@@ -26,7 +26,7 @@ from marimo._output.formatting import (
 
 def test_path_finder_find_spec() -> None:
     # exercises a bug surfaced in
-    # https://github.com/marimo-team/marimo/issues/763, in which find_spec
+    # https://github.com/botterYosuke/marimo/issues/763, in which find_spec
     # would fail because it was incorrectly patched
     register_formatters()
 
@@ -42,7 +42,7 @@ def test_path_finder_find_spec() -> None:
 
 def test_path_finder_find_spec_non_recursive() -> None:
     # exercises a bug surfaced in
-    # https://github.com/marimo-team/marimo/issues/6072
+    # https://github.com/botterYosuke/marimo/issues/6072
     register_formatters()
     spec = importlib.machinery.PathFinder.find_spec(
         "test_formatters", [os.path.dirname(__file__)]

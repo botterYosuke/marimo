@@ -9,6 +9,8 @@ import { WasmFileSystem } from "./fs";
 import { getCustomWheelUrl, getMarimoWheel } from "./getMarimoWheel";
 import { t } from "./tracer";
 import type { SerializedBridge, WasmController } from "./types";
+import { setupBackcastProData, setupPythonFiles } from "./backcastpro-loader";
+import { normalizeLocale } from "@/components/skill-tree/i18n";
 
 const MAKE_SNAPSHOT = false;
 
@@ -98,6 +100,18 @@ import micropip
 await micropip.install("${customWheelUrl}", deps=False)
 print("Custom marimo wheel installed")
 `);
+
+        // Install BackcastPro from PyPI
+        Logger.log("Installing BackcastPro from PyPI...");
+        await pyodide
+          .runPythonAsync(`
+import micropip
+await micropip.install("BackcastPro")
+print("BackcastPro installed from PyPI")
+`)
+          .catch((error) => {
+            Logger.error("Failed to install BackcastPro:", error);
+          });
       }
 
       this.pyodide = pyodide;
@@ -109,12 +123,23 @@ print("Custom marimo wheel installed")
     }
   }
 
-  async mountFilesystem(opts: { code: string; filename: string | null }) {
+  async mountFilesystem(opts: {
+    code: string;
+    filename: string | null;
+    locale?: string | null;
+  }) {
     const span = t.startSpan("mountFilesystem");
     // Set up the filesystem
     WasmFileSystem.createHomeDir(this.requirePyodide);
     WasmFileSystem.mountFS(this.requirePyodide);
     await WasmFileSystem.populateFilesToMemory(this.requirePyodide);
+
+    // Load BackcastPro data files from deployed assets to virtual filesystem
+    await setupBackcastProData(this.requirePyodide);
+
+    // Copy Python notebook files from deployed assets to virtual filesystem
+    const normalizedLocale = normalizeLocale(opts.locale);
+    await setupPythonFiles(this.requirePyodide, normalizedLocale);
 
     span.end("ok");
     return WasmFileSystem.initNotebookCode({

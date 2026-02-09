@@ -26,6 +26,6 @@ SQL parsing failures can lead to:
 
 ## References
 
-- [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
-- [SQL Support](https://docs.marimo.io/guides/sql/)
+- [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
+- [SQL Support](https://backcast-tan.vercel.app/guides/sql/)
 

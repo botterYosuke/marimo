@@ -76,7 +76,7 @@ We issue CVEs and security advisories when:
 - End-users are directly impacted
 - The issue has security implications beyond normal bug fixes
 
-For general safety improvements and hardening work, we document changes in our [release notes](https://github.com/marimo-team/marimo/releases) without issuing formal advisories.
+For general safety improvements and hardening work, we document changes in our [release notes](https://github.com/botterYosuke/marimo/releases) without issuing formal advisories.
 
 ## molab Security
 
@@ -85,7 +85,7 @@ For general safety improvements and hardening work, we document changes in our [
 - We handle disclosure on a case-by-case basis
 - General security improvements are disclosed publicly when applicable, and will be documented on this page.
 - User-specific issues are handled privately through direct notification
-- Reports can be submitted through the same channels: [GitHub advisories](https://github.com/marimo-team/marimo/security/advisories/new) or security [at] marimo [dot] io
+- Reports can be submitted through the same channels: [GitHub advisories](https://github.com/botterYosuke/marimo/security/advisories/new) or security [at] marimo [dot] io
 
 ## Reporting Vulnerabilities
 
@@ -93,7 +93,7 @@ We appreciate the security research community's efforts to improve marimo's secu
 
 **How to report:**
 
-1. [Draft a security advisory on GitHub](https://github.com/marimo-team/marimo/security/advisories/new), or
+1. [Draft a security advisory on GitHub](https://github.com/botterYosuke/marimo/security/advisories/new), or
 2. Email the marimo team at security [at] marimo [dot] io
 
 **What to expect:**
@@ -105,7 +105,7 @@ We appreciate the security research community's efforts to improve marimo's secu
 
 **Recognition:**
 
-We're grateful to [the security researchers](https://github.com/marimo-team/marimo/blob/main/SECURITY.md) who have responsibly disclosed vulnerabilities.
+We're grateful to [the security researchers](https://github.com/botterYosuke/marimo/blob/main/SECURITY.md) who have responsibly disclosed vulnerabilities.
 Your contributions help keep marimo safe for the entire community. We encourage responsible disclosure and recognize all security researchers who help improve marimo.
 
 ## Staying Up to Date
@@ -122,7 +122,7 @@ Using `uv` ensures you benefit from the latest security improvements and patches
 ## Questions?
 
 For security questions or concerns, please reach out to security [at] marimo [dot] io.
-For general questions about marimo, see our [FAQ](faq.md) or join us on [Discord](https://marimo.io/discord).
+For general questions about marimo, see our [FAQ](faq.md) or join us on [Discord](https://discord.com/invite/5mR3Gmff).
 
 ### Previous Advisories
 
@@ -130,7 +130,7 @@ For general questions about marimo, see our [FAQ](faq.md) or join us on [Discord
 <summary>Click to expand previous security advisories</summary>
 
 <ul>
-  <li><strong><a href="https://github.com/marimo-team/marimo/security/advisories/GHSA-xjv7-6w92-42r7">[GHSA-xjv7-6w92-42r7]</a></strong>: Unauthenticated proxy vulnerability in matplotlib endpoint. The <code>/mpl/[port]/[route]</code> endpoint allowed external attackers to reach internal services. Affected versions 0.9.20 through 0.16.3. Fixed in 0.16.4. </li>
+  <li><strong><a href="https://github.com/botterYosuke/marimo/security/advisories/GHSA-xjv7-6w92-42r7">[GHSA-xjv7-6w92-42r7]</a></strong>: Unauthenticated proxy vulnerability in matplotlib endpoint. The <code>/mpl/[port]/[route]</code> endpoint allowed external attackers to reach internal services. Affected versions 0.9.20 through 0.16.3. Fixed in 0.16.4. </li>
 
   <li><strong>[molab-0]</strong>: iframe sandbox escape via markdown render. In molab, an attacker could exploit a vulnerability in the iframe sandboxing to escape the iframe and execute code in the parent context. Fixed in molab deployment on 2025-10-19.</li>
 </ul>

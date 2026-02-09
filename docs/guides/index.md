@@ -20,6 +20,7 @@ These guides cover marimo's core concepts.
 | [Package management](package_management/index.md)     | Inlining dependencies in notebook files and other package management guides |
 | [Generate with AI](generate_with_ai/index.md)         | Generate notebooks with AI                                 |
 | [Editor features](editor_features/index.md)           | View variables, dataframe schemas, docstrings, and more    |
+| [Skill tree](skill_tree.md)                           | Gamification system: skills, tracks, rewards, and ranks    |
 | [Using your own editor](editor_features/watching.md)  | Edit notebooks in your own editor and stream changes back to the browser |
 | [Apps](apps.md)                                       | Running notebooks as apps                                  |
 | [Scripts](scripts.md)                                 | Running notebooks as scripts                               |
