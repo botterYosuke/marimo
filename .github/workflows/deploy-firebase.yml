@@ -44,19 +44,16 @@ jobs:
           echo "$WHEEL_FILE" > frontend/dist/wheels/latest.txt
           echo "Copied wheel: $WHEEL_FILE"
 
-      - name: Download DuckDB data files from FTP
+      - name: Download DuckDB data files from Google Drive
         env:
-          FTP_HOST: backcast.i234.me
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          GDRIVE_API_URL: ${{ secrets.GDRIVE_API_URL }}
         run: |
           mkdir -p frontend/dist/assets/data/stocks_daily
           STOCK_CODES="7203 9984 6758 8306 9432 6861 7267 4502 6501 8035"
           for code in $STOCK_CODES; do
             echo "Downloading data for stock code: $code"
-            curl -s --ftp-create-dirs \
-              -u "${FTP_USER}:${FTP_PASSWORD}" \
-              "ftp://${FTP_HOST}/StockData/jp/stocks_daily/${code}.duckdb" \
+            curl -sf \
+              "${GDRIVE_API_URL}/jp/stocks_daily/${code}.duckdb" \
               -o "frontend/dist/assets/data/stocks_daily/${code}.duckdb" \
               || echo "Failed to download: ${code}.duckdb"
           done
