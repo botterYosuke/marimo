@@ -20,6 +20,7 @@ import {
 import { displayCellName } from "@/core/cells/names";
 import { isOutputEmpty } from "@/core/cells/outputs";
 import { connectionAtom } from "@/core/network/connection";
+import { cellFocusAtom, useCellFocusActions } from "@/core/cells/focus";
 import { RunButton } from "@/components/editor/cell/RunButton";
 import { StopButton } from "@/components/editor/cell/StopButton";
 import { CellActionsDropdown } from "@/components/editor/cell/cell-actions";
@@ -85,6 +86,8 @@ export const Cell3DWrapper: React.FC<Cell3DWrapperProps> = ({
   const runCell = useRunCell(cellId);
   const deleteCell = useDeleteCellCallback();
   const connection = useAtomValue(connectionAtom);
+  const focusedCellId = useAtomValue(cellFocusAtom).focusedCellId;
+  const { focusCell } = useCellFocusActions();
 
   // Calculate values for buttons
   const disabledOrAncestorDisabled =
@@ -107,6 +110,9 @@ export const Cell3DWrapper: React.FC<Cell3DWrapperProps> = ({
       return;
     }
 
+    // フォーカスを設定（最前面に表示）
+    focusCell({ cellId });
+
     // セル要素のCSSスタイルから現在位置を取得
     const wrapperElement = wrapperRef.current;
     if (wrapperElement) {
@@ -124,7 +130,7 @@ export const Cell3DWrapper: React.FC<Cell3DWrapperProps> = ({
       dragManager.startDrag(event.nativeEvent, cellId, currentPosition, scale);
       setIsDragging(true);
     }
-  }, [cellId, css2DService, dragManager]);
+  }, [cellId, css2DService, dragManager, focusCell]);
 
   // ドラッグ終了を監視
   useEffect(() => {
@@ -181,7 +187,10 @@ export const Cell3DWrapper: React.FC<Cell3DWrapperProps> = ({
         isMarkdown && "markdown-cell"
       )}
       data-cell-wrapper-id={cellId}
-      style={{ pointerEvents: "all" }}
+      style={{
+        pointerEvents: "all",
+        zIndex: focusedCellId === cellId ? 1000 : 20,
+      }}
     >
       {/* タイトルバー */}
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
