@@ -759,17 +759,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#available-tools-appropriate-category-tool-description-your_tool_name-brief-description-of-what-the-tool-does-takes-param1-and-param2-parameters-returns-description-of-output" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ## Available tools ### [Appropriate Category] | Tool | Description | |------|-------------| | **your_tool_name** | Brief description of what the tool does. Takes `param1` and `param2` parameters. Returns description of output. |
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#best-practices" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2506,17 +2495,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#available-tools-appropriate-category-tool-description-your_tool_name-brief-description-of-what-the-tool-does-takes-param1-and-param2-parameters-returns-description-of-output" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ## Available tools ### [Appropriate Category] | Tool | Description | |------|-------------| | **your_tool_name** | Brief description of what the tool does. Takes `param1` and `param2` parameters. Returns description of output. |
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#best-practices" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3352,21 +3330,7 @@ hatch<span class="w"> </span>run<span class="w"> </span>+py<span class="o">=</sp
 hatch<span class="w"> </span>run<span class="w"> </span>+py<span class="o">=</span><span class="m">3</span>.12<span class="w"> </span>test:test<span class="w"> </span>tests/_ai/tools/tools/test_your_tool.py<span class="w"> </span>-v
 </code></pre></div><a class="headerlink" href="#run-all-tool-tests-hatch-run-py312-testtest-tests_aitools-run-your-specific-test-hatch-run-py312-testtest-tests_aitoolstoolstest_your_toolpy-run-with-verbose-output-hatch-run-py312-testtest-tests_aitoolstoolstest_your_toolpy-v" title="Permanent link">&para;</a></h2>
 <h3 id="11-update-documentation">11. Update Documentation<a class="headerlink" href="#11-update-documentation" title="Permanent link">&para;</a></h3>
-<p>Add your tool to the user-facing documentation in <code>docs/guides/editor_features/tools.md</code>. Add a row to the appropriate category table:</p>
-<hr />
-<h2 id="available-tools-appropriate-category-tool-description-your_tool_name-brief-description-of-what-the-tool-does-takes-param1-and-param2-parameters-returns-description-of-output"><div class="highlight"><pre><span></span><code><span class="gu">## Available tools</span>
-
-<span class="gu">### [Appropriate Category]</span>
-
-| Tool | Description |
-|------|-------------|
-| <span class="gs">**your_tool_name**</span> | Brief description of what the tool does. Takes <span class="sb">`param1`</span> and <span class="sb">`param2`</span> parameters. Returns description of output. |
-</code></pre></div><a class="headerlink" href="#available-tools-appropriate-category-tool-description-your_tool_name-brief-description-of-what-the-tool-does-takes-param1-and-param2-parameters-returns-description-of-output" title="Permanent link">&para;</a></h2>
-<p>Choose the appropriate category:
-- <strong>Inspection</strong>: Tools for exploring notebook structure and runtime
-- <strong>Data</strong>: Tools for accessing variables and database information
-- <strong>Debugging</strong>: Tools for finding and fixing issues
-- <strong>Reference</strong>: Tools for accessing marimo documentation</p>
+<p>If user-facing documentation for tools exists (e.g., in <code>docs/</code>), add your tool to the appropriate category table. Currently, the tool list is auto-discovered from the registry in <code>marimo/_ai/_tools/tools_registry.py</code>, so registration in step 7 is sufficient for the tool to be available.</p>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
 <h3 id="type-safety">Type Safety<a class="headerlink" href="#type-safety" title="Permanent link">&para;</a></h3>
 <ul>
@@ -3534,7 +3498,7 @@ hatch<span class="w"> </span>run<span class="w"> </span>+py<span class="o">=</sp
 <li>[ ] Tests mock <code>ToolContext</code> appropriately</li>
 <li>[ ] All tests pass</li>
 <li>[ ] Type hints are complete</li>
-<li>[ ] Documentation updated in <code>docs/guides/editor_features/tools.md</code></li>
+<li>[ ] Documentation updated (if user-facing docs exist)</li>
 </ul>
 <h2 id="additional-resources">Additional Resources<a class="headerlink" href="#additional-resources" title="Permanent link">&para;</a></h2>
 <ul>
