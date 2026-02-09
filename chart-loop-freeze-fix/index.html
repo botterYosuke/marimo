@@ -12,25 +12,23 @@
       
       
       
-        <link rel="next" href="adding_backend_and_mcp_tools/">
-      
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>marimo Developer Docs</title>
+        <title>bt.step() 200回ループ時のフリーズ問題修正 - marimo Developer Docs</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -49,7 +47,7 @@
       
     
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -74,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#marimo-developer-documentation" class="md-skip">
+        <a href="#btstep-200" class="md-skip">
           Skip to content
         </a>
       
@@ -90,7 +88,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+    <a href=".." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -110,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              bt.step() 200回ループ時のフリーズ問題修正
             
           </span>
         </div>
@@ -206,7 +204,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+    <a href=".." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -221,37 +219,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -267,120 +238,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#categories" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Categories
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Categories">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#backend-mcp" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Backend &amp; MCP
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#development" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Development
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pyodide" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pyodide
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fixes-improvements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fixes &amp; Improvements
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Features
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#deployment" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Deployment
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -439,7 +296,7 @@
   
   
     <li class="md-nav__item">
-      <a href="adding_backend_and_mcp_tools/" class="md-nav__link">
+      <a href="../adding_backend_and_mcp_tools/" class="md-nav__link">
         
   
   
@@ -521,7 +378,7 @@
   
   
     <li class="md-nav__item">
-      <a href="adding_lint_rules/" class="md-nav__link">
+      <a href="../adding_lint_rules/" class="md-nav__link">
         
   
   
@@ -549,7 +406,7 @@
   
   
     <li class="md-nav__item">
-      <a href="openapi/" class="md-nav__link">
+      <a href="../openapi/" class="md-nav__link">
         
   
   
@@ -631,7 +488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="testing/" class="md-nav__link">
+      <a href="../testing/" class="md-nav__link">
         
   
   
@@ -659,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="prompts/" class="md-nav__link">
+      <a href="../prompts/" class="md-nav__link">
         
   
   
@@ -687,7 +544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="traces/" class="md-nav__link">
+      <a href="../traces/" class="md-nav__link">
         
   
   
@@ -769,7 +626,7 @@
   
   
     <li class="md-nav__item">
-      <a href="pyodide/" class="md-nav__link">
+      <a href="../pyodide/" class="md-nav__link">
         
   
   
@@ -797,7 +654,7 @@
   
   
     <li class="md-nav__item">
-      <a href="pyodide-custom-wheel/" class="md-nav__link">
+      <a href="../pyodide-custom-wheel/" class="md-nav__link">
         
   
   
@@ -879,7 +736,7 @@
   
   
     <li class="md-nav__item">
-      <a href="chart-widget-caching-fix/" class="md-nav__link">
+      <a href="../chart-widget-caching-fix/" class="md-nav__link">
         
   
   
@@ -907,7 +764,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui-switch-state-fix/" class="md-nav__link">
+      <a href="../ui-switch-state-fix/" class="md-nav__link">
         
   
   
@@ -935,7 +792,7 @@
   
   
     <li class="md-nav__item">
-      <a href="anywidget-backend-sync/" class="md-nav__link">
+      <a href="../anywidget-backend-sync/" class="md-nav__link">
         
   
   
@@ -963,7 +820,7 @@
   
   
     <li class="md-nav__item">
-      <a href="anywidget-performance/" class="md-nav__link">
+      <a href="../anywidget-performance/" class="md-nav__link">
         
   
   
@@ -991,7 +848,7 @@
   
   
     <li class="md-nav__item">
-      <a href="frontend-freeze-fix/" class="md-nav__link">
+      <a href="../frontend-freeze-fix/" class="md-nav__link">
         
   
   
@@ -1019,7 +876,7 @@
   
   
     <li class="md-nav__item">
-      <a href="grid-layout-auto-placement/" class="md-nav__link">
+      <a href="../grid-layout-auto-placement/" class="md-nav__link">
         
   
   
@@ -1101,7 +958,7 @@
   
   
     <li class="md-nav__item">
-      <a href="broadcast-channel-hud/" class="md-nav__link">
+      <a href="../broadcast-channel-hud/" class="md-nav__link">
         
   
   
@@ -1129,7 +986,7 @@
   
   
     <li class="md-nav__item">
-      <a href="chart-theme/" class="md-nav__link">
+      <a href="../chart-theme/" class="md-nav__link">
         
   
   
@@ -1157,7 +1014,7 @@
   
   
     <li class="md-nav__item">
-      <a href="skill-tree-panel/" class="md-nav__link">
+      <a href="../skill-tree-panel/" class="md-nav__link">
         
   
   
@@ -1239,7 +1096,7 @@
   
   
     <li class="md-nav__item">
-      <a href="electron-startup-config/" class="md-nav__link">
+      <a href="../electron-startup-config/" class="md-nav__link">
         
   
   
@@ -1267,7 +1124,7 @@
   
   
     <li class="md-nav__item">
-      <a href="steam-deploy/" class="md-nav__link">
+      <a href="../steam-deploy/" class="md-nav__link">
         
   
   
@@ -1295,7 +1152,7 @@
   
   
     <li class="md-nav__item">
-      <a href="steam-integration-fixes/" class="md-nav__link">
+      <a href="../steam-integration-fixes/" class="md-nav__link">
         
   
   
@@ -1350,22 +1207,55 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#categories" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Categories
+        問題
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Categories">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原因分析
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正内容
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計意図
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="設計意図">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#backend-mcp" class="md-nav__link">
+  <a href="#widgetdata-vs-widgetappend_bars" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Backend &amp; MCP
+        widget.data vs widget.append_bars の使い分け
       
     </span>
   </a>
@@ -1373,65 +1263,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
+  <a href="#_prev_data_len" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#development" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Development
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pyodide" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pyodide
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fixes-improvements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fixes &amp; Improvements
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Features
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#deployment" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Deployment
+        _prev_data_len の初期化箇所
       
     </span>
   </a>
@@ -1440,6 +1275,56 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tips">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lightweight-charts-seriesupdate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lightweight Charts の series.update() の動作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anywidget-traitlet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        anywidget のtraitlet同期
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        関連ファイル
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1460,55 +1345,147 @@
 
 
 
-<h1 id="marimo-developer-documentation">marimo Developer Documentation<a class="headerlink" href="#marimo-developer-documentation" title="Permanent link">&para;</a></h1>
-<p>Internal documentation for marimo developers.</p>
-<h2 id="categories">Categories<a class="headerlink" href="#categories" title="Permanent link">&para;</a></h2>
-<h3 id="backend-mcp">Backend &amp; MCP<a class="headerlink" href="#backend-mcp" title="Permanent link">&para;</a></h3>
-<ul>
-<li><a href="adding_backend_and_mcp_tools/">Adding Backend and MCP Tools</a></li>
-</ul>
-<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
-<ul>
-<li><a href="adding_lint_rules/">Adding Lint Rules</a></li>
-<li><a href="openapi/">OpenAPI</a></li>
-</ul>
-<h3 id="development">Development<a class="headerlink" href="#development" title="Permanent link">&para;</a></h3>
-<ul>
-<li><a href="testing/">Testing</a></li>
-<li><a href="prompts/">Prompts</a></li>
-<li><a href="traces/">Traces</a></li>
-</ul>
-<h3 id="pyodide">Pyodide<a class="headerlink" href="#pyodide" title="Permanent link">&para;</a></h3>
-<ul>
-<li><a href="pyodide/">Pyodide</a></li>
-<li><a href="pyodide-custom-wheel/">Custom Wheel</a></li>
-</ul>
-<h3 id="fixes-improvements">Fixes &amp; Improvements<a class="headerlink" href="#fixes-improvements" title="Permanent link">&para;</a></h3>
-<ul>
-<li><a href="chart-widget-caching-fix/">Chart Widget Caching</a></li>
-<li><a href="ui-switch-state-fix/">UI Switch State</a></li>
-<li><a href="anywidget-backend-sync/">AnyWidget Backend Sync</a></li>
-<li><a href="anywidget-performance/">AnyWidget Performance</a></li>
-<li><a href="frontend-freeze-fix/">Frontend Freeze</a></li>
-<li><a href="chart-loop-freeze-fix/">Chart Loop Freeze</a></li>
-<li><a href="skill-event-wiring/">Skill Event Wiring</a></li>
-<li><a href="grid-layout-auto-placement/">Grid Layout Auto Placement</a></li>
-</ul>
-<h3 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h3>
-<ul>
-<li><a href="broadcast-channel-hud/">Broadcast Channel HUD</a></li>
-<li><a href="chart-theme/">Chart Theme</a></li>
-<li><a href="chart-ack-sync/">Chart ACK Sync</a></li>
-<li><a href="skill-tree-panel/">Skill Tree Panel</a></li>
-<li><a href="skill-tree-implementation/">Skill Tree Implementation</a></li>
-<li><a href="progress-persistence/">Progress Persistence</a></li>
-</ul>
-<h3 id="deployment">Deployment<a class="headerlink" href="#deployment" title="Permanent link">&para;</a></h3>
-<ul>
-<li><a href="electron-startup-config/">Electron Startup</a></li>
-<li><a href="steam-deploy/">Steam Deploy</a></li>
-<li><a href="steam-integration-fixes/">Steam Integration Fixes</a></li>
-</ul>
+<h1 id="btstep-200">bt.step() 200回ループ時のフリーズ問題修正<a class="headerlink" href="#btstep-200" title="Permanent link">&para;</a></h1>
+<p><strong>ステータス</strong>: 完了</p>
+<h2 id="_1">問題<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p><code>bt.step()</code> を 200 回ループで呼ぶとチャートがフリーズし、<code>Append bars failed: Error: Cannot update oldest data</code> が800回発生。</p>
+<h2 id="_2">原因分析<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>原因1</strong>: 全データ再送信（毎step()で80-120KB送信）</li>
+<li><strong>原因2</strong>: RAFバッチングによるバー欠落（199個のバーが失われる）</li>
+<li><strong>根本原因</strong>: <code>_prev_data_len=0</code> の状態で <code>append_bars</code> を使うと、JS側で <code>candleSeries.setData()</code> が呼ばれていない状態で <code>candleSeries.update()</code> が呼ばれてエラー発生</li>
+</ol>
+<h2 id="_3">修正内容<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p><strong>ファイル</strong>: <code>frontend/public/files/chart.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="n">prev_len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="c1"># 初回は全データをdataで設定（append_barsではなく）</span>
+    <span class="c1"># JS側でcandleSeries.setData()が呼ばれ、正しく初期化される</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">df_to_lwc_data</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">_prev_data_len</span> <span class="o">=</span> <span class="n">current_len</span>
+<span class="k">elif</span> <span class="n">current_len</span> <span class="o">&gt;</span> <span class="n">prev_len</span><span class="p">:</span>
+    <span class="c1"># 差分更新: 新しいバーのみを取得して追加</span>
+    <span class="n">new_bars</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">prev_len</span><span class="p">:</span><span class="n">current_len</span><span class="p">]</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">append_bars</span> <span class="o">=</span> <span class="n">df_to_lwc_data</span><span class="p">(</span><span class="n">new_bars</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">_prev_data_len</span> <span class="o">=</span> <span class="n">current_len</span>
+</code></pre></div>
+<p><strong>結果</strong>: エラー0件（800件 → 0件）</p>
+<hr />
+<h2 id="_4">設計意図<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="widgetdata-vs-widgetappend_bars"><code>widget.data</code> vs <code>widget.append_bars</code> の使い分け<a class="headerlink" href="#widgetdata-vs-widgetappend_bars" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>状況</th>
+<th>使用するtraitlet</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>初回表示 (<code>prev_len=0</code>)</td>
+<td><code>widget.data</code></td>
+<td>JS側で <code>setData()</code> を呼び、チャートを初期化</td>
+</tr>
+<tr>
+<td>差分更新 (<code>prev_len&gt;0</code>)</td>
+<td><code>widget.append_bars</code></td>
+<td>JS側で <code>update()</code> を呼び、新バーのみ追加</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_prev_data_len"><code>_prev_data_len</code> の初期化箇所<a class="headerlink" href="#_prev_data_len" title="Permanent link">&para;</a></h3>
+<p>必ず以下の3箇所で設定すること:
+1. <code>backtest_chart()</code> 既存ウィジェット全データ更新時 (1332行)
+2. <code>backtest_chart()</code> 既存ウィジェット差分更新時 (1358行)
+3. <code>backtest_chart()</code> 初回ウィジェット作成時 (1396行)</p>
+<hr />
+<h2 id="tips">Tips<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
+<h3 id="lightweight-charts-seriesupdate">Lightweight Charts の <code>series.update()</code> の動作<a class="headerlink" href="#lightweight-charts-seriesupdate" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>条件</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>既存の時刻と同じ</td>
+<td>バーを更新</td>
+</tr>
+<tr>
+<td>既存の最後の時刻より新しい</td>
+<td>新バーを追加</td>
+</tr>
+<tr>
+<td>既存の最初の時刻より古い</td>
+<td><strong>エラー</strong></td>
+</tr>
+<tr>
+<td>シリーズにデータがない状態で呼ぶ</td>
+<td><strong>エラー</strong></td>
+</tr>
+</tbody>
+</table>
+<p>→ 必ず <code>setData()</code> で初期化してから <code>update()</code> を使う</p>
+<h3 id="anywidget-traitlet">anywidget のtraitlet同期<a class="headerlink" href="#anywidget-traitlet" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Python側</span>
+<span class="n">widget</span><span class="o">.</span><span class="n">append_bars</span> <span class="o">=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>  <span class="c1"># トリガー</span>
+
+<span class="c1"># JS側</span>
+<span class="n">model</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;change:append_bars&quot;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="n">const</span> <span class="n">bars</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;append_bars&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">const</span> <span class="n">bar</span> <span class="n">of</span> <span class="n">bars</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">candleSeries</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bar</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+</code></pre></div>
+<h2 id="_5">関連ファイル<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>パス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chart.py</td>
+<td><code>frontend/public/files/chart.py</code></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>関数名</th>
+<th>行番号</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LightweightChartWidget</code></td>
+<td>380</td>
+<td>anywidget ウィジェットクラス</td>
+</tr>
+<tr>
+<td><code>backtest_chart()</code></td>
+<td>1237</td>
+<td>バックテスト用チャート表示（キャッシュ管理）</td>
+</tr>
+<tr>
+<td><code>update_all_backtest_charts()</code></td>
+<td>1456</td>
+<td>全チャートの差分更新</td>
+</tr>
+<tr>
+<td><code>df_to_lwc_data()</code></td>
+<td>162</td>
+<td>DataFrameをLWC形式に変換</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -1558,10 +1535,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": [], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
