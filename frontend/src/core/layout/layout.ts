@@ -13,6 +13,7 @@ import type { CellId } from "../cells/ids";
 import { notebookCells } from "../cells/utils";
 import { is3DModeAtom } from "../mode";
 import { store } from "../state/jotai";
+import { cell3DPositionsAtom } from "../three/cell-3d-positions";
 import {
   calculateNewCellPlacement,
   DEFAULT_PLACEMENT_CONFIG,
@@ -147,9 +148,25 @@ export function getSerializedLayout() {
   if (data === undefined) {
     return null;
   }
+  const cells = notebookCells(notebook);
+  const serialized = plugin.serializeLayout(data, cells);
+
+  // Merge 3D positions into grid layout cells
+  if (selectedLayout === "grid") {
+    const positions3D = store.get(cell3DPositionsAtom);
+    if (positions3D.size > 0) {
+      serialized.cells = serialized.cells.map(
+        (cell: Record<string, unknown>, idx: number) => {
+          const pos = positions3D.get(cells[idx]?.id);
+          return pos ? { ...cell, position3D: pos } : cell;
+        },
+      );
+    }
+  }
+
   return {
     type: selectedLayout,
-    data: plugin.serializeLayout(data, notebookCells(notebook)),
+    data: serialized,
   };
 }
 

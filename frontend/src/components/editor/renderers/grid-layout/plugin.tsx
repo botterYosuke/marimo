@@ -36,6 +36,9 @@ export const GridLayoutPlugin: ICellRendererPlugin<
           .nullable(),
         scrollable: z.boolean().optional(),
         alignment: z.enum(["top", "bottom", "left", "right"]).optional(),
+        position3D: z
+          .object({ x: z.number(), y: z.number(), z: z.number() })
+          .optional(),
       }),
     ),
   }),

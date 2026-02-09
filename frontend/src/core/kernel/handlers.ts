@@ -19,6 +19,7 @@ import {
 import { isVisualOutput } from "../layout/visual-output-detector";
 import { getRequestClient } from "../network/requests";
 import { store } from "../state/jotai";
+import { cell3DPositionsAtom } from "../three/cell-3d-positions";
 import { VirtualFileTracker } from "../static/virtual-file-tracker";
 import type {
   Capabilities,
@@ -88,6 +89,22 @@ export function buildLayoutState(
     layoutState.selectedLayout = layoutType;
     layoutState.layoutData[layoutType] = layoutData;
     setLayoutData({ layoutView: layoutType, data: layoutData });
+
+    // Restore 3D positions from serialized layout
+    if (layoutType === "grid" && layout.data?.cells) {
+      const positions = new Map<CellId, { x: number; y: number; z: number }>();
+      const serializedCells = layout.data.cells as Array<{
+        position3D?: { x: number; y: number; z: number };
+      }>;
+      serializedCells.forEach((cell, idx) => {
+        if (cell.position3D && cells[idx]) {
+          positions.set(cells[idx].id, cell.position3D);
+        }
+      });
+      if (positions.size > 0) {
+        store.set(cell3DPositionsAtom, positions);
+      }
+    }
   }
 
   return layoutState;

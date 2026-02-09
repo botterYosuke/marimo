@@ -27,6 +27,7 @@ import { autoSaveConfigAtom } from "../config/config";
 import { useAutoExport } from "../export/hooks";
 import { getSerializedLayout, layoutStateAtom } from "../layout/layout";
 import { kioskModeAtom } from "../mode";
+import { cell3DPositionsAtom } from "../three/cell-3d-positions";
 import { connectionAtom } from "../network/connection";
 import { useRequestClient } from "../network/requests";
 import { WebSocketState } from "../websocket/types";
@@ -148,6 +149,7 @@ export function useSaveNotebook() {
         codes,
         configs,
         layout,
+        savedCell3DPositions: new Map(store.get(cell3DPositionsAtom)),
       });
     },
   );
