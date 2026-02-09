@@ -26,13 +26,14 @@ When adding a new rule:
 
 1. **Determine severity**: Choose Breaking, Runtime, or Formatting based on impact
 2. **Find next available code**: Check existing rules in the appropriate category
-3. **Use sequential numbering**: MB005, MB006, etc.
+3. **Use sequential numbering**: MB006, MB006, etc.
 
 **Example assignments**:
 - MB001: unparsable-cells
 - MB002: multiple-definitions
 - MB003: cycle-dependencies
 - MB004: setup-cell-dependencies
+- MB006: syntax-error
 - MF001: general-formatting
 - MF002: parse-stdout
 - MF003: parse-stderr
@@ -62,7 +63,7 @@ if TYPE_CHECKING:
 
 
 class YourNewRule(LintRule):
-    """MB005: Brief description of what this rule checks.
+    """MB006: Brief description of what this rule checks.
 
     Detailed explanation of what this rule does and why it's important.
     This should explain the technical details of how the rule works.
@@ -98,7 +99,7 @@ class YourNewRule(LintRule):
     - [Relevant Guide](https://backcast-tan.vercel.app/guides/...)
     """
 
-    code = "MB005"  # Your assigned code
+    code = "MB006"  # Your assigned code
     name = "your-rule-name"  # Kebab-case name
     description = "Brief description for rule listings"
     severity = Severity.BREAKING  # Or RUNTIME/FORMATTING
@@ -141,7 +142,7 @@ BREAKING_RULE_CODES: dict[str, type[LintRule]] = {
     "MB002": MultipleDefinitionsRule,
     "MB003": CycleDependenciesRule,
     "MB004": SetupCellDependenciesRule,
-    "MB005": YourNewRule,  # Add your rule here
+    "MB006": YourNewRule,  # Add your rule here
 }
 
 __all__ = [
@@ -235,7 +236,7 @@ def _():
 
         diagnostics = await ctx.get_diagnostics()
         assert len(diagnostics) > 0
-        assert diagnostics[0].code == "MB005"
+        assert diagnostics[0].code == "MB006"
         assert diagnostics[0].severity == Severity.BREAKING
 
     async def test_no_false_positives(self):

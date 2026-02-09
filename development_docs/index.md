@@ -37,6 +37,10 @@ Internal documentation for marimo developers.
 - [Skill Tree Panel](skill-tree-panel.md)
 - [Skill Tree Implementation](skill-tree-implementation.md)
 - [Progress Persistence](progress-persistence.md)
+- [Money Missile Homing](money-missile-homing.md)
+
+### Security
+- [Python Sandbox Security](python-sandbox-security.md)
 
 ### Deployment
 - [Electron Startup](electron-startup-config.md)

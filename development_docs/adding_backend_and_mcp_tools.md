@@ -437,25 +437,7 @@ hatch run +py=3.12 test:test tests/_ai/tools/tools/test_your_tool.py -v
 
 ### 11. Update Documentation
 
-Add your tool to the user-facing documentation in `docs/guides/editor_features/tools.md`. Add a row to the appropriate category table:
-
----
-```markdown
-## Available tools
-
-### [Appropriate Category]
-
-| Tool | Description |
-|------|-------------|
-| **your_tool_name** | Brief description of what the tool does. Takes `param1` and `param2` parameters. Returns description of output. |
-```
----
-
-Choose the appropriate category:
-- **Inspection**: Tools for exploring notebook structure and runtime
-- **Data**: Tools for accessing variables and database information
-- **Debugging**: Tools for finding and fixing issues
-- **Reference**: Tools for accessing marimo documentation
+If user-facing documentation for tools exists (e.g., in `docs/`), add your tool to the appropriate category table. Currently, the tool list is auto-discovered from the registry in `marimo/_ai/_tools/tools_registry.py`, so registration in step 7 is sufficient for the tool to be available.
 
 ## Best Practices
 
@@ -682,7 +664,7 @@ Before submitting your tool:
 - [ ] Tests mock `ToolContext` appropriately
 - [ ] All tests pass
 - [ ] Type hints are complete
-- [ ] Documentation updated in `docs/guides/editor_features/tools.md`
+- [ ] Documentation updated (if user-facing docs exist)
 
 ## Additional Resources
 
