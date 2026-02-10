@@ -87,7 +87,7 @@ const server = spawn(uv, args, {
   stdio: "inherit",
   env: {
     ...env,
-    BACKCASTPRO_CACHE_DIR: notebookDir
+    STOCKDATA_CACHE_DIR: notebookDir
   }
 });
 

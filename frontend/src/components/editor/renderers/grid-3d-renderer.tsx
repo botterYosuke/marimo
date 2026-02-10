@@ -40,6 +40,7 @@ export const Grid3DRenderer: React.FC<Grid3DRendererProps> = ({
   cells,
 }) => {
   const [gridContainer, setGridContainer] = useState<HTMLDivElement | null>(null);
+  const [isContainerInDOM, setIsContainerInDOM] = useState(false);
 
   // GridCSS2DServiceからグリッドコンテナを取得
   useEffect(() => {
@@ -74,8 +75,47 @@ export const Grid3DRenderer: React.FC<Grid3DRendererProps> = ({
     }
   }, [gridContainer, sceneManager, css2DService]);
 
-  // Gridコンテナが準備できていない場合は何も表示しない
-  if (!gridContainer) {
+  // gridContainer が DOM に接続されるまでポータルレンダリングを遅延
+  // CSS2DRenderer.render() が呼ばれて初めて gridContainer が DOM に追加されるため、
+  // それまでポータルをマウントすると全ての子要素が clientWidth=0 になる
+  useEffect(() => {
+    if (!gridContainer) {
+      setIsContainerInDOM(false);
+      return;
+    }
+
+    // 既に DOM に接続されている場合はそのまま進む
+    if (gridContainer.isConnected) {
+      setIsContainerInDOM(true);
+      return;
+    }
+
+    // CSS2DRenderer.render() を強制的にトリガーして gridContainer を DOM に追加させる
+    sceneManager.markNeedsRender(true);
+
+    // gridContainer が DOM に接続されるまで RAF でポーリング
+    let cancelled = false;
+    const poll = () => {
+      if (cancelled) {
+        return;
+      }
+      if (gridContainer.isConnected) {
+        setIsContainerInDOM(true);
+        // WidthProvider に正しいコンテナ幅を測定させる
+        window.dispatchEvent(new Event("resize"));
+      } else {
+        requestAnimationFrame(poll);
+      }
+    };
+    requestAnimationFrame(poll);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [gridContainer, sceneManager]);
+
+  // Gridコンテナが準備できていない、またはDOMに未接続の場合は何も表示しない
+  if (!gridContainer || !isContainerInDOM) {
     return null;
   }
 

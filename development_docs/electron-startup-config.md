@@ -52,7 +52,7 @@ function getStartupNotebook() {
 }
 ```
 
-### 3. BACKCASTPRO_CACHE_DIR 環境変数
+### 3. STOCKDATA_CACHE_DIR 環境変数
 
 | モード | 設定方法 | 値 |
 |--------|----------|-----|
@@ -71,7 +71,7 @@ getStartupNotebook() 呼び出し
 - backcast.py が無ければテンプレートからコピー
     ↓
 marimo server 起動
-- BACKCASTPRO_CACHE_DIR 環境変数設定
+- STOCKDATA_CACHE_DIR 環境変数設定
 - backcast.py を開く
     ↓
 BrowserWindow でフロントエンドを表示
@@ -90,7 +90,7 @@ BrowserWindow でフロントエンドを表示
 uvの `--directory` オプションを使用して、作業ディレクトリを変更。
 
 ```json
-"start:server": "pnpm setup:notebook && powershell -NoProfile -Command \"$notebookDir = $env:APPDATA + '\\marimo\\notebooks'; $projectDir = (Get-Location).Path; $env:BACKCASTPRO_CACHE_DIR = $notebookDir; & $env:USERPROFILE\\.local\\bin\\uv.exe run --directory $notebookDir --project $projectDir marimo edit --no-token --headless --port 2718 backcast.py\""
+"start:server": "pnpm setup:notebook && powershell -NoProfile -Command \"$notebookDir = $env:APPDATA + '\\marimo\\notebooks'; $projectDir = (Get-Location).Path; $env:STOCKDATA_CACHE_DIR = $notebookDir; & $env:USERPROFILE\\.local\\bin\\uv.exe run --directory $notebookDir --project $projectDir marimo edit --no-token --headless --port 2718 backcast.py\""
 ```
 
 ---

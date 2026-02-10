@@ -8,7 +8,7 @@ import type { SupportedLocale } from "../../../components/skill-tree/i18n";
 // BackcastPro data configuration
 // Use the same directory as marimo home dir so files appear in FILES panel
 // and are persisted to IndexedDB
-const BACKCASTPRO_CACHE_DIR = WasmFileSystem.HOME_DIR;
+const STOCKDATA_CACHE_DIR = WasmFileSystem.HOME_DIR;
 // Worker runs from /assets/, so ./data resolves to /assets/data/
 const DATA_BASE_URL = "./data";
 // Python files are in /files/ (from public/files/) - use absolute path for both dev and prod
@@ -58,7 +58,7 @@ function getDataFilesToLoad(): DataFile[] {
   for (const code of STOCK_CODES) {
     files.push({
       remotePath: `${DATA_BASE_URL}/stocks_daily/${code}.duckdb`,
-      localPath: `${BACKCASTPRO_CACHE_DIR}/stocks_daily/${code}.duckdb`,
+      localPath: `${STOCKDATA_CACHE_DIR}/stocks_daily/${code}.duckdb`,
     });
   }
 
@@ -174,14 +174,14 @@ export async function setupBackcastProData(
   Logger.log("[BackcastPro] Setting up data files...");
 
   // Create cache directory structure
-  ensureDirectoryExists(pyodide, BACKCASTPRO_CACHE_DIR);
-  ensureDirectoryExists(pyodide, `${BACKCASTPRO_CACHE_DIR}/stocks_daily`);
+  ensureDirectoryExists(pyodide, STOCKDATA_CACHE_DIR);
+  ensureDirectoryExists(pyodide, `${STOCKDATA_CACHE_DIR}/stocks_daily`);
 
   // Set environment variable for BackcastPro
   pyodide.runPython(`
 import os
-os.environ['BACKCASTPRO_CACHE_DIR'] = '${BACKCASTPRO_CACHE_DIR}'
-print(f"[BackcastPro] BACKCASTPRO_CACHE_DIR set to: {os.environ['BACKCASTPRO_CACHE_DIR']}")
+os.environ['STOCKDATA_CACHE_DIR'] = '${STOCKDATA_CACHE_DIR}'
+print(f"[BackcastPro] STOCKDATA_CACHE_DIR set to: {os.environ['STOCKDATA_CACHE_DIR']}")
   `);
 
   // Fetch and write data files
@@ -224,7 +224,7 @@ print(f"[BackcastPro] BACKCASTPRO_CACHE_DIR set to: {os.environ['BACKCASTPRO_CAC
   if (successCount > 0) {
     pyodide.runPython(`
 import os
-cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', '/tmp/backcastpro_data')
+cache_dir = os.environ.get('STOCKDATA_CACHE_DIR', '/tmp/backcastpro_data')
 print(f"[BackcastPro] Files in cache directory:")
 for root, dirs, files in os.walk(cache_dir):
     for f in files:
@@ -333,7 +333,7 @@ async function setupPythonFiles(
 
   // Fetch and write files in parallel
   const fetchPromises = pythonFiles.map(async (filename) => {
-    const localPath = `${BACKCASTPRO_CACHE_DIR}/${filename}`;
+    const localPath = `${STOCKDATA_CACHE_DIR}/${filename}`;
 
     // backcast.py is always overwritten (important as initial file)
     // Other files are skipped if they exist (preserve user edits)
@@ -387,4 +387,4 @@ async function setupPythonFiles(
   );
 }
 
-export { BACKCASTPRO_CACHE_DIR, setupPythonFiles };
+export { STOCKDATA_CACHE_DIR, setupPythonFiles };

@@ -493,6 +493,10 @@ class LightweightChartWidget(anywidget.AnyWidget):
                     model[MODEL_OBSERVER_KEY].disconnect();
                     model[MODEL_OBSERVER_KEY].observe(el);
                 }
+                // 移動先の el に幅が確定している場合はチャートサイズを適用
+                if (el.clientWidth > 0) {
+                    model[MODEL_CHART_KEY].applyOptions({ width: el.clientWidth });
+                }
             }
             return () => {};
         }
@@ -505,6 +509,23 @@ class LightweightChartWidget(anywidget.AnyWidget):
             el.innerHTML = '<p style="color:#ef5350;padding:20px;">Chart library failed to load. Check network connection.</p>';
             console.error(e);
             return;
+        }
+
+        // el の幅が確定するまで待つ（3D portal タイミング対策）
+        // CSS2DRenderer が gridContainer を DOM に追加する前にポータルがマウントされると
+        // el.clientWidth が 0 になるため、幅が確定するまで待機する
+        if (el.clientWidth === 0) {
+            await new Promise((resolve) => {
+                const ro = new ResizeObserver(entries => {
+                    if (entries[0].contentRect.width > 0) {
+                        ro.disconnect();
+                        resolve();
+                    }
+                });
+                ro.observe(el);
+                // 安全タイムアウト: 3秒経っても幅が確定しない場合は続行
+                setTimeout(() => { ro.disconnect(); resolve(); }, 3000);
+            });
         }
 
         // チャート作成
