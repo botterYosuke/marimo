@@ -133,7 +133,7 @@ electron = [
 
 [dependency-groups]
 dev = [
-    "hatch>=1.15.1",
+    "hatch>=1.16.3",
     "black~=23.12.1",
     # For tracing debugging
     "opentelemetry-api~=1.28.0",
@@ -200,7 +200,7 @@ test-optional = [
     "ibis-framework[duckdb]>=10.3.0",
     # For testing mo.image
     "pillow~=10.4.0",
-    "anywidget~=0.9.18",
+    "anywidget~=0.9.21",
     "ipython~=8.12.3",
     # testing gen ai
     "pydantic-ai-slim[google,anthropic,bedrock,openai]>=1.52.0",
@@ -290,7 +290,7 @@ check = "mypy marimo --exclude=marimo/_tutorials/"
 tutorials = "mypy marimo/_tutorials"
 
 [tool.hatch.envs.test]
-dependency-groups = ["dev", "test"]
+dependency-groups = ["test"]
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
@@ -613,7 +613,7 @@ platforms = ["osx-arm64", "linux-64", "linux-aarch64"]
 [tool.pixi.dependencies]
 nodejs = "22.*"
 pnpm = "10.*"
-hatch = ">=1.14.1,<2"
+hatch = ">=1.16.3,<2"
 make = ">=4.4.1,<5"
 pre_commit = ">=4.2.0,<5"
 uv = ">=0.6.12,<0.7"
