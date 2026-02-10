@@ -318,24 +318,26 @@ const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
 
   return (
     <SortableCellsProvider multiColumn={appConfig.width === "columns"}>
-      <ReactFlow
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-        onNodesChange={handleNodesChange}
-        onMove={handleViewportMove}
-        panOnDrag={true}
-        zoomOnScroll={true}
-        zoomOnPinch={true}
-        minZoom={0.01}
-        maxZoom={10}
-        defaultViewport={initialViewport}
-        deleteKeyCode={null}
-        selectionKeyCode={null}
-        nodesConnectable={false}
-        nodesDraggable={true}
-        elementsSelectable={true}
-        style={{ position: "absolute", inset: 0, zIndex: 20 }}
-      />
+      <div style={{ position: "absolute", inset: 0, zIndex: 20 }}>
+        <ReactFlow
+          nodes={nodes}
+          nodeTypes={nodeTypes}
+          onNodesChange={handleNodesChange}
+          onMove={handleViewportMove}
+          panOnDrag={true}
+          zoomOnScroll={true}
+          zoomOnPinch={true}
+          minZoom={0.01}
+          maxZoom={10}
+          defaultViewport={initialViewport}
+          deleteKeyCode={null}
+          selectionKeyCode={null}
+          nodesConnectable={false}
+          nodesDraggable={true}
+          elementsSelectable={true}
+          style={{ width: "100%", height: "100%" }}
+        />
+      </div>
     </SortableCellsProvider>
   );
 };
