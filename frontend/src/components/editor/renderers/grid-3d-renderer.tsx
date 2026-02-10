@@ -39,7 +39,9 @@ export const Grid3DRenderer: React.FC<Grid3DRendererProps> = ({
   setLayout,
   cells,
 }) => {
-  const [gridContainer, setGridContainer] = useState<HTMLDivElement | null>(null);
+  const [gridContainer, setGridContainer] = useState<HTMLDivElement | null>(
+    null,
+  );
 
   // GridCSS2DServiceからグリッドコンテナを取得
   useEffect(() => {
@@ -67,12 +69,23 @@ export const Grid3DRenderer: React.FC<Grid3DRendererProps> = ({
 
     // 既にアタッチされている場合はスキップ
     if (!css2DService.getCSS2DObject()) {
-      css2DService.attachContainerToScene(
-        scene,
-        new THREE.Vector3(0, 0, 0),
-      );
+      css2DService.attachContainerToScene(scene, new THREE.Vector3(0, 0, 0));
     }
   }, [gridContainer, sceneManager, css2DService]);
+
+  // Portal コンテンツのマウント後に resize を発火
+  // → scene-manager の resizeHandler → CSS2DRenderer サイズ更新
+  // → portal コンテナサイズ更新 → ウィジェットの ResizeObserver 発火
+  useEffect(() => {
+    if (!gridContainer) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event("resize"));
+      });
+    });
+  }, [gridContainer]);
 
   // Gridコンテナが準備できていない場合は何も表示しない
   if (!gridContainer) {

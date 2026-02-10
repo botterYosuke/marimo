@@ -1,13 +1,16 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { createPortal } from "react-dom";
-import { useEffect, useState, useMemo, useRef, useCallback } from "react";
-import * as THREE from "three";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
-import type { CellCSS2DService } from "@/core/three/cell-css2d-service";
+import ReactFlow, {
+  applyNodeChanges,
+  useReactFlow,
+  type Node,
+  type NodeChange,
+  type Viewport,
+} from "reactflow";
+import "reactflow/dist/style.css";
 import type { SceneManager } from "@/core/three/scene-manager";
-import { CellDragManager } from "@/core/three/cell-drag-manager";
-import { Cell3DWrapper } from "./cell-3d-wrapper";
 import type { AppConfig, UserConfig } from "@/core/config/config-schema";
 import type { AppMode } from "@/core/mode";
 import { useCellIds } from "@/core/cells/cells";
@@ -15,67 +18,59 @@ import { SETUP_CELL_ID, type CellId } from "@/core/cells/ids";
 import { useTheme } from "@/theme/useTheme";
 import {
   cell3DPositionsAtom,
+  type Cell3DPosition,
 } from "@/core/three/cell-3d-positions";
+import { cell3DViewAtom } from "@/core/three/cell-3d-view";
+import { reactFlowViewportToCamera } from "@/core/three/viewport-sync";
+import { CellFlowNode, type CellFlowNodeData } from "./cell-flow-node";
+import { cellFocusAtom, useCellFocusActions } from "@/core/cells/focus";
 import { SortableCellsProvider } from "@/components/sort/SortableCellsProvider";
+
+// React Flow カスタムノードタイプ
+const nodeTypes = {
+  cellFlowNode: CellFlowNode,
+};
+
+// スポーン時の衝突回避オフセット
+const SPAWN_OFFSET = 30;
 
 /**
  * 新規セルのスポーン位置を計算する。
- * ビューポート中央（OrbitControls.target）を基準とし、
- * 既存セルとの衝突を回避するオフセットを適用する。
- *
- * 返り値は "hybrid座標" — containerPosition を基準にCSS変換で
- * スクリーン中央に表示される値。真のワールド座標ではない。
+ * ビューポート中央を基準とし、既存セルとの衝突を回避する。
  */
 function calcSpawnPosition(
-  sceneManager: SceneManager,
-  css2DService: CellCSS2DService,
-  cellPositions: Map<string, THREE.Vector3>,
-): THREE.Vector3 {
-  const camera = sceneManager.getCamera();
-  const controls = sceneManager.getControls();
-  const containerPosition =
-    css2DService.getContainerPosition() || new THREE.Vector3(0, 600, 0);
-  const scale = css2DService.getContainerScale();
-  const renderer = sceneManager.getRenderer();
+  rfScreenToFlowPosition: (pos: { x: number; y: number }) => { x: number; y: number },
+  screenW: number,
+  screenH: number,
+  existingPositions: Map<CellId, Cell3DPosition>,
+): { x: number; z: number } {
+  // RF座標系でのビューポート中央を計算
+  const center = rfScreenToFlowPosition({
+    x: screenW / 2,
+    y: screenH / 2,
+  });
 
-  let baseX = containerPosition.x;
-  let baseZ = containerPosition.z;
+  const baseX = center.x;
+  const baseZ = center.y; // RF y → World z
 
-  if (camera && controls && renderer) {
-    // コンテナの3D位置をスクリーンNDCに投影
-    const containerNDC = containerPosition.clone().project(camera);
-    const screenWidth = renderer.domElement.clientWidth;
-    const screenHeight = renderer.domElement.clientHeight;
-
-    // スクリーン中央とコンテナ投影位置の差分をCSSオフセットに変換
-    // NDC (0,0) = スクリーン中央なので、コンテナのNDC値がそのままオフセット
-    const cssLeft = (-containerNDC.x * screenWidth) / (2 * scale);
-    const cssTop = (containerNDC.y * screenHeight) / (2 * scale);
-
-    // hybrid position（containerPos + cssOffset）として格納
-    baseX = containerPosition.x + cssLeft;
-    baseZ = containerPosition.z + cssTop;
-  }
-
-  // 衝突回避: offset増加後に既にスキップしたセルと重なるケースがあるため
-  // 衝突が見つかるたびにループを最初からやり直す
-  const OFFSET = 30;
+  // 衝突回避
   let offset = 0;
   let hasCollision = true;
   while (hasCollision) {
     hasCollision = false;
-    for (const [, existing] of cellPositions) {
+    for (const [, existing] of existingPositions) {
       if (
         Math.abs(existing.x - (baseX + offset)) < 10 &&
         Math.abs(existing.z - (baseZ + offset)) < 10
       ) {
-        offset += OFFSET;
+        offset += SPAWN_OFFSET;
         hasCollision = true;
         break;
       }
     }
   }
-  return new THREE.Vector3(baseX + offset, 600, baseZ + offset);
+
+  return { x: baseX + offset, z: baseZ + offset };
 }
 
 interface Cell3DRendererProps {
@@ -83,339 +78,274 @@ interface Cell3DRendererProps {
   userConfig: UserConfig;
   appConfig: AppConfig;
   sceneManager: SceneManager;
-  css2DService: CellCSS2DService;
+  initialViewport?: Viewport;
 }
 
 /**
- * Cell3DRenderer
+ * Cell3DRendererInner
  *
- * セルを3D空間に配置するコンポーネント
- * - コンテナ全体を1つのCSS2DObjectとして3D空間に配置
- * - 個別セルはコンテナ内にCSS座標で配置
- * - ビューポート中央配置（初期配置のみ）
- * - セルの追加/削除時の位置更新
- * - ドラッグ機能の統合
+ * ReactFlow でセルをノードとして表示し、viewport 変更を Three.js カメラに同期する。
+ * useReactFlow() を使うため ReactFlowProvider の内部に配置される。
  */
-export const Cell3DRenderer: React.FC<Cell3DRendererProps> = ({
+const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
   mode,
   userConfig,
   appConfig,
   sceneManager,
-  css2DService,
+  initialViewport,
 }) => {
-  const [cellContainer, setCellContainer] = useState<HTMLDivElement | null>(null);
   const cellIds = useCellIds();
   const { theme } = useTheme();
-  const cellWrapperElementsRef = useRef<Map<string, HTMLElement>>(new Map());
-  const dragManagerRef = useRef<CellDragManager | null>(null);
-  const cellPositionsRef = useRef<Map<string, THREE.Vector3>>(new Map());
   const cell3DPositions = useAtomValue(cell3DPositionsAtom);
-  const cell3DPositionsRef = useRef(cell3DPositions);
   const setCell3DPositions = useSetAtom(cell3DPositionsAtom);
+  const setCell3DView = useSetAtom(cell3DViewAtom);
+  const { focusCell } = useCellFocusActions();
+  const focusedCellId = useAtomValue(cellFocusAtom).focusedCellId;
 
-  // atomが更新されたらrefも更新
+  const rfInstance = useReactFlow();
+  const cell3DPositionsRef = useRef(cell3DPositions);
+  const viewportSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // atom が更新されたら ref も更新
   useEffect(() => {
     cell3DPositionsRef.current = cell3DPositions;
   }, [cell3DPositions]);
 
-  // セルIDのリストを取得（フラット化、SETUP_CELL_IDを除外）
+  // セルIDのリスト（SETUP_CELL_ID を除外）
   const allCellIds = useMemo(() => {
     return cellIds.inOrderIds.filter((id) => id !== SETUP_CELL_ID);
   }, [cellIds]);
 
-  // CellDragManagerの初期化
+  const hasOnlyOneCell = cellIds.hasOnlyOneId();
+
+  // RF ノード state
+  const [nodes, setNodes] = useState<Node<CellFlowNodeData>[]>([]);
+
+  // allCellIds / cell3DPositions が変わったらノードを再生成
   useEffect(() => {
-    const dragManager = new CellDragManager();
-    dragManager.setPositionUpdateCallback((cellId, position) => {
-      // 位置を保存
-      cellPositionsRef.current.set(cellId, position);
+    setNodes((prevNodes) => {
+      const prevNodeMap = new Map(prevNodes.map((n) => [n.id, n]));
+      const newNodes: Node<CellFlowNodeData>[] = [];
+      const positionsToSave = new Map<CellId, Cell3DPosition>();
 
-      // atomにも保存
-      setCell3DPositions((prev) => {
-        const next = new Map(prev);
-        next.set(cellId as CellId, {
-          x: position.x,
-          y: position.y,
-          z: position.z,
+      for (const cellId of allCellIds) {
+        const column = cellIds.findWithId(cellId);
+        const isCollapsed = column ? column.isCollapsed(cellId) : false;
+        const collapseCount = column ? column.getCount(cellId) : 0;
+
+        // 保存済み位置 or スポーン
+        let savedPos = cell3DPositionsRef.current.get(cellId);
+        if (!savedPos) {
+          const container = sceneManager.getRenderer()?.domElement;
+          const screenW = container?.clientWidth ?? 800;
+          const screenH = container?.clientHeight ?? 600;
+          const spawn = calcSpawnPosition(
+            rfInstance.screenToFlowPosition,
+            screenW,
+            screenH,
+            cell3DPositionsRef.current,
+          );
+          savedPos = { x: spawn.x, y: 600, z: spawn.z };
+          positionsToSave.set(cellId, savedPos);
+          // ref にも即座に保存（次のスポーンが衝突しないように）
+          cell3DPositionsRef.current = new Map(cell3DPositionsRef.current).set(cellId, savedPos);
+        }
+
+        // 既存ノードの位置を維持（ドラッグ中に外部からリセットされないように）
+        const prevNode = prevNodeMap.get(cellId);
+        const position = prevNode
+          ? prevNode.position
+          : { x: savedPos.x, y: savedPos.z }; // World {x,z} → RF {x,y}
+
+        newNodes.push({
+          id: cellId,
+          type: "cellFlowNode",
+          position,
+          dragHandle: ".window-titlebar",
+          data: {
+            cellId,
+            mode,
+            userConfig,
+            appConfig,
+            theme,
+            showPlaceholder: hasOnlyOneCell,
+            canDelete: !hasOnlyOneCell,
+            isCollapsed,
+            collapseCount,
+            canMoveX: appConfig.width === "columns",
+          },
         });
-        return next;
-      });
-
-      // セル要素のCSSスタイルを更新
-      const wrapperElement = cellWrapperElementsRef.current.get(cellId);
-      if (wrapperElement) {
-        const containerPosition =
-          css2DService.getContainerPosition() ||
-          new THREE.Vector3(0, 600, 0);
-        const relativePosition = new THREE.Vector3(
-          position.x - containerPosition.x,
-          position.y - containerPosition.y,
-          position.z - containerPosition.z,
-        );
-        wrapperElement.style.left = `${relativePosition.x}px`;
-        wrapperElement.style.top = `${relativePosition.z}px`;
       }
 
-      // レンダリングをマーク
-      sceneManager.markNeedsRender();
-      css2DService.markNeedsRender();
-    });
-    dragManager.setCSS2DService(css2DService);
-    dragManagerRef.current = dragManager;
-
-    return () => {
-      dragManager.dispose();
-    };
-  }, [css2DService, sceneManager, setCell3DPositions]);
-
-  // CellCSS2DServiceからセルコンテナを取得
-  useEffect(() => {
-    const container = css2DService.getCellContainer();
-    if (container) {
-      setCellContainer(container);
-    } else {
-      console.warn(
-        "Cell container is not available. Make sure initializeRenderer() is called first.",
-      );
-    }
-  }, [css2DService]);
-
-  // コンテナをシーンにアタッチ
-  useEffect(() => {
-    if (!cellContainer) {
-      return;
-    }
-
-    const scene = sceneManager.getScene();
-    if (!scene) {
-      return;
-    }
-
-    // 既にアタッチされている場合はスキップ
-    if (!css2DService.getCSS2DObject()) {
-      css2DService.attachCellContainerToScene(scene, new THREE.Vector3(0, 600, 0));
-    }
-  }, [cellContainer, sceneManager, css2DService]);
-
-  // セルを3D空間に配置
-  useEffect(() => {
-    if (!cellContainer) {
-      return;
-    }
-
-    const scene = sceneManager.getScene();
-    if (!scene) {
-      return;
-    }
-
-    const dragManager = dragManagerRef.current;
-    if (!dragManager) {
-      return;
-    }
-
-    // コンテナの3D位置を取得
-    const containerPosition =
-      css2DService.getContainerPosition() || new THREE.Vector3(0, 600, 0);
-
-    // 各セルのラッパー要素を取得してCSS座標で配置
-    const updatePositions = () => {
-      allCellIds.forEach((cellId) => {
-        // ラッパー要素を検索
-        const wrapperElement = cellContainer.querySelector(
-          `[data-cell-wrapper-id="${cellId}"]`,
-        ) as HTMLElement;
-
-        if (!wrapperElement) {
-          return; // ラッパー要素が見つからない場合はスキップ
-        }
-
-        // 既存の位置を取得、またはatomから復元、またはビューポート中央に配置
-        let position = cellPositionsRef.current.get(cellId);
-        if (!position) {
-          // atomから位置情報を復元を試みる（最新値を参照）
-          const savedPosition = cell3DPositionsRef.current.get(cellId);
-          if (savedPosition) {
-            // atomに位置があれば、THREE.Vector3に変換して使用
-            position = new THREE.Vector3(
-              savedPosition.x,
-              savedPosition.y,
-              savedPosition.z,
-            );
-            cellPositionsRef.current.set(cellId, position);
-          } else {
-            // 初期配置：ビューポート中央に配置
-            position = calcSpawnPosition(sceneManager, css2DService, cellPositionsRef.current);
-            cellPositionsRef.current.set(cellId, position);
-            // スポーン位置をatomにも保存（再配置防止）
-            const spawnedPos = position;
-            setCell3DPositions((prev) => {
-              const next = new Map(prev);
-              next.set(cellId, { x: spawnedPos.x, y: spawnedPos.y, z: spawnedPos.z });
-              return next;
-            });
-          }
-        } else {
-          // 既存の位置のY座標を600に設定（atomから復元した場合は変更しない）
-          position.y = 600;
-        }
-
-        // コンテナ位置を基準に相対位置を計算
-        const relativePosition = new THREE.Vector3(
-          position.x - containerPosition.x,
-          position.y - containerPosition.y,
-          position.z - containerPosition.z,
-        );
-
-        // CSS座標で位置を設定
-        wrapperElement.style.left = `${relativePosition.x}px`;
-        wrapperElement.style.top = `${relativePosition.z}px`;
-
-        cellWrapperElementsRef.current.set(cellId, wrapperElement);
-      });
-
-      // 削除されたセルの位置情報をクリーンアップ
-      const currentCellIds = new Set(allCellIds);
-      const deletedCellIds: CellId[] = [];
-      cellPositionsRef.current.forEach((_, cellId) => {
-        if (!currentCellIds.has(cellId as CellId)) {
-          cellPositionsRef.current.delete(cellId);
-          cellWrapperElementsRef.current.delete(cellId);
-          deletedCellIds.push(cellId as CellId);
-        }
-      });
-      // atomからも削除
-      if (deletedCellIds.length > 0) {
+      // 新規スポーン位置を atom に永続化
+      if (positionsToSave.size > 0) {
         setCell3DPositions((prev) => {
           const next = new Map(prev);
-          deletedCellIds.forEach((cellId) => {
-            next.delete(cellId);
-          });
+          for (const [id, pos] of positionsToSave) {
+            next.set(id, pos);
+          }
           return next;
         });
       }
 
-      // レンダリングをマーク
-      sceneManager.markNeedsRender();
-      css2DService.markNeedsRender();
-    };
+      // 削除されたセルを atom からクリーンアップ
+      const currentIds = new Set(allCellIds);
+      const deletedIds = [...cell3DPositionsRef.current.keys()].filter(
+        (id) => !currentIds.has(id),
+      );
+      if (deletedIds.length > 0) {
+        setCell3DPositions((prev) => {
+          const next = new Map(prev);
+          for (const id of deletedIds) {
+            next.delete(id);
+          }
+          return next;
+        });
+      }
 
-    // 初期配置
-    updatePositions();
-
-    // MutationObserverを使用してセル要素の変更を監視
-    const observer = new MutationObserver(() => {
-      // 少し遅延させてDOMの更新を待つ
-      setTimeout(updatePositions, 0);
+      return newNodes;
     });
+  }, [
+    allCellIds,
+    cellIds,
+    mode,
+    userConfig,
+    appConfig,
+    theme,
+    hasOnlyOneCell,
+    sceneManager,
+    rfInstance,
+    setCell3DPositions,
+  ]);
 
-    observer.observe(cellContainer, {
-      childList: true,
-      subtree: true,
-    });
+  // onNodesChange: RF controlled mode の中核
+  const handleNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      // remove は marimo 側の削除フローで処理するため除外
+      const filtered = changes.filter((c) => c.type !== "remove");
+      setNodes((nds) => applyNodeChanges(filtered, nds));
 
-    // クリーンアップ
-    return () => {
-      observer.disconnect();
-      cellPositionsRef.current.clear();
-      cellWrapperElementsRef.current.clear();
-    };
-  }, [allCellIds, cellContainer, sceneManager, css2DService, setCell3DPositions]);
-
-  // セルラッパー要素が準備できたときのコールバック
-  const handleCellElementReady = useCallback(
-    (cellId: CellId, element: HTMLElement) => {
-      // 要素が準備できたことを記録
-      cellWrapperElementsRef.current.set(cellId, element);
-
-      // 位置が設定されていない場合は、atomから復元を試みる、またはビューポート中央に配置
-      if (!cellPositionsRef.current.has(cellId)) {
-        // atomから位置情報を復元を試みる
-        const savedPosition = cell3DPositions.get(cellId);
-        let position: THREE.Vector3;
-
-        if (savedPosition) {
-          // atomに位置があれば、THREE.Vector3に変換して使用
-          position = new THREE.Vector3(
-            savedPosition.x,
-            savedPosition.y,
-            savedPosition.z,
-          );
-          cellPositionsRef.current.set(cellId, position);
-        } else {
-          // 初期配置：ビューポート中央に配置
-          position = calcSpawnPosition(sceneManager, css2DService, cellPositionsRef.current);
-          cellPositionsRef.current.set(cellId, position);
-          // スポーン位置をatomにも保存（再配置防止）
-          const spawnedPos = position;
+      for (const change of changes) {
+        // ドラッグ完了 → 位置を atom に永続化
+        if (change.type === "position" && change.position && !change.dragging) {
+          const pos = change.position;
           setCell3DPositions((prev) => {
             const next = new Map(prev);
-            next.set(cellId, { x: spawnedPos.x, y: spawnedPos.y, z: spawnedPos.z });
+            next.set(change.id as CellId, { x: pos.x, y: 600, z: pos.y });
             return next;
           });
         }
 
-        // コンテナ位置を基準に相対位置を計算
-        const containerPosition =
-          css2DService.getContainerPosition() || new THREE.Vector3(0, 600, 0);
-        const relativePosition = new THREE.Vector3(
-          position.x - containerPosition.x,
-          position.y - containerPosition.y,
-          position.z - containerPosition.z,
-        );
-
-        // CSS座標で位置を設定
-        element.style.left = `${relativePosition.x}px`;
-        element.style.top = `${relativePosition.z}px`;
-
-        sceneManager.markNeedsRender();
-        css2DService.markNeedsRender();
+        // セル選択 → フォーカス連携
+        if (change.type === "select" && change.selected) {
+          focusCell({ cellId: change.id as CellId });
+        }
       }
     },
-    [cell3DPositions, css2DService, sceneManager, setCell3DPositions],
+    [setCell3DPositions, focusCell],
   );
 
-  // セルをCSS2Dコンテナ内にレンダリング
-  if (!cellContainer) {
-    return null;
-  }
+  // ビューポート移動 → Three.js カメラ同期
+  const handleViewportMove = useCallback(
+    (_event: MouseEvent | TouchEvent | null, viewport: Viewport) => {
+      const camera = sceneManager.getCamera();
+      const renderer = sceneManager.getRenderer();
+      if (!camera || !renderer) {
+        return;
+      }
 
-  const dragManager = dragManagerRef.current;
-  if (!dragManager) {
-    return null;
-  }
+      const screenW = renderer.domElement.clientWidth;
+      const screenH = renderer.domElement.clientHeight;
+      const { position, target } = reactFlowViewportToCamera(
+        viewport,
+        screenW,
+        screenH,
+        camera.fov,
+      );
+      sceneManager.setCameraFromViewport(position, target);
 
-  // セルの列情報を取得
-  const hasOnlyOneCell = cellIds.hasOnlyOneId();
+      // デバウンスしてカメラビューを保存（300ms）
+      if (viewportSaveTimerRef.current) {
+        clearTimeout(viewportSaveTimerRef.current);
+      }
+      viewportSaveTimerRef.current = setTimeout(() => {
+        const cam = sceneManager.getCamera();
+        if (cam) {
+          setCell3DView({
+            position: { x: cam.position.x, y: cam.position.y, z: cam.position.z },
+            target: { x: target.x, y: target.y, z: target.z },
+          });
+        }
+      }, 300);
+    },
+    [sceneManager, setCell3DView],
+  );
 
-  return createPortal(
+  // ノードの z-index を focusedCellId に応じて更新（変更のある2ノードのみ）
+  const prevFocusedRef = useRef<string | null>(null);
+  useEffect(() => {
+    const prev = prevFocusedRef.current;
+    prevFocusedRef.current = focusedCellId;
+    if (prev === focusedCellId) {
+      return;
+    }
+    setNodes((nds) =>
+      nds.map((n) => {
+        const shouldBeFocused = focusedCellId === n.id;
+        const wasFocused = prev === n.id;
+        if (!shouldBeFocused && !wasFocused) {
+          return n; // 変更なし — 同一参照を返して RF 再レンダリングを回避
+        }
+        return {
+          ...n,
+          style: {
+            ...n.style,
+            zIndex: shouldBeFocused ? 1000 : 20,
+          },
+        };
+      }),
+    );
+  }, [focusedCellId]);
+
+  // クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (viewportSaveTimerRef.current) {
+        clearTimeout(viewportSaveTimerRef.current);
+      }
+    };
+  }, []);
+
+  return (
     <SortableCellsProvider multiColumn={appConfig.width === "columns"}>
-      <div className="cells-3d-container-inner">
-        {allCellIds.map((cellId) => {
-          const column = cellIds.findWithId(cellId);
-          const isCollapsed = column ? column.isCollapsed(cellId) : false;
-          const collapseCount = column ? column.getCount(cellId) : 0;
-
-          return (
-            <Cell3DWrapper
-              key={cellId}
-              cellId={cellId}
-              mode={mode}
-              userConfig={userConfig}
-              appConfig={appConfig}
-              theme={theme}
-              dragManager={dragManager}
-              css2DService={css2DService}
-              showPlaceholder={hasOnlyOneCell}
-              canDelete={!hasOnlyOneCell}
-              isCollapsed={isCollapsed}
-              collapseCount={collapseCount}
-              canMoveX={appConfig.width === "columns"}
-              onCellElementReady={handleCellElementReady}
-            />
-          );
-        })}
-      </div>
-    </SortableCellsProvider>,
-    cellContainer,
+      <ReactFlow
+        nodes={nodes}
+        nodeTypes={nodeTypes}
+        onNodesChange={handleNodesChange}
+        onMove={handleViewportMove}
+        panOnDrag={true}
+        zoomOnScroll={true}
+        zoomOnPinch={true}
+        minZoom={0.01}
+        maxZoom={10}
+        defaultViewport={initialViewport}
+        deleteKeyCode={null}
+        selectionKeyCode={null}
+        nodesConnectable={false}
+        nodesDraggable={true}
+        elementsSelectable={true}
+        style={{ position: "absolute", inset: 0, zIndex: 20 }}
+      />
+    </SortableCellsProvider>
   );
+};
+
+/**
+ * Cell3DRenderer
+ *
+ * ReactFlowProvider は edit-app.tsx 側でラップされる。
+ * このコンポーネントは Provider 内で描画される想定。
+ */
+export const Cell3DRenderer: React.FC<Cell3DRendererProps> = (props) => {
+  return <Cell3DRendererInner {...props} />;
 };

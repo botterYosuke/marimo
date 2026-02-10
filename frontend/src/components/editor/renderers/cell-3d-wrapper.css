@@ -1,7 +1,15 @@
 /* Cell 3D Wrapper Styles */
 
+/* React Flow attribution 非表示 */
+.react-flow__attribution { display: none !important; }
+
+/* React Flow ノード: floating window のオーバーフローを許可 */
+.react-flow__node { overflow: visible !important; }
+
+/* React Flow 背景パネルを透過（Three.jsコンテンツを見せる） */
+.react-flow__pane { background: transparent !important; }
+
 .cell-3d-wrapper {
-  position: absolute;
   background: var(--background, #ffffff);
   border: 1px solid var(--border, #e0e0e0);
   border-radius: 6px;
