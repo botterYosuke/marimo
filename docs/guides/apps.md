@@ -59,6 +59,31 @@ Enable the grid editor in the app preview, via a dropdown:
   <figcaption>Grid layout lets you drag and drop outputs to construct your app</figcaption>
 </div>
 
+### 3D mode (grid layout editing)
+
+When editing a notebook with grid layout (`marimo edit`), cells are displayed as
+**floating windows in a 3D space**. This mode uses Three.js and React Flow to
+provide an immersive editing experience where you can freely arrange cells.
+
+**Features:**
+
+- **Pan**: Click and drag on empty space to move the viewport
+- **Zoom**: Scroll wheel or pinch gesture to zoom in/out
+- **Drag cells**: Grab a cell by its title bar to reposition it
+- **Cell selection**: Click a cell to bring it to the front
+- **Cell operations**: Run, stop, or delete cells via buttons in the title bar
+
+**Position persistence:**
+
+- Cell positions in 3D space are saved to `.grid.json` alongside the grid layout
+  metadata. Positions are auto-saved when cells are moved.
+- Camera view (pan/zoom state) is stored in browser localStorage and restored
+  on reload.
+
+!!! note "Edit mode only"
+    3D mode is active only when editing (`marimo edit`) with the grid layout
+    width. In app preview / present mode, the standard grid layout is displayed.
+
 ### Slides layout
 
 If you prefer a slideshow-like experience, you can use the slides layout. Enable the slides layout in the app preview, via the same dropdown as above.

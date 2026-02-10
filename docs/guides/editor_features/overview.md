@@ -187,6 +187,7 @@ You can set the width of the editor in the notebook settings:
 - **Full**: Uses the full width of your browser window, ideal for dashboard-style notebooks
 - **Multi-column**: Splits your notebook into multiple columns, letting you view and edit cells side-by-side. This is only possible because marimo models your notebook as a directed acyclic graph (DAG) and the [execution order](../reactivity.md#execution-order) is determined by the relationships between
 cells and their variables, not by the order of cells on the page.
+- **Grid**: Enables a drag-and-drop grid layout for arranging cell outputs as an app. In edit mode, cells are displayed as floating windows in a [3D space](../apps.md#3d-mode-grid-layout-editing) where you can pan, zoom, and freely reposition them.
 
 <div align="center">
 <figure>
