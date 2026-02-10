@@ -3,7 +3,11 @@
 import { memo, useCallback } from "react";
 import { useAtomValue } from "jotai";
 import { MoreHorizontalIcon, XIcon } from "lucide-react";
-import type { NodeProps } from "reactflow";
+import { Handle, Position, type NodeProps } from "reactflow";
+import {
+  INPUTS_HANDLE_ID,
+  OUTPUTS_HANDLE_ID,
+} from "@/components/graph-common";
 import { Cell } from "@/components/editor/notebook-cell";
 import type { AppConfig, UserConfig } from "@/core/config/config-schema";
 import type { AppMode } from "@/core/mode";
@@ -18,7 +22,7 @@ import {
 import { displayCellName } from "@/core/cells/names";
 import { isOutputEmpty } from "@/core/cells/outputs";
 import { connectionAtom } from "@/core/network/connection";
-import { cellFocusAtom, useCellFocusActions } from "@/core/cells/focus";
+import { useCellFocusActions } from "@/core/cells/focus";
 import { RunButton } from "@/components/editor/cell/RunButton";
 import { StopButton } from "@/components/editor/cell/StopButton";
 import { CellActionsDropdown } from "@/components/editor/cell/cell-actions";
@@ -78,7 +82,6 @@ const CellFlowNodeInner: React.FC<NodeProps<CellFlowNodeData>> = ({ data }) => {
   const runCell = useRunCell(cellId);
   const deleteCell = useDeleteCellCallback();
   const connection = useAtomValue(connectionAtom);
-  const focusedCellId = useAtomValue(cellFocusAtom).focusedCellId;
   const { focusCell } = useCellFocusActions();
 
   const disabledOrAncestorDisabled =
@@ -98,19 +101,26 @@ const CellFlowNodeInner: React.FC<NodeProps<CellFlowNodeData>> = ({ data }) => {
   }, [cellId, focusCell]);
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-    <div
-      className={cn(
-        "cell-3d-wrapper floating-window",
-        isMarkdown && "markdown-cell",
-      )}
-      onMouseDown={handleMouseDown}
-    >
-      {/* タイトルバー — dragHandle=".window-titlebar" で RF がドラッグ処理 */}
+    <>
+      <Handle
+        type="target"
+        id={INPUTS_HANDLE_ID}
+        position={Position.Top}
+        isConnectable={false}
+      />
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
       <div
-        className="window-titlebar"
-        style={{ cursor: "grab", pointerEvents: "all" }}
+        className={cn(
+          "cell-3d-wrapper floating-window",
+          isMarkdown && "markdown-cell",
+        )}
+        onMouseDown={handleMouseDown}
       >
+        {/* タイトルバー — dragHandle=".window-titlebar" で RF がドラッグ処理 */}
+        <div
+          className="window-titlebar"
+          style={{ cursor: "grab", pointerEvents: "all" }}
+        >
         <div className="titlebar-left">
           <span className="window-title">{cellName}</span>
         </div>
@@ -181,6 +191,13 @@ const CellFlowNodeInner: React.FC<NodeProps<CellFlowNodeData>> = ({ data }) => {
         />
       </section>
     </div>
+      <Handle
+        type="source"
+        id={OUTPUTS_HANDLE_ID}
+        position={Position.Bottom}
+        isConnectable={false}
+      />
+    </>
   );
 };
 

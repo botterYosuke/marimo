@@ -3,11 +3,13 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import ReactFlow, {
-  applyNodeChanges,
-  useReactFlow,
+  type Edge,
+  MarkerType,
   type Node,
   type NodeChange,
   type Viewport,
+  applyNodeChanges,
+  useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import type { SceneManager } from "@/core/three/scene-manager";
@@ -24,6 +26,11 @@ import { cell3DViewAtom } from "@/core/three/cell-3d-view";
 import { reactFlowViewportToCamera } from "@/core/three/viewport-sync";
 import { CellFlowNode, type CellFlowNodeData } from "./cell-flow-node";
 import { cellFocusAtom, useCellFocusActions } from "@/core/cells/focus";
+import { variablesAtom } from "@/core/variables/state";
+import {
+  INPUTS_HANDLE_ID,
+  OUTPUTS_HANDLE_ID,
+} from "@/components/graph-common";
 import { SortableCellsProvider } from "@/components/sort/SortableCellsProvider";
 
 // React Flow カスタムノードタイプ
@@ -117,6 +124,89 @@ const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
   }, [cellIds]);
 
   const hasOnlyOneCell = cellIds.hasOnlyOneId();
+
+  // 依存関係エッジを variables から生成
+  const variables = useAtomValue(variablesAtom);
+  const edges = useMemo<Edge[]>(() => {
+    const result: Edge[] = [];
+    const visited = new Set<string>();
+    const cellIdSet = new Set(allCellIds);
+
+    for (const variable of Object.values(variables)) {
+      if (variable.value === "marimo" && variable.name === "mo") {
+        continue;
+      }
+      if (variable.dataType === "module") {
+        continue;
+      }
+
+      const { declaredBy, usedBy } = variable;
+      for (const fromId of declaredBy) {
+        for (const toId of usedBy) {
+          if (fromId === toId) {
+            continue;
+          }
+          if (!cellIdSet.has(fromId)) {
+            continue;
+          }
+          if (!cellIdSet.has(toId)) {
+            continue;
+          }
+
+          const key = `${fromId}-${toId}`;
+          if (visited.has(key)) {
+            continue;
+          }
+          visited.add(key);
+
+          result.push({
+            id: key,
+            source: fromId,
+            target: toId,
+            sourceHandle: OUTPUTS_HANDLE_ID,
+            targetHandle: INPUTS_HANDLE_ID,
+            type: "default",
+            animated: true,
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 16,
+              height: 16,
+            },
+            style: {
+              strokeWidth: 1.5,
+              stroke: "var(--gray-8, #888)",
+              opacity: 0.5,
+            },
+          });
+        }
+      }
+    }
+
+    return result;
+  }, [variables, allCellIds]);
+
+  // フォーカス中のセルに接続されたエッジをハイライト
+  const styledEdges = useMemo(() => {
+    if (!focusedCellId) {
+      return edges;
+    }
+    return edges.map((edge) => {
+      const isConnected =
+        edge.source === focusedCellId || edge.target === focusedCellId;
+      if (!isConnected) {
+        return edge;
+      }
+      return {
+        ...edge,
+        style: {
+          ...edge.style,
+          opacity: 0.9,
+          stroke: "var(--accent-color, #3b82f6)",
+          strokeWidth: 2.5,
+        },
+      };
+    });
+  }, [edges, focusedCellId]);
 
   // RF ノード state
   const [nodes, setNodes] = useState<Node<CellFlowNodeData>[]>([]);
@@ -321,6 +411,7 @@ const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
       <div style={{ position: "absolute", inset: 0, zIndex: 20 }}>
         <ReactFlow
           nodes={nodes}
+          edges={styledEdges}
           nodeTypes={nodeTypes}
           onNodesChange={handleNodesChange}
           onMove={handleViewportMove}
@@ -335,6 +426,8 @@ const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
           nodesConnectable={false}
           nodesDraggable={true}
           elementsSelectable={true}
+          edgesFocusable={false}
+          edgesUpdatable={false}
           style={{ width: "100%", height: "100%" }}
         />
       </div>
