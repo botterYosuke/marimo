@@ -68,10 +68,7 @@ export const Grid3DRenderer: React.FC<Grid3DRendererProps> = ({
 
     // 既にアタッチされている場合はスキップ
     if (!css2DService.getCSS2DObject()) {
-      css2DService.attachContainerToScene(
-        scene,
-        new THREE.Vector3(0, 0, 0),
-      );
+      css2DService.attachContainerToScene(scene, new THREE.Vector3(0, 0, 0));
     }
   }, [gridContainer, sceneManager, css2DService]);
 

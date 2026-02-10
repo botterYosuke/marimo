@@ -5,6 +5,7 @@ import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import { ReactFlowProvider } from "reactflow";
 // import { NotStartedConnectionAlert } from "@/components/editor/alerts/connecting-alert";
 import { Controls } from "@/components/editor/controls/Controls";
 import { AppHeader } from "@/components/editor/header/app-header";
@@ -50,9 +51,9 @@ import { useFilename } from "./saving/filename";
 import { lastSavedNotebookAtom } from "./saving/state";
 import { useJotaiEffect } from "./state/jotai";
 import { GridCSS2DService } from "./three/grid-css2d-service";
-import { CellCSS2DService } from "./three/cell-css2d-service";
 import { SceneManager } from "./three/scene-manager";
 import { cell3DViewAtom } from "./three/cell-3d-view";
+import { cameraToReactFlowViewport } from "./three/viewport-sync";
 import { useMarimoKernelConnection } from "./websocket/useMarimoKernelConnection";
 import type { GridLayout } from "../components/editor/renderers/grid-layout/types";
 
@@ -105,12 +106,10 @@ export const EditApp: React.FC<AppProps> = ({
   const threeDContainerRef = useRef<HTMLDivElement>(null);
   const sceneManagerRef = useRef<SceneManager | null>(null);
   const css2DServiceRef = useRef<GridCSS2DService | null>(null);
-  const cellCSS2DServiceRef = useRef<CellCSS2DService | null>(null);
   const [is3DInitialized, setIs3DInitialized] = useState(false);
   const [containerReady, setContainerReady] = useState(false);
   const containerReadyRef = useRef(false);
   const cell3DView = useAtomValue(cell3DViewAtom);
-  const setCell3DView = useSetAtom(cell3DViewAtom);
   const hasRestoredViewRef = useRef(false);
 
   // GridLayoutRenderer用のsetLayoutラッパー
@@ -152,10 +151,6 @@ export const EditApp: React.FC<AppProps> = ({
   useEffect(() => {
     if (!is3DMode) {
       // 3Dモードが無効な場合はクリーンアップ
-      if (cellCSS2DServiceRef.current) {
-        cellCSS2DServiceRef.current.dispose();
-        cellCSS2DServiceRef.current = null;
-      }
       if (css2DServiceRef.current) {
         css2DServiceRef.current.dispose();
         css2DServiceRef.current = null;
@@ -174,16 +169,13 @@ export const EditApp: React.FC<AppProps> = ({
       return;
     }
 
-    // 初期化順序を明確化:
-    // 1. SceneManagerのインスタンス作成
-    // 2. GridCSS2DServiceのインスタンス作成
-    // 3. CellCSS2DServiceのインスタンス作成
-    // 4. SceneManager.initialize()を呼び出し（サービス参照を渡す、CSS2DRendererを作成）
-    // 5. SceneManagerからCSS2DRendererを取得
-    // 6. GridCSS2DService.initializeRenderer()を呼び出し（CSS2DRendererを渡す）
-    // 7. CellCSS2DService.initializeRenderer()を呼び出し（同じCSS2DRendererを渡す）
-    // 8. シーンにコンテナをアタッチ
-    // 注意: CSS2DレンダリングはSceneManagerのアニメーションループ内で直接実行される
+    // 初期化順序:
+    // 1. SceneManager 作成
+    // 2. GridCSS2DService 作成
+    // 3. SceneManager.initialize() (gridCSS2DService を渡す)
+    // 4. CSS2DRenderer 取得 → GridCSS2DService.initializeRenderer()
+    // 5. Grid コンテナをシーンにアタッチ
+    // セルは React Flow が管理（CellCSS2DService 不要）
 
     if (!sceneManagerRef.current) {
       sceneManagerRef.current = new SceneManager();
@@ -191,23 +183,15 @@ export const EditApp: React.FC<AppProps> = ({
     if (!css2DServiceRef.current) {
       css2DServiceRef.current = new GridCSS2DService();
     }
-    if (!cellCSS2DServiceRef.current) {
-      cellCSS2DServiceRef.current = new CellCSS2DService();
-    }
 
     const container = threeDContainerRef.current;
     const sceneManager = sceneManagerRef.current;
     const css2DService = css2DServiceRef.current;
-    const cellCSS2DService = cellCSS2DServiceRef.current;
 
-    // SceneManager.initialize()を呼び出し（サービス参照を渡す、CSS2DRendererを作成）
-    sceneManager.initialize(
-      container,
-      css2DService,
-      cellCSS2DService,
-    );
+    // SceneManager.initialize() (gridCSS2DService のみ渡す)
+    sceneManager.initialize(container, css2DService);
 
-    // SceneManagerからCSS2DRendererを取得
+    // CSS2DRenderer 取得
     const css2DRenderer = sceneManager.getCSS2DRenderer();
     if (!css2DRenderer) {
       console.error("Failed to get CSS2DRenderer from SceneManager");
@@ -219,12 +203,11 @@ export const EditApp: React.FC<AppProps> = ({
       return;
     }
 
-    // GridCSS2DService.initializeRenderer()を呼び出し（CSS2DRendererを渡す）
+    // GridCSS2DService 初期化
     try {
       css2DService.initializeRenderer(css2DRenderer);
     } catch (error) {
       console.error("Failed to initialize GridCSS2DService:", error);
-      // エラー時はロールバック（既存のインスタンスをクリーンアップ）
       if (css2DServiceRef.current) {
         css2DServiceRef.current.dispose();
         css2DServiceRef.current = null;
@@ -237,137 +220,62 @@ export const EditApp: React.FC<AppProps> = ({
       return;
     }
 
-    // CellCSS2DService.initializeRenderer()を呼び出し（同じCSS2DRendererを渡す）
-    try {
-      cellCSS2DService.initializeRenderer(css2DRenderer);
-    } catch (error) {
-      console.error("Failed to initialize CellCSS2DService:", error);
-      // エラー時はロールバック（CellCSS2DService、GridCSS2DService、SceneManagerをクリーンアップ）
-      if (cellCSS2DServiceRef.current) {
-        cellCSS2DServiceRef.current.dispose();
-        cellCSS2DServiceRef.current = null;
-      }
-      if (css2DServiceRef.current) {
-        css2DServiceRef.current.dispose();
-        css2DServiceRef.current = null;
-      }
-      if (sceneManagerRef.current) {
-        sceneManagerRef.current.dispose();
-        sceneManagerRef.current = null;
-      }
-      setIs3DInitialized(false);
-      return;
-    }
-
-    // シーンにコンテナをアタッチ（GridCSS2DServiceとCellCSS2DService）
+    // Grid コンテナをシーンにアタッチ
     const scene = sceneManager.getScene();
     if (scene) {
-      // GridCSS2DServiceのコンテナをシーンにアタッチ
       if (css2DServiceRef.current && !css2DServiceRef.current.getCSS2DObject()) {
         css2DServiceRef.current.attachContainerToScene(
           scene,
           new THREE.Vector3(0, 0, 0),
         );
       }
-      // CellCSS2DServiceのコンテナをシーンにアタッチ
-      if (cellCSS2DServiceRef.current && !cellCSS2DServiceRef.current.getCSS2DObject()) {
-        cellCSS2DServiceRef.current.attachCellContainerToScene(
-          scene,
-          new THREE.Vector3(0, 600, 0),
-        );
-      }
     }
 
-    // リサイズハンドラー: SceneManagerは内部でWebGLRendererとカメラのリサイズを処理（80-97行目）
-    // SceneManagerのリサイズハンドラーはprivateなので、外部から制御できない
-    // そのため、edit-app.tsxで別のリサイズハンドラーを追加する実装で動作する
-    // 同じresizeイベントで処理することで効率的
-    // 注意: SceneManagerのリサイズハンドラーと重複しないよう注意
-    // 両方のCSS2DRendererのリサイズを確実に実行する
+    // リサイズハンドラー
     const handleResize = () => {
-      // refから直接参照することで、常に最新の値を取得
-      const currentContainer = threeDContainerRef.current;
       const currentSceneManager = sceneManagerRef.current;
-      const currentCss2DService = css2DServiceRef.current;
-      const currentCellCSS2DService = cellCSS2DServiceRef.current;
-
-      if (!currentContainer || !currentSceneManager || !currentCss2DService || !currentCellCSS2DService) {
+      if (!currentSceneManager) {
         return;
       }
-      // SceneManagerが内部でカメラ、WebGLRenderer、CSS2DRendererのリサイズを処理
-      // シーンを再レンダリング
-      const scene = currentSceneManager.getScene();
-      if (scene) {
-        currentSceneManager.markNeedsRender();
-      }
+      currentSceneManager.markNeedsRender();
     };
     window.addEventListener("resize", handleResize);
 
     setIs3DInitialized(true);
 
-    // OrbitControlsのendイベントで視点情報を保存
-    const controls = sceneManager.getControls();
-    let handleEnd: (() => void) | undefined;
-    if (controls) {
-      const camera = sceneManager.getCamera();
-      handleEnd = () => {
-        if (camera && controls) {
-          setCell3DView({
-            position: {
-              x: camera.position.x,
-              y: camera.position.y,
-              z: camera.position.z,
-            },
-            target: {
-              x: controls.target.x,
-              y: controls.target.y,
-              z: controls.target.z,
-            },
-          });
-        }
-      };
-      controls.addEventListener("end", handleEnd);
-    }
+    // カメラビュー保存は Cell3DRenderer の onMove で行う（OrbitControls 不要）
 
     return () => {
-      // OrbitControlsのendイベントリスナーを削除
-      if (handleEnd && sceneManagerRef.current) {
-        const currentControls = sceneManagerRef.current.getControls();
-        if (currentControls) {
-          currentControls.removeEventListener("end", handleEnd);
-        }
-      }
-
-      // リサイズハンドラーを削除（確実に削除する必要がある）
       window.removeEventListener("resize", handleResize);
 
-      // クリーンアップ順序: 初期化の逆順で実行
-      // 1. CellCSS2DServiceのクリーンアップ（最後に初期化したものから）
-      if (cellCSS2DServiceRef.current) {
-        cellCSS2DServiceRef.current.dispose();
-        cellCSS2DServiceRef.current = null;
-      }
-
-      // 2. GridCSS2DServiceのクリーンアップ
+      // クリーンアップ順序: 初期化の逆順
       if (css2DServiceRef.current) {
         css2DServiceRef.current.dispose();
         css2DServiceRef.current = null;
       }
-
-      // 3. SceneManagerのクリーンアップ（最初に初期化したものから）
       if (sceneManagerRef.current) {
         sceneManagerRef.current.dispose();
         sceneManagerRef.current = null;
       }
 
-      // 状態をリセット
       setIs3DInitialized(false);
       setContainerReady(false);
       hasRestoredViewRef.current = false;
     };
-  }, [is3DMode, containerReady, setCell3DView]);
+  }, [is3DMode, containerReady]);
 
-  // 視点情報の復元（初回のみ）
+  // 初期 React Flow viewport を保存されたカメラ位置から計算
+  // 保存されたカメラ位置（またはデフォルト位置）から初期 RF viewport を計算
+  // cell3DView が null の場合もデフォルトカメラ位置 (0,1200,0) から算出し、
+  // RF zoom=1 との不一致によるグリッド・セル間のズレを防ぐ
+  const initialViewport = useMemo(() => {
+    const screenW = threeDContainerRef.current?.clientWidth ?? 800;
+    const screenH = threeDContainerRef.current?.clientHeight ?? 600;
+    const pos = cell3DView?.position ?? { x: 0, y: 1200, z: 0 };
+    return cameraToReactFlowViewport(pos, screenW, screenH, 60);
+  }, [cell3DView]);
+
+  // 視点情報の復元（初回のみ）— カメラ位置を Three.js に適用
   useEffect(() => {
     if (!is3DInitialized || !sceneManagerRef.current || hasRestoredViewRef.current) {
       return;
@@ -390,7 +298,6 @@ export const EditApp: React.FC<AppProps> = ({
         );
         hasRestoredViewRef.current = true;
       } catch (error) {
-        // エラーが発生した場合も、エラーを投げずに処理を続行
         console.warn("Failed to restore camera view:", error);
       }
     }
@@ -556,9 +463,9 @@ export const EditApp: React.FC<AppProps> = ({
                 }
               }}
               className="w-full h-full relative"
-              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 1 }}
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 1, pointerEvents: "none" }}
             />
-            {is3DInitialized && hasCells && sceneManagerRef.current && css2DServiceRef.current && cellCSS2DServiceRef.current ? (
+            {is3DInitialized && hasCells && sceneManagerRef.current && css2DServiceRef.current ? (
               <>
                 <Grid3DRenderer
                   mode={viewState.mode}
@@ -569,13 +476,15 @@ export const EditApp: React.FC<AppProps> = ({
                   setLayout={setGridLayout}
                   cells={cells}
                 />
-                <Cell3DRenderer
-                  mode={viewState.mode}
-                  userConfig={userConfig}
-                  appConfig={appConfig}
-                  sceneManager={sceneManagerRef.current}
-                  css2DService={cellCSS2DServiceRef.current}
-                />
+                <ReactFlowProvider>
+                  <Cell3DRenderer
+                    mode={viewState.mode}
+                    userConfig={userConfig}
+                    appConfig={appConfig}
+                    sceneManager={sceneManagerRef.current}
+                    initialViewport={initialViewport}
+                  />
+                </ReactFlowProvider>
               </>
             ) : null}
           </>

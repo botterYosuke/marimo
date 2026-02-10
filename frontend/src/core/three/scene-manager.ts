@@ -1,7 +1,6 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import type { GridCSS2DService } from "./grid-css2d-service";
 import type { CellCSS2DService } from "./cell-css2d-service";
@@ -11,19 +10,22 @@ import { MoneyMissileEffect } from "./money-missile-effect";
 /**
  * SceneManager
  *
- * Three.jsシーン、カメラ、OrbitControlsの管理を担当
+ * Three.jsシーン、カメラの管理を担当。
+ * パン/ズーム/ドラッグは React Flow が処理し、カメラは RF viewport に追従する。
+ *
+ * INVARIANT: カメラは常に Y 軸正方向から XZ 平面を真下に見下ろす（回転なし）。
+ * この前提が崩れると React Flow のアフィン変換と透視投影の等価性が失われる。
  */
 export class SceneManager {
   private renderer?: THREE.WebGLRenderer;
   private css2DRenderer?: CSS2DRenderer;
   private scene?: THREE.Scene;
   private camera?: THREE.PerspectiveCamera;
-  private controls?: OrbitControls;
   private animationId?: number;
   private resizeHandler?: () => void;
   private hostElement?: HTMLDivElement;
   private needsRender = true;
-  private needsCSS2DRender = true; // CSS2Dレンダリング専用フラグ
+  private needsCSS2DRender = true;
   private readonly MIN_FRAME_INTERVAL = 16; // 約60FPS
   private lastRenderTime = 0;
   private gridCSS2DService?: GridCSS2DService;
@@ -40,18 +42,15 @@ export class SceneManager {
    *
    * @param hostElement レンダラーを配置する親要素
    * @param gridCSS2DService GridCSS2DServiceの参照（オプショナル）
-   * @param cellCSS2DService CellCSS2DServiceの参照（オプショナル）
    */
   initialize(
     hostElement: HTMLDivElement,
     gridCSS2DService?: GridCSS2DService,
-    cellCSS2DService?: CellCSS2DService,
   ): void {
     this.dispose();
 
     // サービス参照を保存
     this.gridCSS2DService = gridCSS2DService;
-    this.cellCSS2DService = cellCSS2DService;
 
     this.hostElement = hostElement;
     const width = hostElement.clientWidth;
@@ -70,7 +69,6 @@ export class SceneManager {
     // CSS2DRendererの作成（WebGLRendererの前に作成）
     this.css2DRenderer = new CSS2DRenderer();
     // zOrder関数を無効化（z-indexの自動設定を停止）
-    // sortObjectsプロパティはThree.jsのバージョンによって存在しない場合がある
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.css2DRenderer as any).sortObjects = false;
     this.css2DRenderer.setSize(width, height);
@@ -79,8 +77,6 @@ export class SceneManager {
     css2DRendererElement.style.top = "0";
     css2DRendererElement.style.left = "0";
     css2DRendererElement.style.pointerEvents = "none";
-    // z-indexは個々のCSS2DObjectのelementで制御（zOrder関数は無効化済み）
-    // Grid CSS2DObject: z-index: 5, Cell CSS2DObject: z-index: 20
 
     // レンダラーの作成
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -89,34 +85,12 @@ export class SceneManager {
     this.renderer.domElement.style.position = "absolute";
     this.renderer.domElement.style.top = "0";
     this.renderer.domElement.style.left = "0";
-    // z-index: 10 - 3D物体をgrid（z-index: 5）とcell（z-index: 20）の間に配置するため
+    // z-index: 10 - 3D物体をgrid（z-index: 5）とReact Flowセル（z-index: 20）の間に配置
     this.renderer.domElement.style.zIndex = "10";
 
     // CSS2DRendererのDOM要素をWebGL Canvasの前に配置
     hostElement.appendChild(this.css2DRenderer.domElement);
     hostElement.appendChild(this.renderer.domElement);
-
-    // OrbitControlsの作成
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = false;
-    this.controls.enableRotate = false;
-    // 左クリックにも pan を割り当て
-    this.controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
-    // ズーム制限を設定
-    this.controls.minDistance = 100;
-    this.controls.maxDistance = this.camera.far * 0.9;
-    // パン制限を設定
-    this.controls.enablePan = true;
-
-    // カメラ操作時のイベントリスナー（CSS2D最適化）
-    this.controls.addEventListener("change", () => {
-      this.needsRender = true;
-      this.needsCSS2DRender = true;
-    });
-
-    // 初期カメラ位置を記録
-    this.lastCameraPosition.copy(this.camera.position);
-    this.lastCameraTarget.copy(this.controls.target);
 
     // ライトの追加
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -128,11 +102,7 @@ export class SceneManager {
 
     // リサイズハンドラーの設定
     this.resizeHandler = () => {
-      if (
-        !this.camera ||
-        !this.renderer ||
-        !this.hostElement
-      ) {
+      if (!this.camera || !this.renderer || !this.hostElement) {
         return;
       }
       const { clientWidth, clientHeight } = this.hostElement;
@@ -253,6 +223,7 @@ export class SceneManager {
         }
       }
 
+
       // WebGLレンダリング（3Dモデル、z-index: 10）
       if (this.needsRender) {
         this.renderer.render(this.scene, this.camera);
@@ -260,24 +231,12 @@ export class SceneManager {
       }
 
       // CSS2Dレンダリング（カメラ移動時のみ実行 - パフォーマンス最適化）
-      // Plotly等の重いDOM要素を含むため、不要な更新を避ける
       if (this.needsCSS2DRender && this.css2DRenderer && this.scene && this.camera) {
         this.css2DRenderer.render(this.scene, this.camera);
 
-        // 各サービスのスケール更新（レンダリング後）
-        // CSS2DRenderer.render()が全CSS2DObjectのtransformを再計算・上書きするため、
-        // 各コンテナのscale()を再適用する必要がある
+        // GridCSS2DServiceのスケール更新（レンダリング後）
         if (this.gridCSS2DService) {
           this.gridCSS2DService.forceUpdateContainerScale(this.camera);
-        }
-        if (this.cellCSS2DService) {
-          this.cellCSS2DService.forceUpdateCellContainerScale(this.camera);
-        }
-
-        // カメラ位置を記録
-        this.lastCameraPosition.copy(this.camera.position);
-        if (this.controls) {
-          this.lastCameraTarget.copy(this.controls.target);
         }
 
         this.needsCSS2DRender = false;
@@ -309,13 +268,6 @@ export class SceneManager {
   }
 
   /**
-   * OrbitControlsを取得します
-   */
-  getControls(): OrbitControls | undefined {
-    return this.controls;
-  }
-
-  /**
    * CSS2DRendererを取得します
    */
   getCSS2DRenderer(): CSS2DRenderer | undefined {
@@ -323,20 +275,27 @@ export class SceneManager {
   }
 
   /**
-   * カメラの視点を設定します
-   *
-   * @param position カメラの位置
-   * @param target OrbitControlsのtarget（カメラが向いている方向）
+   * React Flow viewport からカメラ位置を設定します。
+   * onMove コールバックから呼び出される。
    */
-  setCameraView(position: THREE.Vector3, target: THREE.Vector3): void {
-    if (!this.camera || !this.controls) {
+  setCameraFromViewport(position: THREE.Vector3, target: THREE.Vector3): void {
+    if (!this.camera) {
       return;
     }
-
     this.camera.position.copy(position);
-    this.controls.target.copy(target);
-    this.controls.update();
-    this.markNeedsRender();
+    this.camera.lookAt(target.x, target.y, target.z);
+    this.camera.updateProjectionMatrix();
+    this.markNeedsRender(true);
+  }
+
+  /**
+   * カメラの視点を設定します（初期復元用）
+   *
+   * @param position カメラの位置
+   * @param target カメラが向いている方向
+   */
+  setCameraView(position: THREE.Vector3, target: THREE.Vector3): void {
+    this.setCameraFromViewport(position, target);
   }
 
   /**
@@ -369,11 +328,6 @@ export class SceneManager {
     if (this.resizeHandler) {
       window.removeEventListener("resize", this.resizeHandler);
       this.resizeHandler = undefined;
-    }
-
-    if (this.controls) {
-      this.controls.dispose();
-      this.controls = undefined;
     }
 
     if (this.css2DRenderer) {
@@ -438,9 +392,6 @@ export class SceneManager {
     this.needsRender = true;
     this.needsCSS2DRender = true;
     this.lastRenderTime = 0;
-    this.lastCameraPosition = new THREE.Vector3();
-    this.lastCameraTarget = new THREE.Vector3();
     this.gridCSS2DService = undefined;
-    this.cellCSS2DService = undefined;
   }
 }

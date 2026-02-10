@@ -1,16 +1,18 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { memo, useCallback } from "react";
 import { useAtomValue } from "jotai";
 import { MoreHorizontalIcon, XIcon } from "lucide-react";
+import { Handle, Position, type NodeProps } from "reactflow";
+import {
+  INPUTS_HANDLE_ID,
+  OUTPUTS_HANDLE_ID,
+} from "@/components/graph-common";
 import { Cell } from "@/components/editor/notebook-cell";
 import type { AppConfig, UserConfig } from "@/core/config/config-schema";
 import type { AppMode } from "@/core/mode";
 import type { CellId } from "@/core/cells/ids";
 import type { Theme } from "@/theme/useTheme";
-import type { CellCSS2DService } from "@/core/three/cell-css2d-service";
-import type { CellDragManager } from "@/core/three/cell-drag-manager";
-import * as THREE from "three";
 import {
   useCellData,
   useCellIds,
@@ -20,7 +22,7 @@ import {
 import { displayCellName } from "@/core/cells/names";
 import { isOutputEmpty } from "@/core/cells/outputs";
 import { connectionAtom } from "@/core/network/connection";
-import { cellFocusAtom, useCellFocusActions } from "@/core/cells/focus";
+import { useCellFocusActions } from "@/core/cells/focus";
 import { RunButton } from "@/components/editor/cell/RunButton";
 import { StopButton } from "@/components/editor/cell/StopButton";
 import { CellActionsDropdown } from "@/components/editor/cell/cell-actions";
@@ -33,63 +35,55 @@ import { cn } from "@/utils/cn";
 import { isMarkdownCell } from "@/core/codemirror/language/languages/markdown";
 import "./cell-3d-wrapper.css";
 
-interface Cell3DWrapperProps {
+/**
+ * React Flow カスタムノードに渡されるデータ
+ */
+export interface CellFlowNodeData {
   cellId: CellId;
   mode: AppMode;
   userConfig: UserConfig;
   appConfig: AppConfig;
   theme: Theme;
-  dragManager: CellDragManager;
-  css2DService: CellCSS2DService;
   showPlaceholder: boolean;
   canDelete: boolean;
   isCollapsed: boolean;
   collapseCount: number;
   canMoveX: boolean;
-  onCellElementReady?: (cellId: CellId, element: HTMLElement) => void;
 }
 
 /**
- * Cell3DWrapper
+ * CellFlowNode
  *
- * セルをタイトルバー付きでラップするコンポーネント
- * - タイトルバーの表示（セル名またはID）
- * - ドラッグハンドルの実装
- * - セルコンテンツの表示
+ * React Flow カスタムノードとしてセルを表示する。
+ * Cell3DWrapper の UI を再実装し、ドラッグは React Flow がネイティブに処理する。
+ * タイトルバーが dragHandle として機能する。
  */
-export const Cell3DWrapper: React.FC<Cell3DWrapperProps> = ({
-  cellId,
-  mode,
-  userConfig,
-  appConfig: _appConfig, // 将来の拡張用に保持
-  theme,
-  dragManager,
-  css2DService,
-  showPlaceholder,
-  canDelete,
-  isCollapsed,
-  collapseCount,
-  canMoveX,
-  onCellElementReady,
-}) => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
+const CellFlowNodeInner: React.FC<NodeProps<CellFlowNodeData>> = ({ data }) => {
+  const {
+    cellId,
+    mode,
+    userConfig,
+    theme,
+    showPlaceholder,
+    canDelete,
+    isCollapsed,
+    collapseCount,
+    canMoveX,
+  } = data;
+
   const cellData = useCellData(cellId);
   const isMarkdown = cellData?.code ? isMarkdownCell(cellData.code) : false;
   const cellIds = useCellIds();
   const cellIndex = cellIds.inOrderIds.indexOf(cellId);
   const cellName = displayCellName(cellData?.name ?? "_", cellIndex);
-  const [isDragging, setIsDragging] = useState(false);
 
-  // Hooks for cell runtime and actions
   const cellRuntime = useCellRuntime(cellId);
   const cellHandle = useCellHandle(cellId);
   const runCell = useRunCell(cellId);
   const deleteCell = useDeleteCellCallback();
   const connection = useAtomValue(connectionAtom);
-  const focusedCellId = useAtomValue(cellFocusAtom).focusedCellId;
   const { focusCell } = useCellFocusActions();
 
-  // Calculate values for buttons
   const disabledOrAncestorDisabled =
     cellData?.config.disabled || cellRuntime.status === "disabled-transitively";
   const needsRun =
@@ -102,103 +96,31 @@ export const Cell3DWrapper: React.FC<Cell3DWrapperProps> = ({
     return cellHandle.current?.editorView ?? null;
   }, [cellHandle]);
 
-  // タイトルバーのドラッグ開始処理
-  const handleTitleBarMouseDown = useCallback((event: React.MouseEvent) => {
-    const target = event.target as HTMLElement;
-    // ボタンがクリックされた場合はドラッグを開始しない
-    if (target.tagName === "BUTTON" || target.closest(".titlebar-btn")) {
-      return;
-    }
-
-    // フォーカスを設定（最前面に表示）
+  const handleMouseDown = useCallback(() => {
     focusCell({ cellId });
-
-    // セル要素のCSSスタイルから現在位置を取得
-    const wrapperElement = wrapperRef.current;
-    if (wrapperElement) {
-      const left = parseFloat(wrapperElement.style.left) || 0;
-      const top = parseFloat(wrapperElement.style.top) || 0;
-      // CSS座標を3D座標に変換（コンテナ位置を基準に）
-      const containerPosition =
-        css2DService.getContainerPosition() || new THREE.Vector3(0, 600, 0);
-      const currentPosition = new THREE.Vector3(
-        containerPosition.x + left,
-        containerPosition.y,
-        containerPosition.z + top,
-      );
-      const scale = css2DService.getCurrentScale();
-      dragManager.startDrag(event.nativeEvent, cellId, currentPosition, scale);
-      setIsDragging(true);
-    }
-  }, [cellId, css2DService, dragManager, focusCell]);
-
-  // ドラッグ終了を監視
-  useEffect(() => {
-    if (!isDragging) {
-      return;
-    }
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    document.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isDragging]);
-
-  // ラッパー要素が準備できたらコールバックを呼び出す
-  useEffect(() => {
-    if (wrapperRef.current && onCellElementReady) {
-      // wrapperElement全体を渡す（cell-3d-wrapper要素）
-      onCellElementReady(cellId, wrapperRef.current);
-
-      // タイトルバーにネイティブイベントリスナーを直接追加（Reactイベントが発火しない場合のフォールバック）
-      const titlebar = wrapperRef.current?.querySelector('.window-titlebar');
-      if (titlebar) {
-        const nativeMouseDownHandler = (e: Event) => {
-          // Reactイベントハンドラーを手動で呼び出す
-          const mouseEvent = e as MouseEvent;
-          const syntheticEvent = {
-            ...mouseEvent,
-            nativeEvent: mouseEvent,
-            currentTarget: titlebar,
-            target: mouseEvent.target,
-            preventDefault: () => mouseEvent.preventDefault(),
-            stopPropagation: () => mouseEvent.stopPropagation(),
-          } as unknown as React.MouseEvent;
-          handleTitleBarMouseDown(syntheticEvent);
-        };
-        titlebar.addEventListener('mousedown', nativeMouseDownHandler);
-        return () => {
-          titlebar.removeEventListener('mousedown', nativeMouseDownHandler);
-        };
-      }
-    }
-  }, [cellId, onCellElementReady, handleTitleBarMouseDown]);
+  }, [cellId, focusCell]);
 
   return (
-    <div
-      ref={wrapperRef}
-      className={cn(
-        "cell-3d-wrapper floating-window",
-        isDragging && "dragging",
-        isMarkdown && "markdown-cell"
-      )}
-      data-cell-wrapper-id={cellId}
-      style={{
-        pointerEvents: "all",
-        zIndex: focusedCellId === cellId ? 1000 : 20,
-      }}
-    >
-      {/* タイトルバー */}
+    <>
+      <Handle
+        type="target"
+        id={INPUTS_HANDLE_ID}
+        position={Position.Top}
+        isConnectable={false}
+      />
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
       <div
-        className="window-titlebar"
-        onMouseDown={handleTitleBarMouseDown}
-        style={{ cursor: "grab", pointerEvents: "all" }}
+        className={cn(
+          "cell-3d-wrapper floating-window",
+          isMarkdown && "markdown-cell",
+        )}
+        onMouseDown={handleMouseDown}
       >
+        {/* タイトルバー — dragHandle=".window-titlebar" で RF がドラッグ処理 */}
+        <div
+          className="window-titlebar"
+          style={{ cursor: "grab", pointerEvents: "all" }}
+        >
         <div className="titlebar-left">
           <span className="window-title">{cellName}</span>
         </div>
@@ -250,7 +172,10 @@ export const Cell3DWrapper: React.FC<Cell3DWrapperProps> = ({
         aria-label="Cell content"
         role="region"
         onMouseDown={(e) => {
+          // セルコンテンツ内のクリックがRFドラッグをトリガーしないようにする
           e.stopPropagation();
+          // stopPropagation で親の handleMouseDown に届かないため、ここで focusCell を呼ぶ
+          focusCell({ cellId });
         }}
       >
         <Cell
@@ -266,5 +191,14 @@ export const Cell3DWrapper: React.FC<Cell3DWrapperProps> = ({
         />
       </section>
     </div>
+      <Handle
+        type="source"
+        id={OUTPUTS_HANDLE_ID}
+        position={Position.Bottom}
+        isConnectable={false}
+      />
+    </>
   );
 };
+
+export const CellFlowNode = memo(CellFlowNodeInner);
