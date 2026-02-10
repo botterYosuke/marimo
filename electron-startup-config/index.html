@@ -1218,10 +1218,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-backcastpro_cache_dir" class="md-nav__link">
+  <a href="#3-stockdata_cache_dir" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. BACKCASTPRO_CACHE_DIR 環境変数
+        3. STOCKDATA_CACHE_DIR 環境変数
       
     </span>
   </a>
@@ -1449,10 +1449,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-backcastpro_cache_dir" class="md-nav__link">
+  <a href="#3-stockdata_cache_dir" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. BACKCASTPRO_CACHE_DIR 環境変数
+        3. STOCKDATA_CACHE_DIR 環境変数
       
     </span>
   </a>
@@ -1598,7 +1598,7 @@
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">startupNotebook</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="3-backcastpro_cache_dir">3. BACKCASTPRO_CACHE_DIR 環境変数<a class="headerlink" href="#3-backcastpro_cache_dir" title="Permanent link">&para;</a></h3>
+<h3 id="3-stockdata_cache_dir">3. STOCKDATA_CACHE_DIR 環境変数<a class="headerlink" href="#3-stockdata_cache_dir" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1629,7 +1629,7 @@ getStartupNotebook() 呼び出し
 - backcast.py が無ければテンプレートからコピー
     ↓
 marimo server 起動
-- BACKCASTPRO_CACHE_DIR 環境変数設定
+- STOCKDATA_CACHE_DIR 環境変数設定
 - backcast.py を開く
     ↓
 BrowserWindow でフロントエンドを表示
@@ -1640,7 +1640,7 @@ BrowserWindow でフロントエンドを表示
 <p>開発モードでElectronを起動すると、marimoの左サイドバーがプロジェクトルートを表示していた。</p>
 <h3 id="_6">解決策<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <p>uvの <code>--directory</code> オプションを使用して、作業ディレクトリを変更。</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;start:server&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pnpm setup:notebook &amp;&amp; powershell -NoProfile -Command \&quot;$notebookDir = $env:APPDATA + &#39;\\marimo\\notebooks&#39;; $projectDir = (Get-Location).Path; $env:BACKCASTPRO_CACHE_DIR = $notebookDir; &amp; $env:USERPROFILE\\.local\\bin\\uv.exe run --directory $notebookDir --project $projectDir marimo edit --no-token --headless --port 2718 backcast.py\&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;start:server&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pnpm setup:notebook &amp;&amp; powershell -NoProfile -Command \&quot;$notebookDir = $env:APPDATA + &#39;\\marimo\\notebooks&#39;; $projectDir = (Get-Location).Path; $env:STOCKDATA_CACHE_DIR = $notebookDir; &amp; $env:USERPROFILE\\.local\\bin\\uv.exe run --directory $notebookDir --project $projectDir marimo edit --no-token --headless --port 2718 backcast.py\&quot;&quot;</span>
 </code></pre></div>
 <hr />
 <h2 id="_7">注意事項<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
