@@ -22,6 +22,11 @@
   background: transparent !important;
 }
 
+/* 下側ハンドル(source)の位置調整：エッジがウィンドウ底面近くから出るように */
+.cell-3d-flow .react-flow__node .react-flow__handle.source {
+  top: -16px !important;
+}
+
 .cell-3d-wrapper {
   background: var(--background, #ffffff);
   border: 1px solid var(--border, #e0e0e0);
@@ -133,6 +138,17 @@
   display: flex;
   overflow: hidden;
   position: relative;
+  /* 3Dモード: window-content内では通常のカーソルに戻す */
+  cursor: auto;
+  pointer-events: all;
+}
+
+/* 3Dモード: CodeMirrorエディタ領域ではテキストカーソルを表示 */
+.window-content .cm-editor,
+.window-content .cm-scroller,
+.window-content .cm-content {
+  cursor: text;
+  pointer-events: all;
 }
 
 /* テーマ反転: markdownセル以外のみ適用 */
