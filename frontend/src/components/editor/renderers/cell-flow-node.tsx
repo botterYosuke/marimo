@@ -4,10 +4,7 @@ import { memo, useCallback } from "react";
 import { useAtomValue } from "jotai";
 import { MoreHorizontalIcon, XIcon } from "lucide-react";
 import { Handle, Position, type NodeProps } from "reactflow";
-import {
-  INPUTS_HANDLE_ID,
-  OUTPUTS_HANDLE_ID,
-} from "@/components/graph-common";
+import { INPUTS_HANDLE_ID, OUTPUTS_HANDLE_ID } from "@/components/graph-common";
 import { Cell } from "@/components/editor/notebook-cell";
 import type { AppConfig, UserConfig } from "@/core/config/config-schema";
 import type { AppMode } from "@/core/mode";
@@ -114,6 +111,7 @@ const CellFlowNodeInner: React.FC<NodeProps<CellFlowNodeData>> = ({ data }) => {
           "cell-3d-wrapper floating-window",
           isMarkdown && "markdown-cell",
         )}
+        data-cell-wrapper-id={cellId}
         onMouseDown={handleMouseDown}
       >
         {/* タイトルバー — dragHandle=".window-titlebar" で RF がドラッグ処理 */}
@@ -121,76 +119,77 @@ const CellFlowNodeInner: React.FC<NodeProps<CellFlowNodeData>> = ({ data }) => {
           className="window-titlebar"
           style={{ cursor: "grab", pointerEvents: "all" }}
         >
-        <div className="titlebar-left">
-          <span className="window-title">{cellName}</span>
-        </div>
-        <div className="titlebar-buttons">
-          <RunButton
-            edited={cellData?.edited ?? false}
-            onClick={isAppConnected(connection.state) ? runCell : Functions.NOOP}
-            connectionState={connection.state}
-            status={cellRuntime.status}
-            config={cellData?.config}
-            needsRun={needsRun}
-          />
-          <StopButton
-            status={cellRuntime.status}
-            connectionState={connection.state}
-          />
-          <CellActionsDropdown
-            cellId={cellId}
-            status={cellRuntime.status}
-            getEditorView={getEditorView}
-            name={cellData?.name}
-            config={cellData?.config}
-            hasOutput={hasOutput}
-            hasConsoleOutput={hasConsoleOutput}
-          >
-            <ToolbarItem
-              variant={"green"}
-              tooltip={null}
-              data-testid="cell-actions-button"
+          <div className="titlebar-left">
+            <span className="window-title">{cellName}</span>
+          </div>
+          <div className="titlebar-buttons">
+            <RunButton
+              edited={cellData?.edited ?? false}
+              onClick={
+                isAppConnected(connection.state) ? runCell : Functions.NOOP
+              }
+              connectionState={connection.state}
+              status={cellRuntime.status}
+              config={cellData?.config}
+              needsRun={needsRun}
+            />
+            <StopButton
+              status={cellRuntime.status}
+              connectionState={connection.state}
+            />
+            <CellActionsDropdown
+              cellId={cellId}
+              status={cellRuntime.status}
+              getEditorView={getEditorView}
+              name={cellData?.name}
+              config={cellData?.config}
+              hasOutput={hasOutput}
+              hasConsoleOutput={hasConsoleOutput}
             >
-              <MoreHorizontalIcon strokeWidth={1.5} />
-            </ToolbarItem>
-          </CellActionsDropdown>
-          <button
-            className="titlebar-btn close"
-            onClick={() => deleteCell({ cellId })}
-            type="button"
-            aria-label="Delete cell"
-            title="Delete cell"
-          >
-            <XIcon size={14} />
-          </button>
+              <ToolbarItem
+                variant={"green"}
+                tooltip={null}
+                data-testid="cell-actions-button"
+              >
+                <MoreHorizontalIcon strokeWidth={1.5} />
+              </ToolbarItem>
+            </CellActionsDropdown>
+            <button
+              className="titlebar-btn close"
+              onClick={() => deleteCell({ cellId })}
+              type="button"
+              aria-label="Delete cell"
+              title="Delete cell"
+            >
+              <XIcon size={14} />
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* セルコンテンツ */}
-      <section
-        className={cn("window-content", isMarkdown && "markdown-content")}
-        aria-label="Cell content"
-        role="region"
-        onMouseDown={(e) => {
-          // セルコンテンツ内のクリックがRFドラッグをトリガーしないようにする
-          e.stopPropagation();
-          // stopPropagation で親の handleMouseDown に届かないため、ここで focusCell を呼ぶ
-          focusCell({ cellId });
-        }}
-      >
-        <Cell
-          cellId={cellId}
-          theme={isMarkdown ? theme : theme === "dark" ? "light" : "dark"}
-          showPlaceholder={showPlaceholder}
-          canDelete={canDelete}
-          mode={mode}
-          userConfig={userConfig}
-          isCollapsed={isCollapsed}
-          collapseCount={collapseCount}
-          canMoveX={canMoveX}
-        />
-      </section>
-    </div>
+        {/* セルコンテンツ */}
+        <section
+          className={cn("window-content", isMarkdown && "markdown-content")}
+          aria-label="Cell content"
+          onMouseDown={(e) => {
+            // セルコンテンツ内のクリックがRFドラッグをトリガーしないようにする
+            e.stopPropagation();
+            // stopPropagation で親の handleMouseDown に届かないため、ここで focusCell を呼ぶ
+            focusCell({ cellId });
+          }}
+        >
+          <Cell
+            cellId={cellId}
+            theme={isMarkdown ? theme : theme === "dark" ? "light" : "dark"}
+            showPlaceholder={showPlaceholder}
+            canDelete={canDelete}
+            mode={mode}
+            userConfig={userConfig}
+            isCollapsed={isCollapsed}
+            collapseCount={collapseCount}
+            canMoveX={canMoveX}
+          />
+        </section>
+      </div>
       <Handle
         type="source"
         id={OUTPUTS_HANDLE_ID}
