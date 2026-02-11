@@ -37,7 +37,6 @@ import { PyodideRouter } from "./router";
 import { getWorkerRPC } from "./rpc";
 import { createShareableLink } from "./share";
 import { wasmInitializationAtom } from "./state";
-import { filenameAtom } from "../saving/file-state";
 import { fallbackFileStore, notebookFileStore } from "./store";
 import { isWasm } from "./utils";
 import type { SaveWorkerSchema } from "./worker/save-worker";
