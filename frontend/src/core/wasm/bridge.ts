@@ -29,6 +29,7 @@ import type {
   SaveUserConfigurationRequest,
   Snippets,
 } from "../network/types";
+import { filenameAtom } from "../saving/file-state";
 import { store } from "../state/jotai";
 import { BasicTransport } from "../websocket/transports/basic";
 import type { IConnectionTransport } from "../websocket/transports/transport";
@@ -147,8 +148,6 @@ export class PyodideBridge implements RunRequests, EditRequests {
 
     const code = await notebookFileStore.readFile();
     const fallbackCode = await fallbackFileStore.readFile();
-    // Use filenameAtom (from mount config) instead of URL params
-    // This ensures the filename from mount_config is used for initial load
     const filename = store.get(filenameAtom) ?? PyodideRouter.getFilename();
     const userConfig = store.get(userConfigAtom);
 
