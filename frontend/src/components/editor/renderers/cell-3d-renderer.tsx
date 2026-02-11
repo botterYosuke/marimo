@@ -408,7 +408,7 @@ const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
 
   return (
     <SortableCellsProvider multiColumn={appConfig.width === "columns"}>
-      <div style={{ position: "absolute", inset: 0, zIndex: 20 }}>
+      <div className="cell-3d-flow" style={{ position: "absolute", inset: 0, zIndex: 20 }}>
         <ReactFlow
           nodes={nodes}
           edges={styledEdges}
