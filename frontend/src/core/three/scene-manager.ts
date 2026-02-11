@@ -3,7 +3,6 @@
 import * as THREE from "three";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import type { GridCSS2DService } from "./grid-css2d-service";
-import type { CellCSS2DService } from "./cell-css2d-service";
 import { CharacterComponent } from "./character-component";
 import { MoneyMissileEffect } from "./money-missile-effect";
 
@@ -29,13 +28,9 @@ export class SceneManager {
   private readonly MIN_FRAME_INTERVAL = 16; // 約60FPS
   private lastRenderTime = 0;
   private gridCSS2DService?: GridCSS2DService;
-  private cellCSS2DService?: CellCSS2DService;
   private characterComponent?: CharacterComponent;
   private moneyMissileEffect?: MoneyMissileEffect;
   private tradeEventChannel?: BroadcastChannel;
-  // カメラ位置追跡（CSS2D最適化用）
-  private lastCameraPosition = new THREE.Vector3();
-  private lastCameraTarget = new THREE.Vector3();
 
   /**
    * Three.jsシーンを初期化します
@@ -122,9 +117,9 @@ export class SceneManager {
     // キャラクターコンポーネントの初期化
     // Grid → 3Dモデル → Cellの順序で配置するため、
     // Gridコンテナの配置後に、CharacterComponentを初期化
-    if (this.scene && this.camera && this.controls) {
+    if (this.scene && this.camera) {
       this.characterComponent = new CharacterComponent();
-      this.characterComponent.load(this.scene, this.camera, this.controls);
+      this.characterComponent.load(this.scene, this.camera, new THREE.Vector3(0, 0, 0));
     }
 
     // マネーミサイルエフェクトの初期化
@@ -194,12 +189,6 @@ export class SceneManager {
 
       if (!this.scene || !this.camera || !this.renderer) {
         return;
-      }
-
-      // OrbitControlsの更新
-      // changeイベントでneedsRenderが設定されるため、ここでは設定しない
-      if (this.controls) {
-        this.controls.update();
       }
 
       // キャラクターコンポーネントのアニメーション更新
@@ -285,6 +274,7 @@ export class SceneManager {
     this.camera.position.copy(position);
     this.camera.lookAt(target.x, target.y, target.z);
     this.camera.updateProjectionMatrix();
+    this.characterComponent?.setCameraTarget(target);
     this.markNeedsRender(true);
   }
 

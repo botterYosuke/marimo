@@ -2,7 +2,6 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 /**
  * CharacterComponent
@@ -34,7 +33,7 @@ export class CharacterComponent {
 
   // 旋回機能用のプロパティ
   private camera?: THREE.PerspectiveCamera;
-  private controls?: OrbitControls;
+  private cameraTarget = new THREE.Vector3();
   private targetPosition = new THREE.Vector3();
   private movementSpeed = 200; // 移動速度（単位/秒）
   private waypointInterval = 3000; // 目標位置更新間隔（ミリ秒）
@@ -54,20 +53,20 @@ export class CharacterComponent {
    *
    * @param scene Three.jsシーン
    * @param camera カメラの参照（旋回機能用、オプショナル）
-   * @param controls OrbitControlsの参照（旋回機能用、オプショナル）
+   * @param cameraTarget カメラの注視点（旋回機能用、オプショナル）
    */
   load(
     scene: THREE.Scene,
     camera?: THREE.PerspectiveCamera,
-    controls?: OrbitControls,
+    cameraTarget?: THREE.Vector3,
   ): void {
     if (this.model || this.isLoading) {
       return;
     }
 
-    // カメラとcontrolsの参照を保存
+    // カメラとカメラターゲットの参照を保存
     this.camera = camera;
-    this.controls = controls;
+    this.cameraTarget.copy(cameraTarget ?? new THREE.Vector3(0, 0, 0));
 
     this.isLoading = true;
     const loader = new GLTFLoader();
@@ -97,7 +96,7 @@ export class CharacterComponent {
         this.applyTransform();
 
         // 旋回機能の初期化
-        if (this.camera && this.controls && this.orbitEnabled) {
+        if (this.camera && this.orbitEnabled) {
           this.initializeOrbit();
         }
 
@@ -149,6 +148,15 @@ export class CharacterComponent {
   }
 
   /**
+   * カメラターゲット（注視点）を更新します
+   *
+   * @param target 新しいカメラターゲット位置
+   */
+  setCameraTarget(target: THREE.Vector3): void {
+    this.cameraTarget.copy(target);
+  }
+
+  /**
    * ドローンの現在位置を取得します
    *
    * @returns ドローンの位置、またはモデルが読み込まれていない場合はnull
@@ -179,7 +187,7 @@ export class CharacterComponent {
     }
 
     // 旋回機能の更新
-    if (this.orbitEnabled && this.camera && this.controls && this.model) {
+    if (this.orbitEnabled && this.camera && this.model) {
       this.updateOrbit(delta);
       this._isAnimating = true;
     }
@@ -215,7 +223,7 @@ export class CharacterComponent {
 
     // 旋回機能のクリーンアップ
     this.camera = undefined;
-    this.controls = undefined;
+    this.cameraTarget.set(0, 0, 0);
     this.targetPosition = new THREE.Vector3();
     this.nextWaypointTime = 0;
     this.currentVelocity = new THREE.Vector3();
@@ -432,7 +440,7 @@ export class CharacterComponent {
    * 旋回機能を初期化します
    */
   private initializeOrbit(): void {
-    if (!this.model || !this.camera || !this.controls) {
+    if (!this.model || !this.camera) {
       return;
     }
 
@@ -451,12 +459,12 @@ export class CharacterComponent {
    * @returns 視点中心からの最大距離
    */
   private calculateMaxDistance(): number {
-    if (!this.camera || !this.controls) {
+    if (!this.camera) {
       return 500; // デフォルト値
     }
 
     // カメラから視点中心までの距離
-    const distance = this.camera.position.distanceTo(this.controls.target);
+    const distance = this.camera.position.distanceTo(this.cameraTarget);
 
     // FOVは垂直視野角（度）なので、ラジアンに変換
     const fovRad = (this.camera.fov * Math.PI) / 180;
@@ -479,10 +487,6 @@ export class CharacterComponent {
    * @returns ランダムな位置
    */
   private generateRandomPosition(): THREE.Vector3 {
-    if (!this.controls) {
-      return new THREE.Vector3(0, 300, 0);
-    }
-
     const maxDistance = this.calculateMaxDistance();
 
     // 球面座標系でランダムな位置を生成
@@ -506,7 +510,7 @@ export class CharacterComponent {
 
     // 視点中心を基準にした位置を返す
     const position = new THREE.Vector3(x, y, z);
-    position.add(this.controls.target);
+    position.add(this.cameraTarget);
 
     return position;
   }
@@ -517,7 +521,7 @@ export class CharacterComponent {
    * @param delta フレーム間の時間差（秒）
    */
   private updateOrbit(delta: number): void {
-    if (!this.model || !this.camera || !this.controls) {
+    if (!this.model || !this.camera) {
       return;
     }
 
@@ -618,10 +622,10 @@ export class CharacterComponent {
       // 現在の回転から目標回転へスムーズに補間
       const rotationLerpFactor = Math.min(clampedRotationSpeed * delta, 1.0);
       this.model.quaternion.slerp(desiredQuaternion, rotationLerpFactor);
-    } else if (this.controls) {
+    } else {
       // 速度がほぼゼロの場合、視点中心を向く
       const lookAtTarget = new THREE.Vector3().copy(
-        this.controls.target,
+        this.cameraTarget,
       );
       const targetRotation = new THREE.Object3D();
       targetRotation.position.copy(this.model.position);
