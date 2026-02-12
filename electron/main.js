@@ -151,7 +151,9 @@ async function createNotebookWindow(notebookPath = null) {
       contextIsolation: false, // Required for Steam Overlay
       sandbox: false, // Required for preload script
     },
-    icon: path.join(getAppRoot(), "frontend", "public", "logo.png"),
+    icon: app.isPackaged
+      ? path.join(process.resourcesPath, "icon.png")
+      : path.join(__dirname, "..", "frontend", "public", "android-chrome-512x512.png"),
   });
 
   // Store window info

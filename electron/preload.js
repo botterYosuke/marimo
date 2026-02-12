@@ -102,6 +102,16 @@ window.electronAPI = {
   updateSetupBlock: (newSetupContent) => ipcRenderer.invoke("notebook:update-setup", newSetupContent),
 };
 
+// Remove Node.js globals injected by nodeIntegration: true
+// This prevents Vite-bundled ESM code from being confused by
+// the presence of module/exports/require in the global scope,
+// which can cause minified code to break (e.g. "aa is not a function").
+// Safe because: preload.js already imported what it needs via ESM imports,
+// and the renderer uses window.electronAPI for IPC (not direct require).
+delete window.module;
+delete window.exports;
+delete window.require;
+
 // Inject mount configuration for the frontend
 // This tells the React app where to find the marimo server
 (() => {
@@ -129,3 +139,25 @@ window.electronAPI = {
     configurable: false,
   });
 })();
+
+// Fix HTML template placeholders that the Python server would normally replace.
+// In Electron, we load index.html directly via loadFile(), so {{ title }},
+// {{ filename }} etc. remain as literal strings.
+document.addEventListener('DOMContentLoaded', () => {
+  // Fix {{ title }}
+  if (document.title.includes('{{')) {
+    document.title = 'marimo';
+  }
+  // Fix {{ filename }}
+  const filenameTag = document.querySelector('marimo-filename');
+  if (filenameTag && filenameTag.innerHTML.includes('{{')) {
+    filenameTag.innerHTML = '';
+  }
+  // Set title from notebook path via IPC
+  window.electronAPI.getNotebookPath().then((notebookPath) => {
+    if (notebookPath) {
+      const basename = notebookPath.split(/[/\\]/).pop() || 'Untitled';
+      document.title = `${basename} - marimo`;
+    }
+  });
+});

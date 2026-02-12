@@ -105,6 +105,10 @@
           "filter": [
             "**/*"
           ]
+        },
+        {
+          "from": "electron/build/icon.png",
+          "to": "icon.png"
         }
       ]
     },
@@ -127,6 +131,10 @@
           "filter": [
             "**/*"
           ]
+        },
+        {
+          "from": "electron/build/icon.png",
+          "to": "icon.png"
         }
       ]
     },
@@ -155,6 +163,10 @@
           "filter": [
             "**/*"
           ]
+        },
+        {
+          "from": "electron/build/icon.png",
+          "to": "icon.png"
         }
       ]
     },
