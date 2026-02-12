@@ -133,3 +133,4 @@ pixi.lock
 # mkdocs
 site
 nul
+dist-electron/

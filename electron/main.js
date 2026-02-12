@@ -167,8 +167,8 @@ async function createNotebookWindow(notebookPath = null) {
 
   // Load the app with windowId and port as query params
   if (app.isPackaged) {
-    // Production: load from dist
-    window.loadFile(path.join(getAppRoot(), "dist", "index.html"), {
+    // Production: load from frontend/dist inside the asar
+    window.loadFile(path.join(app.getAppPath(), "frontend", "dist", "index.html"), {
       query: { windowId: String(windowId), port: String(port) },
     });
   } else {
