@@ -101,3 +101,31 @@ window.electronAPI = {
    */
   updateSetupBlock: (newSetupContent) => ipcRenderer.invoke("notebook:update-setup", newSetupContent),
 };
+
+// Inject mount configuration for the frontend
+// This tells the React app where to find the marimo server
+(() => {
+  const params = new URLSearchParams(window.location.search);
+  const port = params.get("port");
+  const mountConfig = {
+    filename: "",
+    mode: "edit",
+    version: "electron",
+    config: {},
+    configOverrides: {},
+    appConfig: {},
+    view: { showAppCode: true },
+    serverToken: "",
+    session: null,
+    notebook: null,
+    runtimeConfig: port ? [{
+      url: `http://localhost:${port}`,
+      lazy: false,
+    }] : null,
+  };
+  Object.defineProperty(window, "__MARIMO_MOUNT_CONFIG__", {
+    value: mountConfig,
+    writable: false,
+    configurable: false,
+  });
+})();

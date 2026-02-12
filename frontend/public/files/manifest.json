@@ -1,0 +1,21 @@
+{
+  "files": [
+    "backcast.py",
+    "backcast_en.py",
+    "backcast_zh.py",
+    "backtest_wrapper.py",
+    "board.py",
+    "bridge.py",
+    "chart.py",
+    "full_mode.py",
+    "game_setup.py",
+    "headless_broadcast.py",
+    "progress_manager.py",
+    "pyodide.py",
+    "sample_skill_triggers.py",
+    "sandbox.py",
+    "skill_events.py",
+    "wasm-intro.py"
+  ],
+  "generated": "2026-02-11T06:18:31.172Z"
+}

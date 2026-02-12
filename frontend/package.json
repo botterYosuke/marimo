@@ -1,6 +1,6 @@
 {
   "name": "@marimo-team/frontend",
-  "version": "0.0.0-placeholder",
+  "version": "0.19.10",
   "main": "dist/main.js",
   "types": "dist/index.d.ts",
   "type": "module",

@@ -2,7 +2,7 @@
   "name": "marimo",
   "version": "0.19.2",
   "type": "module",
-  "main": "electron/main.js",
+  "main": "electron/entry.cjs",
   "author": {
     "name": "marimo team",
     "email": "info@marimo.io"
@@ -29,7 +29,7 @@
     "@typescript/native-preview": "7.0.0-dev.20260201.1",
     "concurrently": "^9.2.1",
     "cross-env": "^7.0.3",
-    "electron": "^39.2.7",
+    "electron": "39.5.1",
     "electron-builder": "^26.0.12",
     "turbo": "^2.8.0",
     "vitest": "^3.2.4",
@@ -77,6 +77,7 @@
     },
     "files": [
       "electron/**/*",
+      "!electron/**/*.md",
       "frontend/dist/**/*",
       "resources/**/*",
       "package.json"

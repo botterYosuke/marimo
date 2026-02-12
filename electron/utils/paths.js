@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
  */
 export function getAppRoot() {
   if (app.isPackaged) {
-    // In production, app.getAppPath() returns the resources directory
+    // In production, app.getAppPath() returns the asar path (resources/app.asar)
     return path.join(app.getAppPath(), "..");
   }
   // In development, return the project root
@@ -65,7 +65,7 @@ export function getVenvPythonPath() {
 export function getMarimoServerExecutable() {
   const appRoot = getAppRoot();
   if (process.platform === "win32") {
-    return path.join(appRoot, "resources", "marimo-server.exe");
+    return path.join(appRoot, "marimo-server.exe");
   }
-  return path.join(appRoot, "resources", "marimo-server");
+  return path.join(appRoot, "marimo-server");
 }
