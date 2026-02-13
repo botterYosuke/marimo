@@ -1,0 +1,195 @@
+use std::path::{Path, PathBuf};
+
+use anyhow::{anyhow, Result};
+use log::info;
+use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
+use url::Url;
+
+use crate::state::{ServerState, WindowState};
+
+/// Create a new window for a notebook or the home page.
+/// - `file_path = None` → home page
+/// - `file_path = Some(path)` → notebook at that path
+pub fn open_window(
+    app: &tauri::AppHandle,
+    file_path: Option<&Path>,
+) -> Result<()> {
+    let window_state = app.state::<WindowState>();
+    let server_state = app.state::<ServerState>();
+
+    let port = *server_state.port.lock().unwrap();
+    let key = file_path.map(|p| p.to_path_buf());
+
+    // Check for duplicate window
+    {
+        let windows = window_state.windows.lock().unwrap();
+        if let Some(label) = windows.get(&key) {
+            // Try to focus existing window
+            if let Some(win) = app.get_webview_window(label) {
+                let _ = win.set_focus();
+                info!("Focused existing window: {}", label);
+                return Ok(());
+            }
+            // Window handle is gone, remove stale entry
+        }
+    }
+
+    // Build URL
+    let base_url = if cfg!(debug_assertions) {
+        "http://localhost:3000".to_string()
+    } else {
+        format!("http://localhost:{}", port)
+    };
+
+    let url = match file_path {
+        Some(path) => {
+            let encoded = urlencoding::encode(&path.to_string_lossy());
+            format!("{}/?file={}", base_url, encoded)
+        }
+        None => format!("{}/", base_url),
+    };
+
+    // Generate unique window label
+    let label = match file_path {
+        Some(path) => {
+            let hash = simple_hash(&path.to_string_lossy());
+            format!("notebook-{}", hash)
+        }
+        None => {
+            let existing = window_state.windows.lock().unwrap();
+            let home_count = existing
+                .keys()
+                .filter(|k| k.is_none())
+                .count();
+            if home_count == 0 {
+                "main".to_string()
+            } else {
+                format!("home-{}", home_count)
+            }
+        }
+    };
+
+    let title = match file_path {
+        Some(path) => {
+            let name = path
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_else(|| "Notebook".to_string());
+            format!("marimo - {}", name)
+        }
+        None => "marimo".to_string(),
+    };
+
+    info!("Creating window '{}' → {}", label, url);
+
+    let window = WebviewWindowBuilder::new(app, &label, WebviewUrl::External(url.parse()?))
+        .title(&title)
+        .inner_size(1200.0, 800.0)
+        .min_inner_size(600.0, 400.0)
+        .build()?;
+
+    // Register navigation handler to intercept external links
+    // Note: target-based link interception is done via JS injection in on_page_load
+
+    // Track the window
+    {
+        let mut windows = window_state.windows.lock().unwrap();
+        windows.insert(key, label.clone());
+    }
+
+    Ok(())
+}
+
+/// Remove a window from tracking when it's destroyed.
+pub fn on_window_destroyed(app: &tauri::AppHandle, label: &str) {
+    let window_state = app.state::<WindowState>();
+    let mut windows = window_state.windows.lock().unwrap();
+    windows.retain(|_, v| v != label);
+    info!("Window '{}' destroyed, remaining: {}", label, windows.len());
+}
+
+/// Get the number of tracked windows.
+pub fn window_count(app: &tauri::AppHandle) -> usize {
+    let window_state = app.state::<WindowState>();
+    let windows = window_state.windows.lock().unwrap();
+    windows.len()
+}
+
+/// Simple hash for generating window labels from paths.
+fn simple_hash(s: &str) -> u64 {
+    let mut hash: u64 = 5381;
+    for byte in s.bytes() {
+        hash = hash.wrapping_mul(33).wrapping_add(byte as u64);
+    }
+    hash
+}
+
+/// JavaScript to inject into each page load for link interception.
+/// This handles `<a target="...">` links by converting them to
+/// Tauri IPC calls that open new windows.
+pub const LINK_INTERCEPT_JS: &str = r#"
+(function() {
+    if (window.__marimo_link_intercept_installed) return;
+    window.__marimo_link_intercept_installed = true;
+
+    document.addEventListener('click', function(e) {
+        const anchor = e.target.closest('a[target]');
+        if (!anchor) return;
+
+        const href = anchor.getAttribute('href');
+        const target = anchor.getAttribute('target');
+        if (!href || !target) return;
+
+        // Skip same-window targets
+        if (target === '_self') return;
+
+        // Parse the URL
+        let url;
+        try {
+            url = new URL(href, window.location.origin);
+        } catch {
+            return;
+        }
+
+        // Only intercept same-origin links
+        if (url.origin !== window.location.origin) {
+            // External link → open in system browser
+            e.preventDefault();
+            if (window.__TAURI_INTERNALS__) {
+                window.__TAURI_INTERNALS__.invoke('plugin:shell|open', { path: url.href });
+            }
+            return;
+        }
+
+        // Same-origin with target → open in new window
+        e.preventDefault();
+        const filePath = url.searchParams.get('file');
+
+        if (window.__TAURI_INTERNALS__) {
+            window.__TAURI_INTERNALS__.invoke('window_open_notebook', {
+                filePath: filePath || null
+            });
+        }
+    }, true);
+
+    // Also intercept window.open calls
+    const originalOpen = window.open;
+    window.open = function(url, target, features) {
+        if (url && typeof url === 'string') {
+            try {
+                const parsed = new URL(url, window.location.origin);
+                if (parsed.origin === window.location.origin) {
+                    const filePath = parsed.searchParams.get('file');
+                    if (window.__TAURI_INTERNALS__) {
+                        window.__TAURI_INTERNALS__.invoke('window_open_notebook', {
+                            filePath: filePath || null
+                        });
+                    }
+                    return null;
+                }
+            } catch {}
+        }
+        return originalOpen.call(this, url, target, features);
+    };
+})();
+"#;

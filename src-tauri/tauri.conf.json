@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
+  "productName": "marimo",
+  "version": "0.1.0",
+  "identifier": "com.marimo.desktop",
+  "build": {
+    "frontendDist": "../frontend/dist",
+    "devUrl": "http://localhost:3000",
+    "beforeDevCommand": "",
+    "beforeBuildCommand": ""
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "marimo",
+        "label": "main",
+        "width": 1200,
+        "height": 800,
+        "visible": false
+      }
+    ],
+    "security": {
+      "csp": "default-src http://localhost:* ws://localhost:*; script-src http://localhost:* 'unsafe-inline' 'unsafe-eval'; style-src http://localhost:* 'unsafe-inline'; img-src http://localhost:* data: blob:; font-src http://localhost:* data:; connect-src http://localhost:* ws://localhost:* blob:; media-src http://localhost:* blob:; worker-src http://localhost:* blob:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "dmg", "appimage"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": [],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      }
+    }
+  }
+}
