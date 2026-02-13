@@ -2,21 +2,11 @@
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { getUserDataDir } from "./paths.js";
+import { getUserDataDir, normalizePathForComparison } from "./paths.js";
 import { logInfo, logError } from "./logger.js";
 
 const RECENT_FILES_FILENAME = "recent-files.json";
 const MAX_RECENT_FILES = 10;
-
-/**
- * Normalize file path for comparison (handles Windows case-insensitivity)
- * @param {string} filePath - The file path to normalize
- * @returns {string} Normalized path
- */
-function normalizePathForComparison(filePath) {
-  const normalized = path.normalize(filePath);
-  return process.platform === "win32" ? normalized.toLowerCase() : normalized;
-}
 
 /**
  * Get the path to the recent files JSON file

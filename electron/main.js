@@ -2,12 +2,12 @@
 
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import path from "node:path";
-import { spawn, execSync, ChildProcess } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { initLogger, logInfo, logError } from "./utils/logger.js";
-import { getAppRoot, getMarimoServerExecutable } from "./utils/paths.js";
+import { getAppRoot, getMarimoServerExecutable, normalizePathForComparison } from "./utils/paths.js";
 import { injectCells, readProgress, updateSetupBlock } from "./utils/notebook-injector.js";
 import { getMostRecentFile, addRecentFile } from "./utils/recent-files.js";
 
@@ -91,28 +91,19 @@ let nextPort = 2718;
  */
 async function findAvailablePort(startPort) {
   const net = await import("node:net");
-  return new Promise((resolve) => {
-    const server = net.createServer();
-    server.listen(startPort, "127.0.0.1", () => {
-      const port = server.address().port;
-      server.close(() => resolve(port));
-    });
-    server.on("error", () => {
-      // Port is in use, try next one
-      resolve(findAvailablePort(startPort + 1));
-    });
-  });
-}
+  const MAX_ATTEMPTS = 100;
 
-/**
- * Normalize file path for comparison (handles Windows case-insensitivity and slashes)
- * @param {string} filePath - The file path to normalize
- * @returns {string} Normalized path
- */
-function normalizePathForComparison(filePath) {
-  const normalized = path.normalize(filePath);
-  // On Windows, paths are case-insensitive
-  return process.platform === "win32" ? normalized.toLowerCase() : normalized;
+  for (let port = startPort; port < startPort + MAX_ATTEMPTS; port++) {
+    const available = await new Promise((resolve) => {
+      const server = net.createServer();
+      server.listen(port, "127.0.0.1", () => {
+        server.close(() => resolve(true));
+      });
+      server.on("error", () => resolve(false));
+    });
+    if (available) return port;
+  }
+  throw new Error(`No available port found in range ${startPort}-${startPort + MAX_ATTEMPTS - 1}`);
 }
 
 // Server status constants
@@ -122,6 +113,20 @@ const SERVER_STATUS = {
   STARTING: "starting",
   ERROR: "error",
 };
+
+/**
+ * Check server health by fetching the /healthz endpoint
+ * @param {number} port - The server port to check
+ * @returns {Promise<string>} SERVER_STATUS value
+ */
+async function checkServerHealth(port) {
+  try {
+    const response = await fetch(`http://localhost:${port}/healthz`);
+    return response.ok ? SERVER_STATUS.RUNNING : SERVER_STATUS.ERROR;
+  } catch {
+    return SERVER_STATUS.STOPPED;
+  }
+}
 
 // Notebook management
 const DEFAULT_NOTEBOOK = "wasm-intro.py"; // 起動時のデフォルト
@@ -196,13 +201,6 @@ async function createNotebookWindow(notebookPath = null) {
 
   logInfo(`Window ${windowId} created on port ${port}`);
   return windowId;
-}
-
-/**
- * Legacy createWindow function for backwards compatibility
- */
-async function createWindow() {
-  return await createNotebookWindow(null);
 }
 
 /**
@@ -366,20 +364,29 @@ function startServerForWindow(windowId, notebookPath) {
 /**
  * Stop the marimo Python server for a specific window
  * @param {number} windowId - The window ID
+ * @param {object} options
+ * @param {boolean} options.sync - If true, use synchronous kill (for app exit)
+ * @returns {Promise<void>} Resolves when the server process has exited
  */
 function stopServerForWindow(windowId, { sync = false } = {}) {
   const windowInfo = windows.get(windowId);
   if (!windowInfo || !windowInfo.serverProcess) {
-    return;
+    return Promise.resolve();
   }
 
   const pid = windowInfo.serverProcess.pid;
+  const serverProcess = windowInfo.serverProcess;
   logInfo(`Stopping marimo server for window ${windowId} (pid=${pid}, sync=${sync})...`);
   windowInfo.status = SERVER_STATUS.STOPPED;
 
-  // Kill the server process
-  if (process.platform === "win32") {
-    if (sync) {
+  // Notify the window
+  if (windowInfo.window && !windowInfo.window.isDestroyed()) {
+    windowInfo.window.webContents.send("server:status-changed", windowInfo.status);
+  }
+
+  if (sync) {
+    // Synchronous kill for app exit paths
+    if (process.platform === "win32") {
       try {
         execSync(`taskkill /pid ${pid} /f /t`, { timeout: 5000 });
         logInfo(`taskkill succeeded for pid=${pid}`);
@@ -387,9 +394,33 @@ function stopServerForWindow(windowId, { sync = false } = {}) {
         logError(`taskkill failed for pid=${pid}`, error);
       }
     } else {
+      serverProcess.kill("SIGTERM");
+    }
+    windowInfo.serverProcess = null;
+    return Promise.resolve();
+  }
+
+  // Async kill: return a Promise that resolves when the process exits
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      logError(`Server for window ${windowId} did not exit within 5s, forcing kill`);
+      windowInfo.serverProcess = null;
+      resolve();
+    }, 5000);
+
+    serverProcess.on("exit", () => {
+      clearTimeout(timeout);
+      windowInfo.serverProcess = null;
+      resolve();
+    });
+
+    if (process.platform === "win32") {
       const killProc = spawn("taskkill", ["/pid", String(pid), "/f", "/t"]);
       killProc.on("error", (err) => {
         logError(`taskkill spawn error for pid=${pid}`, err);
+        clearTimeout(timeout);
+        windowInfo.serverProcess = null;
+        resolve();
       });
       killProc.on("exit", (code) => {
         if (code === 0) {
@@ -398,17 +429,10 @@ function stopServerForWindow(windowId, { sync = false } = {}) {
           logError(`taskkill exited with code ${code} for pid=${pid}`);
         }
       });
+    } else {
+      serverProcess.kill("SIGTERM");
     }
-  } else {
-    windowInfo.serverProcess.kill("SIGTERM");
-  }
-
-  windowInfo.serverProcess = null;
-
-  // Notify the window
-  if (windowInfo.window && !windowInfo.window.isDestroyed()) {
-    windowInfo.window.webContents.send("server:status-changed", windowInfo.status);
-  }
+  });
 }
 
 /**
@@ -457,19 +481,11 @@ ipcMain.handle("server:get-status", async (event) => {
   const port = ctx ? ctx.windowInfo.serverPort : 2718;
   logInfo(`IPC: server:get-status (port ${port})`);
 
-  try {
-    const response = await fetch(`http://localhost:${port}/healthz`);
-    const status = response.ok ? SERVER_STATUS.RUNNING : SERVER_STATUS.ERROR;
-    if (ctx) {
-      ctx.windowInfo.status = status;
-    }
-    return status;
-  } catch (error) {
-    if (ctx) {
-      ctx.windowInfo.status = SERVER_STATUS.STOPPED;
-    }
-    return SERVER_STATUS.STOPPED;
+  const status = await checkServerHealth(port);
+  if (ctx) {
+    ctx.windowInfo.status = status;
   }
+  return status;
 });
 
 ipcMain.handle("server:start", async (event) => {
@@ -485,7 +501,7 @@ ipcMain.handle("server:stop", async (event) => {
   const ctx = getWindowFromEvent(event);
   if (ctx) {
     logInfo(`IPC: server:stop (window ${ctx.windowId})`);
-    stopServerForWindow(ctx.windowId);
+    await stopServerForWindow(ctx.windowId);
   }
   return { success: true, message: "Server stop requested" };
 });
@@ -494,10 +510,8 @@ ipcMain.handle("server:restart", async (event) => {
   const ctx = getWindowFromEvent(event);
   if (ctx) {
     logInfo(`IPC: server:restart (window ${ctx.windowId})`);
-    stopServerForWindow(ctx.windowId);
-    setTimeout(() => {
-      startServerForWindow(ctx.windowId, ctx.windowInfo.notebookPath);
-    }, 1000);
+    await stopServerForWindow(ctx.windowId);
+    startServerForWindow(ctx.windowId, ctx.windowInfo.notebookPath);
   }
   return { success: true, message: "Server restart requested" };
 });
@@ -512,29 +526,6 @@ ipcMain.handle("server:get-logs", (event) => {
 });
 
 // Notebook IPC handlers
-ipcMain.handle("notebook:open", async (_event, filePath) => {
-  logInfo(`IPC: notebook:open ${filePath}`);
-
-  // Validate file path
-  if (!filePath || typeof filePath !== "string") {
-    return { success: false, error: "Invalid file path" };
-  }
-
-  // Check file extension
-  if (!filePath.endsWith(".py")) {
-    return { success: false, error: "File must be a .py notebook file" };
-  }
-
-  // Check if file exists
-  if (!existsSync(filePath)) {
-    return { success: false, error: `File not found: ${filePath}` };
-  }
-
-  // Open in a new window
-  return await openNotebookInNewWindow(filePath);
-});
-
-// New IPC handler for opening notebook in new window
 ipcMain.handle("notebook:open-in-new-window", async (_event, filePath) => {
   logInfo(`IPC: notebook:open-in-new-window ${filePath}`);
 
@@ -630,32 +621,24 @@ app.whenReady().then(async () => {
   connectSteam();
 
   // Create the first window (server starts inside createNotebookWindow for production)
-  await createWindow();
+  await createNotebookWindow(null);
 
   // Check server status periodically for all windows
   setInterval(async () => {
     for (const [windowId, windowInfo] of windows) {
       if (!windowInfo.window || windowInfo.window.isDestroyed()) continue;
 
-      try {
-        const response = await fetch(`http://localhost:${windowInfo.serverPort}/healthz`);
-        const newStatus = response.ok ? SERVER_STATUS.RUNNING : SERVER_STATUS.ERROR;
-        if (newStatus !== windowInfo.status) {
-          windowInfo.status = newStatus;
-          windowInfo.window.webContents.send("server:status-changed", newStatus);
-        }
-      } catch (error) {
-        if (windowInfo.status !== SERVER_STATUS.STOPPED) {
-          windowInfo.status = SERVER_STATUS.STOPPED;
-          windowInfo.window.webContents.send("server:status-changed", SERVER_STATUS.STOPPED);
-        }
+      const newStatus = await checkServerHealth(windowInfo.serverPort);
+      if (newStatus !== windowInfo.status) {
+        windowInfo.status = newStatus;
+        windowInfo.window.webContents.send("server:status-changed", newStatus);
       }
     }
   }, 5000); // Check every 5 seconds
 
   app.on("activate", async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      await createWindow();
+      await createNotebookWindow(null);
     }
   });
 });
