@@ -3,7 +3,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import path from "node:path";
 import { spawn, ChildProcess } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { initLogger, logInfo, logError } from "./utils/logger.js";
@@ -167,15 +167,15 @@ async function createNotebookWindow(notebookPath = null) {
   };
   windows.set(windowId, windowInfo);
 
-  // Load the app with windowId and port as query params
+  // Load the app with windowId, port, and notebookPath as query params
   if (app.isPackaged) {
     // Production: load from frontend/dist inside the asar
     window.loadFile(path.join(app.getAppPath(), "frontend", "dist", "index.html"), {
-      query: { windowId: String(windowId), port: String(port) },
+      query: { windowId: String(windowId), port: String(port), notebookPath: actualNotebookPath },
     });
   } else {
     // Development: load from Vite dev server
-    window.loadURL(`http://localhost:3000?windowId=${windowId}&port=${port}`);
+    window.loadURL(`http://localhost:3000?windowId=${windowId}&port=${port}&notebookPath=${encodeURIComponent(actualNotebookPath)}`);
   }
 
   // Start server for this window (production only)
@@ -293,16 +293,26 @@ function startServerForWindow(windowId, notebookPath) {
     return;
   }
 
+  // Resolve to absolute path for safety (e.g. if relative path is passed via IPC)
+  const resolvedNotebookPath = path.resolve(notebookPath);
+  const serverCwd = path.dirname(resolvedNotebookPath);
+  logInfo(`Server CWD for window ${windowId}: ${serverCwd}`);
+
+  // Ensure the CWD directory exists (e.g. first launch with default notebooks path)
+  mkdirSync(serverCwd, { recursive: true });
+
   // Spawn the server process
   const serverProcess = spawn(serverExecutable, [
     "edit",
     "--no-token",
+    "--no-skew-protection",
     "--headless",
     "--port",
     String(windowInfo.serverPort),
-    notebookPath,
+    resolvedNotebookPath,
   ], {
     stdio: ["ignore", "pipe", "pipe"],
+    cwd: serverCwd,
     env: {
       ...process.env,
       PATH: process.env.PATH || "",

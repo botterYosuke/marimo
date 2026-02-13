@@ -293,7 +293,7 @@ export default defineConfig({
     "process.env.DEBUG": JSON.stringify(process.env.DEBUG ?? ""),
   },
   build: {
-    minify: isDev ? false : "oxc", // default is "oxc"
+    minify: isDev ? false : "oxc",
     sourcemap: isDev,
   },
   resolve: {
@@ -334,6 +334,5 @@ export default defineConfig({
       uploadToken: process.env.CODECOV_TOKEN,
     }),
     wasm(),
-    topLevelAwait(),
   ],
 });

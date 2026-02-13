@@ -57,7 +57,10 @@ class AppFileRouter(abc.ABC):
                 last_modified=file.last_modified,
             )
         ]
-        return ListOfFilesAppFileRouter(files, allow_dynamic=True)
+        directory = os.path.dirname(file.absolute_name)
+        return ListOfFilesAppFileRouter(
+            files, directory=directory, allow_dynamic=True
+        )
 
     @staticmethod
     def from_directory(directory: str) -> AppFileRouter:

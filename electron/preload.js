@@ -117,8 +117,9 @@ delete window.require;
 (() => {
   const params = new URLSearchParams(window.location.search);
   const port = params.get("port");
+  const notebookPath = params.get("notebookPath");
   const mountConfig = {
-    filename: "",
+    filename: notebookPath || "",
     mode: "edit",
     version: "electron",
     config: {},
@@ -143,21 +144,30 @@ delete window.require;
 // Fix HTML template placeholders that the Python server would normally replace.
 // In Electron, we load index.html directly via loadFile(), so {{ title }},
 // {{ filename }} etc. remain as literal strings.
-document.addEventListener('DOMContentLoaded', () => {
-  // Fix {{ title }}
-  if (document.title.includes('{{')) {
-    document.title = 'marimo';
-  }
-  // Fix {{ filename }}
-  const filenameTag = document.querySelector('marimo-filename');
-  if (filenameTag && filenameTag.innerHTML.includes('{{')) {
-    filenameTag.innerHTML = '';
-  }
-  // Set title from notebook path via IPC
-  window.electronAPI.getNotebookPath().then((notebookPath) => {
-    if (notebookPath) {
-      const basename = notebookPath.split(/[/\\]/).pop() || 'Untitled';
+//
+// We use 'readystatechange' (interactive) instead of 'DOMContentLoaded' because:
+// - interactive fires after DOM parsing but BEFORE module scripts execute
+// - DOMContentLoaded fires AFTER module scripts execute
+// - React's file-state.ts reads <marimo-filename> at module level via getFilenameFromDOM()
+// - So we must clear placeholders before module scripts run
+document.addEventListener('readystatechange', () => {
+  if (document.readyState === 'interactive') {
+    const params = new URLSearchParams(window.location.search);
+    const nbPath = params.get("notebookPath");
+
+    // Fix {{ title }}
+    if (document.title.includes('{{')) {
+      document.title = 'marimo';
+    }
+    // Fix {{ filename }} — replace placeholder with actual notebook path
+    const filenameTag = document.querySelector('marimo-filename');
+    if (filenameTag && filenameTag.innerHTML.includes('{{')) {
+      filenameTag.innerHTML = nbPath || '';
+    }
+    // Set window title from notebook path (synchronous, no IPC needed)
+    if (nbPath) {
+      const basename = nbPath.split(/[/\\]/).pop() || 'Untitled';
       document.title = `${basename} - marimo`;
     }
-  });
+  }
 });
