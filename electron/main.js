@@ -190,7 +190,7 @@ async function createNotebookWindow(notebookPath = null) {
   // Handle window close - cleanup this window only
   window.on("closed", () => {
     logInfo(`Window ${windowId} closed, cleaning up...`);
-    stopServerForWindow(windowId);
+    stopServerForWindow(windowId, { sync: true });
     windows.delete(windowId);
   });
 
