@@ -221,6 +221,14 @@ export default defineConfig({
     host: "localhost",
     port: 3000,
     proxy: {
+      "/health": {
+        target: TARGET,
+        changeOrigin: true,
+      },
+      "/healthz": {
+        target: TARGET,
+        changeOrigin: true,
+      },
       "/api": {
         target: TARGET,
         changeOrigin: true,
