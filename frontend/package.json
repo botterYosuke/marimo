@@ -188,7 +188,9 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "ci": "cross-env CI=true run-s lint typecheck test build",
-    "start": "vite",
+    "start": "run-p start:vite start:server",
+    "start:vite": "vite",
+    "start:server": "node ../scripts/start-server.js",
     "dev": "vite",
     "build:watch": "vite build --watch --outDir ../marimo/_static",
     "build": "cross-env vite build",

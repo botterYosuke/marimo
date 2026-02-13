@@ -12,8 +12,14 @@
 
 import { spawn } from "node:child_process";
 import { cpSync, mkdirSync, existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { env, platform } from "node:process";
+
+// Get script directory for resolving relative paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectDir = join(__dirname, "..");
 
 // Determine app data path based on platform
 const appData = platform === "win32"
@@ -22,8 +28,7 @@ const appData = platform === "win32"
 
 // Paths
 const notebookDir = join(appData, "marimo", "notebooks");
-const templateDir = join("frontend", "public", "files");
-const projectDir = process.cwd();
+const templateDir = join(projectDir, "frontend", "public", "files");
 
 // Setup: copy all template files (skip files that already exist)
 console.log(`Syncing templates to ${notebookDir}`);
