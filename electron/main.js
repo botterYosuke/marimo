@@ -2,7 +2,7 @@
 
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import path from "node:path";
-import { spawn, ChildProcess } from "node:child_process";
+import { spawn, execSync, ChildProcess } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
@@ -367,18 +367,38 @@ function startServerForWindow(windowId, notebookPath) {
  * Stop the marimo Python server for a specific window
  * @param {number} windowId - The window ID
  */
-function stopServerForWindow(windowId) {
+function stopServerForWindow(windowId, { sync = false } = {}) {
   const windowInfo = windows.get(windowId);
   if (!windowInfo || !windowInfo.serverProcess) {
     return;
   }
 
-  logInfo(`Stopping marimo server for window ${windowId}...`);
+  const pid = windowInfo.serverProcess.pid;
+  logInfo(`Stopping marimo server for window ${windowId} (pid=${pid}, sync=${sync})...`);
   windowInfo.status = SERVER_STATUS.STOPPED;
 
   // Kill the server process
   if (process.platform === "win32") {
-    spawn("taskkill", ["/pid", String(windowInfo.serverProcess.pid), "/f", "/t"]);
+    if (sync) {
+      try {
+        execSync(`taskkill /pid ${pid} /f /t`, { timeout: 5000 });
+        logInfo(`taskkill succeeded for pid=${pid}`);
+      } catch (error) {
+        logError(`taskkill failed for pid=${pid}`, error);
+      }
+    } else {
+      const killProc = spawn("taskkill", ["/pid", String(pid), "/f", "/t"]);
+      killProc.on("error", (err) => {
+        logError(`taskkill spawn error for pid=${pid}`, err);
+      });
+      killProc.on("exit", (code) => {
+        if (code === 0) {
+          logInfo(`taskkill succeeded for pid=${pid}`);
+        } else {
+          logError(`taskkill exited with code ${code} for pid=${pid}`);
+        }
+      });
+    }
   } else {
     windowInfo.serverProcess.kill("SIGTERM");
   }
@@ -394,9 +414,9 @@ function stopServerForWindow(windowId) {
 /**
  * Stop all servers
  */
-function stopAllServers() {
+function stopAllServers({ sync = false } = {}) {
   for (const [windowId] of windows) {
-    stopServerForWindow(windowId);
+    stopServerForWindow(windowId, { sync });
   }
 }
 
@@ -642,7 +662,7 @@ app.whenReady().then(async () => {
 
 app.on("window-all-closed", () => {
   // Stop all servers when all windows are closed
-  stopAllServers();
+  stopAllServers({ sync: true });
 
   if (process.platform !== "darwin") {
     app.quit();
@@ -663,7 +683,7 @@ app.on("before-quit", () => {
   }
 
   // Ensure all servers are stopped before quitting
-  stopAllServers();
+  stopAllServers({ sync: true });
 });
 
 // Error handling
@@ -673,4 +693,18 @@ process.on("uncaughtException", (error) => {
 
 process.on("unhandledRejection", (reason) => {
   logError("Unhandled rejection", new Error(String(reason)));
+});
+
+// Last resort: kill any remaining marimo-server.exe on process exit
+process.on("exit", () => {
+  if (process.platform === "win32") {
+    try {
+      execSync("taskkill /im marimo-server.exe /f", {
+        timeout: 3000,
+        stdio: "ignore",
+      });
+    } catch (_) {
+      // プロセスが既に終了している場合は無視
+    }
+  }
 });
