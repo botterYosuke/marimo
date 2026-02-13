@@ -337,3 +337,14 @@ for the better.
 <p align="right">
   <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/marimo-logotype-horizontal.png" height="200px">
 </p>
+
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org)
+
+### Team roles and members
+* Committers and reviewers: [botterYosuke](https://github.com/botterYosuke/marimo/graphs/contributors)
+* Approvers: [botterYosuke](https://github.com/botterYosuke)
+
+### Privacy policy
+This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it.
