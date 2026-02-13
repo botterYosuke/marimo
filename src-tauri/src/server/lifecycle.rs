@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::path::Path;
 use std::process::{Command, Stdio};
 use std::time::Duration;
 
@@ -96,8 +95,6 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
     // Capture output
     let stdout = child.stdout.take();
     let stderr = child.stderr.take();
-    let state_clone = app.state::<ServerState>().inner().clone();
-    // We can't clone ServerState directly, so we use app handle
     let app_handle = app.clone();
     super::process::capture_output(stdout, stderr, move |level, msg| {
         let server_state = app_handle.state::<ServerState>();

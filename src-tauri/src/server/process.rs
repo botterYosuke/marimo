@@ -1,5 +1,5 @@
 use std::io::{BufRead, BufReader};
-use std::process::{Child, ChildStderr, ChildStdout, Stdio};
+use std::process::{ChildStderr, ChildStdout};
 use log::{error, info};
 
 /// Capture stdout/stderr from a child process into log callbacks.

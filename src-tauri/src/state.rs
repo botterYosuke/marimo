@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use serde::Serialize;
-use tauri::WebviewWindow;
 
 /// Server information stored as app state.
 pub struct ServerState {
@@ -52,8 +51,9 @@ impl ServerState {
         let mut buf = self.log_buffer.lock().unwrap();
         buf.push(entry);
         // Keep max 1000 entries
-        if buf.len() > 1000 {
-            buf.drain(0..buf.len() - 1000);
+        let to_remove = buf.len().saturating_sub(1000);
+        if to_remove > 0 {
+            buf.drain(0..to_remove);
         }
     }
 }

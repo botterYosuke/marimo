@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use tauri::Manager;
 
 use crate::error::AppError;
-use crate::state::{LogEntry, ServerState, ServerStatus};
+use crate::state::{LogEntry, ServerState};
 use crate::window;
 
 #[tauri::command]
@@ -70,7 +70,7 @@ pub async fn window_open_dialog(app: tauri::AppHandle) -> Result<(), AppError> {
         .blocking_pick_file();
 
     if let Some(path) = file_path {
-        let path_buf = path.path;
+        let path_buf = path.into_path().unwrap();
         window::manager::open_window(&app, Some(&path_buf))
             .map_err(|e| AppError::Window(e.to_string()))?;
     }

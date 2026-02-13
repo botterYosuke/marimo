@@ -29,6 +29,7 @@ pub fn run() {
             commands::window_open_home,
             commands::window_open_dialog,
         ])
+        .menu(|app| window::menu::build_menu(app))
         .setup(|app| {
             let app_handle = app.handle().clone();
 
@@ -87,39 +88,9 @@ pub fn run() {
                     return;
                 }
 
-                // Server is up — open home page window with the server URL
-                let server_state = app_handle_clone.state::<ServerState>();
-                let actual_port = *server_state.port.lock().unwrap();
-
-                // Navigate the initial (hidden) main window to the server URL
-                if let Some(main_window) = app_handle_clone.get_webview_window("main") {
-                    let url = if cfg!(debug_assertions) {
-                        "http://localhost:3000/".to_string()
-                    } else {
-                        format!("http://localhost:{}/", actual_port)
-                    };
-                    info!("Navigating main window to: {}", url);
-
-                    // Inject link intercept JS on page load
-                    let app_for_eval = app_handle_clone.clone();
-                    main_window.on_page_load(move |webview, payload| {
-                        if matches!(
-                            payload.event(),
-                            tauri::WebviewEvent::Loaded
-                        ) {
-                            // Inject link intercept script
-                            let _ = webview.eval(window::manager::LINK_INTERCEPT_JS);
-                        }
-                    });
-
-                    let _ = main_window.navigate(url.parse().unwrap());
-                    let _ = main_window.show();
-
-                    // Track the main window
-                    let window_state = app_handle_clone.state::<WindowState>();
-                    let mut windows = window_state.windows.lock().unwrap();
-                    windows.insert(None, "main".to_string());
-                }
+                // Server is up — open home page window
+                info!("Server started, opening home page...");
+                let _ = window::manager::open_window(&app_handle_clone, None);
 
                 // Start periodic health check
                 let app_for_health = app_handle_clone.clone();
@@ -164,21 +135,17 @@ pub fn run() {
                     let _ = window::manager::open_window(app, None);
                 }
                 "reload" => {
-                    if let Some(win) = app.get_focused_window() {
-                        if let Some(webview) = app.get_webview_window(win.label()) {
-                            let _ = webview.eval("location.reload()");
-                        }
+                    if let Some(win) = app.webview_windows().values().find(|w| w.is_focused().unwrap_or(false)) {
+                        let _ = win.eval("location.reload()");
                     }
                 }
                 "devtools" => {
-                    if let Some(win) = app.get_focused_window() {
-                        if let Some(webview) = app.get_webview_window(win.label()) {
-                            webview.open_devtools();
-                        }
+                    if let Some(win) = app.webview_windows().values().find(|w| w.is_focused().unwrap_or(false)) {
+                        win.open_devtools();
                     }
                 }
                 "fullscreen" => {
-                    if let Some(win) = app.get_focused_window() {
+                    if let Some(win) = app.webview_windows().values().find(|w| w.is_focused().unwrap_or(false)) {
                         if let Ok(is_fullscreen) = win.is_fullscreen() {
                             let _ = win.set_fullscreen(!is_fullscreen);
                         }

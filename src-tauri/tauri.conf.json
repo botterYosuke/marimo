@@ -10,18 +10,10 @@
     "beforeBuildCommand": ""
   },
   "app": {
-    "windows": [
-      {
-        "title": "marimo",
-        "label": "main",
-        "width": 1200,
-        "height": 800,
-        "visible": false
-      }
-    ],
     "security": {
-      "csp": "default-src http://localhost:* ws://localhost:*; script-src http://localhost:* 'unsafe-inline' 'unsafe-eval'; style-src http://localhost:* 'unsafe-inline'; img-src http://localhost:* data: blob:; font-src http://localhost:* data:; connect-src http://localhost:* ws://localhost:* blob:; media-src http://localhost:* blob:; worker-src http://localhost:* blob:"
-    }
+      "csp": "default-src http://localhost:* ws://localhost:*; script-src http://localhost:* 'unsafe-inline' 'unsafe-eval'; style-src http://localhost:* 'unsafe-inline'; img-src http://localhost:* data: blob:; font-src http://localhost:* data:; connect-src http://localhost:* ws://localhost:* blob: data:; media-src http://localhost:* blob:; worker-src http://localhost:* blob:; frame-src http://localhost:* blob:"
+    },
+    "withGlobalTauri": true
   },
   "bundle": {
     "active": true,
@@ -37,6 +29,9 @@
     "windows": {
       "webviewInstallMode": {
         "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "installMode": "perMachine"
       }
     }
   }

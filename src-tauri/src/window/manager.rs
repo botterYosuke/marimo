@@ -1,9 +1,8 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use log::info;
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
-use url::Url;
 
 use crate::state::{ServerState, WindowState};
 
@@ -43,7 +42,8 @@ pub fn open_window(
 
     let url = match file_path {
         Some(path) => {
-            let encoded = urlencoding::encode(&path.to_string_lossy());
+            let path_str = path.to_string_lossy();
+            let encoded = urlencoding::encode(&path_str);
             format!("{}/?file={}", base_url, encoded)
         }
         None => format!("{}/", base_url),
@@ -82,10 +82,11 @@ pub fn open_window(
 
     info!("Creating window '{}' → {}", label, url);
 
-    let window = WebviewWindowBuilder::new(app, &label, WebviewUrl::External(url.parse()?))
+    let _window = WebviewWindowBuilder::new(app, &label, WebviewUrl::External(url.parse()?))
         .title(&title)
         .inner_size(1200.0, 800.0)
         .min_inner_size(600.0, 400.0)
+        .initialization_script(LINK_INTERCEPT_JS)
         .build()?;
 
     // Register navigation handler to intercept external links

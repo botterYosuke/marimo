@@ -162,3 +162,23 @@ docs-serve:
 # 🧩 Start Storybook for UI development
 storybook:
 	pnpm --filter @marimo-team/frontend storybook
+
+####################
+# Tauri Desktop    #
+####################
+
+.PHONY: tauri-dev
+# 🖥️ Start Tauri desktop app in dev mode (requires: marimo edit --no-token --headless --port 2718)
+tauri-dev:
+	cd src-tauri && cargo tauri dev
+
+.PHONY: tauri-build
+# 📦 Build Tauri desktop app for production
+tauri-build:
+	node scripts/download-uv.js
+	cd src-tauri && cargo tauri build
+
+.PHONY: download-uv
+# ⬇️ Download uv binary for Tauri bundling
+download-uv:
+	node scripts/download-uv.js

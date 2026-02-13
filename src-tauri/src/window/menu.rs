@@ -1,5 +1,5 @@
 use tauri::menu::{Menu, MenuItemBuilder, SubmenuBuilder};
-use tauri::{AppHandle, Manager, Wry};
+use tauri::{AppHandle, Wry};
 
 /// Build the application menu.
 /// Minimizes accelerators to avoid conflicts with marimo's hotkey system.

@@ -132,3 +132,9 @@ pixi.lock
 
 # mkdocs
 site
+# Tauri
+src-tauri/target/
+src-tauri/gen/
+src-tauri/binaries/
+src-tauri/build.log
+src-tauri/build_utf8.log
