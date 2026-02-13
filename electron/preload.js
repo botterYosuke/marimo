@@ -123,7 +123,7 @@ delete window.require;
     session: null,
     notebook: null,
     runtimeConfig: port ? [{
-      url: `http://localhost:${port}`,
+      url: process.env.NODE_ENV === "development" ? window.location.origin : `http://localhost:${port}`,
       lazy: false,
     }] : null,
   };

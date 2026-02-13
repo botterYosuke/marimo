@@ -79,7 +79,7 @@ function connectSteam() {
 initSteam();
 
 // Multi-window support: Map<windowId, WindowInfo>
-// WindowInfo = { window, serverProcess, serverPort, notebookPath, status, logs }
+// WindowInfo = { window, serverProcess, serverPort, notebookPath, status, logs, crashCount, lastCrashTime }
 const windows = new Map();
 let nextWindowId = 1;
 let nextPort = 2718;
@@ -138,8 +138,19 @@ const DEFAULT_NOTEBOOK = "wasm-intro.py"; // 起動時のデフォルト
  */
 async function createNotebookWindow(notebookPath = null) {
   const windowId = nextWindowId++;
-  const port = await findAvailablePort(nextPort);
-  nextPort = port + 1; // Update for next window
+  let port;
+  if (app.isPackaged) {
+    try {
+      port = await findAvailablePort(nextPort);
+      nextPort = port + 1;
+    } catch (error) {
+      logError("No available port found", error);
+      dialog.showErrorBox("Server Error", `ポートを確保できませんでした: ${error.message}`);
+      return null;
+    }
+  } else {
+    port = 2718;
+  }
   const actualNotebookPath = notebookPath || getDefaultNotebook();
 
   // Add to recent files history
@@ -169,6 +180,8 @@ async function createNotebookWindow(notebookPath = null) {
     notebookPath: actualNotebookPath,
     status: SERVER_STATUS.STOPPED,
     logs: [],
+    crashCount: 0,
+    lastCrashTime: 0,
   };
   windows.set(windowId, windowInfo);
 
@@ -246,6 +259,9 @@ async function openNotebookInNewWindow(filePath) {
 
   // Create new window
   const windowId = await createNotebookWindow(filePath);
+  if (windowId === null) {
+    return { success: false, error: "ポートを確保できませんでした" };
+  }
   return { success: true, windowId, path: filePath };
 }
 
@@ -353,11 +369,39 @@ function startServerForWindow(windowId, notebookPath) {
 
   serverProcess.on("exit", (code, signal) => {
     logInfo(`Server for window ${windowId} exited with code ${code} and signal ${signal}`);
-    windowInfo.status = SERVER_STATUS.STOPPED;
-    if (windowInfo.window && !windowInfo.window.isDestroyed()) {
-      windowInfo.window.webContents.send("server:status-changed", windowInfo.status);
-    }
     windowInfo.serverProcess = null;
+
+    if (windowInfo.status !== SERVER_STATUS.STOPPED) {
+      // 予期しないクラッシュ
+      windowInfo.status = SERVER_STATUS.ERROR;
+      if (windowInfo.window && !windowInfo.window.isDestroyed()) {
+        windowInfo.window.webContents.send("server:status-changed", windowInfo.status);
+      }
+
+      // クラッシュループ防止
+      const now = Date.now();
+      if (now - windowInfo.lastCrashTime > 30000) {
+        windowInfo.crashCount = 0;
+      }
+      windowInfo.crashCount++;
+      windowInfo.lastCrashTime = now;
+
+      if (windowInfo.crashCount <= 3 && windowInfo.window && !windowInfo.window.isDestroyed()) {
+        logInfo(`Unexpected server exit for window ${windowId}, restarting (attempt ${windowInfo.crashCount}/3)...`);
+        setTimeout(() => {
+          if (windowInfo.window && !windowInfo.window.isDestroyed()) {
+            startServerForWindow(windowId, windowInfo.notebookPath);
+          }
+        }, 2000);
+      } else {
+        logError(`Server for window ${windowId} crashed ${windowInfo.crashCount} times in 30s, giving up`);
+      }
+    } else {
+      // 意図的な停止 — 通知のみ
+      if (windowInfo.window && !windowInfo.window.isDestroyed()) {
+        windowInfo.window.webContents.send("server:status-changed", windowInfo.status);
+      }
+    }
   });
 }
 
@@ -621,7 +665,11 @@ app.whenReady().then(async () => {
   connectSteam();
 
   // Create the first window (server starts inside createNotebookWindow for production)
-  await createNotebookWindow(null);
+  const firstWindowId = await createNotebookWindow(null);
+  if (firstWindowId === null) {
+    app.quit();
+    return;
+  }
 
   // Check server status periodically for all windows
   setInterval(async () => {

@@ -73,6 +73,7 @@ const args = [
   "--project", projectDir,
   "marimo", "edit",
   "--no-token",
+  "--no-skew-protection",
   "--headless",
   "--port", "2718",
   notebookFile
