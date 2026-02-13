@@ -20,42 +20,10 @@ export function getAppRoot() {
 }
 
 /**
- * Get the server directory path
- */
-export function getServerDir() {
-  return path.join(getAppRoot(), "backend");
-}
-
-/**
- * Get the Python runtime directory path
- */
-export function getPythonRuntimeDir() {
-  return path.join(getServerDir(), "python-runtime");
-}
-
-/**
  * Get the user data directory
  */
 export function getUserDataDir() {
   return app.getPath("userData");
-}
-
-/**
- * Get the virtual environment directory path
- */
-export function getVenvDir() {
-  return path.join(getServerDir(), "python-env");
-}
-
-/**
- * Get the Python executable path in the virtual environment
- */
-export function getVenvPythonPath() {
-  const venvDir = getVenvDir();
-  if (process.platform === "win32") {
-    return path.join(venvDir, "Scripts", "python.exe");
-  }
-  return path.join(venvDir, "bin", "python3");
 }
 
 /**
@@ -68,4 +36,14 @@ export function getMarimoServerExecutable() {
     return path.join(appRoot, "marimo-server.exe");
   }
   return path.join(appRoot, "marimo-server");
+}
+
+/**
+ * Normalize file path for comparison (handles Windows case-insensitivity and slashes)
+ * @param {string} filePath - The file path to normalize
+ * @returns {string} Normalized path
+ */
+export function normalizePathForComparison(filePath) {
+  const normalized = path.normalize(filePath);
+  return process.platform === "win32" ? normalized.toLowerCase() : normalized;
 }

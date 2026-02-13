@@ -61,7 +61,6 @@ interface ElectronAPI {
     callback: (status: "running" | "stopped" | "starting" | "error") => void,
   ) => () => void;
   getServerLogs: () => Promise<ElectronServerLog[]>;
-  openNotebook: (filePath: string) => Promise<ElectronOpenNotebookResult>;
   openNotebookInNewWindow: (
     filePath: string,
   ) => Promise<ElectronOpenNotebookResult>;
