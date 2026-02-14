@@ -1,39 +1,42 @@
 import marimo
 
-__generated_with = "0.9.10"
-app = marimo.App(width="full")
+__generated_with = "0.19.11"
+app = marimo.App(width="grid")
 
 
 @app.cell
-def __():
+def _():
     import marimo as mo
     import duckdb
+
     return duckdb, mo
 
 
 @app.cell
-def __(duckdb):
+def _(duckdb):
     duckdb.sql(
         "ATTACH 'md:_share/sample_data/23b0d623-1361-421d-ae77-62d701d471e6' AS sample_data"
     )
-    return (sample_data,)
-
-
-@app.cell
-def __(mo):
-    mo.md(r"""## Reactive SQL""")
     return
 
 
 @app.cell
-def __(mo):
+def _(mo):
+    mo.md(r"""
+    ## Reactive SQL
+    """)
+    return
+
+
+@app.cell
+def _(mo):
     last_x_months = mo.ui.slider(24, 30, label="Last x months")
     last_x_months
     return (last_x_months,)
 
 
 @app.cell
-def __(last_x_months, mo):
+def _(last_x_months, mo):
     recent_hacker_news = mo.sql(
         f"""
         FROM sample_data.hn.hacker_news 
@@ -45,7 +48,7 @@ def __(last_x_months, mo):
 
 
 @app.cell
-def __(mo, recent_hacker_news):
+def _(mo, recent_hacker_news):
     aggregations = mo.sql(
         f"""
         SELECT 
@@ -54,17 +57,19 @@ def __(mo, recent_hacker_news):
         FROM recent_hacker_news WHERE score IS NOT NULL;
         """
     )
-    return (aggregations,)
-
-
-@app.cell
-def __(mo):
-    mo.md(r"""## Mix and match Python""")
     return
 
 
 @app.cell
-def __(mo, sample_data, service_requests):
+def _(mo):
+    mo.md(r"""
+    ## Mix and match Python
+    """)
+    return
+
+
+@app.cell
+def _(mo):
     agency_tickets = mo.sql(
         f"""
         SELECT 
@@ -80,7 +85,7 @@ def __(mo, sample_data, service_requests):
 
 
 @app.cell
-def __(agency_tickets):
+def _(agency_tickets):
     import altair as alt
 
     scale = alt.Scale(type="sqrt")
@@ -96,7 +101,7 @@ def __(agency_tickets):
         x=alt.X("open_count", scale=scale)
     )
     chart_closed + chart_open
-    return alt, base, chart_closed, chart_open, scale
+    return
 
 
 if __name__ == "__main__":

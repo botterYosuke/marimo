@@ -60,6 +60,11 @@ export interface SerializedGridLayoutCell {
    * The cell's alignment.
    */
   side?: GridLayoutCellSide;
+
+  /**
+   * The cell's 3D position for 3D mode.
+   */
+  position3D?: { x: number; y: number; z: number };
 }
 
 export type GridLayoutCellSide = "top" | "left" | "right" | "bottom";

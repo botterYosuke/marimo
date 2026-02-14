@@ -6,6 +6,7 @@ import { assertExists } from "@/utils/assertExists";
 import { invariant } from "@/utils/invariant";
 import type { CellId } from "./cells/ids";
 import { store } from "./state/jotai";
+import { repl } from "@/utils/repl";
 
 /**
  * This is the internal mode.
@@ -79,3 +80,14 @@ export const viewStateAtom = atom<ViewState>({
 export const initialModeAtom = atom<AppMode | undefined>(undefined);
 
 export const kioskModeAtom = atom<boolean>(false);
+
+/**
+ * 3Dモードの状態を管理するatom
+ * true: 3Dモード有効（edit時のみ）
+ */
+export const is3DModeAtom = atom<boolean>(true);
+
+function setIs3DMode(value: boolean) {
+  store.set(is3DModeAtom, value);
+}
+repl(setIs3DMode, "setIs3DMode");
