@@ -989,3 +989,152 @@ if let Some(path) = file_path {
 - ✅ F11 キーでフルスクリーン切り替え — PASS
 - ✅ View → Toggle Fullscreen メニュークリック — PASS
 - ✅ `cargo check` エラーゼロ・warning ゼロ
+
+### Phase 10: NSIS インストーラー版の起動不能デバッグ ✅
+
+**状況**: NSIS インストーラー (`marimo_0.1.0_x64-setup.exe`) でインストール後、アプリが起動しない問題を特定・修正。
+
+#### 問題の発見
+
+NSIS インストーラーのビルドは成功し、インストール自体も問題なく完了した。しかし、インストール後にアプリを起動しても**ウィンドウが表示されず、何も起きない**状態だった。
+
+#### 根本的な障壁: リリースビルドではログが見えない
+
+`main.rs:2` の `#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]` により、リリースビルドではコンソールウィンドウが非表示。`env_logger` の出力は stderr に送られるが、コンソールがないため**全てのログが見えない**。これがデバッグの最大の障壁だった。
+
+#### デバッグ手法: ファイルベースのデバッグログ
+
+`%LOCALAPPDATA%\com.marimo.desktop\logs\debug.log` にファイル出力する `debug_log()` 関数を一時的に追加し、起動シーケンスの各チェックポイントでログを記録した。
+
+```rust
+// デバッグ用に一時追加した関数（修正完了後に削除済み）
+pub fn debug_log(msg: &str) {
+    use std::io::Write;
+    let base = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
+    let log_dir = std::path::PathBuf::from(&base)
+        .join("com.marimo.desktop").join("logs");
+    let _ = std::fs::create_dir_all(&log_dir);
+    let log_file = log_dir.join("debug.log");
+    if let Ok(mut f) = std::fs::OpenOptions::new()
+        .create(true).append(true).open(&log_file) {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap_or_default();
+        let _ = writeln!(f, "[{}] {}", now.as_secs(), msg);
+    }
+}
+```
+
+#### 仮説と検証結果
+
+**仮説 1: `uv.exe` のリソースパス解決失敗** — 否定
+- ログ: `uv_bin exists: true` — バンドルされた `uv.exe` は正しく見つかった
+
+**仮説 2: 環境ブートストラップのサイレント失敗** — 否定
+- ログ: `Bootstrap: SUCCESS` — Python 検出、venv 作成、marimo インストール全て成功
+
+**仮説 3: サーバープロセスの起動失敗** — **的中 (3 つの原因を段階的に特定)**
+
+#### ✅ 修正 1: Python プロセスの cwd 未設定（原因特定: 1 回目のデバッグ実行）
+
+**問題**: `Command::new(&venv_python)` に `.current_dir()` が設定されていないため、親プロセスの cwd を継承。cwd が marimo ソースリポジトリの場合、Python が venv の marimo ではなく**ローカルの開発用 marimo ソース**をインポートし、依存ライブラリ (`msgspec`) が見つからずクラッシュ。
+
+```
+ModuleNotFoundError: No module named 'msgspec'
+# File "c:\Users\sasai\Documents\marimo\marimo\__init__.py" ← 開発ソースを誤インポート
+```
+
+**修正** (`lifecycle.rs`):
+```rust
+let home_dir = std::env::var("USERPROFILE")
+    .unwrap_or_else(|_| std::env::var("HOME").unwrap_or_else(|_| ".".to_string()));
+
+Command::new(&venv_python)
+    .args([...])
+    .current_dir(&home_dir)  // ← 追加: ユーザーホームを cwd に設定
+    ...
+```
+
+#### ✅ 修正 2: 存在しない CLI オプション `--no-skew-protection`（原因特定: 2 回目のデバッグ実行）
+
+**問題**: marimo 0.13.0 には `--no-skew-protection` オプションが存在しない。サーバーが `Error: No such option: --no-skew-protection` で即座に終了。
+
+**修正** (`lifecycle.rs`): コマンド引数から `"--no-skew-protection"` を削除。
+
+```rust
+// 修正前
+.args(["-m", "marimo", "edit", "--no-token", "--no-skew-protection", "--headless", ...])
+// 修正後
+.args(["-m", "marimo", "edit", "--no-token", "--headless", ...])
+```
+
+> **補足**: このレポートの Phase 3 セクション 3.4 にも `--no-skew-protection` が記載されているが、これは marimo の開発版 (HEAD) で追加されたオプションであり、リリース版 0.13.0 には含まれない。将来 marimo がこのオプションを公式リリースに含めた場合は再追加を検討。
+
+#### ✅ 修正 3: Windows GUI アプリでの stdout エンコーディング問題（原因特定: 3 回目のデバッグ実行）
+
+**問題の連鎖**:
+1. `windows_subsystem = "windows"` の GUI アプリから spawn された Python プロセスは、コンソールがないため stdout のエンコーディングがシステムデフォルト (cp932 等) になる
+2. marimo の `click.echo()` がカラー出力や絵文字を含むスタートアップメッセージを stdout に書き込む
+3. Rust 側の `BufReader::lines()` が非 UTF-8 バイトを検出してエラーを返し、`break` でパイプの read 側を閉じる
+4. Python 側で `stdout.flush()` が `OSError: [Errno 22] Invalid argument` を発生させサーバークラッシュ
+
+```
+OSError: [Errno 22] Invalid argument
+  File "...\click\utils.py", line 322, in echo
+    file.flush()
+ERROR: Application startup failed. Exiting.
+```
+
+**修正 (2 箇所)**:
+
+1. `lifecycle.rs` — Python プロセスの環境変数に UTF-8 強制を追加:
+```rust
+env.insert("PYTHONIOENCODING".into(), "utf-8".into());
+env.insert("PYTHONUNBUFFERED".into(), "1".into());
+```
+
+2. `process.rs` — `BufReader::lines()` を lossy UTF-8 対応の `read_lines_lossy()` に置換:
+```rust
+fn read_lines_lossy<R: Read>(reader: R) -> impl Iterator<Item = String> {
+    let mut inner = BufReader::new(reader);
+    let mut bytes = Vec::new();
+    std::iter::from_fn(move || {
+        bytes.clear();
+        match inner.read_until(b'\n', &mut bytes) {
+            Ok(0) => None,
+            Ok(_) => {
+                while bytes.last() == Some(&b'\n') || bytes.last() == Some(&b'\r') {
+                    bytes.pop();
+                }
+                Some(String::from_utf8_lossy(&bytes).into_owned())
+            }
+            Err(_) => None,
+        }
+    })
+}
+```
+
+#### 修正後の動作確認
+
+リリースビルド exe を直接実行し、`/healthz` エンドポイントが `{"status":"healthy"}` を返すことを確認:
+
+```
+$ curl -s http://localhost:2718/healthz
+{"status":"healthy"}
+```
+
+サーバーが正常に起動し、ホームページウィンドウが表示された。
+
+#### 変更対象ファイルまとめ
+
+| ファイル | 変更内容 |
+|---------|---------|
+| `src-tauri/src/server/lifecycle.rs` | `.current_dir()` 追加、`--no-skew-protection` 削除、`PYTHONIOENCODING`/`PYTHONUNBUFFERED` 環境変数追加 |
+| `src-tauri/src/server/process.rs` | `BufReader::lines()` を `read_lines_lossy()` に置換（非 UTF-8 出力への耐性） |
+
+#### 設計知見 (Tips)
+
+31. **リリースビルドのデバッグにはファイルログが必須**: `windows_subsystem = "windows"` により stderr は見えない。`env_logger` は開発モードでのみ有用。プロダクションのデバッグには `%LOCALAPPDATA%` 等へのファイル出力ログを一時的に追加する手法が有効
+32. **Python プロセス spawn 時の `current_dir` 設定は必須**: `python -m <module>` は cwd をモジュール検索パスに含める。cwd にソースリポジトリがあるとローカルパッケージを誤インポートする。NSIS インストール後は `Program Files` が cwd になるため問題が顕在化しにくいが、開発ビルドの直接実行でハマる
+33. **Windows GUI アプリから spawn した Python の `PYTHONIOENCODING=utf-8` は必須**: コンソールなしの GUI アプリでは Python の stdio エンコーディングがシステムロケール依存になる。`click.echo()` 等のライブラリが非 ASCII 文字 (カラーコード、絵文字) を出力すると Rust 側の UTF-8 パイプリーダーが破断し、Python 側で `stdout.flush()` が `OSError` で失敗する。`PYTHONUNBUFFERED=1` も併せて設定するとバッファリング起因の問題も防げる
+34. **`BufReader::lines()` は非 UTF-8 に脆弱**: 子プロセスの stdout/stderr を読む際、`lines()` は無効な UTF-8 で `Err` を返す。`break` で read ループを中断するとパイプの read 側が閉じ、子プロセスの write が失敗する連鎖障害を引き起こす。`read_until(b'\n')` + `String::from_utf8_lossy()` の組み合わせで耐性のある読み取りを実装すること
+35. **marimo の CLI オプションはバージョン依存**: `--no-skew-protection` は開発版にのみ存在し、0.13.0 リリースには含まれない。`MARIMO_VERSION` で指定したバージョンのオプション互換性を確認すること。`marimo edit --help` でオプション一覧を検証できる
