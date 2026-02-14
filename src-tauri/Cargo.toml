@@ -20,6 +20,9 @@ url = "2"
 urlencoding = "2"
 thiserror = "2"
 
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
