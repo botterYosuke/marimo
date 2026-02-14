@@ -35,7 +35,7 @@ pub fn open_window(
 
     // Build URL
     let base_url = if cfg!(debug_assertions) {
-        "http://localhost:3000".to_string()
+        "http://localhost:2718".to_string()
     } else {
         format!("http://localhost:{}", port)
     };
@@ -156,20 +156,27 @@ pub const LINK_INTERCEPT_JS: &str = r#"
         if (url.origin !== window.location.origin) {
             // External link → open in system browser
             e.preventDefault();
+            e.stopPropagation();
             if (window.__TAURI_INTERNALS__) {
-                window.__TAURI_INTERNALS__.invoke('plugin:shell|open', { path: url.href });
+                window.__TAURI_INTERNALS__.invoke('plugin:shell|open', { path: url.href })
+                    .catch(err => console.error('[marimo-link-intercept] shell open failed:', err));
+            } else {
+                console.warn('[marimo-link-intercept] __TAURI_INTERNALS__ not available');
             }
             return;
         }
 
         // Same-origin with target → open in new window
         e.preventDefault();
+        e.stopPropagation();
         const filePath = url.searchParams.get('file');
 
         if (window.__TAURI_INTERNALS__) {
             window.__TAURI_INTERNALS__.invoke('window_open_notebook', {
                 filePath: filePath || null
-            });
+            }).catch(err => console.error('[marimo-link-intercept] window_open_notebook failed:', err));
+        } else {
+            console.warn('[marimo-link-intercept] __TAURI_INTERNALS__ not available');
         }
     }, true);
 

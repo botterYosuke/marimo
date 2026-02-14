@@ -5,7 +5,7 @@
   "identifier": "com.marimo.desktop",
   "build": {
     "frontendDist": "../frontend/dist",
-    "devUrl": "http://localhost:3000",
+    "devUrl": "http://localhost:2718",
     "beforeDevCommand": "",
     "beforeBuildCommand": ""
   },

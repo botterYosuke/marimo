@@ -45,18 +45,29 @@ pub async fn server_restart(app: tauri::AppHandle) -> Result<String, AppError> {
 }
 
 #[tauri::command]
-pub fn window_open_notebook(
+pub async fn window_open_notebook(
     app: tauri::AppHandle,
     file_path: Option<String>,
 ) -> Result<(), AppError> {
     let path = file_path.map(PathBuf::from);
-    window::manager::open_window(&app, path.as_deref())
-        .map_err(|e| AppError::Window(e.to_string()))
+    let app_clone = app.clone();
+    app.run_on_main_thread(move || {
+        if let Err(e) = window::manager::open_window(&app_clone, path.as_deref()) {
+            log::error!("Failed to open notebook window: {}", e);
+        }
+    })
+    .map_err(|e| AppError::Window(e.to_string()))
 }
 
 #[tauri::command]
-pub fn window_open_home(app: tauri::AppHandle) -> Result<(), AppError> {
-    window::manager::open_window(&app, None).map_err(|e| AppError::Window(e.to_string()))
+pub async fn window_open_home(app: tauri::AppHandle) -> Result<(), AppError> {
+    let app_clone = app.clone();
+    app.run_on_main_thread(move || {
+        if let Err(e) = window::manager::open_window(&app_clone, None) {
+            log::error!("Failed to open home window: {}", e);
+        }
+    })
+    .map_err(|e| AppError::Window(e.to_string()))
 }
 
 #[tauri::command]
