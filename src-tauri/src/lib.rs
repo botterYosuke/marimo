@@ -135,20 +135,21 @@ pub fn run() {
                     let _ = window::manager::open_window(app, None);
                 }
                 "reload" => {
-                    if let Some(win) = app.webview_windows().values().find(|w| w.is_focused().unwrap_or(false)) {
+                    let windows = app.webview_windows();
+                    let win = windows.values()
+                        .find(|w| w.is_focused().unwrap_or(false))
+                        .or_else(|| windows.values().next());
+                    if let Some(win) = win {
                         let _ = win.eval("location.reload()");
                     }
                 }
                 "devtools" => {
-                    if let Some(win) = app.webview_windows().values().find(|w| w.is_focused().unwrap_or(false)) {
+                    let windows = app.webview_windows();
+                    let win = windows.values()
+                        .find(|w| w.is_focused().unwrap_or(false))
+                        .or_else(|| windows.values().next());
+                    if let Some(win) = win {
                         win.open_devtools();
-                    }
-                }
-                "fullscreen" => {
-                    if let Some(win) = app.webview_windows().values().find(|w| w.is_focused().unwrap_or(false)) {
-                        if let Ok(is_fullscreen) = win.is_fullscreen() {
-                            let _ = win.set_fullscreen(!is_fullscreen);
-                        }
                     }
                 }
                 _ => {}

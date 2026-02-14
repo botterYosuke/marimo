@@ -674,11 +674,11 @@ scripts/download-uv && cd src-tauri && cargo tauri build
 - [ ] LSP 補完が動作する
 - [ ] メニューのショートカットが marimo エディタのホットキーと競合しない
 - [ ] ホームページの「Server Shutdown」で全ウィンドウが閉じてアプリが終了する
-- [ ] 初回起動時に Python 未インストール環境で自動セットアップが完了する
+- [x] 初回起動時に Python 未インストール環境で自動セットアップが完了する → ✅ プロダクションビルド手動テスト PASS
 - [ ] 初回起動時にスプラッシュ画面で進捗が表示される
-- [ ] 2回目以降の起動が高速（venv 再構築なし）
+- [x] 2回目以降の起動が高速（venv 再構築なし）→ ✅ プロダクションビルド手動テスト PASS
 - [ ] marimo バージョン更新時に自動的に新バージョンがインストールされる
-- [ ] venv 内の Python で pip/uv パッケージインストールが正常に動作する
+- [x] venv 内の Python で pip/uv パッケージインストールが正常に動作する → ✅ プロダクションビルド手動テスト PASS
 - [ ] macOS ドックアイコンクリックでウィンドウ復帰する
 - [ ] クロスプラットフォーム: Windows/macOS/Linux でビルド・起動が成功する
 - [ ] ファイルアップロード (ドラッグ&ドロップ) が動作する (ギャップ分析 #1)
@@ -829,14 +829,14 @@ cd src-tauri && CARGO_TARGET_DIR="C:\Users\sasai\cargo-target-marimo" cargo taur
 - [x] ホームページが表示されるか → ✅ 表示確認済み
 - [x] メニュー (File/Edit/View) が表示されるか → ✅ スクリーンショットで確認済み
 - [x] 「Create a new notebook」で新しいウィンドウが開くか → ✅ Playwright E2E テスト PASS
-- [ ] ノートブッククリックで新しいウィンドウが開くか (リンクインターセプト動作) → 未テスト（ホームページに既存ノートブックが表示されている場合のみテスト可能）
+- [x] ノートブッククリックで新しいウィンドウが開くか (リンクインターセプト動作) → ✅ 手動テスト PASS
 - [x] セル実行が動作するか → ✅ E2E テスト PASS (`cell-execution.spec.ts`)
 - [x] ホットキー競合がないか (Ctrl+S, Ctrl+Enter 等がエディタに届くか) → ✅ セル実行テストで Ctrl+Enter 検証 PASS
-- [ ] 全ウィンドウ閉じるとアプリが終了するか → 手動テストのみ（E2E では CDP 切断になるため）
+- [x] 全ウィンドウ閉じるとアプリが終了するか → ✅ 手動テスト PASS
 - [x] 外部リンク (Documentation, GitHub, Community 等) がシステムブラウザで開くか → ✅ E2E テスト PASS (`external-links.spec.ts`)
-- [ ] F12 で DevTools が開くか → 手動テストのみ
+- [x] F12 で DevTools が開くか → ✅ 手動テスト PASS
 - [x] F5 でページリロードが動作するか → ✅ E2E テスト PASS (`reload.spec.ts`)
-- [ ] F11 でフルスクリーン切り替えが動作するか → 手動テストのみ
+- [x] F11 フルスクリーン → 削除済み（WebView2 との F11 キー競合のため機能自体を削除。View メニューから Toggle Fullscreen も削除）
 - [x] ウィンドウ重複排除（同一パスで既存ウィンドウにフォーカス）→ ✅ E2E テスト PASS (`window-deduplication.spec.ts`)
 - [x] 異なるパスで別ウィンドウが作成される → ✅ E2E テスト PASS (`window-deduplication.spec.ts`)
 
