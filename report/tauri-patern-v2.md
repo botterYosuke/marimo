@@ -1288,9 +1288,12 @@ Command::new(uv_bin).args(["pip", "install", "--python", ..., marimo_source])
 3. `session_manager.py:183`: `create_session()` で `register_allowed_file()` 呼び出し
 4. `ws_endpoint.py:395-407`: `except HTTPException` ハンドラ
 
-**修正 2: `commands.rs` — ファイルパスの絶対パス正規化**
+**修正 2: `commands.rs` — ファイルパスの絶対パス正規化** ⚠️ **Phase 14 で撤回**
+
+> **注意**: この修正は Phase 11 で `marimo edit <notebooks_dir>` を導入した後、`current_dir()` と `notebooks_dir` が一致しなくなり壊れた。Phase 14 で Rust 側のパス解決を全面撤廃し、Python バックエンドに委譲する方式に変更。詳細は Phase 14 を参照。
 
 ```rust
+// ⚠️ Phase 14 で撤回済み — current_dir() は Tauri アプリでは不定
 let path = file_path.map(|p| {
     let pb = PathBuf::from(&p);
     if pb.is_relative() {
@@ -1367,14 +1370,180 @@ Production ビルド（`cargo tauri build`）→ NSIS インストーラー → 
     - debug_log: `%LOCALAPPDATA%\com.marimo.desktop\logs\debug.log`
     - 完全リセット: `Remove-Item -Recurse -Force "$env:APPDATA\com.marimo.desktop\marimo-env"`
 
-44. **Tauri コマンドに渡されるファイルパスは相対パスの可能性がある**: フロントエンドの `window.open()` やリンクインターセプターから渡されるファイルパスは相対パスの場合がある。Rust 側で絶対パスに変換する:
+44. **~~Rust 側で絶対パスに変換する~~ → Rust はパス解決しない (Phase 14 で撤回)**: フロントエンドから渡されるファイルパスは相対パスの場合がある。しかし `std::env::current_dir()` は Tauri アプリでは不定（開発: `src-tauri/`、本番: `C:\WINDOWS\system32\` 等）。**Rust はパスをそのまま Python に渡し、Python の `LazyListOfFilesAppFileRouter.resolve_file_path()` が自身の `_directory` 基準で解決する**:
     ```rust
-    if pb.is_relative() {
-        std::env::current_dir().unwrap_or_default().join(pb)
-    }
+    // ✅ 正しい — Python に委譲
+    let path = file_path.map(PathBuf::from);
+
+    // ❌ 間違い — current_dir() は不定
+    // if pb.is_relative() { std::env::current_dir().unwrap_or_default().join(pb) }
     ```
 
 45. **ローカル marimo から PyPI に戻す方法**: PyPI の次バージョンで Windows 対応が入った場合、`bootstrap.rs` を `&format!("marimo=={}", NEW_VERSION)` に戻し、`version.rs` を更新、`venv` を削除してクリーンインストール
+
+---
+
+### Phase 13: 子プロセスのコンソールウィンドウ非表示 ✅
+
+- **状況**: ✅ 完了
+
+#### 問題
+
+Tauri デスクトップアプリを起動すると、タイトルバーに `C:\Users\sasai\AppData\Roaming\com.marimo.desktop\marimo-env\Scripts\python.exe` と表示されるコンソールウィンドウが表示される。`uv` コマンド実行時にも同様のウィンドウが一瞬表示される。
+
+#### 原因
+
+`main.rs` の `#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]` は Tauri 本体プロセスのコンソールを抑制するが、`std::process::Command::new()` で生成される子プロセスには効かない。Windows では子プロセスごとに新しいコンソールウィンドウが割り当てられる。
+
+#### 修正
+
+Windows API の `CREATE_NO_WINDOW` フラグ (`0x08000000`) を全ての `Command::new()` に設定。Rust 標準ライブラリの `std::os::windows::process::CommandExt` トレイトを使用し、外部クレート不要。
+
+**ヘルパー関数** (両ファイルに追加):
+```rust
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
+/// Apply CREATE_NO_WINDOW flag so child processes don't spawn a console window.
+#[cfg(windows)]
+fn no_window(cmd: &mut Command) -> &mut Command {
+    cmd.creation_flags(0x08000000)
+}
+
+#[cfg(not(windows))]
+fn no_window(cmd: &mut Command) -> &mut Command {
+    cmd
+}
+```
+
+| ファイル | 箇所 | 対象コマンド |
+|---------|------|------------|
+| `src-tauri/src/server/lifecycle.rs` | line 102 | `Command::new(&venv_python)` — marimo サーバー起動 |
+| `src-tauri/src/server/lifecycle.rs` | line 222 | `Command::new("taskkill")` — プロセス停止 |
+| `src-tauri/src/environment/bootstrap.rs` | line 62 | `Command::new(uv_bin)` — venv 作成 |
+| `src-tauri/src/environment/bootstrap.rs` | line 94 | `Command::new(uv_bin)` — marimo インストール |
+| `src-tauri/src/environment/bootstrap.rs` | line 117 | `Command::new(uv_bin)` — Python 検索 |
+| `src-tauri/src/environment/bootstrap.rs` | line 136 | `Command::new(uv_bin)` — Python インストール |
+
+**使用パターン** — メソッドチェーンを分割して `no_window()` を挿入:
+```rust
+// Before:
+let mut child = Command::new(&venv_python)
+    .args([...])
+    .stdout(Stdio::piped())
+    .spawn()?;
+
+// After:
+let mut cmd = Command::new(&venv_python);
+cmd.args([...])
+    .stdout(Stdio::piped());
+no_window(&mut cmd);
+let mut child = cmd.spawn()?;
+```
+
+taskkill は既に `#[cfg(windows)]` ブロック内のため、`.creation_flags(0x08000000)` を直接呼び出し。
+
+#### 設計知見 (Tips)
+
+46. **`windows_subsystem = "windows"` は子プロセスに効かない**: Tauri 本体の PE ヘッダを GUI サブシステムに設定するだけ。`Command::new()` で起動する子プロセスには別途 `CREATE_NO_WINDOW` フラグが必要
+
+47. **`CREATE_NO_WINDOW` (0x08000000) は `std::os::windows::process::CommandExt` で設定する**: 外部クレート不要。`#[cfg(windows)]` と `#[cfg(not(windows))]` のペアでクロスコンパイル対応
+
+48. **ヘルパー関数パターンでプラットフォーム分岐を局所化する**: `no_window()` 関数を定義し、各 `Command` に呼ぶだけで全箇所に適用。メソッドチェーンの分割が必要だが、可読性は十分
+
+---
+
+### Phase 14: パス解決ロジックの根本見直し — `current_dir()` 撤廃 ✅
+
+- **状況**: ✅ 完了
+
+#### 問題
+
+2 つのバグが発生:
+
+1. **「Create a new notebook」クリック → 404**: `__new__s_xxx` が `current_dir()\__new__s_xxx` に変換され、Python の `startswith("__new__")` チェックを通過できない
+2. **Recent notebooks クリック → 404**: `sss.py` が `current_dir()\sss.py` に変換され、Python がファイルを発見できない
+
+エラーメッセージ:
+- 開発: `{"detail":"File C:\\Users\\sasai\\Documents\\marimo\\src-tauri\\sss.py not found"}`
+- 本番: `{"detail":"File C:\\WINDOWS\\system32\\sss.py not found"}`
+
+#### 原因
+
+Phase 12 で導入した `commands.rs` のパス正規化が、Phase 11 の `notebooks_dir` 導入により壊れた。
+
+**Phase 12 時点**: `marimo edit` にディレクトリ引数なし → Python の `file_router.directory` = `os.getcwd()` = HOME → フロントエンドが返す相対パスは HOME 基準の長いパス (`Documents\marimo\examples\...`) → `current_dir()` = HOME → **偶然一致**
+
+**Phase 11 以降**: `marimo edit <notebooks_dir>` → Python の `file_router.directory` = `notebooks_dir` → フロントエンドが返す相対パスは `notebooks_dir` 基準 (`sss.py`) → `current_dir()` ≠ `notebooks_dir` → **不一致で 404**
+
+根本原因: **`std::env::current_dir()` は Tauri アプリでは不定** (開発: `src-tauri/`、本番: `C:\WINDOWS\system32\` 等)。パス解決の基準として使用してはならない。
+
+#### パスの流れ (修正前)
+
+```
+Python recents.py: 絶対パス保存 (C:\Users\sasai\AppData\Roaming\marimo\notebooks\sss.py)
+    ↓ get_recents(notebooks_dir) で相対化
+Python API → Frontend: "sss.py" (notebooks_dir からの相対パス)
+    ↓ LINK_INTERCEPT_JS が ?file=sss.py を抽出
+Tauri IPC: window_open_notebook({ filePath: "sss.py" })
+    ↓ commands.rs が current_dir() と結合 ← ★ ここが壊れていた
+Rust → open_window: C:\...\src-tauri\sss.py (間違った絶対パス)
+    ↓ URL: ?file=C%3A%5C...%5Csrc-tauri%5Csss.py
+Python file_router: os.path.exists() → False → 404
+```
+
+#### 修正
+
+| ファイル | 変更内容 |
+|---------|---------|
+| `src-tauri/src/commands.rs` | パス解決ロジック全面撤廃 → `file_path.map(PathBuf::from)` |
+
+**修正方針**: Rust はパス解決せず、フロントエンドから渡された文字列をそのまま Python に渡す。
+
+```rust
+// 修正前 (Phase 12) — current_dir() は不定
+let path = file_path.map(|p| {
+    let pb = PathBuf::from(&p);
+    if pb.is_relative() {
+        std::env::current_dir().unwrap_or_default().join(pb)
+    } else {
+        pb
+    }
+});
+
+// 修正後 (Phase 14) — Python に委譲
+let path = file_path.map(PathBuf::from);
+```
+
+**Python 側が全ケースを正しく処理する**:
+- `__new__s_xxx` → `file_router.py:342` の `startswith("__new__")` で新規ノートブック判定
+- `sss.py` (相対) → `file_router.py:350-351` の `directory / filepath` で `notebooks_dir` 基準に解決
+- `C:\...\sss.py` (絶対) → そのまま `os.path.exists()` で検証
+
+中間の `notebooks_dir` 解決方式（`paths::get_notebooks_dir(&app).join(pb)`）も試したが、**開発モードでは Python サーバーが外部起動されるため `notebooks_dir` と実際のサーバーディレクトリが一致しない**。Python に委譲する方式のみが dev/prod 両方で正しく動作する。
+
+#### 設計知見 (Tips)
+
+49. **Tauri の Rust 層はパス解決しない**: `std::env::current_dir()` は Tauri アプリでは不定。パス解決は Python バックエンドの `LazyListOfFilesAppFileRouter.resolve_file_path()` に完全に委譲する。Rust は `PathBuf::from()` で文字列→パス変換のみ行い、解決・正規化はしない
+
+50. **`current_dir` と `marimo edit` 引数と `file_router.directory` の三者関係**:
+    - `current_dir` = HOME → Python import パス安全 (`sys.path[0]`)
+    - `marimo edit` 引数 = `notebooks_dir` → ファイルスキャン対象
+    - `file_router.directory` = `marimo edit` 引数と同値 → 相対パス解決の基準
+    Rust の `current_dir()` はこの三者のいずれとも一致しない
+
+51. **Phase 間の前提の崩壊に注意**: Phase 12 の `current_dir()` パターンは Phase 11 以前の「ディレクトリ引数なし」前提で成立していた。Phase 11 で前提が変わったが、当時テストしたフロー (ファイル一覧→クリック) では問題が顕在化せず、Recent notebooks フローで初めて発覚した
+
+52. **`cargo clean` 後のフルビルドで確認する**: Cargo のインクリメンタルビルドは `commands.rs` の変更を反映しない場合がある。パス解決ロジックの変更後は `cargo clean && cargo tauri build` で確実にクリーンビルドすること。今回も修正済みソースで `cargo tauri build` したがキャッシュが残り本番で `C:\WINDOWS\system32\` が再発、`cargo clean` 後のリビルドで解消した
+
+#### 検証結果
+
+Production ビルド（`cargo clean` → `cargo tauri build`）→ NSIS インストーラー → インストール → 起動:
+
+1. ✅ 「Create a new notebook」クリック → 新しいウィンドウで空のノートブックが開く
+2. ✅ 新規ノートブック作成 → 保存 → ホーム画面の Recent notebooks に表示
+3. ✅ Recent notebooks クリック → 保存したノートブックが正しく開く
+4. ✅ File → Open で既存ファイルを開く動作が正常
 
 ---
 
@@ -1400,12 +1569,12 @@ src-tauri/src/
 ├── main.rs               # エントリーポイント
 ├── lib.rs                # Tauri Builder + setup + メニュー/ウィンドウイベント
 ├── state.rs              # ServerState, WindowState, ServerStatus
-├── commands.rs           # IPC コマンド（パス正規化含む）
+├── commands.rs           # IPC コマンド（パス解決は Python に委譲）
 ├── error.rs              # AppError 型
 ├── paths.rs              # uv, venv, Python, log, notebooks パス解決
 ├── server/
 │   ├── mod.rs
-│   ├── lifecycle.rs      # start/stop/health — notebooks_dir 引数付き
+│   ├── lifecycle.rs      # start/stop/health — notebooks_dir 引数付き、CREATE_NO_WINDOW 対応
 │   ├── port.rs           # find_available_port()
 │   └── process.rs        # lossy UTF-8 対応 stdout/stderr キャプチャ
 ├── window/
@@ -1414,6 +1583,6 @@ src-tauri/src/
 │   └── menu.rs           # File/Edit/View メニュー
 └── environment/
     ├── mod.rs
-    ├── bootstrap.rs      # Python + venv + ローカル marimo インストール
+    ├── bootstrap.rs      # Python + venv + ローカル marimo インストール、CREATE_NO_WINDOW 対応
     └── version.rs        # MARIMO_VERSION (現在未使用、将来の PyPI 復帰用)
 ```

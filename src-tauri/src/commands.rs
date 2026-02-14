@@ -49,15 +49,10 @@ pub async fn window_open_notebook(
     app: tauri::AppHandle,
     file_path: Option<String>,
 ) -> Result<(), AppError> {
-    let path = file_path.map(|p| {
-        let pb = PathBuf::from(&p);
-        // Ensure absolute path for correct server-side file resolution
-        if pb.is_relative() {
-            std::env::current_dir().unwrap_or_default().join(pb)
-        } else {
-            pb
-        }
-    });
+    // Don't resolve paths here — the Python backend handles all path resolution.
+    // Its LazyListOfFilesAppFileRouter resolves relative paths against its own
+    // directory, and recognizes __new__ prefixes for new notebooks.
+    let path = file_path.map(PathBuf::from);
     let app_clone = app.clone();
     app.run_on_main_thread(move || {
         if let Err(e) = window::manager::open_window(&app_clone, path.as_deref()) {

@@ -2,12 +2,26 @@ use std::collections::HashMap;
 use std::process::{Command, Stdio};
 use std::time::Duration;
 
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
 use anyhow::{anyhow, Result};
 use log::{error, info, warn};
 use tauri::Manager;
 
 use crate::paths;
 use crate::state::{ServerState, ServerStatus};
+
+/// Apply CREATE_NO_WINDOW flag so child processes don't spawn a console window.
+#[cfg(windows)]
+fn no_window(cmd: &mut Command) -> &mut Command {
+    cmd.creation_flags(0x08000000)
+}
+
+#[cfg(not(windows))]
+fn no_window(cmd: &mut Command) -> &mut Command {
+    cmd
+}
 
 /// Start the marimo server process.
 /// In dev mode, the server is expected to be started externally.
@@ -85,8 +99,8 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
     let home_dir = std::env::var("USERPROFILE")
         .unwrap_or_else(|_| std::env::var("HOME").unwrap_or_else(|_| ".".to_string()));
 
-    let mut child = Command::new(&venv_python)
-        .args([
+    let mut cmd = Command::new(&venv_python);
+    cmd.args([
             "-m",
             "marimo",
             "edit",
@@ -99,7 +113,9 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
         .current_dir(&home_dir)
         .envs(&env)
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stderr(Stdio::piped());
+    no_window(&mut cmd);
+    let mut child = cmd
         .spawn()
         .map_err(|e| anyhow!("Failed to spawn marimo server: {}", e))?;
 
@@ -203,9 +219,10 @@ fn kill_process(pid: u32) {
     #[cfg(windows)]
     {
         // Use taskkill with /T to kill the process tree
-        let _ = Command::new("taskkill")
-            .args(["/pid", &pid.to_string(), "/f", "/t"])
-            .output();
+        let mut cmd = Command::new("taskkill");
+        cmd.args(["/pid", &pid.to_string(), "/f", "/t"])
+            .creation_flags(0x08000000);
+        let _ = cmd.output();
     }
 
     #[cfg(unix)]
