@@ -19,38 +19,38 @@ env:
 
 jobs:
   build_windows:
-    name: "\U0001FA9F Build Windows"
+    name: 🪟 Build Windows
     runs-on: windows-latest
 
     steps:
-      - name: "\u2B07\uFE0F Checkout repo"
+      - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: "\u23CE Setup pnpm"
+      - name: ⎔ Setup pnpm
         uses: pnpm/action-setup@v4
 
-      - name: "\u23CE Setup Node.js"
+      - name: ⎔ Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: "\uD83D\uDCE5 Install Node.js dependencies"
+      - name: 📥 Install Node.js dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: "\uD83D\uDCE6 Build frontend"
+      - name: 📦 Build frontend
         uses: ./.github/actions/build-frontend
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: "\u2B07\uFE0F Download uv binary for bundling"
+      - name: ⬇️ Download uv binary for bundling
         run: node scripts/download-uv.js
 
-      - name: "\u2705 Verify uv binary"
+      - name: ✅ Verify uv binary
         shell: pwsh
         run: |
           if (Test-Path "src-tauri/binaries/uv.exe") {
@@ -65,7 +65,7 @@ jobs:
         with:
           version: "latest"
 
-      - name: "\uD83D\uDD28 Get version"
+      - name: 🔨 Get version
         id: get_version
         shell: pwsh
         run: |
@@ -73,22 +73,22 @@ jobs:
           echo "marimo_version=$version" >> $env:GITHUB_OUTPUT
           echo "MARIMO_VERSION=$version" >> $env:GITHUB_ENV
 
-      - name: "\uD83E\uDD80 Setup Rust toolchain"
+      - name: 🦀 Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: "\uD83D\uDCBE Cache Rust dependencies"
+      - name: 💾 Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
 
-      - name: "\uD83D\uDD27 Install Tauri CLI"
+      - name: 🔧 Install Tauri CLI
         run: cargo install tauri-cli --locked
 
-      - name: "\uD83D\uDCE6 Build Tauri app"
+      - name: 📦 Build Tauri app
         working-directory: src-tauri
         run: cargo tauri build
 
-      - name: "\uD83D\uDCE4 Upload Windows artifacts"
+      - name: 📤 Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
           name: tauri-windows-${{ env.MARIMO_VERSION }}
@@ -97,38 +97,38 @@ jobs:
           retention-days: 30
 
   build_macos:
-    name: "\uD83C\uDF4E Build macOS"
+    name: 🍎 Build macOS
     runs-on: macos-latest
 
     steps:
-      - name: "\u2B07\uFE0F Checkout repo"
+      - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: "\u23CE Setup pnpm"
+      - name: ⎔ Setup pnpm
         uses: pnpm/action-setup@v4
 
-      - name: "\u23CE Setup Node.js"
+      - name: ⎔ Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: "\uD83D\uDCE5 Install Node.js dependencies"
+      - name: 📥 Install Node.js dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: "\uD83D\uDCE6 Build frontend"
+      - name: 📦 Build frontend
         uses: ./.github/actions/build-frontend
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: "\u2B07\uFE0F Download uv binary for bundling"
+      - name: ⬇️ Download uv binary for bundling
         run: node scripts/download-uv.js
 
-      - name: "\u2705 Verify uv binary"
+      - name: ✅ Verify uv binary
         run: |
           if [ -f "src-tauri/binaries/uv" ]; then
             echo "uv binary downloaded successfully"
@@ -143,29 +143,29 @@ jobs:
         with:
           version: "latest"
 
-      - name: "\uD83D\uDD28 Get version"
+      - name: 🔨 Get version
         id: get_version
         run: |
           version=$(uv version --short)
           echo "marimo_version=$version" >> $GITHUB_OUTPUT
           echo "MARIMO_VERSION=$version" >> $GITHUB_ENV
 
-      - name: "\uD83E\uDD80 Setup Rust toolchain"
+      - name: 🦀 Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: "\uD83D\uDCBE Cache Rust dependencies"
+      - name: 💾 Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
 
-      - name: "\uD83D\uDD27 Install Tauri CLI"
+      - name: 🔧 Install Tauri CLI
         run: cargo install tauri-cli --locked
 
-      - name: "\uD83D\uDCE6 Build Tauri app"
+      - name: 📦 Build Tauri app
         working-directory: src-tauri
         run: cargo tauri build
 
-      - name: "\uD83D\uDCE4 Upload macOS artifacts"
+      - name: 📤 Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
           name: tauri-macos-${{ env.MARIMO_VERSION }}
@@ -174,16 +174,16 @@ jobs:
           retention-days: 30
 
   build_linux:
-    name: "\uD83D\uDC27 Build Linux"
+    name: 🐧 Build Linux
     runs-on: ubuntu-latest
 
     steps:
-      - name: "\u2B07\uFE0F Checkout repo"
+      - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: "\uD83D\uDCE6 Install Linux dependencies"
+      - name: 📦 Install Linux dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -192,29 +192,29 @@ jobs:
             librsvg2-dev \
             patchelf
 
-      - name: "\u23CE Setup pnpm"
+      - name: ⎔ Setup pnpm
         uses: pnpm/action-setup@v4
 
-      - name: "\u23CE Setup Node.js"
+      - name: ⎔ Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: "\uD83D\uDCE5 Install Node.js dependencies"
+      - name: 📥 Install Node.js dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: "\uD83D\uDCE6 Build frontend"
+      - name: 📦 Build frontend
         uses: ./.github/actions/build-frontend
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: "\u2B07\uFE0F Download uv binary for bundling"
+      - name: ⬇️ Download uv binary for bundling
         run: node scripts/download-uv.js
 
-      - name: "\u2705 Verify uv binary"
+      - name: ✅ Verify uv binary
         run: |
           if [ -f "src-tauri/binaries/uv" ]; then
             echo "uv binary downloaded successfully"
@@ -229,29 +229,29 @@ jobs:
         with:
           version: "latest"
 
-      - name: "\uD83D\uDD28 Get version"
+      - name: 🔨 Get version
         id: get_version
         run: |
           version=$(uv version --short)
           echo "marimo_version=$version" >> $GITHUB_OUTPUT
           echo "MARIMO_VERSION=$version" >> $GITHUB_ENV
 
-      - name: "\uD83E\uDD80 Setup Rust toolchain"
+      - name: 🦀 Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: "\uD83D\uDCBE Cache Rust dependencies"
+      - name: 💾 Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
 
-      - name: "\uD83D\uDD27 Install Tauri CLI"
+      - name: 🔧 Install Tauri CLI
         run: cargo install tauri-cli --locked
 
-      - name: "\uD83D\uDCE6 Build Tauri app"
+      - name: 📦 Build Tauri app
         working-directory: src-tauri
         run: cargo tauri build
 
-      - name: "\uD83D\uDCE4 Upload Linux artifacts"
+      - name: 📤 Upload Linux artifacts
         uses: actions/upload-artifact@v4
         with:
           name: tauri-linux-${{ env.MARIMO_VERSION }}
@@ -261,12 +261,12 @@ jobs:
           retention-days: 30
 
   create_release:
-    name: "\uD83D\uDCE6 Create Release"
+    name: 📦 Create Release
     needs: [build_windows, build_macos, build_linux]
     runs-on: ubuntu-latest
 
     steps:
-      - name: "\u2B07\uFE0F Checkout repo"
+      - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
       - name: Install uv
@@ -274,14 +274,14 @@ jobs:
         with:
           version: "latest"
 
-      - name: "\uD83D\uDD28 Get version"
+      - name: 🔨 Get version
         id: get_version
         run: |
           version=$(uv version --short)
           echo "marimo_version=$version" >> $GITHUB_OUTPUT
           echo "tag=v$version-tauri" >> $GITHUB_OUTPUT
 
-      - name: "\uD83D\uDD0D Check if release already exists"
+      - name: 🔍 Check if release already exists
         id: check_release
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" \
@@ -291,34 +291,34 @@ jobs:
 
           if [ "$response" = "200" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
-            echo "\u26A0\uFE0F Release ${{ steps.get_version.outputs.tag }} already exists"
+            echo "⚠️ Release ${{ steps.get_version.outputs.tag }} already exists"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "\u2705 Release ${{ steps.get_version.outputs.tag }} does not exist"
+            echo "✅ Release ${{ steps.get_version.outputs.tag }} does not exist"
           fi
 
-      - name: "\uD83D\uDCE5 Download Windows artifacts"
+      - name: 📥 Download Windows artifacts
         uses: actions/download-artifact@v4
         with:
           name: tauri-windows-${{ steps.get_version.outputs.marimo_version }}
           path: artifacts/windows
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "\uD83D\uDCE5 Download macOS artifacts"
+      - name: 📥 Download macOS artifacts
         uses: actions/download-artifact@v4
         with:
           name: tauri-macos-${{ steps.get_version.outputs.marimo_version }}
           path: artifacts/macos
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "\uD83D\uDCE5 Download Linux artifacts"
+      - name: 📥 Download Linux artifacts
         uses: actions/download-artifact@v4
         with:
           name: tauri-linux-${{ steps.get_version.outputs.marimo_version }}
           path: artifacts/linux
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "\uD83D\uDCDD Create Release"
+      - name: 📝 Create Release
         if: steps.check_release.outputs.exists == 'false'
         uses: softprops/action-gh-release@v1
         with:
@@ -357,13 +357,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "\u26A0\uFE0F Skip release (already exists)"
+      - name: ⚠️ Skip release (already exists)
         if: steps.check_release.outputs.exists == 'true'
         run: |
           echo "Release ${{ steps.get_version.outputs.tag }} already exists. Skipping release creation."
           exit 0
 
-      - name: "\uD83D\uDCE7 Post to Discord"
+      - name: 📧 Post to Discord
         if: steps.check_release.outputs.exists == 'false'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_RELEASE_WEBHOOK_URL }}
