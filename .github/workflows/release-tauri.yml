@@ -144,7 +144,7 @@ jobs:
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.args != '' && (matrix.platform == 'macos-arm64' && 'aarch64-apple-darwin' || 'x86_64-apple-darwin') || '' }}
+          targets: ${{ matrix.rust_target }}
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
@@ -152,7 +152,7 @@ jobs:
           workspaces: src-tauri
 
       - name: Build and release Tauri app
-        uses: tauri-apps/tauri-action@v1
+        uses: tauri-apps/tauri-action@v0.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
