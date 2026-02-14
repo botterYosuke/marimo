@@ -49,6 +49,7 @@ from marimo._session import Session
 from marimo._session.consumer import SessionConsumer
 from marimo._session.events import SessionEventBus
 from marimo._session.managers.ipc import KernelStartupError
+from marimo._utils.http import HTTPException, HTTPStatus
 from marimo._session.model import (
     ConnectionState,
     SessionMode,
@@ -390,6 +391,19 @@ class WebSocketHandler(SessionConsumer):
         except KernelStartupError as e:
             LOGGER.error("Kernel startup failed: %s", e)
             await self._close_kernel_startup_error(str(e))
+            return
+        except HTTPException as e:
+            LOGGER.error(
+                "Session creation failed with HTTP %s: %s",
+                e.status_code,
+                e.detail,
+            )
+            await self.websocket.close(
+                WebSocketCodes.FORBIDDEN
+                if e.status_code == HTTPStatus.FORBIDDEN
+                else WebSocketCodes.UNEXPECTED_ERROR,
+                "MARIMO_ERROR",
+            )
             return
         LOGGER.debug(
             "Connected to session %s with type %s",

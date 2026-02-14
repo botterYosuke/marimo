@@ -679,6 +679,9 @@ scripts/download-uv && cd src-tauri && cargo tauri build
 - [x] 2回目以降の起動が高速（venv 再構築なし）→ ✅ プロダクションビルド手動テスト PASS
 - [ ] marimo バージョン更新時に自動的に新バージョンがインストールされる
 - [x] venv 内の Python で pip/uv パッケージインストールが正常に動作する → ✅ プロダクションビルド手動テスト PASS
+- [x] ホームページが "Loading workspace files took too long" エラーなしで表示される → ✅ Phase 11 で修正、Production テスト PASS
+- [x] ワークスペース外のノートブックを開いて WebSocket 接続が確立される → ✅ Phase 12 で修正、Production テスト PASS
+- [x] セルの実行ができる (Production ビルド) → ✅ Phase 12 検証で確認 PASS
 - [ ] macOS ドックアイコンクリックでウィンドウ復帰する
 - [ ] クロスプラットフォーム: Windows/macOS/Linux でビルド・起動が成功する
 - [ ] ファイルアップロード (ドラッグ&ドロップ) が動作する (ギャップ分析 #1)
@@ -820,10 +823,16 @@ cd src-tauri && CARGO_TARGET_DIR="C:\Users\sasai\cargo-target-marimo" cargo taur
 | Phase 5: ビルド・開発ワークフロー | ✅ 完了 | download-uv.js, Makefile, package.json |
 | Phase 6: 手動テスト・バグ修正 | ✅ 完了 | 新規ノートブック作成の E2E テスト PASS |
 | Phase 7: Playwright E2E テスト基盤 | ✅ 完了 | CDP 接続方式、Tauri 専用 config |
+| Phase 8: 包括的テスト・バグ修正 | ✅ 完了 | 7 E2E テスト PASS |
+| Phase 9: F11 フルスクリーン | ✅ 完了 | JS→IPC 経由で制御 |
+| Phase 10: NSIS 起動不能デバッグ | ✅ 完了 | cwd + CLI オプション + エンコーディング |
+| Phase 11: ホームページタイムアウト | ✅ 完了 | 専用 notebooks ディレクトリでスキャン制御 |
+| Phase 12: WebSocket 1006 修正 | ✅ 完了 | ローカル marimo + パス正規化 |
 
 **コンパイル状況**: `cargo check` — ✅ エラーゼロ、warning ゼロ
 **dev モード動作**: ✅ Windows で起動確認済み（ホームページ表示成功）
 **E2E テスト**: ✅ Playwright CDP 経由で「Create a new notebook」の自動テスト PASS (3.2秒)
+**Production ビルド**: ✅ NSIS インストーラー → インストール → ホームページ表示 → ノートブック開封・実行成功
 
 ### テスト結果 (手動テスト + 自動テスト)
 - [x] ホームページが表示されるか → ✅ 表示確認済み
@@ -836,7 +845,7 @@ cd src-tauri && CARGO_TARGET_DIR="C:\Users\sasai\cargo-target-marimo" cargo taur
 - [x] 外部リンク (Documentation, GitHub, Community 等) がシステムブラウザで開くか → ✅ E2E テスト PASS (`external-links.spec.ts`)
 - [x] F12 で DevTools が開くか → ✅ 手動テスト PASS
 - [x] F5 でページリロードが動作するか → ✅ E2E テスト PASS (`reload.spec.ts`)
-- [x] F11 フルスクリーン → 削除済み（WebView2 との F11 キー競合のため機能自体を削除。View メニューから Toggle Fullscreen も削除）
+- [x] F11 フルスクリーン → ✅ 手動テスト PASS（initialization_script で F11 preventDefault、Tauri メニューアクセラレータで制御）
 - [x] ウィンドウ重複排除（同一パスで既存ウィンドウにフォーカス）→ ✅ E2E テスト PASS (`window-deduplication.spec.ts`)
 - [x] 異なるパスで別ウィンドウが作成される → ✅ E2E テスト PASS (`window-deduplication.spec.ts`)
 
@@ -965,3 +974,446 @@ if let Some(path) = file_path {
 27. **「Create a new notebook」リンクはセッション中固定 URL**: ホームページの「Create a new notebook」リンクは `?file=__new__s_XXXXXX` という固定 href を持つ。同セッションで複数回クリックしてもウィンドウマネージャーが重複排除するため、E2E テストで毎回新ウィンドウが必要な場合は IPC (`window_open_notebook`) を直接呼び出し一意のランダム ID を渡すこと
 28. **サイドバーパネルによるクリック遮断**: ノートブックの FILES サイドバーが開いている場合、`.cm-editor` 上のクリックが `data-panel-group` に遮られる。`.cm-content` をターゲットにして `{ force: true }` を使うことで回避
 29. **CDP ページ URL の遷移タイミング**: 新ウィンドウは CDP 上で `about:blank` → 実 URL の 2 段階で出現する。`expect.poll()` でページ数増加を待った後、さらに `expect.poll()` で URL にランダム ID が含まれるページを待つ 2 段階ポーリングが安定
+30. **WebView2 の F11 キーキャプチャ問題**: Windows の WebView2 (Chromium) は F11 キーを OS レベルで先にキャプチャし、Chromium 内蔵のフルスクリーン処理を実行する。このため **(a)** Tauri のメニューアクセラレータに F11 が到達しない **(b)** JS の `preventDefault()` だけでは Tauri 側でフルスクリーンを制御できない。解決策は `initialization_script` 内で `addEventListener('keydown', ..., true)` (capture phase) で F11 を `preventDefault()` し、同時に `window.__TAURI_INTERNALS__.invoke('window_toggle_fullscreen')` で Tauri IPC コマンドを直接呼び出すこと。メニューの F11 アクセラレータ表記はユーザーへの視覚的ヒントとして残すが、実際のキー処理は JS→IPC 経由で行われる。View → Toggle Fullscreen のメニュークリックは `on_menu_event` ハンドラで処理されるため正常に動作する
+
+### Phase 9: F11 フルスクリーン機能の再実装 ✅
+
+**背景**: F11 フルスクリーンは Phase 6 で一度実装したが、WebView2 が F11 を横取りし Tauri の `set_fullscreen()` と競合するため削除された (Tips 30 参照)。
+
+**修正内容** (3 ファイル):
+
+- ✅ `src-tauri/src/window/manager.rs` — `LINK_INTERCEPT_JS` に F11 `preventDefault()` + IPC `window_toggle_fullscreen` 呼び出しを追加。WebView2 のネイティブフルスクリーンをブロックし、Tauri IPC 経由で制御
+- ✅ `src-tauri/src/commands.rs` — `window_toggle_fullscreen` コマンド追加。フォーカスフォールバックパターン (`.find(|w| w.is_focused()).or_else(|| windows.values().next())`) を使用
+- ✅ `src-tauri/src/lib.rs` — `invoke_handler` に `window_toggle_fullscreen` を登録。`on_menu_event` に `"fullscreen"` ハンドラ追加 (View メニュークリック用)
+- ✅ `src-tauri/src/window/menu.rs` — View メニューに `Toggle Fullscreen` (F11 アクセラレータ) を追加
+
+**設計判断**:
+- F11 キー押下は **2 経路** で fullscreen を切り替える:
+  1. **JS → IPC**: WebView 内で F11 keydown → `preventDefault()` + `invoke('window_toggle_fullscreen')` (主経路、Windows で確実に動作)
+  2. **メニューアクセラレータ → on_menu_event**: メニュークリック時 (補助経路)
+- メニューアクセラレータの F11 表記は視覚的ヒントとして残す
+- `window_toggle_fullscreen` コマンドは同期関数 (`pub fn`、`async` 不要) — `is_fullscreen()` と `set_fullscreen()` はメインスレッドからの呼び出し不要
+
+**テスト結果**:
+- ✅ F11 キーでフルスクリーン切り替え — PASS
+- ✅ View → Toggle Fullscreen メニュークリック — PASS
+- ✅ `cargo check` エラーゼロ・warning ゼロ
+
+### Phase 10: NSIS インストーラー版の起動不能デバッグ ✅
+
+**状況**: NSIS インストーラー (`marimo_0.1.0_x64-setup.exe`) でインストール後、アプリが起動しない問題を特定・修正。
+
+#### 問題の発見
+
+NSIS インストーラーのビルドは成功し、インストール自体も問題なく完了した。しかし、インストール後にアプリを起動しても**ウィンドウが表示されず、何も起きない**状態だった。
+
+#### 根本的な障壁: リリースビルドではログが見えない
+
+`main.rs:2` の `#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]` により、リリースビルドではコンソールウィンドウが非表示。`env_logger` の出力は stderr に送られるが、コンソールがないため**全てのログが見えない**。これがデバッグの最大の障壁だった。
+
+#### デバッグ手法: ファイルベースのデバッグログ
+
+`%LOCALAPPDATA%\com.marimo.desktop\logs\debug.log` にファイル出力する `debug_log()` 関数を一時的に追加し、起動シーケンスの各チェックポイントでログを記録した。
+
+```rust
+// デバッグ用に一時追加した関数（修正完了後に削除済み）
+pub fn debug_log(msg: &str) {
+    use std::io::Write;
+    let base = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
+    let log_dir = std::path::PathBuf::from(&base)
+        .join("com.marimo.desktop").join("logs");
+    let _ = std::fs::create_dir_all(&log_dir);
+    let log_file = log_dir.join("debug.log");
+    if let Ok(mut f) = std::fs::OpenOptions::new()
+        .create(true).append(true).open(&log_file) {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap_or_default();
+        let _ = writeln!(f, "[{}] {}", now.as_secs(), msg);
+    }
+}
+```
+
+#### 仮説と検証結果
+
+**仮説 1: `uv.exe` のリソースパス解決失敗** — 否定
+- ログ: `uv_bin exists: true` — バンドルされた `uv.exe` は正しく見つかった
+
+**仮説 2: 環境ブートストラップのサイレント失敗** — 否定
+- ログ: `Bootstrap: SUCCESS` — Python 検出、venv 作成、marimo インストール全て成功
+
+**仮説 3: サーバープロセスの起動失敗** — **的中 (3 つの原因を段階的に特定)**
+
+#### ✅ 修正 1: Python プロセスの cwd 未設定（原因特定: 1 回目のデバッグ実行）
+
+**問題**: `Command::new(&venv_python)` に `.current_dir()` が設定されていないため、親プロセスの cwd を継承。cwd が marimo ソースリポジトリの場合、Python が venv の marimo ではなく**ローカルの開発用 marimo ソース**をインポートし、依存ライブラリ (`msgspec`) が見つからずクラッシュ。
+
+```
+ModuleNotFoundError: No module named 'msgspec'
+# File "c:\Users\sasai\Documents\marimo\marimo\__init__.py" ← 開発ソースを誤インポート
+```
+
+**修正** (`lifecycle.rs`):
+```rust
+let home_dir = std::env::var("USERPROFILE")
+    .unwrap_or_else(|_| std::env::var("HOME").unwrap_or_else(|_| ".".to_string()));
+
+Command::new(&venv_python)
+    .args([...])
+    .current_dir(&home_dir)  // ← 追加: ユーザーホームを cwd に設定
+    ...
+```
+
+#### ✅ 修正 2: 存在しない CLI オプション `--no-skew-protection`（原因特定: 2 回目のデバッグ実行）
+
+**問題**: marimo 0.13.0 には `--no-skew-protection` オプションが存在しない。サーバーが `Error: No such option: --no-skew-protection` で即座に終了。
+
+**修正** (`lifecycle.rs`): コマンド引数から `"--no-skew-protection"` を削除。
+
+```rust
+// 修正前
+.args(["-m", "marimo", "edit", "--no-token", "--no-skew-protection", "--headless", ...])
+// 修正後
+.args(["-m", "marimo", "edit", "--no-token", "--headless", ...])
+```
+
+> **補足**: このレポートの Phase 3 セクション 3.4 にも `--no-skew-protection` が記載されているが、これは marimo の開発版 (HEAD) で追加されたオプションであり、リリース版 0.13.0 には含まれない。将来 marimo がこのオプションを公式リリースに含めた場合は再追加を検討。
+
+#### ✅ 修正 3: Windows GUI アプリでの stdout エンコーディング問題（原因特定: 3 回目のデバッグ実行）
+
+**問題の連鎖**:
+1. `windows_subsystem = "windows"` の GUI アプリから spawn された Python プロセスは、コンソールがないため stdout のエンコーディングがシステムデフォルト (cp932 等) になる
+2. marimo の `click.echo()` がカラー出力や絵文字を含むスタートアップメッセージを stdout に書き込む
+3. Rust 側の `BufReader::lines()` が非 UTF-8 バイトを検出してエラーを返し、`break` でパイプの read 側を閉じる
+4. Python 側で `stdout.flush()` が `OSError: [Errno 22] Invalid argument` を発生させサーバークラッシュ
+
+```
+OSError: [Errno 22] Invalid argument
+  File "...\click\utils.py", line 322, in echo
+    file.flush()
+ERROR: Application startup failed. Exiting.
+```
+
+**修正 (2 箇所)**:
+
+1. `lifecycle.rs` — Python プロセスの環境変数に UTF-8 強制を追加:
+```rust
+env.insert("PYTHONIOENCODING".into(), "utf-8".into());
+env.insert("PYTHONUNBUFFERED".into(), "1".into());
+```
+
+2. `process.rs` — `BufReader::lines()` を lossy UTF-8 対応の `read_lines_lossy()` に置換:
+```rust
+fn read_lines_lossy<R: Read>(reader: R) -> impl Iterator<Item = String> {
+    let mut inner = BufReader::new(reader);
+    let mut bytes = Vec::new();
+    std::iter::from_fn(move || {
+        bytes.clear();
+        match inner.read_until(b'\n', &mut bytes) {
+            Ok(0) => None,
+            Ok(_) => {
+                while bytes.last() == Some(&b'\n') || bytes.last() == Some(&b'\r') {
+                    bytes.pop();
+                }
+                Some(String::from_utf8_lossy(&bytes).into_owned())
+            }
+            Err(_) => None,
+        }
+    })
+}
+```
+
+#### 修正後の動作確認
+
+リリースビルド exe を直接実行し、`/healthz` エンドポイントが `{"status":"healthy"}` を返すことを確認:
+
+```
+$ curl -s http://localhost:2718/healthz
+{"status":"healthy"}
+```
+
+サーバーが正常に起動し、ホームページウィンドウが表示された。
+
+#### 変更対象ファイルまとめ
+
+| ファイル | 変更内容 |
+|---------|---------|
+| `src-tauri/src/server/lifecycle.rs` | `.current_dir()` 追加、`--no-skew-protection` 削除、`PYTHONIOENCODING`/`PYTHONUNBUFFERED` 環境変数追加 |
+| `src-tauri/src/server/process.rs` | `BufReader::lines()` を `read_lines_lossy()` に置換（非 UTF-8 出力への耐性） |
+
+#### 設計知見 (Tips)
+
+31. **リリースビルドのデバッグにはファイルログが必須**: `windows_subsystem = "windows"` により stderr は見えない。`env_logger` は開発モードでのみ有用。プロダクションのデバッグには `%LOCALAPPDATA%` 等へのファイル出力ログを一時的に追加する手法が有効
+32. **Python プロセス spawn 時の `current_dir` 設定は必須**: `python -m <module>` は cwd をモジュール検索パスに含める。cwd にソースリポジトリがあるとローカルパッケージを誤インポートする。NSIS インストール後は `Program Files` が cwd になるため問題が顕在化しにくいが、開発ビルドの直接実行でハマる
+33. **Windows GUI アプリから spawn した Python の `PYTHONIOENCODING=utf-8` は必須**: コンソールなしの GUI アプリでは Python の stdio エンコーディングがシステムロケール依存になる。`click.echo()` 等のライブラリが非 ASCII 文字 (カラーコード、絵文字) を出力すると Rust 側の UTF-8 パイプリーダーが破断し、Python 側で `stdout.flush()` が `OSError` で失敗する。`PYTHONUNBUFFERED=1` も併せて設定するとバッファリング起因の問題も防げる
+34. **`BufReader::lines()` は非 UTF-8 に脆弱**: 子プロセスの stdout/stderr を読む際、`lines()` は無効な UTF-8 で `Err` を返す。`break` で read ループを中断するとパイプの read 側が閉じ、子プロセスの write が失敗する連鎖障害を引き起こす。`read_until(b'\n')` + `String::from_utf8_lossy()` の組み合わせで耐性のある読み取りを実装すること
+35. **marimo の CLI オプションはバージョン依存**: `--no-skew-protection` は開発版にのみ存在し、0.13.0 リリースには含まれない。`MARIMO_VERSION` で指定したバージョンのオプション互換性を確認すること。`marimo edit --help` でオプション一覧を検証できる
+
+### Phase 11: ホームページ タイムアウトエラーの修正 ✅
+
+- **状況**: ✅ 完了
+- **詳細レポート**: `report/validated-wondering-wren.md`
+
+#### 問題
+
+Phase 10 の修正でアプリは起動するようになったが、ホームページ表示時に以下のエラーが発生:
+
+```
+Request timed out: Loading workspace files took too long
+```
+
+#### 原因
+
+Phase 10 で `lifecycle.rs` の `current_dir` を HOME (`%USERPROFILE%`) に設定した副作用。`marimo edit` にファイル/ディレクトリ引数を渡していなかったため、`os.getcwd()` = HOME がワークスペースのスキャン対象になり、Windows の HOME 配下（Documents, Downloads, AppData, node_modules 等）を `max_depth=5` で再帰スキャンし 10 秒のタイムアウトを超過。
+
+```
+lifecycle.rs: .current_dir(&home_dir)    ← %USERPROFILE%
+    ↓
+cli.py:498: name = os.getcwd()           ← C:\Users\sasai
+    ↓
+DirectoryScanner(HOME, max_depth=5, max_time=10s) → タイムアウト
+```
+
+#### 修正
+
+| ファイル | 変更内容 |
+|---------|---------|
+| `src-tauri/src/paths.rs` | `get_notebooks_dir()` 関数を追加 — `%APPDATA%/marimo/notebooks` |
+| `src-tauri/src/server/lifecycle.rs` | `marimo edit` にノートブックディレクトリを引数として追加 |
+
+**`paths.rs` — ノートブックディレクトリ**:
+```rust
+pub fn get_notebooks_dir(app: &tauri::AppHandle) -> PathBuf {
+    let config_dir = app.path().config_dir().expect("failed to get config dir");
+    config_dir.join("marimo").join("notebooks")
+}
+```
+
+**`lifecycle.rs` — サーバー起動コマンド**:
+```rust
+let notebooks_dir = paths::get_notebooks_dir(app);
+std::fs::create_dir_all(&notebooks_dir).ok();
+let notebooks_dir_str = notebooks_dir.to_string_lossy().to_string();
+
+Command::new(&venv_python)
+    .args(["-m", "marimo", "edit", &notebooks_dir_str, "--no-token", "--headless", ...])
+    .current_dir(&home_dir)  // HOME は import 安全のため維持
+```
+
+**設計判断**: `current_dir`（Python import パス）と `marimo edit` の引数（スキャン対象）は異なる役割:
+- `current_dir` = HOME → `sys.path[0]` でローカル marimo パッケージの誤インポートを防止
+- `marimo edit` 引数 = `%APPDATA%/marimo/notebooks` → 小規模ディレクトリのみスキャン
+
+#### 設計知見 (Tips)
+
+36. **Production デバッグは Rust 側ファイルログで行う**: Production ビルドでは PyPI 版 marimo が venv にインストールされるため、ローカルの Python コード変更は反映されない。`debug_log()` 関数パターン（`%LOCALAPPDATA%\com.marimo.desktop\logs\debug.log` に出力）が最も確実
+
+37. **`marimo edit` には常にワークスペースディレクトリを明示する**:
+    ```rust
+    // NG: os.getcwd() に依存
+    .args(["-m", "marimo", "edit", "--no-token", ...])
+    // OK: 専用ディレクトリを明示
+    .args(["-m", "marimo", "edit", &notebooks_dir_str, "--no-token", ...])
+    ```
+
+38. **`current_dir` と CLI 引数は別の役割**: `current_dir` は Python の `sys.path[0]`、`marimo edit` 引数はスキャン対象。混同すると「import 問題」と「スキャンタイムアウト」のどちらかが発生する
+
+39. **Windows HOME のファイルスキャンは避ける**: `%USERPROFILE%` は巨大（Documents, Downloads, AppData, node_modules 等）。`DirectoryScanner` の `MAX_EXECUTION_TIME=10s`, `MAX_DEPTH=5` では到底完了しない
+
+40. **PowerShell 変数を Bash ツールから使う場合は `.ps1` ファイル経由**: `$env:LOCALAPPDATA` は bash シェルで `$` が展開されて空文字列になる。`.ps1` スクリプトを書き出して `powershell.exe -File script.ps1` で実行する
+
+---
+
+### Phase 12: WebSocket 1006 — ノートブックファイルが開けない ✅
+
+- **状況**: ✅ 完了
+- **詳細レポート**: `report/noble-noodling-dragon.md`
+
+#### 問題
+
+Phase 11 でホームページは表示されるようになったが、ワークスペース外のファイル（例: `examples\running_cells\basics.py`）を開くと WebSocket が 1006 (Abnormal Closure) で切断され、"Connecting" のまま固まる。
+
+#### 初期仮説 vs 実際の原因
+
+事前のコード解析では「ワークスペース外ファイルのパス検証エラー（`HTTPException(FORBIDDEN)`）」を最有力仮説としていたが、**Rust 側 stderr キャプチャのログ分析により全く異なる原因が判明した**。
+
+#### 確認された原因: 2 つの問題の複合
+
+**原因 1: Windows の `ProactorEventLoop` が `add_reader()` をサポートしない**
+
+```
+distributor.py:76, in start
+    asyncio.get_event_loop().add_reader(...)
+events.py:552, in add_reader
+    raise NotImplementedError
+```
+
+- Windows Python はデフォルトで `ProactorEventLoop` を使用
+- marimo の `ConnectionDistributor.start()` は `add_reader()` を呼ぶ（`SelectorEventLoop` でのみサポート）
+- ローカルの修正版 marimo には `SelectorEventLoop` 強制コードがあるが、**Production は PyPI 版 0.13.0 を使用しており反映されていなかった**
+
+**原因 2: ファイルパスが相対パスで渡されている**
+
+```
+open_window URL: http://localhost:2718/?file=Documents%5Cmarimo%5Cexamples%5C...
+# ↑ 相対パス。絶対パス (C:\Users\...) であるべき
+```
+
+フロントエンドのリンクインターセプターがワークスペースからの相対パスをそのまま渡していた。
+
+#### 修正
+
+| ファイル | 変更内容 |
+|---------|---------|
+| `src-tauri/src/environment/bootstrap.rs` | PyPI 版 → ローカル marimo ソースからインストール |
+| `src-tauri/src/commands.rs` | 相対パスを絶対パスに正規化 |
+
+**修正 1: `bootstrap.rs` — ローカル marimo ソースからインストール**
+
+```rust
+// 修正前
+&format!("marimo=={}", MARIMO_VERSION),  // PyPI 版
+
+// 修正後
+// Install from local source to include desktop-specific patches:
+// - SelectorEventLoop for Windows (distributor.py add_reader fix)
+// - register_allowed_file on LazyListOfFilesAppFileRouter
+// - HTTPException handler in ws_endpoint
+let marimo_source = r"c:\Users\sasai\Documents\marimo";
+Command::new(uv_bin).args(["pip", "install", "--python", ..., marimo_source])
+```
+
+これにより venv にローカルの修正済み marimo がインストールされ、以下が有効:
+1. `start.py:315-326`: uvicorn >= 0.36.0 向け `SelectorEventLoop` 強制
+2. `file_router.py:303-310`: `LazyListOfFilesAppFileRouter.register_allowed_file()`
+3. `session_manager.py:183`: `create_session()` で `register_allowed_file()` 呼び出し
+4. `ws_endpoint.py:395-407`: `except HTTPException` ハンドラ
+
+**修正 2: `commands.rs` — ファイルパスの絶対パス正規化**
+
+```rust
+let path = file_path.map(|p| {
+    let pb = PathBuf::from(&p);
+    if pb.is_relative() {
+        std::env::current_dir().unwrap_or_default().join(pb)
+    } else {
+        pb
+    }
+});
+```
+
+#### なぜ事前仮説と実際の原因が異なったか
+
+ローカルリポジトリには既にパス検証修正が存在していたため「パス検証エラー」と推定した。しかし Production は PyPI 版を使用するため修正は効いておらず、**さらに上流の問題**（イベントループ互換性）で先にクラッシュしていた。
+
+**教訓**: ローカルコードの解析だけでなく、Production で実際に実行されるコード（venv 内の site-packages）を確認する必要がある。
+
+#### デバッグ手法: Python stderr の Rust 側キャプチャ
+
+今回の問題特定の決め手となった手法。`process.rs` の stderr スレッド内で `crate::debug_log(&format!("[py-stderr] {}", line))` を追加し、Python の例外トレースバック全体をファイルログに記録。`NotImplementedError` の根本原因まで一発で特定できた。
+
+#### PyPI 版 vs ローカルソースの判断
+
+| 観点 | PyPI 版 (`marimo==0.13.0`) | ローカルソース |
+|------|--------------------------|---------------|
+| Windows `add_reader()` 対応 | uvicorn >= 0.36.0 対応なし | ✅ `start.py:315-326` |
+| ワークスペース外ファイル | `register_allowed_file()` なし | ✅ `file_router.py:303-310` |
+| WebSocket エラーハンドリング | `except KernelStartupError` のみ | ✅ `except HTTPException` 追加 |
+
+現時点ではローカルソースの使用が必須。PyPI の次バージョンに上記修正が含まれれば、PyPI 版に戻すことが望ましい。
+
+#### デバッグログ — ✅ 削除済み
+
+Phase 12 で追加した全デバッグコードは修正確認後に削除済み:
+
+| ファイル | 削除内容 |
+|---------|---------|
+| `src-tauri/src/lib.rs` | `pub fn debug_log(...)` 関数を削除 |
+| `src-tauri/src/window/manager.rs` | `crate::debug_log(...)` × 2 行を削除 |
+| `src-tauri/src/server/process.rs` | `crate::debug_log(...)` × 1 行を削除 |
+| `src-tauri/src/environment/bootstrap.rs` | 未使用 `use super::version::MARIMO_VERSION` を削除 |
+| `check_log.ps1`, `cleanup_venv.ps1`, `find_venv.ps1` | ヘルパースクリプトを削除 |
+
+`cargo check` — ✅ エラーゼロ、warning ゼロで通過。
+
+#### 検証結果
+
+Production ビルド（`cargo tauri build`）→ NSIS インストーラー → インストール → 起動:
+
+1. ✅ 初回起動時にローカル marimo がインストールされる
+2. ✅ ホームページが正常表示される（Phase 11 の修正が維持）
+3. ✅ `examples\running_cells\basics.py` を開いて WebSocket が接続される
+4. ✅ ノートブック内容が表示される（"Connecting" のまま固まらない）
+5. ✅ セルの実行ができる
+
+#### 設計知見 (Tips)
+
+41. **Python stderr を Rust 側でファイルログに記録する**: Production デバッグで最も有効な手法。Python 側のコードを変更せずに例外トレースバック全体を取得できる:
+    ```rust
+    // process.rs の stderr キャプチャスレッド内
+    crate::debug_log(&format!("[py-stderr] {}", line));
+    ```
+
+42. **Windows で `add_reader()` を使う場合は `SelectorEventLoop` を強制する**:
+    ```python
+    # _server/utils.py
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    # _server/start.py — uvicorn >= 0.36.0 の場合はさらに
+    edit_loop_policy = "asyncio:SelectorEventLoop"
+    ```
+
+43. **venv は `%APPDATA%` にある**:
+    - venv: `%APPDATA%\com.marimo.desktop\marimo-env` (Tauri の `app_data_dir()`)
+    - debug_log: `%LOCALAPPDATA%\com.marimo.desktop\logs\debug.log`
+    - 完全リセット: `Remove-Item -Recurse -Force "$env:APPDATA\com.marimo.desktop\marimo-env"`
+
+44. **Tauri コマンドに渡されるファイルパスは相対パスの可能性がある**: フロントエンドの `window.open()` やリンクインターセプターから渡されるファイルパスは相対パスの場合がある。Rust 側で絶対パスに変換する:
+    ```rust
+    if pb.is_relative() {
+        std::env::current_dir().unwrap_or_default().join(pb)
+    }
+    ```
+
+45. **ローカル marimo から PyPI に戻す方法**: PyPI の次バージョンで Windows 対応が入った場合、`bootstrap.rs` を `&format!("marimo=={}", NEW_VERSION)` に戻し、`version.rs` を更新、`venv` を削除してクリーンインストール
+
+---
+
+### Python 側の変更一覧（ローカルソース限定）
+
+Production ビルドでローカル marimo を使用するため、以下の Python 変更がデスクトップアプリに影響する:
+
+| ファイル | 変更内容 | 関連 Phase |
+|---------|---------|-----------|
+| `marimo/_server/start.py:315-326` | uvicorn >= 0.36.0 で `SelectorEventLoop` を強制 | Phase 12 |
+| `marimo/_server/file_router.py:276,303-310,353-361` | `LazyListOfFilesAppFileRouter` に `_allowed_files` / `register_allowed_file()` 追加 | Phase 12 |
+| `marimo/_server/session_manager.py:183` | `create_session()` で `LazyListOfFilesAppFileRouter` に対し `register_allowed_file()` 呼び出し | Phase 12 |
+| `marimo/_server/api/endpoints/ws_endpoint.py:395-407` | `except HTTPException` ハンドラ追加 | Phase 12 |
+
+これらはデスクトップ固有のパッチであり、upstream marimo にマージされれば PyPI 版への回帰が可能。
+
+---
+
+### 現在のファイル構成（最終状態）
+
+```
+src-tauri/src/
+├── main.rs               # エントリーポイント
+├── lib.rs                # Tauri Builder + setup + メニュー/ウィンドウイベント
+├── state.rs              # ServerState, WindowState, ServerStatus
+├── commands.rs           # IPC コマンド（パス正規化含む）
+├── error.rs              # AppError 型
+├── paths.rs              # uv, venv, Python, log, notebooks パス解決
+├── server/
+│   ├── mod.rs
+│   ├── lifecycle.rs      # start/stop/health — notebooks_dir 引数付き
+│   ├── port.rs           # find_available_port()
+│   └── process.rs        # lossy UTF-8 対応 stdout/stderr キャプチャ
+├── window/
+│   ├── mod.rs
+│   ├── manager.rs        # マルチウィンドウ + リンクインターセプト + F11 IPC
+│   └── menu.rs           # File/Edit/View メニュー
+└── environment/
+    ├── mod.rs
+    ├── bootstrap.rs      # Python + venv + ローカル marimo インストール
+    └── version.rs        # MARIMO_VERSION (現在未使用、将来の PyPI 復帰用)
+```

@@ -133,6 +133,19 @@ pub const LINK_INTERCEPT_JS: &str = r#"
     if (window.__marimo_link_intercept_installed) return;
     window.__marimo_link_intercept_installed = true;
 
+    // Block F11 from WebView2's native fullscreen handler and
+    // toggle fullscreen via Tauri IPC instead. The menu accelerator
+    // cannot receive F11 because WebView2 captures it first.
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F11') {
+            e.preventDefault();
+            if (window.__TAURI_INTERNALS__) {
+                window.__TAURI_INTERNALS__.invoke('window_toggle_fullscreen')
+                    .catch(function(err) { console.error('[marimo] fullscreen toggle failed:', err); });
+            }
+        }
+    }, true);
+
     document.addEventListener('click', function(e) {
         const anchor = e.target.closest('a[target]');
         if (!anchor) return;

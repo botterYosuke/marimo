@@ -49,7 +49,15 @@ pub async fn window_open_notebook(
     app: tauri::AppHandle,
     file_path: Option<String>,
 ) -> Result<(), AppError> {
-    let path = file_path.map(PathBuf::from);
+    let path = file_path.map(|p| {
+        let pb = PathBuf::from(&p);
+        // Ensure absolute path for correct server-side file resolution
+        if pb.is_relative() {
+            std::env::current_dir().unwrap_or_default().join(pb)
+        } else {
+            pb
+        }
+    });
     let app_clone = app.clone();
     app.run_on_main_thread(move || {
         if let Err(e) = window::manager::open_window(&app_clone, path.as_deref()) {
@@ -68,6 +76,20 @@ pub async fn window_open_home(app: tauri::AppHandle) -> Result<(), AppError> {
         }
     })
     .map_err(|e| AppError::Window(e.to_string()))
+}
+
+#[tauri::command]
+pub fn window_toggle_fullscreen(app: tauri::AppHandle) -> Result<(), AppError> {
+    let windows = app.webview_windows();
+    let win = windows
+        .values()
+        .find(|w| w.is_focused().unwrap_or(false))
+        .or_else(|| windows.values().next());
+    if let Some(win) = win {
+        let is_fullscreen = win.is_fullscreen().unwrap_or(false);
+        let _ = win.set_fullscreen(!is_fullscreen);
+    }
+    Ok(())
 }
 
 #[tauri::command]

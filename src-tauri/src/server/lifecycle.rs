@@ -64,21 +64,39 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
         );
     }
     env.insert("UV".into(), uv_bin.to_string_lossy().into_owned());
+    // Force Python to use UTF-8 for stdio to avoid encoding issues
+    // when stdout/stderr are piped (no console in Windows GUI apps)
+    env.insert("PYTHONIOENCODING".into(), "utf-8".into());
+    env.insert("PYTHONUNBUFFERED".into(), "1".into());
 
-    info!("Starting marimo server: {} -m marimo edit --no-token --no-skew-protection --headless --port {}", venv_python.display(), port);
+    // Use a dedicated notebooks directory as the workspace so that
+    // marimo doesn't scan the entire HOME directory (which causes timeout).
+    // %APPDATA%/marimo/notebooks — same location as other marimo settings.
+    let notebooks_dir = paths::get_notebooks_dir(app);
+    std::fs::create_dir_all(&notebooks_dir).ok();
+    let notebooks_dir_str = notebooks_dir.to_string_lossy().to_string();
+
+    info!("Starting marimo server: {} -m marimo edit {} --no-token --headless --port {}",
+        venv_python.display(), notebooks_dir_str, port);
     server_state.add_log("info", &format!("Starting server on port {}", port));
+
+    // Use the user's home directory as cwd to avoid Python importing
+    // a local `marimo/` package from the current working directory
+    let home_dir = std::env::var("USERPROFILE")
+        .unwrap_or_else(|_| std::env::var("HOME").unwrap_or_else(|_| ".".to_string()));
 
     let mut child = Command::new(&venv_python)
         .args([
             "-m",
             "marimo",
             "edit",
+            &notebooks_dir_str,
             "--no-token",
-            "--no-skew-protection",
             "--headless",
             "--port",
             &port.to_string(),
         ])
+        .current_dir(&home_dir)
         .envs(&env)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

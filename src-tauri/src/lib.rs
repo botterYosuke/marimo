@@ -28,6 +28,7 @@ pub fn run() {
             commands::window_open_notebook,
             commands::window_open_home,
             commands::window_open_dialog,
+            commands::window_toggle_fullscreen,
         ])
         .menu(|app| window::menu::build_menu(app))
         .setup(|app| {
@@ -150,6 +151,16 @@ pub fn run() {
                         .or_else(|| windows.values().next());
                     if let Some(win) = win {
                         win.open_devtools();
+                    }
+                }
+                "fullscreen" => {
+                    let windows = app.webview_windows();
+                    let win = windows.values()
+                        .find(|w| w.is_focused().unwrap_or(false))
+                        .or_else(|| windows.values().next());
+                    if let Some(win) = win {
+                        let is_fullscreen = win.is_fullscreen().unwrap_or(false);
+                        let _ = win.set_fullscreen(!is_fullscreen);
                     }
                 }
                 _ => {}
