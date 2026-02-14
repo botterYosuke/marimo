@@ -82,8 +82,13 @@ pub async fn window_open_dialog(app: tauri::AppHandle) -> Result<(), AppError> {
 
     if let Some(path) = file_path {
         let path_buf = path.into_path().unwrap();
-        window::manager::open_window(&app, Some(&path_buf))
-            .map_err(|e| AppError::Window(e.to_string()))?;
+        let app_clone = app.clone();
+        app.run_on_main_thread(move || {
+            if let Err(e) = window::manager::open_window(&app_clone, Some(&path_buf)) {
+                log::error!("Failed to open dialog-selected notebook: {}", e);
+            }
+        })
+        .map_err(|e| AppError::Window(e.to_string()))?;
     }
 
     Ok(())

@@ -7,7 +7,11 @@ import {
   test,
 } from "@playwright/test";
 
-const CDP_ENDPOINT = "http://localhost:9222";
+import {
+  CDP_ENDPOINT,
+  createNotebookViaIPC,
+  findHomePage,
+} from "./helpers";
 
 test.describe("Tauri Desktop - New Notebook", () => {
   let context: BrowserContext;
@@ -25,77 +29,39 @@ test.describe("Tauri Desktop - New Notebook", () => {
     }
 
     context = contexts[0];
-    const pages = context.pages();
 
-    if (pages.length === 0) {
+    if (context.pages().length === 0) {
       throw new Error("No pages found in the Tauri browser context.");
     }
 
-    // Find the home page (no ?file= parameter in URL)
-    for (const page of pages) {
-      const url = page.url();
-      if (url.includes("localhost") && !url.includes("file=")) {
-        homePage = page;
-        break;
-      }
-    }
-
-    // Fallback: find by content
-    if (!homePage) {
-      for (const page of pages) {
-        const visible = await page
-          .getByText("Create a new notebook")
-          .isVisible()
-          .catch(() => false);
-        if (visible) {
-          homePage = page;
-          break;
-        }
-      }
-    }
-
-    if (!homePage) {
-      homePage = pages[0];
-    }
+    homePage = await findHomePage(context);
   });
 
-  test("clicking 'Create a new notebook' opens a new Tauri window", async () => {
+  test("opening a new notebook creates a Tauri window with editor", async () => {
     // Verify we're on the home page
     await expect(homePage.getByText("Create a new notebook")).toBeVisible({
       timeout: 15_000,
     });
 
-    const pageCountBefore = context.pages().length;
-
-    // Click "Create a new notebook" link
-    await homePage.getByText("Create a new notebook").click();
-
-    // Wait for a new page to appear in the context
-    await expect
-      .poll(() => context.pages().length, { timeout: 15_000 })
-      .toBeGreaterThan(pageCountBefore);
-
-    // Find the new notebook page
-    const newPage = context
-      .pages()
-      .find(
-        (p) => p.url().includes("__new__") || p.url().includes("file="),
-      );
-    expect(newPage).toBeDefined();
+    // Create notebook via IPC with a unique ID to avoid deduplication.
+    // The UI "Create a new notebook" link has a fixed href per session,
+    // so clicking it when a notebook window already exists just focuses
+    // the existing window (correct deduplication behavior).
+    const newPage = await createNotebookViaIPC(homePage, context);
 
     // Wait for the notebook to fully load
-    await newPage!.waitForLoadState("domcontentloaded", { timeout: 15_000 });
+    await newPage.waitForLoadState("domcontentloaded", { timeout: 15_000 });
 
     // Verify the URL contains the new notebook pattern
-    expect(newPage!.url()).toContain("__new__");
+    expect(newPage.url()).toContain("__new__");
 
     // Verify the notebook editor is rendered (not a blank page)
-    await newPage!.waitForFunction(
+    await newPage.waitForFunction(
       () => document.querySelector(".cm-editor") !== null,
       { timeout: 30_000 },
     );
 
-    const hasEditor = await newPage!.evaluate(
+    const hasEditor = await newPage.evaluate(
       () => document.querySelector(".cm-editor") !== null,
     );
     expect(hasEditor).toBe(true);
