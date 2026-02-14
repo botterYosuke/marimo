@@ -272,6 +272,8 @@ class LazyListOfFilesAppFileRouter(AppFileRouter):
         self._validator = PathValidator(abs_directory)
         # Use DirectoryScanner for file discovery (use absolute path)
         self._scanner = DirectoryScanner(str(abs_directory), include_markdown)
+        # Dynamically allowed external files (e.g., opened via file dialog)
+        self._allowed_files: set[str] = set()
 
     @property
     def directory(self) -> str:
@@ -297,6 +299,15 @@ class LazyListOfFilesAppFileRouter(AppFileRouter):
             temp_dir: The absolute path to the temp directory to allow.
         """
         self._validator.register_temp_dir(temp_dir)
+
+    def register_allowed_file(self, filepath: str) -> None:
+        """Allow an external file path for access.
+
+        This enables files outside the base directory to be opened,
+        e.g. via file dialog in a desktop app.
+        """
+        normalized = str(normalize_path(Path(filepath)))
+        self._allowed_files.add(normalized)
 
     def is_file_in_allowed_temp_dir(self, filepath: str) -> bool:
         """Check if a file is inside an allowed temp directory.
@@ -338,6 +349,16 @@ class LazyListOfFilesAppFileRouter(AppFileRouter):
         # If filepath is relative, resolve it relative to directory
         if not filepath.is_absolute():
             filepath = directory / filepath
+
+        # Check if the file is explicitly allowed (e.g., opened via file dialog)
+        normalized_path = str(normalize_path(filepath))
+        if normalized_path in self._allowed_files:
+            if filepath.exists():
+                return str(filepath)
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"File {key} not found",
+            )
 
         # Use PathValidator for security validation
         # Check if file is in an allowed temp directory (e.g., for tutorials)

@@ -22,6 +22,7 @@ from marimo._runtime.commands import (
 from marimo._server.app_defaults import AppDefaults
 from marimo._server.file_router import (
     AppFileRouter,
+    LazyListOfFilesAppFileRouter,
     ListOfFilesAppFileRouter,
     MarimoFileKey,
     flatten_files,
@@ -153,7 +154,7 @@ class SessionManager:
         defaults = AppDefaults.from_config_manager(self._config_manager)
         if (
             self.mode is SessionMode.EDIT
-            and isinstance(self.file_router, ListOfFilesAppFileRouter)
+            and isinstance(self.file_router, (ListOfFilesAppFileRouter, LazyListOfFilesAppFileRouter))
             and not key.startswith(AppFileRouter.NEW_FILE)
         ):
             self.file_router.register_allowed_file(key)
@@ -179,7 +180,7 @@ class SessionManager:
         defaults = AppDefaults.from_config_manager(self._config_manager)
         if (
             self.mode is SessionMode.EDIT
-            and isinstance(self.file_router, ListOfFilesAppFileRouter)
+            and isinstance(self.file_router, (ListOfFilesAppFileRouter, LazyListOfFilesAppFileRouter))
             and not file_key.startswith(AppFileRouter.NEW_FILE)
         ):
             self.file_router.register_allowed_file(file_key)

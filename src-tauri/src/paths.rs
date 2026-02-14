@@ -50,4 +50,14 @@ pub fn get_log_dir(app: &tauri::AppHandle) -> PathBuf {
     data_dir.join("logs")
 }
 
+/// Get the notebooks workspace directory.
+/// Uses %APPDATA%/marimo/notebooks (same location as other marimo settings).
+pub fn get_notebooks_dir(app: &tauri::AppHandle) -> PathBuf {
+    let config_dir = app
+        .path()
+        .config_dir()
+        .expect("failed to get config dir");
+    config_dir.join("marimo").join("notebooks")
+}
+
 use tauri::Manager;

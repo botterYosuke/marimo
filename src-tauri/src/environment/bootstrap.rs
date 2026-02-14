@@ -5,7 +5,7 @@ use anyhow::{anyhow, Result};
 use log::info;
 
 use crate::paths;
-use super::version::MARIMO_VERSION;
+
 
 /// Check if the environment is ready (venv Python exists).
 pub fn is_environment_ready(env_dir: &Path) -> bool {
@@ -61,12 +61,17 @@ pub fn ensure_environment(
         }
     }
 
-    // 3. Install/update marimo
-    on_progress(&format!("Installing marimo {}...", MARIMO_VERSION));
+    // 3. Install/update marimo from local source
+    // Using local source to include desktop-specific patches:
+    // - SelectorEventLoop for Windows (distributor.py add_reader fix)
+    // - register_allowed_file on LazyListOfFilesAppFileRouter
+    // - HTTPException handler in ws_endpoint
+    let marimo_source = r"c:\Users\sasai\Documents\marimo";
+    on_progress(&format!("Installing marimo from local source..."));
     let venv_python = paths::get_venv_python(env_dir);
     info!(
-        "Installing marimo {} into venv (python: {})",
-        MARIMO_VERSION,
+        "Installing marimo from {} into venv (python: {})",
+        marimo_source,
         venv_python.display()
     );
 
@@ -76,7 +81,7 @@ pub fn ensure_environment(
             "install",
             "--python",
             &venv_python.to_string_lossy(),
-            &format!("marimo=={}", MARIMO_VERSION),
+            marimo_source,
         ])
         .status()
         .map_err(|e| anyhow!("Failed to install marimo: {}", e))?;
