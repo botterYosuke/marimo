@@ -71,6 +71,20 @@ pub async fn window_open_home(app: tauri::AppHandle) -> Result<(), AppError> {
 }
 
 #[tauri::command]
+pub fn window_toggle_fullscreen(app: tauri::AppHandle) -> Result<(), AppError> {
+    let windows = app.webview_windows();
+    let win = windows
+        .values()
+        .find(|w| w.is_focused().unwrap_or(false))
+        .or_else(|| windows.values().next());
+    if let Some(win) = win {
+        let is_fullscreen = win.is_fullscreen().unwrap_or(false);
+        let _ = win.set_fullscreen(!is_fullscreen);
+    }
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn window_open_dialog(app: tauri::AppHandle) -> Result<(), AppError> {
     use tauri_plugin_dialog::DialogExt;
 

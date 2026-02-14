@@ -836,7 +836,7 @@ cd src-tauri && CARGO_TARGET_DIR="C:\Users\sasai\cargo-target-marimo" cargo taur
 - [x] 外部リンク (Documentation, GitHub, Community 等) がシステムブラウザで開くか → ✅ E2E テスト PASS (`external-links.spec.ts`)
 - [x] F12 で DevTools が開くか → ✅ 手動テスト PASS
 - [x] F5 でページリロードが動作するか → ✅ E2E テスト PASS (`reload.spec.ts`)
-- [x] F11 フルスクリーン → 削除済み（WebView2 との F11 キー競合のため機能自体を削除。View メニューから Toggle Fullscreen も削除）
+- [x] F11 フルスクリーン → ✅ 手動テスト PASS（initialization_script で F11 preventDefault、Tauri メニューアクセラレータで制御）
 - [x] ウィンドウ重複排除（同一パスで既存ウィンドウにフォーカス）→ ✅ E2E テスト PASS (`window-deduplication.spec.ts`)
 - [x] 異なるパスで別ウィンドウが作成される → ✅ E2E テスト PASS (`window-deduplication.spec.ts`)
 
@@ -965,3 +965,27 @@ if let Some(path) = file_path {
 27. **「Create a new notebook」リンクはセッション中固定 URL**: ホームページの「Create a new notebook」リンクは `?file=__new__s_XXXXXX` という固定 href を持つ。同セッションで複数回クリックしてもウィンドウマネージャーが重複排除するため、E2E テストで毎回新ウィンドウが必要な場合は IPC (`window_open_notebook`) を直接呼び出し一意のランダム ID を渡すこと
 28. **サイドバーパネルによるクリック遮断**: ノートブックの FILES サイドバーが開いている場合、`.cm-editor` 上のクリックが `data-panel-group` に遮られる。`.cm-content` をターゲットにして `{ force: true }` を使うことで回避
 29. **CDP ページ URL の遷移タイミング**: 新ウィンドウは CDP 上で `about:blank` → 実 URL の 2 段階で出現する。`expect.poll()` でページ数増加を待った後、さらに `expect.poll()` で URL にランダム ID が含まれるページを待つ 2 段階ポーリングが安定
+30. **WebView2 の F11 キーキャプチャ問題**: Windows の WebView2 (Chromium) は F11 キーを OS レベルで先にキャプチャし、Chromium 内蔵のフルスクリーン処理を実行する。このため **(a)** Tauri のメニューアクセラレータに F11 が到達しない **(b)** JS の `preventDefault()` だけでは Tauri 側でフルスクリーンを制御できない。解決策は `initialization_script` 内で `addEventListener('keydown', ..., true)` (capture phase) で F11 を `preventDefault()` し、同時に `window.__TAURI_INTERNALS__.invoke('window_toggle_fullscreen')` で Tauri IPC コマンドを直接呼び出すこと。メニューの F11 アクセラレータ表記はユーザーへの視覚的ヒントとして残すが、実際のキー処理は JS→IPC 経由で行われる。View → Toggle Fullscreen のメニュークリックは `on_menu_event` ハンドラで処理されるため正常に動作する
+
+### Phase 9: F11 フルスクリーン機能の再実装 ✅
+
+**背景**: F11 フルスクリーンは Phase 6 で一度実装したが、WebView2 が F11 を横取りし Tauri の `set_fullscreen()` と競合するため削除された (Tips 30 参照)。
+
+**修正内容** (3 ファイル):
+
+- ✅ `src-tauri/src/window/manager.rs` — `LINK_INTERCEPT_JS` に F11 `preventDefault()` + IPC `window_toggle_fullscreen` 呼び出しを追加。WebView2 のネイティブフルスクリーンをブロックし、Tauri IPC 経由で制御
+- ✅ `src-tauri/src/commands.rs` — `window_toggle_fullscreen` コマンド追加。フォーカスフォールバックパターン (`.find(|w| w.is_focused()).or_else(|| windows.values().next())`) を使用
+- ✅ `src-tauri/src/lib.rs` — `invoke_handler` に `window_toggle_fullscreen` を登録。`on_menu_event` に `"fullscreen"` ハンドラ追加 (View メニュークリック用)
+- ✅ `src-tauri/src/window/menu.rs` — View メニューに `Toggle Fullscreen` (F11 アクセラレータ) を追加
+
+**設計判断**:
+- F11 キー押下は **2 経路** で fullscreen を切り替える:
+  1. **JS → IPC**: WebView 内で F11 keydown → `preventDefault()` + `invoke('window_toggle_fullscreen')` (主経路、Windows で確実に動作)
+  2. **メニューアクセラレータ → on_menu_event**: メニュークリック時 (補助経路)
+- メニューアクセラレータの F11 表記は視覚的ヒントとして残す
+- `window_toggle_fullscreen` コマンドは同期関数 (`pub fn`、`async` 不要) — `is_fullscreen()` と `set_fullscreen()` はメインスレッドからの呼び出し不要
+
+**テスト結果**:
+- ✅ F11 キーでフルスクリーン切り替え — PASS
+- ✅ View → Toggle Fullscreen メニュークリック — PASS
+- ✅ `cargo check` エラーゼロ・warning ゼロ

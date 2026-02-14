@@ -50,6 +50,11 @@ pub fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
                 .accelerator("F12")
                 .build(app)?,
         )
+        .item(
+            &MenuItemBuilder::with_id("fullscreen", "Toggle Fullscreen")
+                .accelerator("F11")
+                .build(app)?,
+        )
         .build()?;
     menu.append(&view_menu)?;
 
