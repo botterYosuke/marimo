@@ -65,20 +65,10 @@ jobs:
         include:
           - platform: windows
             os: windows-latest
-            args: ""
-            rust_target: ""
-          - platform: macos-arm64
+          - platform: macos
             os: macos-latest
-            args: "--target aarch64-apple-darwin"
-            rust_target: "aarch64-apple-darwin"
-          - platform: macos-x86_64
-            os: macos-13
-            args: "--target x86_64-apple-darwin"
-            rust_target: "x86_64-apple-darwin"
           - platform: linux
             os: ubuntu-24.04
-            args: ""
-            rust_target: ""
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -143,8 +133,6 @@ jobs:
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.rust_target }}
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
@@ -168,9 +156,8 @@ jobs:
             #### Windows
             - **NSIS Installer**: `.exe`
 
-            #### macOS
-            - **Apple Silicon (ARM)**: `.dmg`
-            - **Intel (x86_64)**: `.dmg`
+            #### macOS (Apple Silicon)
+            - **DMG**: `.dmg`
 
             #### Linux
             - **AppImage**: `.AppImage`
@@ -186,7 +173,6 @@ jobs:
             On first launch, the app will automatically set up a Python environment using the bundled uv tool. This may take a minute on the first run.
           releaseDraft: false
           prerelease: false
-          args: ${{ matrix.args }}
 
   notify:
     name: Discord Notification
@@ -201,5 +187,5 @@ jobs:
           RELEASE_VERSION: ${{ needs.check-release.outputs.marimo_version }}
         run: |
           curl -H "Content-Type: application/json" \
-            -d "{\"username\": \"GitHub\", \"avatar_url\": \"https://cdn.discordapp.com/icons/1059888774789730424/bc13378b871c363137358a531e1a2f82.png\", \"embeds\": [{\"title\": \"marimo Desktop App ${RELEASE_VERSION}\", \"url\": \"https://github.com/${{ github.repository }}/releases/tag/${RELEASE_TAG}\", \"color\": 2105893, \"description\": \"New Tauri desktop release is available!\n\n**Downloads:**\n- Windows: NSIS installer (.exe)\n- macOS: DMG (Apple Silicon + Intel)\n- Linux: AppImage / .deb\"}]}" \
+            -d "{\"username\": \"GitHub\", \"avatar_url\": \"https://cdn.discordapp.com/icons/1059888774789730424/bc13378b871c363137358a531e1a2f82.png\", \"embeds\": [{\"title\": \"marimo Desktop App ${RELEASE_VERSION}\", \"url\": \"https://github.com/${{ github.repository }}/releases/tag/${RELEASE_TAG}\", \"color\": 2105893, \"description\": \"New Tauri desktop release is available!\n\n**Downloads:**\n- Windows: NSIS installer (.exe)\n- macOS: DMG (Apple Silicon)\n- Linux: AppImage / .deb\"}]}" \
             "$DISCORD_WEBHOOK_URL"
