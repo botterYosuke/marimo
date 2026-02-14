@@ -1,10 +1,24 @@
 use std::path::Path;
 use std::process::Command;
 
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
 use anyhow::{anyhow, Result};
 use log::info;
 
 use crate::paths;
+
+/// Apply CREATE_NO_WINDOW flag so child processes don't spawn a console window.
+#[cfg(windows)]
+fn no_window(cmd: &mut Command) -> &mut Command {
+    cmd.creation_flags(0x08000000)
+}
+
+#[cfg(not(windows))]
+fn no_window(cmd: &mut Command) -> &mut Command {
+    cmd
+}
 
 
 /// Check if the environment is ready (venv Python exists).
@@ -45,14 +59,16 @@ pub fn ensure_environment(
     if !env_dir.exists() {
         on_progress("Creating environment...");
         info!("Creating venv at: {}", env_dir.display());
-        let status = Command::new(uv_bin)
-            .args([
+        let mut cmd = Command::new(uv_bin);
+        cmd.args([
                 "venv",
                 "--seed",
                 "--python",
                 &python_path,
                 &env_dir.to_string_lossy(),
-            ])
+            ]);
+        no_window(&mut cmd);
+        let status = cmd
             .status()
             .map_err(|e| anyhow!("Failed to create venv: {}", e))?;
 
@@ -75,14 +91,16 @@ pub fn ensure_environment(
         venv_python.display()
     );
 
-    let status = Command::new(uv_bin)
-        .args([
+    let mut cmd = Command::new(uv_bin);
+    cmd.args([
             "pip",
             "install",
             "--python",
             &venv_python.to_string_lossy(),
             marimo_source,
-        ])
+        ]);
+    no_window(&mut cmd);
+    let status = cmd
         .status()
         .map_err(|e| anyhow!("Failed to install marimo: {}", e))?;
 
@@ -96,8 +114,10 @@ pub fn ensure_environment(
 
 /// Find Python via `uv python find`.
 fn find_python(uv_bin: &Path) -> Option<String> {
-    let output = Command::new(uv_bin)
-        .args(["python", "find"])
+    let mut cmd = Command::new(uv_bin);
+    cmd.args(["python", "find"]);
+    no_window(&mut cmd);
+    let output = cmd
         .output()
         .ok()?;
 
@@ -113,8 +133,10 @@ fn find_python(uv_bin: &Path) -> Option<String> {
 /// Install Python 3.13 via `uv python install`.
 fn install_python(uv_bin: &Path) -> Result<()> {
     info!("Installing Python 3.13 via uv...");
-    let status = Command::new(uv_bin)
-        .args(["python", "install", "3.13"])
+    let mut cmd = Command::new(uv_bin);
+    cmd.args(["python", "install", "3.13"]);
+    no_window(&mut cmd);
+    let status = cmd
         .status()
         .map_err(|e| anyhow!("Failed to install Python: {}", e))?;
 
