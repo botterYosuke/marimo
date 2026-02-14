@@ -1,7 +1,7 @@
 # Edit モード Grid レイアウト（3Dモード）追加計画
 
 ## 概要
-`main` ブランチ（`D:\Documents\marimo - m`、Electron版）の edit モード grid レイアウト（3Dモード）を `sasa/tauri` ブランチ（`D:\Documents\marimo`、Tauri版）に追加する。
+`main` ブランチ（`D:\Documents\marimo - m`、Electron版）の edit モード grid レイアウト（3Dモード）を `sasa/ma` ブランチ（`D:\Documents\marimo`、Tauri版）に追加する。
 
 ## 主な機能
 - `appConfig.width === "grid"` 時に3Dモードを有効化

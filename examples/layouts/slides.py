@@ -10,8 +10,8 @@
 
 import marimo
 
-__generated_with = "0.19.7"
-app = marimo.App(width="medium", layout_file="layouts/slides.slides.json")
+__generated_with = "0.19.11"
+app = marimo.App(width="grid")
 
 
 @app.cell(hide_code=True)
@@ -106,17 +106,21 @@ def _(mo, print_and_run):
 
     By casting a column to a DECIMAL with a fixed number of digits after the decimal point, we can pretty-print it as follows:
 
-    {print_and_run('''
+    {
+        print_and_run('''
     SELECT x::DECIMAL(15, 3) AS x
     FROM 'example.csv';
-    ''')}
+    ''')
+    }
 
     A typical alternative solution is to use the printf or format functions, e.g.:
 
-    {print_and_run('''
+    {
+        print_and_run('''
     SELECT printf('%.3f', x)
     FROM 'example.csv';
-    ''')}
+    ''')
+    }
 
     However, these approaches require us to specify a formatting string that's easy to forget. What's worse, the statement above returns string values, which makes subsequent operations (e.g., sorting) more difficult. Therefore, unless keeping the full precision of the floating-point numbers is a concern, casting to DECIMAL values should be the preferred solution for most use cases.
     """)
@@ -136,17 +140,19 @@ def _(mo, print_and_run):
     mo.md(f"""
     To copy the schema from a table without copying its data, we can use LIMIT 0.
 
-    {print_and_run('''
+    {
+        print_and_run('''
     CREATE OR REPLACE TABLE example AS
         FROM 'example.csv';
     CREATE OR REPLACE TABLE tbl AS
         FROM example
         LIMIT 0;
-    ''')}
+    ''')
+    }
 
     This will result in an empty table with the same schema as the source table:
 
-    {print_and_run('DESCRIBE tbl;')}
+    {print_and_run("DESCRIBE tbl;")}
 
     This will return the schema of the table.
 
@@ -180,18 +186,22 @@ def _(mo, print_and_run, rerun):
 
     {rerun}
 
-    {print_and_run('''
+    {
+        print_and_run('''
     FROM 'example.csv' ORDER BY random();
-    ''')}
+    ''')
+    }
 
     Shuffling deterministically is a bit more tricky. To achieve this, we can order on the hash, of the rowid pseudocolumn. Note that this column is only available in physical tables, so we first have to load the CSV in a table, then perform the shuffle operation as follows:
 
     {rerun}
 
-    {print_and_run('''
+    {
+        print_and_run('''
     CREATE OR REPLACE TABLE example AS FROM 'example.csv';
     FROM example ORDER BY hash(rowid + 42);
-    ''')}
+    ''')
+    }
 
     Note that the + 42 is only necessary to nudge the first row from its position – as hash(0) returns 0, the smallest possible value, using it for ordering leaves the first row in its place.
     """)
@@ -211,6 +221,7 @@ def _(mo):
 @app.cell
 def _(duckdb, mo):
     # Utils
+
 
     def print_and_run(sql: str):
         result = duckdb.sql(sql)

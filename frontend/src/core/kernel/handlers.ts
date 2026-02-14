@@ -1,6 +1,7 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 import { deserializeLayout } from "@/components/editor/renderers/plugins";
 import type { LayoutType } from "@/components/editor/renderers/types";
+import { sendBroadcastMessage } from "@/utils/broadcastChannel";
 import { Logger } from "@/utils/Logger";
 import { Objects } from "@/utils/objects";
 import type { CellId, UIElementId } from "../cells/ids";
@@ -8,11 +9,17 @@ import { type CellData, createCell } from "../cells/types";
 import { type AppConfig, AppConfigSchema } from "../config/config-schema";
 import { UI_ELEMENT_REGISTRY } from "../dom/uiregistry";
 import {
+  addCellToGridLayout,
   initialLayoutState,
+  isCellInGrid,
   type LayoutData,
   type LayoutState,
+  layoutStateAtom,
 } from "../layout/layout";
+import { isVisualOutput } from "../layout/visual-output-detector";
 import { getRequestClient } from "../network/requests";
+import { store } from "../state/jotai";
+import { cell3DPositionsAtom } from "../three/cell-3d-positions";
 import { VirtualFileTracker } from "../static/virtual-file-tracker";
 import type {
   Capabilities,
@@ -82,6 +89,22 @@ export function buildLayoutState(
     layoutState.selectedLayout = layoutType;
     layoutState.layoutData[layoutType] = layoutData;
     setLayoutData({ layoutView: layoutType, data: layoutData });
+
+    // Restore 3D positions from serialized layout
+    if (layoutType === "grid" && layout.data?.cells) {
+      const positions = new Map<CellId, { x: number; y: number; z: number }>();
+      const serializedCells = layout.data.cells as Array<{
+        position3D?: { x: number; y: number; z: number };
+      }>;
+      serializedCells.forEach((cell, idx) => {
+        if (cell.position3D && cells[idx]) {
+          positions.set(cells[idx].id, cell.position3D);
+        }
+      });
+      if (positions.size > 0) {
+        store.set(cell3DPositionsAtom, positions);
+      }
+    }
   }
 
   return layoutState;
@@ -201,6 +224,48 @@ export function handleRemoveUIElements(
   VirtualFileTracker.INSTANCE.removeForCellId(cellId);
 }
 
+/**
+ * Extract and send marimo-broadcast messages from HTML output.
+ * This is called at WebSocket receive time to ensure all messages are processed,
+ * even when React batches state updates and only renders the final state.
+ */
+function extractAndSendBroadcastMessages(html: string): void {
+  // Quick check before running regex
+  if (!html.includes("marimo-broadcast")) {
+    return;
+  }
+
+  // Pattern 1: Match <marimo-broadcast> tag and extract attributes (any order)
+  const tagRegex = /<marimo-broadcast([^>]*)>/gi;
+  let match = tagRegex.exec(html);
+  while (match) {
+    const attrString = match[1];
+    const channelMatch = /channel="([^"]+)"/.exec(attrString);
+    const typeMatch = /type="([^"]+)"/.exec(attrString);
+    const payloadMatch = /payload="([^"]+)"/.exec(attrString);
+
+    if (channelMatch && typeMatch && payloadMatch) {
+      sendBroadcastMessage(channelMatch[1], typeMatch[1], payloadMatch[1]);
+    }
+    match = tagRegex.exec(html);
+  }
+
+  // Pattern 2: Match data-marimo-broadcast attribute (any order)
+  const divRegex = /<[^>]+data-marimo-broadcast="([^"]+)"[^>]*>/gi;
+  match = divRegex.exec(html);
+  while (match) {
+    const fullMatch = match[0];
+    const channel = match[1];
+    const typeMatch = /data-marimo-type="([^"]+)"/.exec(fullMatch);
+    const payloadMatch = /data-marimo-payload="([^"]+)"/.exec(fullMatch);
+
+    if (typeMatch && payloadMatch) {
+      sendBroadcastMessage(channel, typeMatch[1], payloadMatch[1]);
+    }
+    match = divRegex.exec(html);
+  }
+}
+
 export function handleCellNotificationeration(
   data: NotificationMessageData<"cell-op">,
   handleCellMessage: (message: CellMessage) => void,
@@ -212,6 +277,63 @@ export function handleCellNotificationeration(
    * it may have stopped running. Each of these things
    * affects how the cell should be rendered.
    */
+
+  // Extract broadcast messages from HTML output BEFORE React processes it.
+  // This ensures all messages are sent even when React batches state updates.
+  const output = data.output;
+  if (output?.mimetype === "text/html" && typeof output.data === "string") {
+    extractAndSendBroadcastMessages(output.data);
+  }
+
   handleCellMessage(data);
   VirtualFileTracker.INSTANCE.track(data);
+
+  // Auto-place visual outputs in grid layout
+  autoPlaceVisualOutput(data);
+}
+
+/**
+ * Auto-place a cell in the grid layout if it has visual output
+ * and auto-layout is enabled.
+ */
+function autoPlaceVisualOutput(data: NotificationMessageData<"cell-op">) {
+  const cellId = data.cell_id as CellId;
+  const output = data.output;
+
+  // Skip if no output
+  if (!output) {
+    return;
+  }
+
+  // Check layout state
+  const layoutState = store.get(layoutStateAtom);
+
+  // Only auto-place in grid layout mode
+  if (layoutState.selectedLayout !== "grid") {
+    return;
+  }
+
+  // Only auto-place if auto-layout is enabled
+  if (!layoutState.autoLayoutEnabled) {
+    Logger.log(`[autoPlace] Cell ${cellId}: autoLayout disabled, skipping`);
+    return;
+  }
+
+  // Skip if cell is already in the grid
+  if (isCellInGrid(cellId)) {
+    return;
+  }
+
+  // Check if output is visual
+  const visual = isVisualOutput(output);
+  Logger.log(
+    `[autoPlace] Cell ${cellId}: isVisual=${visual}, mimetype=${output.mimetype}`,
+  );
+  if (!visual) {
+    return;
+  }
+
+  // Add cell to grid layout
+  Logger.log(`[autoPlace] Cell ${cellId}: adding to grid layout`);
+  addCellToGridLayout(cellId);
 }
