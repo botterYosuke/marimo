@@ -7,7 +7,7 @@
     "codegen": "pnpm turbo run codegen",
     "lint": "pnpm biome check --write && pnpm run -r lint",
     "dev": "pnpm run --filter @marimo-team/frontend dev",
-    "dev:makeless": "uv run marimo edit --no-token --headless /tmp --port 2718 & pnpm run dev",
+    "dev:makeless": "concurrently \"uv run marimo edit --no-token --headless /tmp --port 2718\" \"pnpm run dev\"",
     "tauri:dev": "cargo tauri dev --manifest-path src-tauri/Cargo.toml",
     "tauri:build": "cargo tauri build --manifest-path src-tauri/Cargo.toml",
     "download:uv": "node scripts/download-uv.js"
@@ -16,6 +16,7 @@
     "@biomejs/biome": "2.3.13",
     "@testing-library/jest-dom": "^6.9.1",
     "@typescript/native-preview": "7.0.0-dev.20260201.1",
+    "concurrently": "^9.2.1",
     "turbo": "^2.8.0",
     "vitest": "^3.2.4"
   },
