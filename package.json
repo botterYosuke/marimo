@@ -7,6 +7,7 @@
     "codegen": "pnpm turbo run codegen",
     "lint": "pnpm biome check --write && pnpm run -r lint",
     "dev": "pnpm run --filter @marimo-team/frontend dev",
+    "dev:makeless": "uv run marimo edit --no-token --headless /tmp --port 2718 & pnpm run dev",
     "tauri:dev": "cargo tauri dev --manifest-path src-tauri/Cargo.toml",
     "tauri:build": "cargo tauri build --manifest-path src-tauri/Cargo.toml",
     "download:uv": "node scripts/download-uv.js"

@@ -46,7 +46,14 @@ import { Objects } from "@/utils/objects";
 
 type Props = ICellRendererProps<GridLayout>;
 
-const ReactGridLayout = WidthProvider(Responsive);
+let _ReactGridLayout: ReturnType<typeof WidthProvider<typeof Responsive>> | null =
+  null;
+function getReactGridLayout() {
+  if (!_ReactGridLayout) {
+    _ReactGridLayout = WidthProvider(Responsive);
+  }
+  return _ReactGridLayout;
+}
 
 const MARGIN: [number, number] = [0, 0];
 
@@ -58,6 +65,7 @@ export const GridLayoutRenderer: React.FC<Props> = ({
   cells,
   mode,
 }) => {
+  const ReactGridLayout = getReactGridLayout();
   const isReading = mode === "read";
   const inGridIds = new Set(layout.cells.map((cell) => cell.i));
   const [droppingItem, setDroppingItem] = useState<{
