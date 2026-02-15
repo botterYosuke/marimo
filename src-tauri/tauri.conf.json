@@ -25,7 +25,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": ["binaries/uv*"],
+    "resources": [
+      "binaries/uv*",
+      "../marimo/**/*",
+      "../pyproject.toml",
+      "../LICENSE",
+      "../README.md",
+      "../MANIFEST.in"
+    ],
     "windows": {
       "webviewInstallMode": {
         "type": "downloadBootstrapper"

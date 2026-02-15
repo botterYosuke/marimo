@@ -61,12 +61,17 @@ pub fn run() {
             if !cfg!(debug_assertions) {
                 let uv_bin = paths::get_uv_bin(&app_handle);
                 let env_dir = paths::get_env_dir(&app_handle);
+                let python_install_dir = paths::get_python_install_dir(&app_handle);
+                let marimo_source = paths::get_marimo_source(&app_handle);
 
                 info!("Bootstrapping environment...");
+                info!("Marimo source: {}", marimo_source.display());
                 // TODO: Show splash screen with progress
                 if let Err(e) = environment::bootstrap::ensure_environment(
                     &uv_bin,
                     &env_dir,
+                    &python_install_dir,
+                    &marimo_source,
                     &|msg| {
                         info!("Bootstrap: {}", msg);
                     },

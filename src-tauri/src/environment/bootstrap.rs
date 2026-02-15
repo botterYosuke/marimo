@@ -37,11 +37,13 @@ pub fn is_environment_ready(env_dir: &Path) -> bool {
 pub fn ensure_environment(
     uv_bin: &Path,
     env_dir: &Path,
+    python_install_dir: &Path,
+    marimo_source: &Path,
     on_progress: &dyn Fn(&str),
 ) -> Result<()> {
     // 1. Find Python
     on_progress("Checking Python...");
-    let python_path = find_python(uv_bin);
+    let python_path = find_python(uv_bin, python_install_dir);
 
     let python_path = match python_path {
         Some(p) => {
@@ -50,8 +52,8 @@ pub fn ensure_environment(
         }
         None => {
             on_progress("Installing Python (this may take a minute)...");
-            install_python(uv_bin)?;
-            find_python(uv_bin).ok_or_else(|| anyhow!("Python installation failed"))?
+            install_python(uv_bin, python_install_dir)?;
+            find_python(uv_bin, python_install_dir).ok_or_else(|| anyhow!("Python installation failed"))?
         }
     };
 
@@ -77,17 +79,16 @@ pub fn ensure_environment(
         }
     }
 
-    // 3. Install/update marimo from local source
-    // Using local source to include desktop-specific patches:
+    // 3. Install/update marimo from bundled source
+    // Desktop-specific patches are included:
     // - SelectorEventLoop for Windows (distributor.py add_reader fix)
     // - register_allowed_file on LazyListOfFilesAppFileRouter
     // - HTTPException handler in ws_endpoint
-    let marimo_source = r"c:\Users\sasai\Documents\marimo";
-    on_progress(&format!("Installing marimo from local source..."));
+    on_progress("Installing marimo from bundled source...");
     let venv_python = paths::get_venv_python(env_dir);
     info!(
         "Installing marimo from {} into venv (python: {})",
-        marimo_source,
+        marimo_source.display(),
         venv_python.display()
     );
 
@@ -97,7 +98,7 @@ pub fn ensure_environment(
             "install",
             "--python",
             &venv_python.to_string_lossy(),
-            marimo_source,
+            &format!("{}[game]", marimo_source.display()),
         ]);
     no_window(&mut cmd);
     let status = cmd
@@ -113,9 +114,10 @@ pub fn ensure_environment(
 }
 
 /// Find Python via `uv python find`.
-fn find_python(uv_bin: &Path) -> Option<String> {
+fn find_python(uv_bin: &Path, python_install_dir: &Path) -> Option<String> {
     let mut cmd = Command::new(uv_bin);
-    cmd.args(["python", "find"]);
+    cmd.args(["python", "find"])
+        .env("UV_PYTHON_INSTALL_DIR", python_install_dir);
     no_window(&mut cmd);
     let output = cmd
         .output()
@@ -131,10 +133,16 @@ fn find_python(uv_bin: &Path) -> Option<String> {
 }
 
 /// Install Python 3.13 via `uv python install`.
-fn install_python(uv_bin: &Path) -> Result<()> {
-    info!("Installing Python 3.13 via uv...");
+fn install_python(uv_bin: &Path, python_install_dir: &Path) -> Result<()> {
+    info!("Installing Python 3.13 via uv into {}...", python_install_dir.display());
+
+    // Ensure the install directory exists
+    std::fs::create_dir_all(python_install_dir)
+        .map_err(|e| anyhow!("Failed to create Python install directory: {}", e))?;
+
     let mut cmd = Command::new(uv_bin);
-    cmd.args(["python", "install", "3.13"]);
+    cmd.args(["python", "install", "3.13"])
+        .env("UV_PYTHON_INSTALL_DIR", python_install_dir);
     no_window(&mut cmd);
     let status = cmd
         .status()
