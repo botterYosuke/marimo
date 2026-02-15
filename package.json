@@ -6,9 +6,10 @@
     "build": "pnpm turbo build",
     "codegen": "pnpm turbo run codegen",
     "lint": "pnpm biome check --write && pnpm run -r lint",
-    "dev": "pnpm run --filter @marimo-team/frontend dev",
-    "dev:makeless": "concurrently \"uv run marimo edit --no-token --headless /tmp --port 2718\" \"pnpm run dev\"",
-    "tauri:dev": "cargo tauri dev --manifest-path src-tauri/Cargo.toml",
+    "dev": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
+    "dev:frontend": "pnpm run --filter @marimo-team/frontend dev",
+    "dev:backend": "uv run marimo edit --no-token --headless /tmp --port 2718",
+    "tauri:dev": "concurrently \"pnpm run dev:backend\" \"cargo tauri dev --manifest-path src-tauri/Cargo.toml\"",
     "tauri:build": "cargo tauri build --manifest-path src-tauri/Cargo.toml",
     "download:uv": "node scripts/download-uv.js"
   },
