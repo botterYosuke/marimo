@@ -91,6 +91,64 @@ To build the frontend unminified, run:
 NODE_ENV=development make fe -B
 ```
 
+## Tauri Desktop App Setup
+
+marimo provides a desktop application built with Tauri. To build and develop the desktop app, additional setup is required beyond the standard web development environment.
+
+### Prerequisites
+
+**Required for all platforms:**
+- [Rust](https://rustup.rs/) - Install via rustup
+
+**Windows-specific:**
+- [WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (pre-installed on Windows 11)
+- [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) with "Desktop development with C++" workload
+
+**macOS-specific:**
+- Xcode Command Line Tools: `xcode-select --install`
+
+**Linux-specific:**
+- WebKit2GTK development libraries (see [Tauri prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites#linux))
+
+### Setup and Build
+
+**Windows:**
+```powershell
+# Run setup (includes frontend, LSP, and uv)
+pnpm run setup:win
+
+# Build Tauri installer
+pnpm run tauri:build:win
+```
+
+**macOS/Linux:**
+```bash
+# Run setup
+pnpm run setup
+
+# Build Tauri installer
+pnpm run tauri:build
+```
+
+The installer will be generated in `src-tauri/target/release/bundle/`:
+- Windows: `.msi` installer
+- macOS: `.dmg` and `.app` bundle
+- Linux: `.deb`, `.AppImage`, or `.rpm`
+
+### Development Mode
+
+For Tauri development with hot-reload:
+
+```bash
+# Terminal 1: Start marimo server
+uv run marimo edit --no-token --headless . --port 2718
+
+# Terminal 2: Run Tauri in development mode
+pnpm run tauri:dev
+```
+
+See [frontend/e2e-tests/tauri/README.md](frontend/e2e-tests/tauri/README.md) for more details on Tauri development and testing.
+
 ## `make` commands
 
 > [!NOTE]

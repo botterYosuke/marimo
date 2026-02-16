@@ -11,6 +11,7 @@ use tauri::Manager;
 
 use crate::paths;
 use crate::state::{ServerState, ServerStatus};
+use crate::window;
 
 /// Apply CREATE_NO_WINDOW flag so child processes don't spawn a console window.
 #[cfg(windows)]
@@ -189,6 +190,12 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
 
     // Wait for health check
     info!("Starting health check (timeout: 30s)...");
+
+    // Update splash: Waiting for server
+    if !cfg!(debug_assertions) {
+        window::splash::update_splash_progress(app, "Waiting for server...", 95);
+    }
+
     match wait_for_health(port, Duration::from_secs(30)).await {
         Ok(_) => info!("Health check passed"),
         Err(e) => {

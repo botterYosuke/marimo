@@ -238,7 +238,19 @@ pub fn run() {
                     log::error!("Environment bootstrap failed: {}", e);
                     let bootstrap_state = app_handle.state::<BootstrapState>();
                     bootstrap_state.error(&e.to_string());
-                    // Continue anyway in case the environment was partially set up
+
+                    // Show error on splash screen
+                    let log_dir = paths::get_log_dir(&app_handle);
+                    let log_file = log_dir.join("marimo-desktop.log");
+                    window::splash::show_splash_error(
+                        &app_handle,
+                        &format!(
+                            "環境構築エラー:\n{}\n\nログファイル:\n{}",
+                            e,
+                            log_file.display()
+                        )
+                    );
+                    return Ok(()); // Don't continue if bootstrap failed
                 } else {
                     let bootstrap_state = app_handle.state::<BootstrapState>();
                     bootstrap_state.complete();
@@ -249,6 +261,11 @@ pub fn run() {
             // Start server
             let app_handle_clone = app_handle.clone();
             tauri::async_runtime::spawn(async move {
+                // Update splash: Starting server
+                if !cfg!(debug_assertions) {
+                    window::splash::update_splash_progress(&app_handle_clone, "Starting marimo server...", 90);
+                }
+
                 if let Err(e) =
                     server::lifecycle::start_server(&app_handle_clone, port).await
                 {
@@ -256,11 +273,30 @@ pub fn run() {
                     let server_state = app_handle_clone.state::<ServerState>();
                     let mut status = server_state.status.lock().unwrap();
                     *status = state::ServerStatus::Error(e.to_string());
+
+                    // Show error on splash screen
+                    if !cfg!(debug_assertions) {
+                        let log_dir = paths::get_log_dir(&app_handle_clone);
+                        let log_file = log_dir.join("marimo-desktop.log");
+                        window::splash::show_splash_error(
+                            &app_handle_clone,
+                            &format!(
+                                "サーバー起動エラー:\n{}\n\nログファイル:\n{}",
+                                e,
+                                log_file.display()
+                            )
+                        );
+                    }
                     return;
                 }
 
                 // Server is up — create main window FIRST, then close splash
                 info!("Server started, creating home window first...");
+
+                // Update splash: Opening window
+                if !cfg!(debug_assertions) {
+                    window::splash::update_splash_progress(&app_handle_clone, "Opening window...", 98);
+                }
 
                 match window::manager::open_window(&app_handle_clone, None) {
                     Ok(_) => info!("Home window created successfully"),

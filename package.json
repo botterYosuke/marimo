@@ -8,7 +8,7 @@
     "lint": "pnpm biome check --write && pnpm run -r lint",
     "clean": "rimraf .turbo build dist frontend/dist marimo/_lsp marimo/_static packages/lsp/dist src-tauri/binaries src-tauri/target",
     "setup": "pnpm install && make fe && pnpm download:uv",
-    "setup:win": "pnpm install && pnpm build:fe && pnpm build:lsp && pnpm download:uv && node src-tauri/prepare-resources.js",
+    "setup:win": "pnpm install && pnpm build:fe && pnpm build:lsp && pnpm download:uv",
     "setup:uv": "uv python install 3.12 && uv venv && uv pip install -e \".[dev]\" && pnpm install && pnpm build:fe && pnpm build:lsp",
     "build:fe": "pnpm turbo build --filter @marimo-team/frontend && pnpm format packages/openapi/ && rimraf marimo/_static && node -e \"require('fs').mkdirSync('marimo/_static', {recursive: true})\" && node scripts/copy-frontend.js",
     "build:lsp": "pnpm turbo build --filter @marimo-team/lsp && rimraf marimo/_lsp && node -e \"require('fs').mkdirSync('marimo/_lsp', {recursive: true})\" && node scripts/copy-lsp.js",
@@ -16,7 +16,8 @@
     "dev:frontend": "pnpm run --filter @marimo-team/frontend dev",
     "dev:backend": ".venv\\Scripts\\python.exe -m marimo edit --no-token --headless %TEMP% --port 2718",
     "tauri:dev": "node scripts/tauri-dev-with-cleanup.mjs",
-    "tauri:build": "cargo tauri build",
+    "tauri:build": "pnpm run setup && node src-tauri/prepare-resources.js && cargo tauri build",
+    "tauri:build:win": "pnpm run setup:win && node src-tauri/prepare-resources.js && cargo tauri build",
     "download:uv": "node scripts/download-uv.js"
   },
   "devDependencies": {

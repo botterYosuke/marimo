@@ -11,7 +11,7 @@
   },
   "app": {
     "security": {
-      "csp": "default-src http://localhost:* ws://localhost:*; script-src http://localhost:* 'unsafe-inline' 'unsafe-eval'; style-src http://localhost:* 'unsafe-inline'; img-src http://localhost:* data: blob:; font-src http://localhost:* data:; connect-src http://localhost:* ws://localhost:* blob: data:; media-src http://localhost:* blob:; worker-src http://localhost:* blob:; frame-src http://localhost:* blob:"
+      "csp": "default-src http://localhost:* ws://localhost:* tauri: data:; script-src http://localhost:* tauri: 'unsafe-inline' 'unsafe-eval'; style-src http://localhost:* tauri: 'unsafe-inline'; img-src http://localhost:* tauri: data: blob:; font-src http://localhost:* tauri: data:; connect-src http://localhost:* ws://localhost:* blob: data:; media-src http://localhost:* tauri: blob:; worker-src http://localhost:* tauri: blob:; frame-src http://localhost:* tauri: blob:"
     },
     "withGlobalTauri": true
   },

@@ -66,8 +66,19 @@ pub fn ensure_environment(
     };
     info!("Final Python path: {}", python_path);
 
-    // 2. Create venv if it doesn't exist
-    if !env_dir.exists() {
+    // 2. Create venv if it doesn't exist or is broken
+    let venv_python = paths::get_venv_python(env_dir);
+    let venv_exists = venv_python.exists();
+
+    if !venv_exists {
+        // Remove broken venv directory if it exists
+        if env_dir.exists() {
+            info!("⚠️ Venv directory exists but Python not found, removing broken venv...");
+            if let Err(e) = std::fs::remove_dir_all(env_dir) {
+                log::warn!("Failed to remove broken venv: {}", e);
+            }
+        }
+
         on_progress("Creating environment...");
         info!("=== Creating venv ===");
         info!("Env dir: {}", env_dir.display());
