@@ -9,6 +9,7 @@
     "clean": "rimraf .turbo build dist frontend/dist marimo/_lsp marimo/_static packages/lsp/dist src-tauri/binaries src-tauri/target",
     "setup": "pnpm install && make fe && pnpm download:uv",
     "setup:win": "pnpm install && pnpm build:fe && pnpm build:lsp && pnpm download:uv && node src-tauri/prepare-resources.js",
+    "setup:uv": "uv python install 3.12 && uv venv && uv pip install -e \".[dev]\" && pnpm install && pnpm build:fe && pnpm build:lsp",
     "build:fe": "pnpm turbo build --filter @marimo-team/frontend && pnpm format packages/openapi/ && rimraf marimo/_static && node -e \"require('fs').mkdirSync('marimo/_static', {recursive: true})\" && node scripts/copy-frontend.js",
     "build:lsp": "pnpm turbo build --filter @marimo-team/lsp && rimraf marimo/_lsp && node -e \"require('fs').mkdirSync('marimo/_lsp', {recursive: true})\" && node scripts/copy-lsp.js",
     "dev": "node scripts/dev-with-cleanup.mjs",
