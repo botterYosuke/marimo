@@ -31,7 +31,6 @@ pub fn server_get_logs(app: tauri::AppHandle) -> Result<Vec<LogEntry>, AppError>
 
 #[tauri::command]
 pub async fn server_restart(app: tauri::AppHandle) -> Result<String, AppError> {
-    info!("[DEBUG-RESTART] server_restart command called!");
     let server_state = app.state::<ServerState>();
     let port = *server_state.port.lock().unwrap();
 
