@@ -6,10 +6,11 @@
     "build": "pnpm turbo build",
     "codegen": "pnpm turbo run codegen",
     "lint": "pnpm biome check --write && pnpm run -r lint",
-    "dev": "concurrently --kill-others \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
+    "clean": "rimraf .turbo build dist frontend/dist frontend/node_modules marimo/_lsp marimo/_static packages/openapi/src packages/lsp/dist src-tauri/binaries src-tauri/target",
+    "dev": "node scripts/dev-with-cleanup.mjs",
     "dev:frontend": "pnpm run --filter @marimo-team/frontend dev",
     "dev:backend": ".venv\\Scripts\\python.exe -m marimo edit --no-token --headless %TEMP% --port 2718",
-    "tauri:dev": "concurrently --kill-others \"pnpm run dev:backend\" \"pnpm run dev:frontend\" \"cargo tauri dev\"",
+    "tauri:dev": "node scripts/tauri-dev-with-cleanup.mjs",
     "tauri:build": "cargo tauri build",
     "download:uv": "node scripts/download-uv.js"
   },
@@ -18,6 +19,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@typescript/native-preview": "7.0.0-dev.20260201.1",
     "concurrently": "^9.2.1",
+    "rimraf": "^6.0.1",
     "turbo": "^2.8.0",
     "vitest": "^3.2.4"
   },

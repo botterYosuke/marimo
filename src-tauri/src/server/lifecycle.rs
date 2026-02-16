@@ -277,7 +277,21 @@ fn kill_process(pid: u32) {
         let mut cmd = Command::new("taskkill");
         cmd.args(["/pid", &pid.to_string(), "/f", "/t"])
             .creation_flags(0x08000000);
-        let _ = cmd.output();
+
+        match cmd.output() {
+            Ok(output) => {
+                if !output.status.success() {
+                    error!(
+                        "Failed to kill process {}: {}",
+                        pid,
+                        String::from_utf8_lossy(&output.stderr)
+                    );
+                }
+            }
+            Err(e) => {
+                error!("Failed to execute taskkill for PID {}: {}", pid, e);
+            }
+        }
     }
 
     #[cfg(unix)]
