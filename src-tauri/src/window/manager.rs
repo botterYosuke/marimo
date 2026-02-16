@@ -121,7 +121,7 @@ pub fn open_window(
     // Track the window
     {
         let mut windows = window_state.windows.lock().unwrap();
-        windows.insert(key, label.clone());
+        windows.insert(key.clone(), label.clone());
     }
 
     Ok(())

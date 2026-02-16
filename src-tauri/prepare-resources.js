@@ -75,5 +75,25 @@ otherFiles.forEach(file => {
   }
 });
 
+// Verify static assets after copying marimo source
+const staticAssetsDir = path.join(marimoDest, '_static', 'assets');
+if (fs.existsSync(staticAssetsDir)) {
+  const assetsCount = fs.readdirSync(staticAssetsDir).length;
+  console.log(`✓ _static/assets contains ${assetsCount} files`);
+
+  if (assetsCount < 10) {
+    console.error('\n❌ CRITICAL: Too few asset files!');
+    console.error(`Expected 100+ files, but found only ${assetsCount}`);
+    console.error('Frontend may not be built correctly.');
+    console.error('Please run: ./scripts/buildfrontend.sh');
+    process.exit(1);
+  }
+} else {
+  console.error('\n❌ CRITICAL: _static/assets directory not found!');
+  console.error('Frontend has not been built.');
+  console.error('Please run: ./scripts/buildfrontend.sh');
+  process.exit(1);
+}
+
 console.log('\nResources prepared successfully!');
 console.log(`Resources directory: ${resourcesDir}`);

@@ -109,6 +109,11 @@ jobs:
       - name: Download uv binary for bundling
         run: node scripts/download-uv.js
 
+      - name: Prepare Tauri resources
+        run: |
+          cd src-tauri
+          node prepare-resources.js
+
       - name: Verify uv binary (Unix)
         if: runner.os != 'Windows'
         run: |

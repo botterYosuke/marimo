@@ -160,6 +160,57 @@ pub fn ensure_environment(
         if let Ok(static_output) = verify_static_cmd.output() {
             info!("Installed marimo has _static directory: {}", String::from_utf8_lossy(&static_output.stdout).trim());
         }
+
+        // DEBUG: Detailed static assets verification
+        info!("[DEBUG-ASSETS] === Detailed Static Assets Verification ===");
+
+        // Check if _static/assets directory exists
+        let mut verify_assets_dir_cmd = Command::new(&venv_python);
+        verify_assets_dir_cmd.args(&["-c", "import marimo, os; static_dir = os.path.join(os.path.dirname(marimo.__file__), '_static'); assets_dir = os.path.join(static_dir, 'assets'); print(f'_static exists: {os.path.exists(static_dir)}'); print(f'_static/assets exists: {os.path.exists(assets_dir)}')"]);
+        no_window(&mut verify_assets_dir_cmd);
+        if let Ok(output) = verify_assets_dir_cmd.output() {
+            info!("[DEBUG-ASSETS] {}", String::from_utf8_lossy(&output.stdout).trim());
+        }
+
+        // Count files in _static/assets
+        let mut count_assets_cmd = Command::new(&venv_python);
+        count_assets_cmd.args(&["-c", r#"
+import marimo, os
+assets_dir = os.path.join(os.path.dirname(marimo.__file__), '_static', 'assets')
+if os.path.exists(assets_dir):
+    files = [f for f in os.listdir(assets_dir) if os.path.isfile(os.path.join(assets_dir, f))]
+    print(f'Total files in _static/assets: {len(files)}')
+    if len(files) > 0:
+        print(f'Sample files: {", ".join(files[:5])}')
+    else:
+        print('WARNING: _static/assets directory is EMPTY')
+else:
+    print('ERROR: _static/assets directory does NOT exist')
+"#]);
+        no_window(&mut count_assets_cmd);
+        if let Ok(output) = count_assets_cmd.output() {
+            info!("[DEBUG-ASSETS] {}", String::from_utf8_lossy(&output.stdout).trim());
+        }
+
+        // Check for specific expected files
+        let mut check_index_cmd = Command::new(&venv_python);
+        check_index_cmd.args(&["-c", r#"
+import marimo, os, glob
+assets_dir = os.path.join(os.path.dirname(marimo.__file__), '_static', 'assets')
+if os.path.exists(assets_dir):
+    index_js = glob.glob(os.path.join(assets_dir, 'index-*.js'))
+    index_css = glob.glob(os.path.join(assets_dir, 'index-*.css'))
+    print(f'index-*.js files found: {len(index_js)}')
+    print(f'index-*.css files found: {len(index_css)}')
+else:
+    print('Cannot check for index files: assets directory does not exist')
+"#]);
+        no_window(&mut check_index_cmd);
+        if let Ok(output) = check_index_cmd.output() {
+            info!("[DEBUG-ASSETS] {}", String::from_utf8_lossy(&output.stdout).trim());
+        }
+
+        info!("[DEBUG-ASSETS] === End Assets Verification ===");
     }
 
     on_progress("Ready");

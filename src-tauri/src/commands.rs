@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use log::info;
 use tauri::Manager;
 
 use crate::error::AppError;
@@ -30,6 +31,7 @@ pub fn server_get_logs(app: tauri::AppHandle) -> Result<Vec<LogEntry>, AppError>
 
 #[tauri::command]
 pub async fn server_restart(app: tauri::AppHandle) -> Result<String, AppError> {
+    info!("[DEBUG-RESTART] server_restart command called!");
     let server_state = app.state::<ServerState>();
     let port = *server_state.port.lock().unwrap();
 

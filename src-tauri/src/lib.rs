@@ -259,9 +259,8 @@ pub fn run() {
                     return;
                 }
 
-                // Server is up — close splash and open home page window
-                info!("Server started, closing splash and opening home page...");
-                window::splash::close_splash_window(&app_handle_clone);
+                // Server is up — create main window FIRST, then close splash
+                info!("Server started, creating home window first...");
 
                 match window::manager::open_window(&app_handle_clone, None) {
                     Ok(_) => info!("Home window created successfully"),
@@ -270,6 +269,13 @@ pub fn run() {
                         log::error!("Error details: {:?}", e);
                     }
                 }
+
+                // Small delay to ensure main window is fully ready before closing splash
+                tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+
+                // Now safe to close splash - main window is already created
+                info!("Closing splash window now that main window is ready...");
+                window::splash::close_splash_window(&app_handle_clone);
 
                 // Start periodic health check
                 let app_for_health = app_handle_clone.clone();
@@ -345,9 +351,6 @@ pub fn run() {
             }
         })
         .on_window_event(|window, event| {
-            // DEBUG: Log all window events at app level
-            info!("App window event - label: {}, event: {:?}", window.label(), event);
-
             if let tauri::WindowEvent::Destroyed = event {
                 let app = window.app_handle();
                 let label = window.label().to_string();
@@ -356,7 +359,6 @@ pub fn run() {
 
                 // If all windows are closed, stop server and exit
                 let remaining = window::manager::window_count(app);
-                info!("Window destroyed, remaining windows: {}", remaining);
                 if remaining == 0 {
                     info!("All windows closed, stopping server and exiting");
                     server::lifecycle::stop_server(app);
