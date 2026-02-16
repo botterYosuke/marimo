@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use tauri::Manager;
 
 use crate::error::AppError;
-use crate::state::{LogEntry, ServerState};
+use crate::state::{BootstrapState, LogEntry, ServerState};
 use crate::window;
 
 #[tauri::command]
@@ -109,4 +109,34 @@ pub async fn window_open_dialog(app: tauri::AppHandle) -> Result<(), AppError> {
     }
 
     Ok(())
+}
+
+/// Response for bootstrap progress queries.
+#[derive(serde::Serialize)]
+pub struct BootstrapProgress {
+    pub status: String,
+    pub current_step: String,
+    pub progress_percent: u8,
+}
+
+#[tauri::command]
+pub fn bootstrap_get_progress(app: tauri::AppHandle) -> Result<BootstrapProgress, AppError> {
+    let bootstrap_state = app.state::<BootstrapState>();
+    let status = bootstrap_state.status.lock().unwrap().clone();
+    let current_step = bootstrap_state.current_step.lock().unwrap().clone();
+    let progress_percent = *bootstrap_state.progress_percent.lock().unwrap();
+
+    let status_str = match status {
+        crate::state::BootstrapStatus::NotStarted => "NotStarted",
+        crate::state::BootstrapStatus::InProgress => "InProgress",
+        crate::state::BootstrapStatus::Completed => "Completed",
+        crate::state::BootstrapStatus::Error(_) => "Error",
+    }
+    .to_string();
+
+    Ok(BootstrapProgress {
+        status: status_str,
+        current_step,
+        progress_percent,
+    })
 }

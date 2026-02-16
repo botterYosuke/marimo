@@ -73,3 +73,44 @@ fn chrono_now() -> String {
         .unwrap_or_default();
     format!("{}", now.as_secs())
 }
+
+/// Bootstrap status for Python environment setup.
+#[derive(Debug, Clone, Serialize, PartialEq)]
+pub enum BootstrapStatus {
+    NotStarted,
+    InProgress,
+    Completed,
+    Error(String),
+}
+
+/// Tracks the Python environment bootstrap process.
+pub struct BootstrapState {
+    pub status: Mutex<BootstrapStatus>,
+    pub current_step: Mutex<String>,
+    pub progress_percent: Mutex<u8>,
+}
+
+impl BootstrapState {
+    pub fn new() -> Self {
+        Self {
+            status: Mutex::new(BootstrapStatus::NotStarted),
+            current_step: Mutex::new(String::new()),
+            progress_percent: Mutex::new(0),
+        }
+    }
+
+    pub fn update(&self, step: &str, percent: u8) {
+        *self.current_step.lock().unwrap() = step.to_string();
+        *self.progress_percent.lock().unwrap() = percent;
+        *self.status.lock().unwrap() = BootstrapStatus::InProgress;
+    }
+
+    pub fn complete(&self) {
+        *self.status.lock().unwrap() = BootstrapStatus::Completed;
+        *self.progress_percent.lock().unwrap() = 100;
+    }
+
+    pub fn error(&self, msg: &str) {
+        *self.status.lock().unwrap() = BootstrapStatus::Error(msg.to_string());
+    }
+}

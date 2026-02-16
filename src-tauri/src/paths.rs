@@ -84,12 +84,13 @@ pub fn get_marimo_source(app: &tauri::AppHandle) -> PathBuf {
             PathBuf::from("..")
         }
     } else {
-        // Production: Use bundled marimo from resources
+        // Production: Use bundled marimo from resources subdirectory
+        // Tauri bundles "resources/marimo" as resource_dir/resources/marimo
         let resource_dir = app
             .path()
             .resource_dir()
             .expect("failed to get resource dir");
-        resource_dir
+        resource_dir.join("resources")
     }
 }
 

@@ -5,7 +5,7 @@ edition = "2021"
 description = "marimo desktop application"
 
 [dependencies]
-tauri = { version = "2", features = ["tray-icon", "devtools"] }
+tauri = { version = "2", features = ["tray-icon", "devtools", "webview-data-url"] }
 tauri-plugin-shell = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
@@ -15,6 +15,7 @@ tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.12", features = ["json"] }
 log = "0.4"
 env_logger = "0.11"
+simplelog = "0.12"
 anyhow = "1"
 url = "2"
 urlencoding = "2"

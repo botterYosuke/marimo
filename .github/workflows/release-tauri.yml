@@ -37,7 +37,7 @@ jobs:
       - name: Get version
         id: version
         run: |
-          version=$(uv version --short)
+          version=$(node -p "require('./src-tauri/tauri.conf.json').version")
           echo "marimo_version=$version" >> $GITHUB_OUTPUT
           echo "tag=v$version-tauri" >> $GITHUB_OUTPUT
 

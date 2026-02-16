@@ -27,11 +27,11 @@
     ],
     "resources": [
       "binaries/uv*",
-      "../marimo/**/*",
-      "../pyproject.toml",
-      "../LICENSE",
-      "../README.md",
-      "../MANIFEST.in"
+      "resources/marimo",
+      "resources/pyproject.toml",
+      "resources/LICENSE",
+      "resources/README.md",
+      "resources/MANIFEST.in"
     ],
     "windows": {
       "webviewInstallMode": {

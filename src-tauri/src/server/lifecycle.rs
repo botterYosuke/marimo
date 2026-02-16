@@ -54,16 +54,25 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
     }
 
     // Production mode: spawn the server
+    info!("=== Production Mode: Spawning Server ===");
     let env_dir = paths::get_env_dir(app);
     let venv_python = paths::get_venv_python(&env_dir);
     let uv_bin = paths::get_uv_bin(app);
 
+    info!("Env dir: {}", env_dir.display());
+    info!("Venv Python: {}", venv_python.display());
+    info!("Venv Python exists: {}", venv_python.exists());
+    info!("UV bin: {}", uv_bin.display());
+    info!("UV bin exists: {}", uv_bin.exists());
+
     if !venv_python.exists() {
+        error!("Python venv not found at {}", venv_python.display());
         return Err(anyhow!(
             "Python venv not found at {}. Run environment bootstrap first.",
             venv_python.display()
         ));
     }
+    info!("Venv verification passed");
 
     // Build environment variables
     let mut env: HashMap<String, String> = std::env::vars().collect();
@@ -90,14 +99,17 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
     std::fs::create_dir_all(&notebooks_dir).ok();
     let notebooks_dir_str = notebooks_dir.to_string_lossy().to_string();
 
-    info!("Starting marimo server: {} -m marimo edit {} --no-token --headless --port {}",
-        venv_python.display(), notebooks_dir_str, port);
-    server_state.add_log("info", &format!("Starting server on port {}", port));
-
     // Use the user's home directory as cwd to avoid Python importing
     // a local `marimo/` package from the current working directory
     let home_dir = std::env::var("USERPROFILE")
         .unwrap_or_else(|_| std::env::var("HOME").unwrap_or_else(|_| ".".to_string()));
+
+    info!("Notebooks dir: {}", notebooks_dir_str);
+    info!("Notebooks dir exists: {}", notebooks_dir.exists());
+    info!("Working directory: {}", home_dir);
+    info!("Starting marimo server: {} -m marimo edit {} --no-token --headless --port {}",
+        venv_python.display(), notebooks_dir_str, port);
+    server_state.add_log("info", &format!("Starting server on port {}", port));
 
     let mut cmd = Command::new(&venv_python);
     cmd.args([
@@ -115,16 +127,28 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
     no_window(&mut cmd);
+
+    // DEBUG: Log command details
+    info!("Server command: {:?}", cmd);
+    info!("Server working directory: {:?}", home_dir);
+    info!("Server environment: PATH={:?}, UV={:?}",
+        env.get("PATH"),
+        env.get("UV"));
+
+    info!("Spawning server process...");
     let mut child = cmd
         .spawn()
-        .map_err(|e| anyhow!("Failed to spawn marimo server: {}", e))?;
+        .map_err(|e| {
+            error!("Failed to spawn server process: {}", e);
+            anyhow!("Failed to spawn marimo server: {}", e)
+        })?;
 
     let pid = child.id();
     {
         let mut pid_lock = server_state.pid.lock().unwrap();
         *pid_lock = Some(pid);
     }
-    info!("marimo server started with PID {}", pid);
+    info!("Server process spawned with PID {}", pid);
 
     // Capture output
     let stdout = child.stdout.take();
@@ -137,11 +161,15 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
 
     // Monitor process exit in background
     let app_handle = app.clone();
+    let start_time = std::time::Instant::now();
     tokio::spawn(async move {
         let exit_status = tokio::task::spawn_blocking(move || child.wait()).await;
         match exit_status {
             Ok(Ok(status)) => {
                 warn!("marimo server exited with status: {}", status);
+                // DEBUG: Log more details about the exit
+                warn!("Server stopped unexpectedly. Last known status: Running");
+                warn!("Server ran for approximately {:?}", start_time.elapsed());
                 let server_state = app_handle.state::<ServerState>();
                 let mut s = server_state.status.lock().unwrap();
                 *s = ServerStatus::Stopped;
@@ -160,13 +188,21 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
     });
 
     // Wait for health check
-    wait_for_health(port, Duration::from_secs(30)).await?;
+    info!("Starting health check (timeout: 30s)...");
+    match wait_for_health(port, Duration::from_secs(30)).await {
+        Ok(_) => info!("Health check passed"),
+        Err(e) => {
+            error!("Health check failed: {}", e);
+            return Err(e);
+        }
+    }
 
     {
         let mut status = server_state.status.lock().unwrap();
         *status = ServerStatus::Running;
     }
     server_state.add_log("info", "Server is running");
+    info!("Server fully started and healthy");
 
     Ok(())
 }
@@ -192,25 +228,44 @@ pub fn stop_server(app: &tauri::AppHandle) {
 /// Wait for the server to respond to health checks.
 async fn wait_for_health(port: u16, timeout: Duration) -> Result<()> {
     let url = format!("http://localhost:{}/healthz", port);
+    info!("Health check URL: {}", url);
     let start = std::time::Instant::now();
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(2))
         .build()?;
 
+    let mut attempt = 0;
     loop {
-        if start.elapsed() > timeout {
+        attempt += 1;
+        let elapsed = start.elapsed();
+
+        if elapsed > timeout {
+            error!("Health check timed out after {:?} ({} attempts)", elapsed, attempt);
             return Err(anyhow!("Server health check timed out after {:?}", timeout));
         }
 
+        if attempt % 5 == 1 {  // Log every 5th attempt to reduce noise
+            info!("Health check attempt {}, elapsed: {:?}", attempt, elapsed);
+        }
+
         match client.get(&url).send().await {
-            Ok(resp) if resp.status().is_success() => {
-                info!("Server health check passed on port {}", port);
-                return Ok(());
+            Ok(resp) => {
+                if attempt % 5 == 1 || resp.status().is_success() {
+                    info!("Health check response: status={}", resp.status());
+                }
+                if resp.status().is_success() {
+                    info!("Server health check passed on port {} after {} attempts", port, attempt);
+                    return Ok(());
+                }
             }
-            _ => {
-                tokio::time::sleep(Duration::from_millis(500)).await;
+            Err(e) => {
+                if attempt % 5 == 1 {
+                    info!("Health check request failed: {}", e);
+                }
             }
         }
+
+        tokio::time::sleep(Duration::from_millis(500)).await;
     }
 }
 

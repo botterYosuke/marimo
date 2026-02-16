@@ -80,14 +80,40 @@ pub fn open_window(
         None => "marimo".to_string(),
     };
 
-    info!("Creating window '{}' → {}", label, url);
+    // DEBUG: Log server status before creating window
+    info!("About to create home window with URL: {}", url);
+    let current_status = server_state.status.lock().unwrap().clone();
+    info!("Current app state - server status: {:?}", current_status);
 
-    let _window = WebviewWindowBuilder::new(app, &label, WebviewUrl::External(url.parse()?))
+    info!("Creating window '{}' → {}", label, url);
+    info!("Creating WebviewWindow: label='{}', url='{}'", label, url);
+
+    let window_result = WebviewWindowBuilder::new(app, &label, WebviewUrl::External(url.parse()?))
         .title(&title)
         .inner_size(1200.0, 800.0)
         .min_inner_size(600.0, 400.0)
         .initialization_script(LINK_INTERCEPT_JS)
-        .build()?;
+        .build();
+
+    match &window_result {
+        Ok(_) => {
+            info!("WebviewWindow created successfully: {}", label);
+            // DEBUG: Check if window exists
+            info!("Home window created and shown successfully");
+            info!("Checking if window is visible...");
+            if let Some(_window) = app.get_webview_window(&label) {
+                info!("Main window exists in app handle");
+            } else {
+                log::error!("Main window NOT found in app handle after creation!");
+            }
+        },
+        Err(e) => {
+            log::error!("WebviewWindow creation failed: {}", e);
+            log::error!("Error details: {:?}", e);
+        }
+    }
+
+    let _window = window_result?;
 
     // Register navigation handler to intercept external links
     // Note: target-based link interception is done via JS injection in on_page_load

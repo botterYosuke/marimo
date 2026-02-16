@@ -7,12 +7,87 @@ pub mod state;
 pub mod window;
 
 use log::info;
+use simplelog::*;
+use std::fs::File;
+use std::path::PathBuf;
 use tauri::Manager;
 
-use state::{ServerState, WindowState};
+use state::{BootstrapState, BootstrapStatus, ServerState, WindowState};
+
+fn get_log_file_path() -> PathBuf {
+    // Get log directory path before Tauri app starts
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(appdata) = std::env::var("APPDATA") {
+            let log_dir = PathBuf::from(appdata)
+                .join("com.marimo.desktop")
+                .join("logs");
+            return log_dir.join("marimo-desktop.log");
+        }
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        if let Ok(home) = std::env::var("HOME") {
+            let log_dir = PathBuf::from(home)
+                .join("Library")
+                .join("Application Support")
+                .join("com.marimo.desktop")
+                .join("logs");
+            return log_dir.join("marimo-desktop.log");
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        if let Ok(home) = std::env::var("HOME") {
+            let log_dir = PathBuf::from(home)
+                .join(".local")
+                .join("share")
+                .join("com.marimo.desktop")
+                .join("logs");
+            return log_dir.join("marimo-desktop.log");
+        }
+    }
+
+    // Fallback to temp directory
+    if let Ok(temp_dir) = std::env::var("TEMP") {
+        PathBuf::from(temp_dir).join("marimo-desktop.log")
+    } else {
+        PathBuf::from("marimo-desktop.log")
+    }
+}
 
 pub fn run() {
-    env_logger::init();
+    // Initialize logging to file in APPDATA directory
+    let log_file_path = get_log_file_path();
+
+    // Ensure log directory exists
+    if let Some(parent) = log_file_path.parent() {
+        std::fs::create_dir_all(parent).ok();
+    }
+
+    let _ = CombinedLogger::init(vec![
+        TermLogger::new(
+            LevelFilter::Info,
+            Config::default(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        ),
+        WriteLogger::new(
+            LevelFilter::Info,
+            Config::default(),
+            File::create(&log_file_path).unwrap_or_else(|e| {
+                eprintln!("Failed to create log file: {}", e);
+                panic!("Cannot create log file");
+            }),
+        ),
+    ]);
+
+    info!("=== marimo Desktop Starting ===");
+    info!("Build: {}", if cfg!(debug_assertions) { "DEBUG" } else { "RELEASE" });
+    info!("Platform: {}", std::env::consts::OS);
+    info!("Log file: {}", log_file_path.display());
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
@@ -20,6 +95,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .manage(ServerState::new())
         .manage(WindowState::new())
+        .manage(BootstrapState::new())
         .invoke_handler(tauri::generate_handler![
             commands::server_get_url,
             commands::server_get_status,
@@ -29,6 +105,7 @@ pub fn run() {
             commands::window_open_home,
             commands::window_open_dialog,
             commands::window_toggle_fullscreen,
+            commands::bootstrap_get_progress,
         ])
         .menu(|app| window::menu::build_menu(app))
         .setup(|app| {
@@ -45,6 +122,9 @@ pub fn run() {
 
             info!("marimo desktop starting...");
             info!("Data dir: {}", data_dir.display());
+            info!("App data dir exists: {}", data_dir.exists());
+            info!("Log dir: {}", log_dir.display());
+            info!("Log dir exists: {}", log_dir.exists());
 
             // Determine port
             let port = if cfg!(debug_assertions) {
@@ -59,14 +139,71 @@ pub fn run() {
 
             // In production, bootstrap the environment first
             if !cfg!(debug_assertions) {
-                let uv_bin = paths::get_uv_bin(&app_handle);
-                let env_dir = paths::get_env_dir(&app_handle);
-                let python_install_dir = paths::get_python_install_dir(&app_handle);
-                let marimo_source = paths::get_marimo_source(&app_handle);
+                info!("=== PRODUCTION MODE: Showing splash screen ===");
+                // Show splash window FIRST before any other operations
+                match window::splash::show_splash_window(&app_handle) {
+                    Ok(_) => info!("✅ Splash screen display initiated successfully"),
+                    Err(e) => {
+                        log::error!("❌ FAILED to show splash window: {}", e);
+                        log::error!("Error details: {:?}", e);
+                    }
+                }
 
+                // Initialize bootstrap state
+                let bootstrap_state = app_handle.state::<BootstrapState>();
+                *bootstrap_state.status.lock().unwrap() = BootstrapStatus::InProgress;
+
+                info!("=== Resource Verification ===");
+                let resource_dir = app_handle.path().resource_dir();
+                match resource_dir {
+                    Ok(ref dir) => {
+                        info!("Resource dir: {}", dir.display());
+                        info!("Resource dir exists: {}", dir.exists());
+                    }
+                    Err(e) => {
+                        log::error!("Failed to get resource dir: {}", e);
+                    }
+                }
+
+                let uv_bin = paths::get_uv_bin(&app_handle);
+                info!("UV binary path: {}", uv_bin.display());
+                info!("UV binary exists: {}", uv_bin.exists());
+
+                let env_dir = paths::get_env_dir(&app_handle);
+                info!("Env dir path: {}", env_dir.display());
+
+                let python_install_dir = paths::get_python_install_dir(&app_handle);
+                info!("Python install dir: {}", python_install_dir.display());
+
+                let marimo_source = paths::get_marimo_source(&app_handle);
+                info!("Marimo source path: {}", marimo_source.display());
+                info!("Marimo source exists: {}", marimo_source.exists());
+
+                // Check for key marimo files
+                let marimo_init = marimo_source.join("marimo").join("__init__.py");
+                info!("Marimo __init__.py exists: {}", marimo_init.exists());
+
+                let pyproject = marimo_source.join("pyproject.toml");
+                info!("pyproject.toml exists: {}", pyproject.exists());
+
+                // DEBUG: Check if marimo static assets exist
+                let marimo_assets_path = marimo_source.join("marimo").join("_static");
+                info!("Checking marimo assets at: {:?}", marimo_assets_path);
+                info!("Marimo assets exist: {}", marimo_assets_path.exists());
+                if marimo_assets_path.exists() {
+                    if let Ok(entries) = std::fs::read_dir(&marimo_assets_path) {
+                        let count = entries.count();
+                        info!("Marimo assets directory contains {} items", count);
+                    }
+                } else {
+                    log::error!("❌ CRITICAL: Marimo static assets NOT FOUND at {:?}", marimo_assets_path);
+                }
+
+                info!("=== Environment Bootstrap Starting ===");
                 info!("Bootstrapping environment...");
                 info!("Marimo source: {}", marimo_source.display());
-                // TODO: Show splash screen with progress
+
+                // Bootstrap environment with progress updates
                 if let Err(e) = environment::bootstrap::ensure_environment(
                     &uv_bin,
                     &env_dir,
@@ -74,11 +211,39 @@ pub fn run() {
                     &marimo_source,
                     &|msg| {
                         info!("Bootstrap: {}", msg);
+
+                        // Map messages to progress percentages
+                        let percent = if msg.contains("Checking Python") {
+                            10
+                        } else if msg.contains("Installing Python") {
+                            25
+                        } else if msg.contains("Creating environment") {
+                            50
+                        } else if msg.contains("Installing marimo") {
+                            75
+                        } else if msg.contains("Ready") {
+                            100
+                        } else {
+                            5
+                        };
+
+                        // Update state
+                        let bootstrap_state = app_handle.state::<BootstrapState>();
+                        bootstrap_state.update(msg, percent);
+
+                        // Update splash screen UI directly
+                        window::splash::update_splash_progress(&app_handle, msg, percent);
                     },
                 ) {
                     log::error!("Environment bootstrap failed: {}", e);
+                    let bootstrap_state = app_handle.state::<BootstrapState>();
+                    bootstrap_state.error(&e.to_string());
                     // Continue anyway in case the environment was partially set up
+                } else {
+                    let bootstrap_state = app_handle.state::<BootstrapState>();
+                    bootstrap_state.complete();
                 }
+                info!("=== Environment Bootstrap Complete ===");
             }
 
             // Start server
@@ -94,9 +259,17 @@ pub fn run() {
                     return;
                 }
 
-                // Server is up — open home page window
-                info!("Server started, opening home page...");
-                let _ = window::manager::open_window(&app_handle_clone, None);
+                // Server is up — close splash and open home page window
+                info!("Server started, closing splash and opening home page...");
+                window::splash::close_splash_window(&app_handle_clone);
+
+                match window::manager::open_window(&app_handle_clone, None) {
+                    Ok(_) => info!("Home window created successfully"),
+                    Err(e) => {
+                        log::error!("Failed to create home window: {}", e);
+                        log::error!("Error details: {:?}", e);
+                    }
+                }
 
                 // Start periodic health check
                 let app_for_health = app_handle_clone.clone();
@@ -172,6 +345,9 @@ pub fn run() {
             }
         })
         .on_window_event(|window, event| {
+            // DEBUG: Log all window events at app level
+            info!("App window event - label: {}, event: {:?}", window.label(), event);
+
             if let tauri::WindowEvent::Destroyed = event {
                 let app = window.app_handle();
                 let label = window.label().to_string();
@@ -179,7 +355,9 @@ pub fn run() {
                 window::manager::on_window_destroyed(app, &label);
 
                 // If all windows are closed, stop server and exit
-                if window::manager::window_count(app) == 0 {
+                let remaining = window::manager::window_count(app);
+                info!("Window destroyed, remaining windows: {}", remaining);
+                if remaining == 0 {
                     info!("All windows closed, stopping server and exiting");
                     server::lifecycle::stop_server(app);
                     app.exit(0);
