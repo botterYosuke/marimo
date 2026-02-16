@@ -4,10 +4,20 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 // Copy node_modules/@github/copilot-language-server/dist/ to dist/
-const srcDir = path.join(
+// Try local node_modules first, then check root node_modules (for pnpm hoisted mode)
+let srcDir = path.join(
   __dirname,
   "node_modules/@github/copilot-language-server/dist",
 );
+
+if (!fs.existsSync(srcDir)) {
+  // Try root node_modules (pnpm hoisted mode)
+  srcDir = path.join(
+    __dirname,
+    "../../node_modules/@github/copilot-language-server/dist",
+  );
+}
+
 const destDir = path.join(__dirname, "dist");
 
 // Recursively copy directory
