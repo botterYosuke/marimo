@@ -298,6 +298,29 @@ export default defineConfig({
   },
   resolve: {
     tsconfigPaths: true,
+    alias: {
+      // Fix for rolldown-vite 7.3.1 type-only import resolution
+      // vega-lite exports types via ./types_unstable/* -> ./build/*
+      // but only .d.ts files exist, not .js files
+      // Specific aliases for each vega-lite type module
+      'vega-lite/types_unstable/channeldef.js': 'vega-lite/build/channeldef.d.ts',
+      'vega-lite/types_unstable/encoding.js': 'vega-lite/build/encoding.d.ts',
+      'vega-lite/types_unstable/spec/unit.js': 'vega-lite/build/spec/unit.d.ts',
+      'vega-lite/types_unstable/channel.js': 'vega-lite/build/channel.d.ts',
+      'vega-lite/types_unstable/compositemark/index.js': 'vega-lite/build/compositemark/index.d.ts',
+      'vega-lite/types_unstable/data.js': 'vega-lite/build/data.d.ts',
+      'vega-lite/types_unstable/mark.js': 'vega-lite/build/mark.d.ts',
+      'vega-lite/types_unstable/selection.js': 'vega-lite/build/selection.d.ts',
+      'vega-lite/types_unstable/spec/facet.js': 'vega-lite/build/spec/facet.d.ts',
+      'vega-lite/types_unstable/spec/layer.js': 'vega-lite/build/spec/layer.d.ts',
+      'vega-lite/types_unstable/spec/index.js': 'vega-lite/build/spec/index.d.ts',
+      'vega-lite/types_unstable/spec/toplevel.js': 'vega-lite/build/spec/toplevel.d.ts',
+      'vega-lite/types_unstable/type.js': 'vega-lite/build/type.d.ts',
+      'vega-lite/types_unstable/aggregate.js': 'vega-lite/build/aggregate.d.ts',
+      'vega-lite/types_unstable/bin.js': 'vega-lite/build/bin.d.ts',
+      'vega-lite/types_unstable/scale.js': 'vega-lite/build/scale.d.ts',
+      'vega-lite/types_unstable/resolve.js': 'vega-lite/build/resolve.d.ts',
+    },
     dedupe: [
       "react",
       "react-dom",
