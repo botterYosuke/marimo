@@ -35,10 +35,23 @@ pub fn open_window(
 
     // Build URL
     let base_url = if cfg!(debug_assertions) {
-        "http://localhost:2718".to_string()
+        // Use devUrl from tauri.conf.json in development for HMR
+        app.config()
+            .build
+            .dev_url
+            .as_ref()
+            .map(|url| url.to_string())
+            .unwrap_or_else(|| {
+                log::warn!("devUrl not set in tauri.conf.json, falling back to http://localhost:3000");
+                "http://localhost:3000".to_string()
+            })
     } else {
+        // Use marimo backend server in production
         format!("http://localhost:{}", port)
     };
+
+    // Ensure base_url doesn't end with a slash to avoid double slashes
+    let base_url = base_url.trim_end_matches('/');
 
     let url = match file_path {
         Some(path) => {

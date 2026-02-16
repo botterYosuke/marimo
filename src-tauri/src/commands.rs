@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 
-use log::info;
 use tauri::Manager;
 
 use crate::error::AppError;
