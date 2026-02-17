@@ -339,10 +339,10 @@ export default defineConfig({
     ],
   },
   experimental: {
-    // Use 'resolver' for all builds: enableNativePlugin: true/false bypasses vite-plugin-top-level-await's
+    // Use 'resolver' for non-Pyodide builds: enableNativePlugin: true/false bypasses vite-plugin-top-level-await's
     // JS transform, preventing TLA propagation to panels.js and causing "ra/sa is not a function".
-    // Pyodide builds continue to use the topLevelAwait() plugin (no esnext target).
-    enableNativePlugin: 'resolver',
+    // Pyodide builds use enableNativePlugin: true to ensure topLevelAwait() plugin works correctly.
+    enableNativePlugin: isPyodide ? true : 'resolver',
   },
   worker: {
     format: "es",
