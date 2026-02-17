@@ -219,7 +219,7 @@ pub fn run() {
                             25
                         } else if msg.contains("Creating environment") {
                             50
-                        } else if msg.contains("Installing marimo") {
+                        } else if msg.contains("Installing marimo") || msg.starts_with("[pip]") {
                             75
                         } else if msg.contains("Ready") {
                             100

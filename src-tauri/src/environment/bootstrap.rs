@@ -1,5 +1,6 @@
+use std::io::{BufRead, BufReader};
 use std::path::Path;
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
@@ -139,20 +140,31 @@ pub fn ensure_environment(
         ]);
     no_window(&mut cmd);
 
+    cmd.stdout(Stdio::null());
+    cmd.stderr(Stdio::piped());
+
     info!("Running: uv pip install --python {} {}", venv_python.display(), install_path);
-    let output = cmd.output()
-        .map_err(|e| anyhow!("Failed to execute pip install: {}", e))?;
+    let mut child = cmd.spawn()
+        .map_err(|e| anyhow!("Failed to spawn pip install: {}", e))?;
 
-    info!("Pip install exit status: {}", output.status);
-    if !output.stdout.is_empty() {
-        info!("Pip install stdout: {}", String::from_utf8_lossy(&output.stdout));
-    }
-    if !output.stderr.is_empty() {
-        info!("Pip install stderr: {}", String::from_utf8_lossy(&output.stderr));
+    let stderr = child.stderr.take().expect("stderr is piped");
+    let reader = BufReader::new(stderr);
+
+    // Read stderr line by line on the main thread and forward to on_progress
+    for line in reader.lines().flatten() {
+        info!("pip stderr: {}", line);
+        if let Some(msg) = parse_pip_progress(&line) {
+            on_progress(&msg);
+        }
     }
 
-    if !output.status.success() {
-        return Err(anyhow!("marimo installation failed with status: {}", output.status));
+    // stderr closed = process finished
+    let status = child.wait()
+        .map_err(|e| anyhow!("pip install wait failed: {}", e))?;
+    info!("Pip install exit status: {}", status);
+
+    if !status.success() {
+        return Err(anyhow!("marimo installation failed with status: {}", status));
     }
     info!("Marimo installed successfully");
 
@@ -175,6 +187,19 @@ pub fn ensure_environment(
 
     on_progress("Ready");
     Ok(())
+}
+
+/// Parse a line from `uv pip install` stderr and return a progress message if relevant.
+fn parse_pip_progress(line: &str) -> Option<String> {
+    const KEYWORDS: &[&str] = &[
+        "Resolved", "Building", "Prepared", "Uninstalled", "Installed", "Downloading",
+    ];
+    let line = line.trim();
+    if KEYWORDS.iter().any(|k| line.starts_with(k)) {
+        Some(format!("[pip] {}", line))
+    } else {
+        None
+    }
 }
 
 /// Find Python via `uv python find`.
