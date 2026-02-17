@@ -16,19 +16,19 @@
         
       
       
-      <link rel="icon" href="/assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>marimo Developer Docs</title>
+        <title>chart.py 双方向通信（ACK待ち） - marimo Developer Docs</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -47,7 +47,7 @@
       
     
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -71,6 +71,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#chartpy-ack" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -83,7 +88,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+    <a href=".." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -103,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              chart.py 双方向通信（ACK待ち）
             
           </span>
         </div>
@@ -199,7 +204,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+    <a href=".." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -217,7 +222,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -291,7 +296,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/adding_backend_and_mcp_tools/" class="md-nav__link">
+      <a href="../adding_backend_and_mcp_tools/" class="md-nav__link">
         
   
   
@@ -373,7 +378,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/adding_lint_rules/" class="md-nav__link">
+      <a href="../adding_lint_rules/" class="md-nav__link">
         
   
   
@@ -401,7 +406,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/openapi/" class="md-nav__link">
+      <a href="../openapi/" class="md-nav__link">
         
   
   
@@ -483,7 +488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/testing/" class="md-nav__link">
+      <a href="../testing/" class="md-nav__link">
         
   
   
@@ -511,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/prompts/" class="md-nav__link">
+      <a href="../prompts/" class="md-nav__link">
         
   
   
@@ -539,7 +544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/traces/" class="md-nav__link">
+      <a href="../traces/" class="md-nav__link">
         
   
   
@@ -621,7 +626,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/pyodide/" class="md-nav__link">
+      <a href="../pyodide/" class="md-nav__link">
         
   
   
@@ -649,7 +654,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/pyodide-custom-wheel/" class="md-nav__link">
+      <a href="../pyodide-custom-wheel/" class="md-nav__link">
         
   
   
@@ -731,7 +736,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/chart-widget-caching-fix/" class="md-nav__link">
+      <a href="../chart-widget-caching-fix/" class="md-nav__link">
         
   
   
@@ -759,7 +764,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/ui-switch-state-fix/" class="md-nav__link">
+      <a href="../ui-switch-state-fix/" class="md-nav__link">
         
   
   
@@ -787,7 +792,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/anywidget-backend-sync/" class="md-nav__link">
+      <a href="../anywidget-backend-sync/" class="md-nav__link">
         
   
   
@@ -815,7 +820,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/anywidget-performance/" class="md-nav__link">
+      <a href="../anywidget-performance/" class="md-nav__link">
         
   
   
@@ -843,7 +848,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/frontend-freeze-fix/" class="md-nav__link">
+      <a href="../frontend-freeze-fix/" class="md-nav__link">
         
   
   
@@ -871,7 +876,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/grid-layout-auto-placement/" class="md-nav__link">
+      <a href="../grid-layout-auto-placement/" class="md-nav__link">
         
   
   
@@ -953,7 +958,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/broadcast-channel-hud/" class="md-nav__link">
+      <a href="../broadcast-channel-hud/" class="md-nav__link">
         
   
   
@@ -981,7 +986,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/chart-theme/" class="md-nav__link">
+      <a href="../chart-theme/" class="md-nav__link">
         
   
   
@@ -1009,7 +1014,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/skill-tree-panel/" class="md-nav__link">
+      <a href="../skill-tree-panel/" class="md-nav__link">
         
   
   
@@ -1091,7 +1096,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/electron-startup-config/" class="md-nav__link">
+      <a href="../electron-startup-config/" class="md-nav__link">
         
   
   
@@ -1119,7 +1124,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/steam-deploy/" class="md-nav__link">
+      <a href="../steam-deploy/" class="md-nav__link">
         
   
   
@@ -1147,7 +1152,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/steam-integration-fixes/" class="md-nav__link">
+      <a href="../steam-integration-fixes/" class="md-nav__link">
         
   
   
@@ -1192,6 +1197,121 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解決策
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装内容
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装内容">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-javascript-chartpy-_esm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. JavaScript 側の変更 (chart.py _esm)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-python-chartpy-lightweightchartwidget" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Python 側の変更 (chart.py LightweightChartWidget)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-chartpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 関数の置き換え (chart.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-game_setuppy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. game_setup.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正ファイル
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        タイムアウト処理
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1204,8 +1324,93 @@
               
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+
+<h1 id="chartpy-ack">chart.py 双方向通信（ACK待ち）<a class="headerlink" href="#chartpy-ack" title="Permanent link">&para;</a></h1>
+<p><strong>ステータス</strong>: 完了</p>
+<h2 id="_1">問題<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p><code>update_all_backtest_charts()</code> を while ループで呼ぶと、JavaScript が処理を完了する前に次の更新が来てフリーズする。</p>
+<p><strong>原因</strong>: 現在の設計は fire-and-forget（送りっぱなし）で、Python は JavaScript の応答を待たない。</p>
+<h2 id="_2">解決策<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>JavaScript の描画完了後に ACK メッセージを Python に送信し、Python 側で ACK を待ってから次の更新を送る。</p>
+<hr />
+<h2 id="_3">実装内容<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="1-javascript-chartpy-_esm">1. JavaScript 側の変更 (chart.py <code>_esm</code>)<a class="headerlink" href="#1-javascript-chartpy-_esm" title="Permanent link">&para;</a></h3>
+<p><code>flushPendingBar()</code> の finally ブロックで ACK 送信:</p>
+<div class="highlight"><pre><span></span><code><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">hadBar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pendingBar</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">pendingBar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">rafId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">hadBar</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">model</span><span class="p">.</span><span class="nx">send</span><span class="p">({</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;render_ack&#39;</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="2-python-chartpy-lightweightchartwidget">2. Python 側の変更 (chart.py <code>LightweightChartWidget</code>)<a class="headerlink" href="#2-python-chartpy-lightweightchartwidget" title="Permanent link">&para;</a></h3>
+<p>新規追加:
+- <code>_ack_event: threading.Event</code> - ACK 待機用
+- <code>_handle_ack()</code> - on_msg コールバック
+- <code>update_and_wait(bar, timeout=5.0)</code> - 同期 API（内部で Event.wait）</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">LightweightChartWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ack_event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_msg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_handle_ack</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_handle_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">buffers</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">content</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;render_ack&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ack_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_and_wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bar</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ack_event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_bar_fast</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ack_event</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="3-chartpy">3. 関数の置き換え (chart.py)<a class="headerlink" href="#3-chartpy" title="Permanent link">&para;</a></h3>
+<p><code>update_all_backtest_charts()</code> を ACK 待ち版に置き換え（同期関数のまま）。</p>
+<h3 id="4-game_setuppy">4. game_setup.py<a class="headerlink" href="#4-game_setuppy" title="Permanent link">&para;</a></h3>
+<p><strong>変更不要</strong> - <code>step()</code>, <code>buy()</code>, <code>sell()</code> は同期関数のまま。</p>
+<hr />
+<h2 id="_4">修正ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>変更内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frontend/public/files/chart.py</code></td>
+<td>JavaScript ACK 送信、Python threading.Event 待機、<code>update_and_wait()</code> 追加</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">タイムアウト処理<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>デフォルト: 5秒</li>
+<li>タイムアウト時: <code>False</code> を返す（エラーは投げない）</li>
+<li><code>update_all_backtest_charts</code> はタイムアウトしても次のウィジェットに進む</li>
+<li>タブがバックグラウンドの場合など、RAF が停止するケースに対応</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -1242,10 +1447,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "/", "features": [], "search": "/assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="/assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

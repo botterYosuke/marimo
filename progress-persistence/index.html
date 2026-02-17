@@ -16,19 +16,19 @@
         
       
       
-      <link rel="icon" href="/assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>marimo Developer Docs</title>
+        <title>進捗保存リファクタリング: LocalStorage → ファイルベース - marimo Developer Docs</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -47,7 +47,7 @@
       
     
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -71,6 +71,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#localstorage" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -83,7 +88,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+    <a href=".." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -103,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              進捗保存リファクタリング: LocalStorage → ファイルベース
             
           </span>
         </div>
@@ -199,7 +204,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+    <a href=".." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -217,7 +222,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -291,7 +296,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/adding_backend_and_mcp_tools/" class="md-nav__link">
+      <a href="../adding_backend_and_mcp_tools/" class="md-nav__link">
         
   
   
@@ -373,7 +378,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/adding_lint_rules/" class="md-nav__link">
+      <a href="../adding_lint_rules/" class="md-nav__link">
         
   
   
@@ -401,7 +406,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/openapi/" class="md-nav__link">
+      <a href="../openapi/" class="md-nav__link">
         
   
   
@@ -483,7 +488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/testing/" class="md-nav__link">
+      <a href="../testing/" class="md-nav__link">
         
   
   
@@ -511,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/prompts/" class="md-nav__link">
+      <a href="../prompts/" class="md-nav__link">
         
   
   
@@ -539,7 +544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/traces/" class="md-nav__link">
+      <a href="../traces/" class="md-nav__link">
         
   
   
@@ -621,7 +626,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/pyodide/" class="md-nav__link">
+      <a href="../pyodide/" class="md-nav__link">
         
   
   
@@ -649,7 +654,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/pyodide-custom-wheel/" class="md-nav__link">
+      <a href="../pyodide-custom-wheel/" class="md-nav__link">
         
   
   
@@ -731,7 +736,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/chart-widget-caching-fix/" class="md-nav__link">
+      <a href="../chart-widget-caching-fix/" class="md-nav__link">
         
   
   
@@ -759,7 +764,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/ui-switch-state-fix/" class="md-nav__link">
+      <a href="../ui-switch-state-fix/" class="md-nav__link">
         
   
   
@@ -787,7 +792,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/anywidget-backend-sync/" class="md-nav__link">
+      <a href="../anywidget-backend-sync/" class="md-nav__link">
         
   
   
@@ -815,7 +820,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/anywidget-performance/" class="md-nav__link">
+      <a href="../anywidget-performance/" class="md-nav__link">
         
   
   
@@ -843,7 +848,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/frontend-freeze-fix/" class="md-nav__link">
+      <a href="../frontend-freeze-fix/" class="md-nav__link">
         
   
   
@@ -871,7 +876,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/grid-layout-auto-placement/" class="md-nav__link">
+      <a href="../grid-layout-auto-placement/" class="md-nav__link">
         
   
   
@@ -953,7 +958,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/broadcast-channel-hud/" class="md-nav__link">
+      <a href="../broadcast-channel-hud/" class="md-nav__link">
         
   
   
@@ -981,7 +986,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/chart-theme/" class="md-nav__link">
+      <a href="../chart-theme/" class="md-nav__link">
         
   
   
@@ -1009,7 +1014,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/skill-tree-panel/" class="md-nav__link">
+      <a href="../skill-tree-panel/" class="md-nav__link">
         
   
   
@@ -1091,7 +1096,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/electron-startup-config/" class="md-nav__link">
+      <a href="../electron-startup-config/" class="md-nav__link">
         
   
   
@@ -1119,7 +1124,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/steam-deploy/" class="md-nav__link">
+      <a href="../steam-deploy/" class="md-nav__link">
         
   
   
@@ -1147,7 +1152,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/steam-integration-fixes/" class="md-nav__link">
+      <a href="../steam-integration-fixes/" class="md-nav__link">
         
   
   
@@ -1192,6 +1197,265 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計判断
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="設計判断">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-deriverank" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. deriveRank() は存在しない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. ノートブックファイル名からプログレスファイルを導出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. マイグレーション不要
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 起動時ブロードキャストのタイミング
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-_triggered_skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. _triggered_skills の初期化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 状態導出の集約
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stemprogressjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ファイル形式: .{stem}.progress.json
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装内容
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装内容">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-progress_managerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: progress_manager.py 新規作成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-skill_eventspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: skill_events.py 修正
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-game_setuppy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: game_setup.py 修正
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-atomsts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: atoms.ts 修正
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-useprogresssyncts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: useProgressSync.ts 新規作成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-controlstsx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Controls.tsx 修正
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: テストファイル修正
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        データフロー
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="データフロー">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        起動 / ページリロード時
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキル達成時
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更ファイル一覧
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1204,8 +1468,212 @@
               
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+
+<h1 id="localstorage">進捗保存リファクタリング: LocalStorage → ファイルベース<a class="headerlink" href="#localstorage" title="Permanent link">&para;</a></h1>
+<p><strong>ステータス</strong>: 完了</p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>スキルツリー進捗がブラウザ localStorage に保存されている現状の問題:
+1. <code>.py</code> ファイルを削除・再作成しても進捗がリセットされない
+2. ブラウザを変えると進捗が消える
+3. Python 側の <code>_triggered_skills</code>（メモリ上 set）と localStorage が非同期</p>
+<p><strong>目標</strong>: Python 側を Single Source of Truth にし、ノートブックディレクトリにサイドカー JSON で永続化する。</p>
+<hr />
+<h2 id="_1">設計判断<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h3 id="1-deriverank">1. <code>deriveRank()</code> は存在しない<a class="headerlink" href="#1-deriverank" title="Permanent link">&para;</a></h3>
+<p><code>atoms.ts:21</code> で <code>rank</code> は固定値 <code>"bronze"</code>。ランク昇格は未実装。
+→ <code>"bronze"</code> 固定で OK。ファイルに保存も復元もしない。</p>
+<h3 id="2">2. ノートブックファイル名からプログレスファイルを導出<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<p><code>get_context().filename</code> からファイル名を導出: <code>backcast.py</code> → <code>.backcast.progress.json</code></p>
+<h3 id="3">3. マイグレーション不要<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
+<p>後方互換は考慮しない。<code>atomWithStorage</code> → 通常 <code>atom</code> に単純置換。</p>
+<h3 id="4">4. 起動時ブロードキャストのタイミング<a class="headerlink" href="#4" title="Permanent link">&para;</a></h3>
+<p><code>mo.output.append(Html('&lt;marimo-broadcast ...&gt;'))</code> パターンを使用（<code>skill_events.py:47</code> と同じ）。セル出力として永続化されるため、ページリロード時も <code>handlers.ts</code> で再処理される。</p>
+<h3 id="5-_triggered_skills">5. <code>_triggered_skills</code> の初期化<a class="headerlink" href="#5-_triggered_skills" title="Permanent link">&para;</a></h3>
+<p><code>skill_events.py</code> のモジュールレベルで <code>load_progress()</code> から直接初期化。<code>sync_triggered_skills()</code> 呼び出しが不要になる。</p>
+<h3 id="6">6. 状態導出の集約<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
+<p><code>deriveProgressFromSkills(completedSkills)</code> 関数を新設し、<code>calculateTotalRewards()</code> を内部で呼んで全状態を導出。</p>
+<hr />
+<h2 id="stemprogressjson">ファイル形式: <code>.{stem}.progress.json</code><a class="headerlink" href="#stemprogressjson" title="Permanent link">&para;</a></h2>
+<p>ノートブック名から導出: <code>backcast.py</code> → <code>.backcast.progress.json</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;completed_skills&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;SANDBOX_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_002&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>currentCash</code> / <code>earnedTitles</code> / <code>sandboxCompleted</code> 等は保存しない。<code>completed_skills</code> から <code>calculateTotalRewards()</code> で常に導出。</p>
+<hr />
+<h2 id="_2">実装内容<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="step-1-progress_managerpy">Step 1: <code>progress_manager.py</code> 新規作成<a class="headerlink" href="#step-1-progress_managerpy" title="Permanent link">&para;</a></h3>
+<p><strong>ファイル</strong>: <code>frontend/public/files/progress_manager.py</code></p>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_get_progress_path()</code></td>
+<td><code>get_context().filename</code> から stem を取得し <code>mo.notebook_dir() / f".{stem}.progress.json"</code> を返す</td>
+</tr>
+<tr>
+<td><code>load_progress()</code></td>
+<td>JSON 読み込み。不在/壊れ → デフォルト値</td>
+</tr>
+<tr>
+<td><code>save_progress(completed_skills)</code></td>
+<td>JSON 書き込み</td>
+</tr>
+<tr>
+<td><code>add_completed_skill(skill_id)</code></td>
+<td>リストに追加 → 保存</td>
+</tr>
+<tr>
+<td><code>broadcast_progress()</code></td>
+<td><code>mo.output.append(Html('&lt;marimo-broadcast channel="progress_channel" ...&gt;'))</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-2-skill_eventspy">Step 2: <code>skill_events.py</code> 修正<a class="headerlink" href="#step-2-skill_eventspy" title="Permanent link">&para;</a></h3>
+<p><code>_triggered_skills</code> の初期化を <code>load_progress()</code> から行う（モジュールレベル）。<code>emit_skill()</code> 内で <code>add_completed_skill(skill_id)</code> を呼ぶ。</p>
+<h3 id="step-3-game_setuppy">Step 3: <code>game_setup.py</code> 修正<a class="headerlink" href="#step-3-game_setuppy" title="Permanent link">&para;</a></h3>
+<p>モジュール初期化時に <code>broadcast_progress()</code> を1行追加。
+<strong>順序の注意</strong>: <code>publish_state_headless</code> は <code>mo.output.replace()</code> でセル出力をセットし、<code>broadcast_progress</code> は <code>mo.output.append()</code> で追記する。逆にすると <code>replace</code> で progress の broadcast が消える。</p>
+<h3 id="step-4-atomsts">Step 4: <code>atoms.ts</code> 修正<a class="headerlink" href="#step-4-atomsts" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>atomWithStorage</code> → 通常 <code>atom</code>（localStorage 全廃）</li>
+<li><code>deriveProgressFromSkills()</code> 関数を新設</li>
+<li><code>initProgressFromFileAtom</code> を追加</li>
+</ul>
+<h3 id="step-5-useprogresssyncts">Step 5: <code>useProgressSync.ts</code> 新規作成<a class="headerlink" href="#step-5-useprogresssyncts" title="Permanent link">&para;</a></h3>
+<p><code>BroadcastChannel("progress_channel")</code> をリッスンし、<code>initProgressFromFileAtom</code> を呼ぶ。</p>
+<h3 id="step-6-controlstsx">Step 6: <code>Controls.tsx</code> 修正<a class="headerlink" href="#step-6-controlstsx" title="Permanent link">&para;</a></h3>
+<p><code>useProgressSync()</code> を追加（既存の <code>useBroadcastChannelRelay()</code> と並べて配置）。</p>
+<h3 id="step-7">Step 7: テストファイル修正<a class="headerlink" href="#step-7" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>変更内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__tests__/atoms.test.ts</code></td>
+<td>L435-525 の localStorage 永続化テスト（P1-3）を削除。L23-37 の Storage モック削除</td>
+</tr>
+<tr>
+<td><code>__tests__/cumulative-cash-hud.test.ts</code></td>
+<td>Storage モック削除</td>
+</tr>
+<tr>
+<td><code>__tests__/all-59-skills-prerequisites.test.ts</code></td>
+<td>Storage モック削除</td>
+</tr>
+<tr>
+<td><code>__tests__/reward-backtest-sync.test.ts</code></td>
+<td>Storage モック削除</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_3">データフロー<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_4">起動 / ページリロード時<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>game_setup.py import
+  → broadcast_progress()
+    → mo.output.append(Html(&#39;&lt;marimo-broadcast channel=&quot;progress_channel&quot; ...&gt;&#39;))
+      → handlers.ts: extractAndSendBroadcastMessages()
+        → BroadcastChannel(&quot;progress_channel&quot;).postMessage(...)
+          → useProgressSync → initProgressFromFileAtom(completedSkills)
+            → deriveProgressFromSkills() → playerProgressAtom 復元
+</code></pre></div>
+<h3 id="_5">スキル達成時<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>game_setup.buy() → emit_skill(&quot;SANDBOX_002&quot;)
+  ├→ add_completed_skill(&quot;SANDBOX_002&quot;)
+  │    → .backcast_progress.json に保存
+  └→ skill_event_channel にブロードキャスト（既存）
+       → completeSkillWithRewardAtom → playerProgressAtom 更新 + トースト
+</code></pre></div>
+<hr />
+<h2 id="_6">変更ファイル一覧<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>種別</th>
+<th>変更量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frontend/public/files/progress_manager.py</code></td>
+<td>新規</td>
+<td>~70行</td>
+</tr>
+<tr>
+<td><code>frontend/public/files/skill_events.py</code></td>
+<td>修正</td>
+<td>~5行変更</td>
+</tr>
+<tr>
+<td><code>frontend/public/files/game_setup.py</code></td>
+<td>修正</td>
+<td>2行追加</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/atoms.ts</code></td>
+<td>修正</td>
+<td>~30行変更</td>
+</tr>
+<tr>
+<td><code>frontend/src/hooks/useProgressSync.ts</code></td>
+<td>新規</td>
+<td>~25行</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/editor/controls/Controls.tsx</code></td>
+<td>修正</td>
+<td>2行追加</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/__tests__/atoms.test.ts</code></td>
+<td>修正</td>
+<td>~91行削除</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/__tests__/cumulative-cash-hud.test.ts</code></td>
+<td>修正</td>
+<td>モック削除</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/__tests__/all-59-skills-prerequisites.test.ts</code></td>
+<td>修正</td>
+<td>モック削除</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/__tests__/reward-backtest-sync.test.ts</code></td>
+<td>修正</td>
+<td>モック削除</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -1242,10 +1710,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "/", "features": [], "search": "/assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="/assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

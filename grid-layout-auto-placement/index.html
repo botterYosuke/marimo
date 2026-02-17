@@ -11,6 +11,10 @@
       
       
       
+        <link rel="prev" href="../frontend-freeze-fix/">
+      
+      
+        <link rel="next" href="../broadcast-channel-hud/">
       
       
         
@@ -21,7 +25,7 @@
     
     
       
-        <title>フロントエンドのリビルド手順 - marimo Developer Docs</title>
+        <title>Grid Layout Auto Placement - marimo Developer Docs</title>
       
     
     
@@ -108,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              フロントエンドのリビルド手順
+              Grid Layout Auto Placement
             
           </span>
         </div>
@@ -686,18 +690,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -718,7 +724,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -873,10 +879,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../grid-layout-auto-placement/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -892,6 +925,226 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概要
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装サマリー
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装サマリー">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        新規作成ファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更ファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テスト結果
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ビジュアルアウトプット判定ロジック
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ビジュアルアウトプット判定ロジック">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        直接判定されるMIMEタイプ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#htmltexthtml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTML内のチャート署名（text/html の場合）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        自動配置アルゴリズム
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="自動配置アルゴリズム">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        デフォルト設定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置戦略
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        公開API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="公開API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#visual-output-detectorts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        visual-output-detector.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-placementts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        auto-placement.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layoutts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        layout.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テストコマンド
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1210,57 +1463,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        手順
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="手順">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. アーティファクトの削除
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. 依存関係のインストール
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. ビルドの実行
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#powershell" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ワンライナー (PowerShell)
+        概要
       
     </span>
   </a>
@@ -1268,33 +1471,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tips" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Tips
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Tips">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#frontendnode_modules" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        frontend/node_modules について
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        クリーン時の注意点
+        実装サマリー
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装サマリー">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        新規作成ファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更ファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テスト結果
       
     </span>
   </a>
@@ -1303,6 +1517,145 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ビジュアルアウトプット判定ロジック
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ビジュアルアウトプット判定ロジック">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        直接判定されるMIMEタイプ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#htmltexthtml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTML内のチャート署名（text/html の場合）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        自動配置アルゴリズム
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="自動配置アルゴリズム">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        デフォルト設定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置戦略
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        公開API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="公開API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#visual-output-detectorts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        visual-output-detector.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-placementts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        auto-placement.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layoutts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        layout.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テストコマンド
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1323,47 +1676,149 @@
 
 
 
-<h1 id="_1">フロントエンドのリビルド手順<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>Marimoのフロントエンド開発環境において、クリーンビルドを行うための手順を説明します。
-ビルドエラーが発生した場合や、依存関係を完全にリセットしたい場合に有効です。</p>
-<h2 id="_2">手順<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p>以下の手順で、一度既存のアーティファクトを削除してから再構築を行います。</p>
+<h1 id="_1">グリッドレイアウト ビジュアル出力自動配置<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
 <blockquote>
-<p>[!WARNING]
-ルートディレクトリでの <code>pnpm clean</code> コマンドは実行しないでください。ビルド環境が破損する報告があります。
-必ず以下の手順でフロントエンドのみをクリーンにしてください。</p>
+<p><strong>ステータス:</strong> 完了 (2026-01-27)</p>
 </blockquote>
-<h3 id="1">1. アーティファクトの削除<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
-<p><code>frontend</code> ディレクトリ内の生成物を削除します。</p>
-<p>Windows (PowerShell):
-<div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">frontend</span>
-<span class="nb">Remove-Item</span> <span class="n">-Recurse</span> <span class="n">-Force</span> <span class="n">node_modules</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="p">.</span><span class="n">turbo</span> <span class="n">-ErrorAction</span> <span class="n">SilentlyContinue</span>
-<span class="nb">cd </span><span class="p">..</span>
-</code></pre></div></p>
-<h3 id="2">2. 依存関係のインストール<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
-<p>ルートディレクトリで <code>pnpm install</code> を実行し、依存関係を再インストールします。
-Marimoはモノレポ構成のため、ルートでのインストールが推奨されます。</p>
-<div class="highlight"><pre><span></span><code><span class="n">pnpm</span> <span class="n">install</span>
+<h2 id="_2">概要<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p><code>width="grid"</code>モードのノートブックで、チャート・画像・動画などのビジュアルアウトプットを自動的にグリッドに配置する機能。</p>
+<p>従来はすべてのセル出力がサイドバー（Outputsパネル）に配置され、ユーザーが手動でドラッグしてグリッドに配置する必要があった。この機能により、ビジュアル出力は自動的に適切な位置・サイズでグリッドに配置される。</p>
+<hr />
+<h2 id="_3">実装サマリー<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_4">新規作成ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frontend/src/core/layout/visual-output-detector.ts</code></td>
+<td>ビジュアルアウトプット判定ユーティリティ</td>
+</tr>
+<tr>
+<td><code>frontend/src/core/layout/auto-placement.ts</code></td>
+<td>グリッド配置位置計算アルゴリズム</td>
+</tr>
+<tr>
+<td><code>frontend/src/core/layout/__tests__/visual-output-detector.test.ts</code></td>
+<td>テスト（29ケース）</td>
+</tr>
+<tr>
+<td><code>frontend/src/core/layout/__tests__/auto-placement.test.ts</code></td>
+<td>テスト（12ケース）</td>
+</tr>
+<tr>
+<td><code>frontend/src/core/layout/__tests__/layout.test.ts</code></td>
+<td>テスト（9ケース）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_5">変更ファイル<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>変更内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frontend/src/core/layout/layout.ts</code></td>
+<td><code>autoLayoutEnabled</code>/<code>layoutWasAutoGenerated</code>状態追加、<code>addCellToGridLayout()</code>/<code>isCellInGrid()</code>関数追加</td>
+</tr>
+<tr>
+<td><code>frontend/src/core/kernel/handlers.ts</code></td>
+<td><code>autoPlaceVisualOutput()</code>関数追加、セル出力到着時に自動配置トリガー</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_6">テスト結果<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>Test Files: 3 passed (3)
+Tests: 50 passed (50)
 </code></pre></div>
-<h3 id="3">3. ビルドの実行<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
-<p><code>frontend</code> ディレクトリに移動し、ビルドコマンドを実行します。</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">frontend</span>
-<span class="n">pnpm</span> <span class="n">build</span>
+<hr />
+<h2 id="_7">ビジュアルアウトプット判定ロジック<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h3 id="mime">直接判定されるMIMEタイプ<a class="headerlink" href="#mime" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">VISUAL_MIMETYPES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Set</span><span class="p">([</span>
+<span class="w">  </span><span class="c1">// 画像</span>
+<span class="w">  </span><span class="s2">&quot;image/png&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;image/jpeg&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;image/svg+xml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;image/gif&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;image/tiff&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;image/avif&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;image/bmp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="c1">// 動画</span>
+<span class="w">  </span><span class="s2">&quot;video/mp4&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;video/mpeg&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="c1">// チャート（Vega系）</span>
+<span class="w">  </span><span class="s2">&quot;application/vnd.vegalite.v5+json&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;application/vnd.vega.v5+json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;application/vnd.vegalite.v6+json&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;application/vnd.vega.v6+json&quot;</span><span class="p">,</span>
+<span class="p">]);</span>
 </code></pre></div>
-<h2 id="powershell">ワンライナー (PowerShell)<a class="headerlink" href="#powershell" title="Permanent link">&para;</a></h2>
-<p>以下のコマンドをコピーして実行することで、上記の手順を一括で行えます。</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd </span><span class="n">frontend</span><span class="p">;</span> <span class="nb">Remove-Item</span> <span class="n">-Recurse</span> <span class="n">-Force</span> <span class="n">node_modules</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="p">.</span><span class="n">turbo</span> <span class="n">-ErrorAction</span> <span class="n">SilentlyContinue</span><span class="p">;</span> <span class="nb">cd </span><span class="p">..;</span> <span class="n">pnpm</span> <span class="n">install</span><span class="p">;</span> <span class="nb">cd </span><span class="n">frontend</span><span class="p">;</span> <span class="n">pnpm</span> <span class="n">build</span>
+<h3 id="htmltexthtml">HTML内のチャート署名（text/html の場合）<a class="headerlink" href="#htmltexthtml" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">HTML_VISUAL_SIGNATURES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;plotly-graph-div&quot;</span><span class="p">,</span><span class="w">    </span><span class="c1">// Plotly</span>
+<span class="w">  </span><span class="s2">&quot;bokeh&quot;</span><span class="p">,</span><span class="w">               </span><span class="c1">// Bokeh</span>
+<span class="w">  </span><span class="s2">&quot;altair-viz&quot;</span><span class="p">,</span><span class="w">          </span><span class="c1">// Altair</span>
+<span class="w">  </span><span class="s2">&quot;&lt;svg&quot;</span><span class="p">,</span><span class="w">                </span><span class="c1">// SVG埋め込み</span>
+<span class="w">  </span><span class="s2">&quot;&lt;canvas&quot;</span><span class="p">,</span><span class="w">             </span><span class="c1">// Canvas系チャート</span>
+<span class="w">  </span><span class="s2">&quot;data:image/&quot;</span><span class="p">,</span><span class="w">         </span><span class="c1">// インライン画像</span>
+<span class="w">  </span><span class="s2">&quot;echarts&quot;</span><span class="p">,</span><span class="w">             </span><span class="c1">// ECharts</span>
+<span class="w">  </span><span class="s2">&quot;lightweight-charts&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// TradingView Lightweight Charts</span>
+<span class="w">  </span><span class="s2">&quot;marimo-anywidget&quot;</span><span class="p">,</span><span class="w">    </span><span class="c1">// AnyWidget</span>
+<span class="p">];</span>
 </code></pre></div>
-<h2 id="tips">Tips<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
-<h3 id="frontendnode_modules"><code>frontend/node_modules</code> について<a class="headerlink" href="#frontendnode_modules" title="Permanent link">&para;</a></h3>
-<p><code>frontend/node_modules</code> ディレクトリは Git 管理外であり、リポジトリには含まれていません。
-ルートディレクトリで <code>pnpm install</code> を実行したタイミングで、モノレポ全体の依存関係解決の一環としてインストール（生成）されます。</p>
-<h3 id="_3">クリーン時の注意点<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
-<p>ルートの <code>pnpm clean</code> コマンドから <code>frontend/node_modules</code> の削除を除外した理由は、<strong>「フロントエンドだけ依存関係を削除し、ルートの <code>node_modules</code> を残した状態」で再インストールを行うと、依存関係の整合性が取れずにビルドエラーが発生する場合があるため</strong>です。</p>
-<p>もし依存関係を完全にリセットしたい場合は、ルートとフロントエンドの両方の <code>node_modules</code> を削除してから再インストールしてください。</p>
-<div class="highlight"><pre><span></span><code><span class="c"># 完全リセットの手順</span>
-<span class="nb">Remove-Item</span> <span class="n">-Recurse</span> <span class="n">-Force</span> <span class="n">node_modules</span><span class="p">,</span> <span class="n">frontend</span><span class="p">/</span><span class="n">node_modules</span>
-<span class="n">pnpm</span> <span class="n">install</span>
+<hr />
+<h2 id="_8">自動配置アルゴリズム<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="_9">デフォルト設定<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">DEFAULT_PLACEMENT_CONFIG</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">columns</span><span class="o">:</span><span class="w"> </span><span class="kt">24</span><span class="p">,</span><span class="w">        </span><span class="c1">// グリッドの総カラム数</span>
+<span class="w">  </span><span class="nx">rowHeight</span><span class="o">:</span><span class="w"> </span><span class="kt">20</span><span class="p">,</span><span class="w">      </span><span class="c1">// 1行の高さ（px）</span>
+<span class="w">  </span><span class="nx">defaultWidth</span><span class="o">:</span><span class="w"> </span><span class="kt">12</span><span class="p">,</span><span class="w">   </span><span class="c1">// デフォルト幅（カラム数）= グリッドの半分</span>
+<span class="w">  </span><span class="nx">defaultHeight</span><span class="o">:</span><span class="w"> </span><span class="kt">20</span><span class="p">,</span><span class="w">  </span><span class="c1">// デフォルト高さ（行数）= 400px</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="_10">配置戦略<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>単一セル</strong>: フル幅（24カラム）で配置</li>
+<li><strong>複数セル</strong>: 2列レイアウト（左右交互に12カラムずつ）</li>
+<li><strong>奇数個の最後のセル</strong>: フル幅で配置</li>
+<li><strong>新規追加時</strong>: 既存セルの最下部の下に配置</li>
+</ol>
+<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────┐
+│                    単一チャート                    │
+│                  (24カラム x 20行)                 │
+└──────────────────────────────────────────────────┘
+
+┌────────────────────┐ ┌────────────────────┐
+│    チャート1        │ │    チャート2        │
+│  (12カラム x 20行)  │ │  (12カラム x 20行)  │
+└────────────────────┘ └────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="api">公開API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
+<h3 id="visual-output-detectorts">visual-output-detector.ts<a class="headerlink" href="#visual-output-detectorts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">isVisualMimetype</span><span class="p">(</span><span class="nx">mimetype</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">isVisualHtml</span><span class="p">(</span><span class="nx">htmlContent</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">isVisualOutput</span><span class="p">(</span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">OutputMessage</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">VISUAL_MIMETYPES</span><span class="o">:</span><span class="w"> </span><span class="kt">Set</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="auto-placementts">auto-placement.ts<a class="headerlink" href="#auto-placementts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">calculateAutoPlacement</span><span class="p">(</span><span class="nx">visualCellIds</span><span class="o">:</span><span class="w"> </span><span class="kt">CellId</span><span class="p">[],</span><span class="w"> </span><span class="nx">config?</span><span class="o">:</span><span class="w"> </span><span class="kt">PlacementConfig</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">GridCellPosition</span><span class="p">[];</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">calculateNewCellPlacement</span><span class="p">(</span><span class="nx">cellId</span><span class="o">:</span><span class="w"> </span><span class="kt">CellId</span><span class="p">,</span><span class="w"> </span><span class="nx">existingCells</span><span class="o">:</span><span class="w"> </span><span class="kt">GridCellPosition</span><span class="p">[],</span><span class="w"> </span><span class="nx">config?</span><span class="o">:</span><span class="w"> </span><span class="kt">PlacementConfig</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">GridCellPosition</span><span class="p">;</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">DEFAULT_PLACEMENT_CONFIG</span><span class="o">:</span><span class="w"> </span><span class="kt">PlacementConfig</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="layoutts">layout.ts<a class="headerlink" href="#layoutts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">addCellToGridLayout</span><span class="p">(</span><span class="nx">cellId</span><span class="o">:</span><span class="w"> </span><span class="kt">CellId</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">isCellInGrid</span><span class="p">(</span><span class="nx">cellId</span><span class="o">:</span><span class="w"> </span><span class="kt">CellId</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+</code></pre></div>
+<hr />
+<h2 id="_11">テストコマンド<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># ユニットテスト実行</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>src/core/layout/__tests__/
+
+<span class="c1"># 型チェック</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span>tsc<span class="w"> </span>--noEmit
+
+<span class="c1"># リントチェック</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span>biome<span class="w"> </span>check<span class="w"> </span>src/core/layout/
 </code></pre></div>
 
 
