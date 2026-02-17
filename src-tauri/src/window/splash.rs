@@ -15,7 +15,7 @@ pub fn show_splash_window(app: &tauri::AppHandle) -> Result<()> {
     let empty_menu = Menu::new(app)?;
 
     let window = WebviewWindowBuilder::new(app, "splash", WebviewUrl::App("splash.html".into()))
-        .title("marimo - 🚀 起動準備中...")
+        .title("backcast - 🚀 起動準備中...")
         .inner_size(500.0, 200.0)
         .resizable(false)
         .decorations(true)
@@ -29,10 +29,10 @@ pub fn show_splash_window(app: &tauri::AppHandle) -> Result<()> {
     info!("✅ Splash window visible: {:?}", window.is_visible());
 
     // Update title to show loading status
-    if let Err(e) = window.set_title("marimo - 読み込み中...") {
+    if let Err(e) = window.set_title("backcast - 読み込み中...") {
         log::error!("❌ Failed to set initial splash title: {}", e);
     } else {
-        info!("✅ Splash window title set: marimo - 読み込み中...");
+        info!("✅ Splash window title set: backcast - 読み込み中...");
     }
 
     Ok(())
@@ -45,7 +45,7 @@ pub fn update_splash_progress(app: &tauri::AppHandle, message: &str, percent: u8
 
     if let Some(window) = app.get_webview_window("splash") {
         // Update window title (always works, even if HTML isn't ready)
-        let title = format!("marimo - [{}%] {}", percent, message);
+        let title = format!("backcast - [{}%] {}", percent, message);
         if let Err(e) = window.set_title(&title) {
             log::error!("❌ Failed to update splash title: {}", e);
         } else {
@@ -87,7 +87,7 @@ pub fn show_splash_error(app: &tauri::AppHandle, error_message: &str) {
 
     if let Some(window) = app.get_webview_window("splash") {
         // Update window title with error
-        let title = format!("marimo - エラー: {}", error_message);
+        let title = format!("backcast - エラー: {}", error_message);
         if let Err(e) = window.set_title(&title) {
             log::error!("❌ Failed to update splash title with error: {}", e);
         }
@@ -139,10 +139,10 @@ pub fn close_splash_window(app: &tauri::AppHandle) {
 
     if let Some(window) = app.get_webview_window("splash") {
         // Update title before closing
-        if let Err(e) = window.set_title("marimo - 🏁 起動完了") {
+        if let Err(e) = window.set_title("backcast - 🏁 起動完了") {
             log::error!("❌ Failed to set closing splash title: {}", e);
         } else {
-            info!("✅ Splash closing title set: marimo - 🏁 起動完了");
+            info!("✅ Splash closing title set: backcast - 🏁 起動完了");
         }
 
         match window.close() {
