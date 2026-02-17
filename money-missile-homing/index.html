@@ -1306,6 +1306,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更履歴
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1388,13 +1399,44 @@
 </code></pre></div>
 <h3 id="2-scenemanager">2. SceneManager<a class="headerlink" href="#2-scenemanager" title="Permanent link">&para;</a></h3>
 <p><strong>ファイル:</strong> <code>frontend/src/core/three/scene-manager.ts</code></p>
-<div class="highlight"><pre><span></span><code><span class="c1">// アニメーションループでドローン位置を渡す</span>
-<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">moneyMissileEffect</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">delta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">elapsed</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">;</span>
+<p><code>moneyMissileEffect</code>・<code>tradeEventChannel</code> フィールドを追加し、以下を統合：</p>
+<p><strong>initialize() 内（リサイズハンドラー後、アニメーションループ開始前）:</strong>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">scene</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">camera</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">this</span><span class="p">.</span><span class="nx">moneyMissileEffect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">MoneyMissileEffect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">scene</span><span class="p">);</span>
+<span class="w">  </span><span class="k">this</span><span class="p">.</span><span class="nx">moneyMissileEffect</span><span class="p">.</span><span class="nx">setCamera</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">camera</span><span class="p">);</span>
+<span class="w">  </span><span class="k">this</span><span class="p">.</span><span class="nx">setupTradeEventListener</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>startAnimationLoop() 内（early return 後、WebGLレンダリング前）:</strong>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">moneyMissileEffect</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">delta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">elapsed</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">;</span><span class="w"> </span><span class="c1">// elapsed / 1000 を使う（THREE.Clock 不要）</span>
 <span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">dronePosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">characterComponent</span><span class="o">?</span><span class="p">.</span><span class="nx">getPosition</span><span class="p">()</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="kc">undefined</span><span class="p">;</span>
 <span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">isAnimating</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">moneyMissileEffect</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">delta</span><span class="p">,</span><span class="w"> </span><span class="nx">dronePosition</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">isAnimating</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">needsRender</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div>
+</code></pre></div></p>
+<p><strong>dispose() 内（renderer 解放後、scene 解放前）:</strong>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">moneyMissileEffect</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">this</span><span class="p">.</span><span class="nx">moneyMissileEffect</span><span class="p">.</span><span class="nx">dispose</span><span class="p">();</span>
+<span class="w">  </span><span class="k">this</span><span class="p">.</span><span class="nx">moneyMissileEffect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">undefined</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">tradeEventChannel</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">this</span><span class="p">.</span><span class="nx">tradeEventChannel</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+<span class="w">  </span><span class="k">this</span><span class="p">.</span><span class="nx">tradeEventChannel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">undefined</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>setupTradeEventListener()（プライベートメソッド）:</strong>
+<div class="highlight"><pre><span></span><code><span class="k">private</span><span class="w"> </span><span class="nx">setupTradeEventListener</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">this</span><span class="p">.</span><span class="nx">tradeEventChannel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">BroadcastChannel</span><span class="p">(</span><span class="s2">&quot;trade_event_channel&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">this</span><span class="p">.</span><span class="nx">tradeEventChannel</span><span class="p">.</span><span class="nx">onmessage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="o">:</span><span class="w"> </span><span class="kt">MessageEvent</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<blockquote>
+<p><strong>BroadcastChannel 名:</strong> <code>"trade_event_channel"</code>（旧 <code>"backtest_channel"</code> ではない）
+<strong>イベントフィールド:</strong> <code>event.data.data.event_type</code>（<code>"BUY"</code> or <code>"SELL"</code>）、<code>event.data.data.size</code>（<code>trade_type</code>/<code>amount</code> ではない）</p>
+</blockquote>
 <hr />
 <h2 id="_6">パラメータ調整<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <table>
@@ -1424,7 +1466,29 @@
 <li><strong>dronePosition が null の場合</strong>: BUYパーティクルは最後の既知位置を維持</li>
 <li><strong>パフォーマンス</strong>: <code>getHubPosition()</code> は1フレームに1回のみ呼び出し</li>
 <li><strong>ゼロ除算防止</strong>: <code>initialDistance === 0</code> の場合は <code>approachRatio = 0</code></li>
+<li><strong>THREE.Clock 不使用</strong>: <code>delta</code> は <code>elapsed / 1000</code> で計算（<code>elapsed = currentTime - this.lastRenderTime</code>）。<code>THREE.Clock</code> をフィールドに追加しないこと</li>
+<li><strong>SceneManager の dispose 順序</strong>: <code>characterComponent.dispose(scene)</code> が scene 引数を必要とするため、character/missile/channel の解放は <code>if (this.scene)</code> ブロックより<strong>前</strong>に行う</li>
 </ol>
+<hr />
+<h2 id="_8">変更履歴<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>日付</th>
+<th>変更内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-02-03</td>
+<td>ホーミング機能実装完了</td>
+</tr>
+<tr>
+<td>2026-02-17</td>
+<td><code>scene-manager.ts</code> 統合完了（<code>characterComponent</code> と同ファイルに統合）</td>
+</tr>
+</tbody>
+</table>
 
 
 

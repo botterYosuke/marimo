@@ -1745,6 +1745,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#controlstsx-2026-02-17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Controls.tsx 統合メモ（2026-02-17）
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2373,9 +2384,23 @@ Phase 9 (統合) ← 全フェーズ完了後
 <td>4,5,7</td>
 <td>Indicator統合、報酬UI統合</td>
 </tr>
+<tr>
+<td><code>editor/controls/Controls.tsx</code></td>
+<td>統合</td>
+<td><code>&lt;SkillTreeButton /&gt;</code> を <code>bottomRightControls</code> 内（<code>CommandPaletteButton</code> と <code>KeyboardShortcuts</code> の間）に追加</td>
+</tr>
 </tbody>
 </table>
 <p>全ファイルパスのプレフィックス: <code>frontend/src/components/</code> （ノートブックテンプレートは <code>frontend/public/files/</code>）</p>
+<hr />
+<h2 id="controlstsx-2026-02-17">Controls.tsx 統合メモ（2026-02-17）<a class="headerlink" href="#controlstsx-2026-02-17" title="Permanent link">&para;</a></h2>
+<p><code>SkillTreeButton</code> は <code>bottomRightControls</code> 内の以下の位置に配置：</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">CommandPaletteButton</span><span class="w"> </span><span class="p">/&gt;</span>
+<span class="p">&lt;</span><span class="nt">SkillTreeButton</span><span class="w"> </span><span class="p">/&gt;</span><span class="w">   </span><span class="p">{</span><span class="cm">/* ← ここ */</span><span class="p">}</span>
+<span class="p">&lt;</span><span class="nt">KeyboardShortcuts</span><span class="w"> </span><span class="p">/&gt;</span>
+</code></pre></div>
+<p>同時に <code>useProgressSync()</code> / <code>useBroadcastChannelRelay()</code> フックもコンポーネント先頭に追加。
+詳細は <a href="../progress-persistence/">progress-persistence.md</a> 参照。</p>
 
 
 

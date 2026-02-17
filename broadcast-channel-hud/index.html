@@ -1597,12 +1597,14 @@ BacktestHud Component (Controls.tsx 内)
 </ul>
 <h3 id="3-controlstsx">3. Controls.tsx への統合<a class="headerlink" href="#3-controlstsx" title="Permanent link">&para;</a></h3>
 <p><strong>ファイル:</strong> <code>frontend/src/components/editor/controls/Controls.tsx</code></p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="o">!</span><span class="nx">closed</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span>
-<span class="w">  </span><span class="p">&lt;</span><span class="nt">div</span><span class="w"> </span><span class="na">className</span><span class="o">=</span><span class="p">{</span><span class="nx">topLeftControls</span><span class="p">}&gt;</span>
-<span class="w">    </span><span class="p">&lt;</span><span class="nt">BacktestHud</span><span class="w"> </span><span class="p">/&gt;</span>
-<span class="w">  </span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-<span class="p">)}</span>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">div</span><span class="w"> </span><span class="na">className</span><span class="o">=</span><span class="p">{</span><span class="nx">topLeftControls</span><span class="p">}&gt;</span>
+<span class="w">  </span><span class="p">&lt;</span><span class="nt">BacktestHud</span><span class="w"> </span><span class="p">/&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
 </code></pre></div>
+<blockquote>
+<p><strong>重要:</strong> <code>!closed</code> ガードの<strong>外</strong>に配置すること。接続が切れた状態でも HUD は表示し続ける必要があるため。
+（<code>topRightControls</code> は <code>!closed</code> ガード内だが、HUD は別扱い）</p>
+</blockquote>
 <h3 id="4-handlerstswebsocket">4. handlers.ts（WebSocket メッセージ処理）<a class="headerlink" href="#4-handlerstswebsocket" title="Permanent link">&para;</a></h3>
 <p><strong>ファイル:</strong> <code>frontend/src/core/kernel/handlers.ts</code></p>
 <p>WebSocket で受信した HTML 出力から <code>&lt;marimo-broadcast&gt;</code> 要素を抽出し、React のレンダリングを待たずに BroadcastChannel へ送信。</p>
@@ -1649,6 +1651,10 @@ BacktestHud Component (Controls.tsx 内)
 <tr>
 <td>2026-01-28</td>
 <td>HUD 更新問題を修正: WebSocket 受信時に broadcast メッセージを抽出するよう変更</td>
+</tr>
+<tr>
+<td>2026-02-17</td>
+<td><code>Controls.tsx</code> 統合: <code>topLeftControls</code> div を <code>!closed</code> ガード<strong>外</strong>に移動（接続切れでも HUD 表示）。<code>useBroadcastChannelRelay()</code> / <code>useProgressSync()</code> フックを <code>Controls</code> 先頭に追加</td>
 </tr>
 </tbody>
 </table>

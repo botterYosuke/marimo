@@ -1552,7 +1552,16 @@
 <h3 id="step-5-useprogresssyncts">Step 5: <code>useProgressSync.ts</code> 新規作成<a class="headerlink" href="#step-5-useprogresssyncts" title="Permanent link">&para;</a></h3>
 <p><code>BroadcastChannel("progress_channel")</code> をリッスンし、<code>initProgressFromFileAtom</code> を呼ぶ。</p>
 <h3 id="step-6-controlstsx">Step 6: <code>Controls.tsx</code> 修正<a class="headerlink" href="#step-6-controlstsx" title="Permanent link">&para;</a></h3>
-<p><code>useProgressSync()</code> を追加（既存の <code>useBroadcastChannelRelay()</code> と並べて配置）。</p>
+<p>コンポーネント先頭（<code>const undoAvailable</code> より前）に2つのフックを配置：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Relay postMessage from iframes to BroadcastChannel (for Pyodide mode)</span>
+<span class="nx">useBroadcastChannelRelay</span><span class="p">();</span>
+<span class="c1">// Sync progress from Python-side file to playerProgressAtom</span>
+<span class="nx">useProgressSync</span><span class="p">();</span>
+</code></pre></div>
+<blockquote>
+<p><strong>配置順の注意:</strong> React フックのルール上、<code>useAtomValue</code> 等の他フックより前に呼ぶ必要はないが、
+両フックは副作用のみ（戻り値なし）のため、コンポーネント先頭にまとめて置くと可読性が高い。</p>
+</blockquote>
 <h3 id="step-7">Step 7: テストファイル修正<a class="headerlink" href="#step-7" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
