@@ -807,6 +807,84 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#firebase-pyodide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firebase デプロイ（Pyodide ビルド）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Firebase デプロイ（Pyodide ビルド）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ビルドコマンド
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        既知の問題と対処
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="既知の問題と対処">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-wasmcontrollerjs-mime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題1: /wasm/controller.js の MIME タイプエラー
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-typeerror-sa-is-not-a-functionpanels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題2: TypeError: sa is not a function（panels チャンク）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wasmcontrollerjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wasm/controller.js の動作
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1491,6 +1569,84 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#firebase-pyodide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firebase デプロイ（Pyodide ビルド）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Firebase デプロイ（Pyodide ビルド）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ビルドコマンド
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        既知の問題と対処
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="既知の問題と対処">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-wasmcontrollerjs-mime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題1: /wasm/controller.js の MIME タイプエラー
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-typeerror-sa-is-not-a-functionpanels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題2: TypeError: sa is not a function（panels チャンク）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wasmcontrollerjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wasm/controller.js の動作
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1627,6 +1783,41 @@ uv<span class="w"> </span>run<span class="w"> </span>pyodide/build_and_serve.py
 <li><strong>開発モードテスト</strong>: <code>pnpm dev:pyodide</code> で <code>http://localhost:3000</code></li>
 <li><strong>ネットワーク確認</strong>: <code>/files/backcast.py</code> が 200 OK で返ることを確認</li>
 </ul>
+<hr />
+<h2 id="firebase-pyodide">Firebase デプロイ（Pyodide ビルド）<a class="headerlink" href="#firebase-pyodide" title="Permanent link">&para;</a></h2>
+<h3 id="_5">ビルドコマンド<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>frontend
+<span class="nv">PYODIDE</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="nv">VITE_MARIMO_VERSION</span><span class="o">=</span><span class="m">0</span>.19.2<span class="w"> </span><span class="nv">VITE_USE_CUSTOM_WHEEL</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>pnpm<span class="w"> </span>build
+</code></pre></div>
+<h3 id="_6">既知の問題と対処<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<h4 id="1-wasmcontrollerjs-mime">問題1: <code>/wasm/controller.js</code> の MIME タイプエラー<a class="headerlink" href="#1-wasmcontrollerjs-mime" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>Failed to load module script: Expected a JavaScript-or-Wasm module script
+but the server responded with a MIME type of &quot;text/html&quot;.
+</code></pre></div>
+<p><strong>原因</strong>: Firebase の <code>rewrites: ["**" → "/index.html"]</code> が catch-all のため、<code>dist/</code> に存在しないファイルへのリクエストを <code>index.html</code>（HTML）として返す。ブラウザは JS MIME type を期待するため失敗する。</p>
+<p><strong>対処</strong>: <code>frontend/public/wasm/controller.js</code> に placeholder ES module を置く。Vite ビルド時に <code>public/</code> の内容が <code>dist/</code> にコピーされるため、Firebase が静的ファイルとして正しい MIME type で配信できる。</p>
+<ul>
+<li>対象ファイル: <code>frontend/public/wasm/controller.js</code></li>
+<li>Firebase は静的ファイルを rewrite より優先するため、<code>firebase.json</code> の変更は不要</li>
+</ul>
+<h4 id="2-typeerror-sa-is-not-a-functionpanels">問題2: <code>TypeError: sa is not a function</code>（panels チャンク）<a class="headerlink" href="#2-typeerror-sa-is-not-a-functionpanels" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>TypeError: sa is not a function
+    at panels-Cx_inYbb.js:1:34411
+</code></pre></div>
+<p><strong>原因</strong>: <code>vite.config.mts</code> の vega-lite resolve aliases がPyodide ビルドのモジュールグラフを破壊する。これらの aliases は rolldown-vite 7.3.1 の型解決バグ回避のために追加されたが、<code>.d.ts</code> ファイルを <code>.js</code> として解決するため、<code>panels</code> チャンクが <code>layout.js</code> の Top-Level Await 完了前に factory 関数を呼び出してしまう。</p>
+<p><strong>対処</strong>: <code>vite.config.mts</code> で <code>alias</code> を <code>isPyodide</code> で条件分岐し、Pyodide ビルドでは aliases を無効化する。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// frontend/vite.config.mts</span>
+<span class="nx">alias</span><span class="o">:</span><span class="w"> </span><span class="kt">isPyodide</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="s1">&#39;vega-lite/types_unstable/channeldef.js&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;vega-lite/build/channeldef.d.ts&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="c1">// ...</span>
+<span class="p">},</span>
+</code></pre></div>
+<ul>
+<li>非 Pyodide ビルド（Tauri/Electron）は aliases を維持し、rolldown-vite のバグ回避を継続</li>
+</ul>
+<h3 id="wasmcontrollerjs">wasm/controller.js の動作<a class="headerlink" href="#wasmcontrollerjs" title="Permanent link">&para;</a></h3>
+<p><code>frontend/src/core/wasm/worker/getController.ts</code> がランタイムに <code>/wasm/controller.js?version=X.Y.Z</code> を動的 import する。失敗した場合は <code>DefaultWasmController</code> にフォールバックする（<code>backcastpro-loader.ts</code> で拡張）。</p>
+<p><code>frontend/public/wasm/controller.js</code> は空の ES module（<code>export {}</code>）で、ファイルの存在を保証するだけの placeholder。実際のコントローラは <code>backcastpro-loader.ts</code> の <code>BackcastProWasmController</code> が担う。</p>
 
 
 
