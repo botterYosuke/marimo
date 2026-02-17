@@ -95,3 +95,48 @@ pub fn get_marimo_source(app: &tauri::AppHandle) -> PathBuf {
 }
 
 use tauri::Manager;
+
+#[derive(serde::Deserialize)]
+struct RecentFilesState {
+    #[serde(default)]
+    files: Vec<String>,
+}
+
+/// 最近開いたファイルのうち、最初に存在するファイルのパスを返す。
+/// recent_files.toml がない、または有効なファイルがない場合は None。
+///
+/// Python 側 (marimo/_utils/xdg.py) と同じパス解決ロジックを使用:
+/// - Windows: {USERPROFILE}/.marimo/recent_files.toml
+/// - Unix:    {XDG_STATE_HOME:-~/.local/state}/marimo/recent_files.toml
+pub fn get_most_recent_valid_file() -> Option<PathBuf> {
+    #[cfg(target_os = "windows")]
+    let toml_path = {
+        let home = std::env::var("USERPROFILE").ok()?;
+        PathBuf::from(home).join(".marimo").join("recent_files.toml")
+    };
+    #[cfg(not(target_os = "windows"))]
+    let toml_path = {
+        let state_home = std::env::var("XDG_STATE_HOME")
+            .ok()
+            .filter(|s| !s.trim().is_empty())
+            .map(PathBuf::from)
+            .unwrap_or_else(|| {
+                let home = std::env::var("HOME").unwrap_or_default();
+                PathBuf::from(home).join(".local").join("state")
+            });
+        state_home.join("marimo").join("recent_files.toml")
+    };
+
+    if !toml_path.exists() {
+        return None;
+    }
+    let content = std::fs::read_to_string(&toml_path).ok()?;
+    let state: RecentFilesState = toml::from_str(&content).ok()?;
+    for file_str in &state.files {
+        let path = PathBuf::from(file_str);
+        if path.exists() {
+            return Some(path);
+        }
+    }
+    None
+}

@@ -20,6 +20,7 @@ anyhow = "1"
 url = "2"
 urlencoding = "2"
 thiserror = "2"
+toml = "0.8"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

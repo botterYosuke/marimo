@@ -303,8 +303,10 @@ pub fn run() {
                             window::splash::update_splash_progress(&app_handle_clone, "Opening window...", 98);
                         }
 
-                        match window::manager::open_window(&app_handle_clone, None) {
-                            Ok(_) => info!("Home window created successfully"),
+                        let recent_file = paths::get_most_recent_valid_file();
+                        info!("Opening initial window, recent file: {:?}", recent_file);
+                        match window::manager::open_window(&app_handle_clone, recent_file.as_deref()) {
+                            Ok(_) => info!("Initial window created successfully"),
                             Err(e) => {
                                 log::error!("Failed to create home window: {}", e);
                                 log::error!("Error details: {:?}", e);
