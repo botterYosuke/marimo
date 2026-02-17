@@ -120,10 +120,10 @@ pub fn get_most_recent_valid_file() -> Option<PathBuf> {
             .ok()
             .filter(|s| !s.trim().is_empty())
             .map(PathBuf::from)
-            .unwrap_or_else(|| {
-                let home = std::env::var("HOME").unwrap_or_default();
-                PathBuf::from(home).join(".local").join("state")
-            });
+            .or_else(|| {
+                let home = std::env::var("HOME").ok()?;
+                Some(PathBuf::from(home).join(".local").join("state"))
+            })?;
         state_home.join("marimo").join("recent_files.toml")
     };
 
