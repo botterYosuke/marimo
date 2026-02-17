@@ -127,7 +127,7 @@ pub fn ensure_environment(
     info!("Venv Python exists: {}", venv_python.exists());
     info!("Marimo source: {}", marimo_source.display());
 
-    let install_path = format!("{}[game]", marimo_source.display());
+    let install_path = marimo_source.to_string_lossy().to_string();
     info!("Install path: {}", install_path);
 
     let mut cmd = Command::new(uv_bin);
