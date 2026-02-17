@@ -3,6 +3,7 @@
 *.pdf
 *.txt
 !tests/**/*.txt
+!requirements-docs.txt
 
 node_modules/
 .turbo/
