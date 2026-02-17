@@ -91,3 +91,57 @@ mount_config (filename: "backcast.py")
 - **IndexedDBクリア**: DevTools → Application → IndexedDB → `/marimo` 削除
 - **開発モードテスト**: `pnpm dev:pyodide` で `http://localhost:3000`
 - **ネットワーク確認**: `/files/backcast.py` が 200 OK で返ることを確認
+
+---
+
+## Firebase デプロイ（Pyodide ビルド）
+
+### ビルドコマンド
+
+```bash
+cd frontend
+PYODIDE=true VITE_MARIMO_VERSION=0.19.2 VITE_USE_CUSTOM_WHEEL=true pnpm build
+```
+
+### 既知の問題と対処
+
+#### 問題1: `/wasm/controller.js` の MIME タイプエラー
+
+```
+Failed to load module script: Expected a JavaScript-or-Wasm module script
+but the server responded with a MIME type of "text/html".
+```
+
+**原因**: Firebase の `rewrites: ["**" → "/index.html"]` が catch-all のため、`dist/` に存在しないファイルへのリクエストを `index.html`（HTML）として返す。ブラウザは JS MIME type を期待するため失敗する。
+
+**対処**: `frontend/public/wasm/controller.js` に placeholder ES module を置く。Vite ビルド時に `public/` の内容が `dist/` にコピーされるため、Firebase が静的ファイルとして正しい MIME type で配信できる。
+
+- 対象ファイル: `frontend/public/wasm/controller.js`
+- Firebase は静的ファイルを rewrite より優先するため、`firebase.json` の変更は不要
+
+#### 問題2: `TypeError: sa is not a function`（panels チャンク）
+
+```
+TypeError: sa is not a function
+    at panels-Cx_inYbb.js:1:34411
+```
+
+**原因**: `vite.config.mts` の vega-lite resolve aliases がPyodide ビルドのモジュールグラフを破壊する。これらの aliases は rolldown-vite 7.3.1 の型解決バグ回避のために追加されたが、`.d.ts` ファイルを `.js` として解決するため、`panels` チャンクが `layout.js` の Top-Level Await 完了前に factory 関数を呼び出してしまう。
+
+**対処**: `vite.config.mts` で `alias` を `isPyodide` で条件分岐し、Pyodide ビルドでは aliases を無効化する。
+
+```typescript
+// frontend/vite.config.mts
+alias: isPyodide ? {} : {
+  'vega-lite/types_unstable/channeldef.js': 'vega-lite/build/channeldef.d.ts',
+  // ...
+},
+```
+
+- 非 Pyodide ビルド（Tauri/Electron）は aliases を維持し、rolldown-vite のバグ回避を継続
+
+### wasm/controller.js の動作
+
+`frontend/src/core/wasm/worker/getController.ts` がランタイムに `/wasm/controller.js?version=X.Y.Z` を動的 import する。失敗した場合は `DefaultWasmController` にフォールバックする（`backcastpro-loader.ts` で拡張）。
+
+`frontend/public/wasm/controller.js` は空の ES module（`export {}`）で、ファイルの存在を保証するだけの placeholder。実際のコントローラは `backcastpro-loader.ts` の `BackcastProWasmController` が担う。
