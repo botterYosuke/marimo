@@ -1,6 +1,8 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { execSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { codecovVitePlugin } from "@codecov/vite-plugin";
 import react from "@vitejs/plugin-react";
 import { JSDOM } from "jsdom";
@@ -14,6 +16,7 @@ const TARGET = `http://${HOST}:${SERVER_PORT}`;
 const isDev = process.env.NODE_ENV === "development";
 const isStorybook = process.env.npm_lifecycle_script?.includes("storybook");
 const isPyodide = process.env.PYODIDE === "true";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 console.log("Building environment:", process.env.NODE_ENV);
 
@@ -303,7 +306,12 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     // Fix for rolldown-vite 7.3.1 type-only import resolution.
-    alias: isPyodide ? {} : {
+    // When isPyodide, enableNativePlugin is false so tsconfigPaths doesn't work;
+    // manually add the tsconfig paths aliases so "@/..." imports resolve correctly.
+    alias: isPyodide ? {
+      '@': path.resolve(__dirname, 'src'),
+      'zod': path.resolve(__dirname, 'node_modules/zod'),
+    } : {
       // vega-lite exports types via ./types_unstable/* -> ./build/*
       // but only .d.ts files exist, not .js files
       'vega-lite/types_unstable/channeldef.js': 'vega-lite/build/channeldef.d.ts',
