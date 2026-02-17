@@ -339,10 +339,12 @@ export default defineConfig({
     ],
   },
   experimental: {
-    // Use 'resolver' for non-Pyodide builds: enableNativePlugin: true/false bypasses vite-plugin-top-level-await's
-    // JS transform, preventing TLA propagation to panels.js and causing "ra/sa is not a function".
-    // Pyodide builds use enableNativePlugin: true to ensure topLevelAwait() plugin works correctly.
-    enableNativePlugin: isPyodide ? true : 'resolver',
+    // enableNativePlugin: true enables Rolldown's native plugins, which bypass JS-based Vite plugins
+    // like vite-plugin-top-level-await. This prevents TLA transformation in panels.js,
+    // causing "na/ra/sa is not a function" errors at runtime.
+    // Pyodide builds MUST use false so topLevelAwait() plugin transforms TLA correctly.
+    // Non-Pyodide builds use 'resolver' (only native resolver, JS plugins still run).
+    enableNativePlugin: isPyodide ? false : 'resolver',
   },
   worker: {
     format: "es",
