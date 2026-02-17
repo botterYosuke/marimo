@@ -102,20 +102,19 @@ struct RecentFilesState {
     files: Vec<String>,
 }
 
-/// 最近開いたファイルのうち、最初に存在するファイルのパスを返す。
-/// recent_files.toml がない、または有効なファイルがない場合は None。
+/// recent_files.toml のパスを返す。
 ///
 /// Python 側 (marimo/_utils/xdg.py) と同じパス解決ロジックを使用:
 /// - Windows: {USERPROFILE}/.marimo/recent_files.toml
 /// - Unix:    {XDG_STATE_HOME:-~/.local/state}/marimo/recent_files.toml
-pub fn get_most_recent_valid_file() -> Option<PathBuf> {
+pub fn get_recent_files_path() -> Option<PathBuf> {
     #[cfg(target_os = "windows")]
-    let toml_path = {
+    {
         let home = std::env::var("USERPROFILE").ok()?;
-        PathBuf::from(home).join(".marimo").join("recent_files.toml")
-    };
+        Some(PathBuf::from(home).join(".marimo").join("recent_files.toml"))
+    }
     #[cfg(not(target_os = "windows"))]
-    let toml_path = {
+    {
         let state_home = std::env::var("XDG_STATE_HOME")
             .ok()
             .filter(|s| !s.trim().is_empty())
@@ -124,8 +123,14 @@ pub fn get_most_recent_valid_file() -> Option<PathBuf> {
                 let home = std::env::var("HOME").ok()?;
                 Some(PathBuf::from(home).join(".local").join("state"))
             })?;
-        state_home.join("marimo").join("recent_files.toml")
-    };
+        Some(state_home.join("marimo").join("recent_files.toml"))
+    }
+}
+
+/// 最近開いたファイルのうち、最初に存在するファイルのパスを返す。
+/// recent_files.toml がない、または有効なファイルがない場合は None。
+pub fn get_most_recent_valid_file() -> Option<PathBuf> {
+    let toml_path = get_recent_files_path()?;
 
     if !toml_path.exists() {
         return None;

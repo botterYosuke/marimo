@@ -18,7 +18,7 @@ env:
   TURBO_TEAM: marimo
 
 jobs:
-  # Build and release Electron app for Windows, macOS, and Linux
+  # Build Tauri app for Windows, macOS, and Linux
   build_windows:
     name: 🪟 Build Windows
     runs-on: windows-latest
@@ -46,67 +46,50 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
-
       - name: 🔨 Get version
         id: get_version
         shell: pwsh
         run: |
-          $version = uv version --short
+          $version = node -p "require('./src-tauri/tauri.conf.json').version"
           echo "marimo_version=$version" >> $env:GITHUB_OUTPUT
           echo "MARIMO_VERSION=$version" >> $env:GITHUB_ENV
 
-      - name: 📦 Create virtual environment
-        shell: pwsh
-        run: uv venv
+      - name: 📦 Download uv binary for bundling
+        run: node scripts/download-uv.js
 
-      - name: 📦 Install Python dependencies (electron)
+      - name: 🔧 Prepare Tauri resources
+        run: |
+          cd src-tauri
+          node prepare-resources.js
+
+      - name: 📦 Verify uv binary (Windows)
         shell: pwsh
         run: |
-          . .venv/Scripts/Activate.ps1
-          uv pip install -e ".[electron]"
-
-      - name: 🔨 Build Python executable (PyInstaller)
-        shell: pwsh
-        working-directory: ${{ github.workspace }}
-        run: |
-          # Ensure we're in the project root and marimo.spec exists
-          if (-not (Test-Path "marimo.spec")) {
-            Write-Host "❌ marimo.spec not found in current directory: $(Get-Location)"
-            Get-ChildItem -Name | Select-Object -First 10
-            exit 1
-          }
-          Write-Host "✅ Building from: $(Get-Location)"
-          uv run pyinstaller --clean --noconfirm marimo.spec
-
-      - name: 📦 Verify Python executable
-        shell: pwsh
-        run: |
-          if (Test-Path "dist\marimo-server.exe") {
-            Write-Host "✅ Python executable built successfully"
+          if (Test-Path "src-tauri/binaries/uv.exe") {
+            Write-Host "✅ uv binary downloaded successfully"
           } else {
-            Write-Host "❌ Python executable not found"
+            Write-Host "❌ uv binary not found"
             exit 1
           }
 
-      - name: 📦 Update package.json version
-        working-directory: frontend
-        run: |
-          npm version ${{ env.MARIMO_VERSION }} --no-git-tag-version
+      - name: 🦀 Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: 📦 Build Electron app (Steam - unpacked)
-        run: pnpm exec electron-builder --win --x64 --dir
+      - name: 🦀 Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: 🔨 Build Tauri app (Steam)
+        run: pnpm tauri build
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📤 Upload Windows artifacts (Steam)
         uses: actions/upload-artifact@v4
         with:
           name: steam-windows-${{ env.MARIMO_VERSION }}
-          path: dist-electron/win-unpacked/
+          path: src-tauri/target/release/bundle/nsis/
           retention-days: 7
 
   build_macos:
@@ -136,83 +119,69 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
-
       - name: 🔨 Get version
         id: get_version
         run: |
-          version=$(uv version --short)
+          version=$(node -p "require('./src-tauri/tauri.conf.json').version")
           echo "marimo_version=$version" >> $GITHUB_OUTPUT
           echo "MARIMO_VERSION=$version" >> $GITHUB_ENV
 
-      - name: 📦 Create virtual environment
-        run: uv venv
+      - name: 📦 Download uv binary for bundling
+        run: node scripts/download-uv.js
 
-      - name: 📦 Install Python dependencies (electron)
+      - name: 🔧 Prepare Tauri resources
         run: |
-          source .venv/bin/activate
-          uv pip install -e ".[electron]"
+          cd src-tauri
+          node prepare-resources.js
 
-      - name: 🔨 Build Python executable (PyInstaller)
-        working-directory: ${{ github.workspace }}
+      - name: 📦 Verify uv binary (Unix)
         run: |
-          # Ensure we're in the project root and marimo.spec exists
-          echo "Current directory: $(pwd)"
-          echo "Checking for marimo.spec..."
-
-          # Check if file exists and is tracked in git
-          if [ ! -f "marimo.spec" ]; then
-            echo "❌ marimo.spec not found in filesystem"
-            echo "Checking git status..."
-            git ls-files | grep -i "marimo.spec" || echo "marimo.spec not tracked in git"
-            echo "Files in root directory:"
-            ls -la *.spec 2>/dev/null || echo "No .spec files found"
-            exit 1
-          fi
-
-          echo "✅ Found marimo.spec at: $(pwd)/marimo.spec"
-          echo "Building Python executable..."
-          uv run pyinstaller --clean --noconfirm marimo.spec
-
-      - name: 📦 Verify Python executable
-        run: |
-          if [ -f "dist/marimo-server" ]; then
-            echo "✅ Python executable built successfully"
+          if [ -f "src-tauri/binaries/uv" ]; then
+            echo "✅ uv binary downloaded successfully"
+            file src-tauri/binaries/uv
           else
-            echo "❌ Python executable not found"
+            echo "❌ uv binary not found"
             exit 1
           fi
 
-      - name: 📦 Update package.json version
-        working-directory: frontend
-        run: |
-          npm version ${{ env.MARIMO_VERSION }} --no-git-tag-version
+      - name: 🦀 Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: 📦 Build Electron app (Steam - unpacked)
-        run: pnpm exec electron-builder --mac --x64 --arm64 --dir
+      - name: 🦀 Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: 🔨 Build Tauri app (Steam)
+        run: pnpm tauri build
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CSC_IDENTITY_AUTO_DISCOVERY: false  # Skip code signing for now
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📤 Upload macOS artifacts (Steam)
         uses: actions/upload-artifact@v4
         with:
           name: steam-macos-${{ env.MARIMO_VERSION }}
-          path: dist-electron/mac/
+          path: src-tauri/target/release/bundle/macos/
           retention-days: 7
 
   build_linux:
     name: 🐧 Build Linux
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: 🐧 Install Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf
 
       - name: ⎔ Setup pnpm
         uses: pnpm/action-setup@v4
@@ -231,71 +200,49 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "latest"
-
       - name: 🔨 Get version
         id: get_version
         run: |
-          version=$(uv version --short)
+          version=$(node -p "require('./src-tauri/tauri.conf.json').version")
           echo "marimo_version=$version" >> $GITHUB_OUTPUT
           echo "MARIMO_VERSION=$version" >> $GITHUB_ENV
 
-      - name: 📦 Create virtual environment
-        run: uv venv
+      - name: 📦 Download uv binary for bundling
+        run: node scripts/download-uv.js
 
-      - name: 📦 Install Python dependencies (electron)
+      - name: 🔧 Prepare Tauri resources
         run: |
-          source .venv/bin/activate
-          uv pip install -e ".[electron]"
+          cd src-tauri
+          node prepare-resources.js
 
-      - name: 🔨 Build Python executable (PyInstaller)
-        working-directory: ${{ github.workspace }}
+      - name: 📦 Verify uv binary (Unix)
         run: |
-          # Ensure we're in the project root and marimo.spec exists
-          echo "Current directory: $(pwd)"
-          echo "Checking for marimo.spec..."
-
-          # Check if file exists and is tracked in git
-          if [ ! -f "marimo.spec" ]; then
-            echo "❌ marimo.spec not found in filesystem"
-            echo "Checking git status..."
-            git ls-files | grep -i "marimo.spec" || echo "marimo.spec not tracked in git"
-            echo "Files in root directory:"
-            ls -la *.spec 2>/dev/null || echo "No .spec files found"
-            exit 1
-          fi
-
-          echo "✅ Found marimo.spec at: $(pwd)/marimo.spec"
-          echo "Building Python executable..."
-          uv run pyinstaller --clean --noconfirm marimo.spec
-
-      - name: 📦 Verify Python executable
-        run: |
-          if [ -f "dist/marimo-server" ]; then
-            echo "✅ Python executable built successfully"
+          if [ -f "src-tauri/binaries/uv" ]; then
+            echo "✅ uv binary downloaded successfully"
+            file src-tauri/binaries/uv
           else
-            echo "❌ Python executable not found"
+            echo "❌ uv binary not found"
             exit 1
           fi
 
-      - name: 📦 Update package.json version
-        working-directory: frontend
-        run: |
-          npm version ${{ env.MARIMO_VERSION }} --no-git-tag-version
+      - name: 🦀 Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: 📦 Build Electron app (Steam - unpacked)
-        run: pnpm exec electron-builder --linux --x64 --dir
+      - name: 🦀 Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: 🔨 Build Tauri app (Steam)
+        run: pnpm tauri build
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📤 Upload Linux artifacts (Steam)
         uses: actions/upload-artifact@v4
         with:
           name: steam-linux-${{ env.MARIMO_VERSION }}
-          path: dist-electron/linux-unpacked/
+          path: src-tauri/target/release/bundle/appimage/
           retention-days: 7
 
   # Deploy to Steam
@@ -308,34 +255,34 @@ jobs:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          version: "latest"
+          node-version: 22
 
       - name: 🔨 Get version
         id: get_version
         run: |
-          version=$(uv version --short)
+          version=$(node -p "require('./src-tauri/tauri.conf.json').version")
           echo "marimo_version=$version" >> $GITHUB_OUTPUT
 
       - name: 📥 Download Windows build
         uses: actions/download-artifact@v4
         with:
           name: steam-windows-${{ steps.get_version.outputs.marimo_version }}
-          path: dist-electron/win-unpacked/
+          path: dist-tauri/win/
 
       - name: 📥 Download macOS build
         uses: actions/download-artifact@v4
         with:
           name: steam-macos-${{ steps.get_version.outputs.marimo_version }}
-          path: dist-electron/mac/
+          path: dist-tauri/mac/
 
       - name: 📥 Download Linux build
         uses: actions/download-artifact@v4
         with:
           name: steam-linux-${{ steps.get_version.outputs.marimo_version }}
-          path: dist-electron/linux-unpacked/
+          path: dist-tauri/linux/
 
       - name: 📁 Create Steam VDF directory
         run: mkdir -p steam/vdf
@@ -348,6 +295,6 @@ jobs:
           appId: 4228740
           buildDescription: "v${{ steps.get_version.outputs.marimo_version }}"
           rootPath: steam/vdf
-          depot1Path: ../../dist-electron/win-unpacked
-          depot2Path: ../../dist-electron/mac
-          depot3Path: ../../dist-electron/linux-unpacked
+          depot1Path: ../../dist-tauri/win
+          depot2Path: ../../dist-tauri/mac
+          depot3Path: ../../dist-tauri/linux

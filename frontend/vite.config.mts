@@ -339,12 +339,19 @@ export default defineConfig({
     ],
   },
   experimental: {
-    // Use 'resolver' for all builds: enableNativePlugin: true bypasses vite-plugin-top-level-await's
-    // JS transform, preventing TLA propagation to panels.js and causing "sa is not a function".
-    enableNativePlugin: 'resolver',
+    // 'resolver': non-Pyodide builds use esnext target (native TLA) so the plugin is not needed.
+    // false: Pyodide builds require topLevelAwait() plugin's renderChunk hook to propagate TLA.
+    //        'resolver' mode skips that hook and causes "ra is not a function" in panels.js.
+    enableNativePlugin: isPyodide ? false : 'resolver',
   },
   worker: {
     format: "es",
+    rollupOptions: {
+      output: {
+        entryFileNames: '[name]-[hash].js',
+        chunkFileNames: '[name]-[hash].js',
+      },
+    },
   },
   plugins: [
     htmlDevPlugin(),

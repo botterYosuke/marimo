@@ -58,6 +58,58 @@ fn get_log_file_path() -> PathBuf {
     }
 }
 
+fn seed_recent_files(app: &tauri::AppHandle) {
+    let toml_path = match paths::get_recent_files_path() {
+        Some(p) => p,
+        None => {
+            log::warn!("Could not determine recent_files.toml path");
+            return;
+        }
+    };
+
+    // ファイルが既に存在する場合は上書きしない
+    if toml_path.exists() {
+        info!("recent_files.toml already exists, skipping seed");
+        return;
+    }
+
+    // ディレクトリを作成
+    if let Some(parent) = toml_path.parent() {
+        if let Err(e) = std::fs::create_dir_all(parent) {
+            log::error!("Failed to create .marimo dir: {}", e);
+            return;
+        }
+    }
+
+    // backcast.py のみを登録
+    let notebooks_dir = paths::get_notebooks_dir(app);
+    let mut files: Vec<String> = Vec::new();
+
+    let backcast = notebooks_dir.join("backcast.py");
+    if backcast.exists() {
+        files.push(backcast.to_string_lossy().to_string());
+    }
+
+    #[derive(serde::Serialize)]
+    struct RecentFilesState {
+        files: Vec<String>,
+    }
+
+    if files.is_empty() {
+        info!("No files to seed, skipping recent_files.toml creation");
+        return;
+    }
+
+    let state = RecentFilesState { files };
+    match toml::to_string(&state) {
+        Ok(content) => match std::fs::write(&toml_path, content) {
+            Ok(_) => info!("Created recent_files.toml: {}", toml_path.display()),
+            Err(e) => log::error!("Failed to write recent_files.toml: {}", e),
+        },
+        Err(e) => log::error!("Failed to serialize recent_files.toml: {}", e),
+    }
+}
+
 fn copy_sample_files_to_notebooks(app: &tauri::AppHandle) {
     let src_dir = if cfg!(debug_assertions) {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("sample-notebooks")
@@ -167,6 +219,7 @@ pub fn run() {
             std::fs::create_dir_all(&log_dir).ok();
 
             copy_sample_files_to_notebooks(&app_handle);
+            seed_recent_files(&app_handle);
 
             info!("marimo desktop starting...");
             info!("Data dir: {}", data_dir.display());

@@ -11,6 +11,12 @@
         ]
       },
       {
+        "source": "**/*.ts",
+        "headers": [
+          { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+        ]
+      },
+      {
         "source": "**/*.duckdb",
         "headers": [
           { "key": "Content-Type", "value": "application/octet-stream" },
