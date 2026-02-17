@@ -58,6 +58,52 @@ fn get_log_file_path() -> PathBuf {
     }
 }
 
+fn copy_sample_files_to_notebooks(app: &tauri::AppHandle) {
+    let src_dir = if cfg!(debug_assertions) {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("sample-notebooks")
+    } else {
+        app.path()
+            .resource_dir()
+            .expect("failed to get resource dir")
+            .join("resources").join("files")
+    };
+    let dst_dir = paths::get_notebooks_dir(app);
+
+    if let Err(e) = std::fs::create_dir_all(&dst_dir) {
+        log::error!("Failed to create notebooks dir: {}", e);
+        return;
+    }
+
+    if !src_dir.exists() {
+        log::warn!("Sample files dir not found: {}", src_dir.display());
+        return;
+    }
+
+    let entries = match std::fs::read_dir(&src_dir) {
+        Ok(e) => e,
+        Err(e) => {
+            log::error!("Failed to read sample files dir: {}", e);
+            return;
+        }
+    };
+
+    for entry in entries.flatten() {
+        let src = entry.path();
+        if !src.is_file() {
+            continue;
+        }
+        if let Some(name) = src.file_name() {
+            let dst = dst_dir.join(name);
+            if !dst.exists() {
+                match std::fs::copy(&src, &dst) {
+                    Ok(_) => info!("Seeded notebook: {}", name.to_string_lossy()),
+                    Err(e) => log::error!("Failed to copy {:?}: {}", name, e),
+                }
+            }
+        }
+    }
+}
+
 pub fn run() {
     // Initialize logging to file in APPDATA directory
     let log_file_path = get_log_file_path();
@@ -119,6 +165,8 @@ pub fn run() {
             std::fs::create_dir_all(&data_dir).ok();
             let log_dir = paths::get_log_dir(&app_handle);
             std::fs::create_dir_all(&log_dir).ok();
+
+            copy_sample_files_to_notebooks(&app_handle);
 
             info!("marimo desktop starting...");
             info!("Data dir: {}", data_dir.display());

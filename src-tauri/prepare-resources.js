@@ -95,5 +95,16 @@ if (fs.existsSync(staticAssetsDir)) {
   process.exit(1);
 }
 
+// Copy src-tauri/sample-notebooks to src-tauri/resources/files
+const filesSourceDir = path.join(srcTauriDir, 'sample-notebooks');
+const filesDestDir = path.join(resourcesDir, 'files');
+if (fs.existsSync(filesSourceDir)) {
+  copyRecursive(filesSourceDir, filesDestDir);
+  console.log('✅ Copied sample-notebooks/ to resources/files');
+} else {
+  console.error('✗ sample-notebooks/ directory not found!');
+  process.exit(1);
+}
+
 console.log('\nResources prepared successfully!');
 console.log(`Resources directory: ${resourcesDir}`);

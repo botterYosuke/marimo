@@ -28,6 +28,7 @@
     "resources": [
       "binaries/uv*",
       "resources/marimo",
+      "resources/files",
       "resources/pyproject.toml",
       "resources/LICENSE",
       "resources/README.md",
