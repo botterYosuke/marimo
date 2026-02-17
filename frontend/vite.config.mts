@@ -302,11 +302,11 @@ export default defineConfig({
   },
   resolve: {
     tsconfigPaths: true,
-    alias: {
-      // Fix for rolldown-vite 7.3.1 type-only import resolution
+    // Fix for rolldown-vite 7.3.1 type-only import resolution.
+    // Not applied in Pyodide builds: these aliases break the module graph and cause TLA issues.
+    alias: isPyodide ? {} : {
       // vega-lite exports types via ./types_unstable/* -> ./build/*
       // but only .d.ts files exist, not .js files
-      // Specific aliases for each vega-lite type module
       'vega-lite/types_unstable/channeldef.js': 'vega-lite/build/channeldef.d.ts',
       'vega-lite/types_unstable/encoding.js': 'vega-lite/build/encoding.d.ts',
       'vega-lite/types_unstable/spec/unit.js': 'vega-lite/build/spec/unit.d.ts',
