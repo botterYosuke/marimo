@@ -81,7 +81,7 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: pnpm tauri build
+        run: cargo tauri build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -153,7 +153,7 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: pnpm tauri build
+        run: cargo tauri build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -234,7 +234,7 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: pnpm tauri build
+        run: cargo tauri build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

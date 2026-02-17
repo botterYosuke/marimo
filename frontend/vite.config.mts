@@ -1,12 +1,16 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { execSync } from "node:child_process";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { codecovVitePlugin } from "@codecov/vite-plugin";
 import react from "@vitejs/plugin-react";
 import { JSDOM } from "jsdom";
 import { defineConfig, type Plugin } from "vite";
 import topLevelAwait from "vite-plugin-top-level-await";
 import wasm from "vite-plugin-wasm";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const SERVER_PORT = process.env.SERVER_PORT || 2718;
 const HOST = process.env.HOST || "127.0.0.1";
@@ -301,10 +305,15 @@ export default defineConfig({
     sourcemap: isDev,
   },
   resolve: {
-    tsconfigPaths: true,
+    // tsconfigPaths requires native plugins; disabled for Pyodide builds (enableNativePlugin: false).
+    // Explicit aliases below replace it for the Pyodide case.
+    tsconfigPaths: !isPyodide,
     // Fix for rolldown-vite 7.3.1 type-only import resolution.
-    // Not applied in Pyodide builds: these aliases break the module graph and cause TLA issues.
-    alias: isPyodide ? {} : {
+    // Pyodide: explicit aliases replace tsconfigPaths (@/* and zod) since native plugins are disabled.
+    alias: isPyodide ? {
+      '@': resolve(__dirname, 'src'),
+      'zod': resolve(__dirname, 'node_modules/zod'),
+    } : {
       // vega-lite exports types via ./types_unstable/* -> ./build/*
       // but only .d.ts files exist, not .js files
       'vega-lite/types_unstable/channeldef.js': 'vega-lite/build/channeldef.d.ts',
