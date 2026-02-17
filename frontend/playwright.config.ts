@@ -45,6 +45,8 @@ const appToOptions = {
   "slides.py": { command: "edit" },
   // Custom server for shutdown
   "shutdown.py": { command: "edit", port: port() },
+  // Game skill-tree tests
+  "game_test.py": { command: "edit" },
   // Run
   "components.py": { port: port(), command: "run" },
   "layout_grid.py//run": { port: port(), command: "run" },

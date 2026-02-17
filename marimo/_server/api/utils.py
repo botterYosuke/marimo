@@ -68,7 +68,7 @@ def parse_title(filepath: Optional[str]) -> str:
     Create a title from a filename.
     """
     if filepath is None:
-        return "marimo"
+        return "backcast"
 
     # filename is used as title, except basename and suffix are
     # stripped and underscores are replaced with spaces

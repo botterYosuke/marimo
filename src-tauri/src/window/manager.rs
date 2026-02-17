@@ -88,9 +88,9 @@ pub fn open_window(
                 .file_name()
                 .map(|n| n.to_string_lossy().to_string())
                 .unwrap_or_else(|| "Notebook".to_string());
-            format!("marimo - {}", name)
+            format!("backcast - {}", name)
         }
-        None => "marimo".to_string(),
+        None => "backcast".to_string(),
     };
 
     // DEBUG: Log server status before creating window

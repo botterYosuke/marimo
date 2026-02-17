@@ -15,6 +15,7 @@ Internal documentation for marimo developers.
 - [Testing](testing.md)
 - [Prompts](prompts.md)
 - [Traces](traces.md)
+- [Game e2e レビューシステム](game-e2e-review-system.md)
 
 ### Pyodide
 - [Pyodide](pyodide.md)

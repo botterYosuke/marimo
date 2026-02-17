@@ -46,22 +46,21 @@ const htmlDevPlugin = (): Plugin => {
       }
 
       if (isPyodide) {
-        const marimoVersion = execSync("uv run marimo --version")
-          .toString()
-          .trim();
+        // If VITE_MARIMO_VERSION is defined, use it directly to avoid requiring
+        // uv/marimo to be installed in the CI environment.
+        const marimoVersion = process.env.VITE_MARIMO_VERSION
+          ?? execSync("uv run marimo --version").toString().trim();
         const modeFromUrl = ctx.originalUrl?.includes("mode=read")
           ? "read"
           : "edit";
         html = html.replace("{{ base_url }}", "");
-        html = html.replace("{{ title }}", "marimo");
+        html = html.replace("{{ title }}", "backcast");
         html = html.replace(
           "'{{ mount_config }}'",
           JSON.stringify({
             filename: "notebook.py",
             mode: modeFromUrl,
-            // If VITE_MARIMO_VERSION is defined, pull the local version of marimo
-            // Otherwise, pull the latest version of marimo from PyPI
-            version: process.env.VITE_MARIMO_VERSION ?? marimoVersion,
+            version: marimoVersion,
             config: {
               // Add/remove user config here while developing
               // runtime: {
