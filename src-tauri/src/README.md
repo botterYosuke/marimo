@@ -131,7 +131,7 @@ Python環境管理
 - **[bootstrap.rs](environment/bootstrap.rs)** - 環境セットアップ
   - Python 3.13の検出/インストール（`uv python`）
   - venv作成（`uv venv`）
-  - marimoのインストール
+  - marimo[game]のインストール
   - Windows用の`CREATE_NO_WINDOW`フラグ
 
 - **[version.rs](environment/version.rs)** - バージョン定数
