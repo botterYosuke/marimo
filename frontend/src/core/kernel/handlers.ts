@@ -101,9 +101,9 @@ export function buildLayoutState(
           positions.set(cells[idx].id, cell.position3D);
         }
       });
-      if (positions.size > 0) {
-        store.set(cell3DPositionsAtom, positions);
-      }
+      // ファイルにグリッドレイアウトがある場合は常にatomを設定する（positions.size=0でも）。
+      // これにより古いlocalStorageの値で上書きされることを防ぐ。
+      store.set(cell3DPositionsAtom, positions);
     }
   }
 

@@ -14,7 +14,7 @@
     "build:lsp": "pnpm turbo build --filter @marimo-team/lsp && rimraf marimo/_lsp && node -e \"require('fs').mkdirSync('marimo/_lsp', {recursive: true})\" && node scripts/copy-lsp.js",
     "dev": "node scripts/dev-with-cleanup.mjs",
     "dev:frontend": "pnpm run --filter @marimo-team/frontend dev",
-    "dev:backend": ".venv\\Scripts\\python.exe -m marimo edit --no-token --headless %TEMP% --port 2718",
+    "dev:backend": ".venv\\Scripts\\python.exe -m marimo edit --no-token --headless %APPDATA%\\marimo\\notebooks --port 2718",
     "tauri:dev": "node scripts/tauri-dev-with-cleanup.mjs",
     "tauri:build": "pnpm run setup && node src-tauri/prepare-resources.js && cargo tauri build",
     "tauri:build:win": "pnpm run setup:win && node src-tauri/prepare-resources.js && cargo tauri build",

@@ -1,37 +1,34 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactFlow, {
+  applyNodeChanges,
   type Edge,
   MarkerType,
   type Node,
   type NodeChange,
-  type Viewport,
-  applyNodeChanges,
   useReactFlow,
+  type Viewport,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import type { SceneManager } from "@/core/three/scene-manager";
+import { INPUTS_HANDLE_ID, OUTPUTS_HANDLE_ID } from "@/components/graph-common";
+import { SortableCellsProvider } from "@/components/sort/SortableCellsProvider";
+import { useCellIds } from "@/core/cells/cells";
+import { cellFocusAtom, useCellFocusActions } from "@/core/cells/focus";
+import { type CellId, SETUP_CELL_ID } from "@/core/cells/ids";
 import type { AppConfig, UserConfig } from "@/core/config/config-schema";
 import type { AppMode } from "@/core/mode";
-import { useCellIds } from "@/core/cells/cells";
-import { SETUP_CELL_ID, type CellId } from "@/core/cells/ids";
-import { useTheme } from "@/theme/useTheme";
 import {
-  cell3DPositionsAtom,
   type Cell3DPosition,
+  cell3DPositionsAtom,
 } from "@/core/three/cell-3d-positions";
 import { cell3DViewAtom } from "@/core/three/cell-3d-view";
+import type { SceneManager } from "@/core/three/scene-manager";
 import { reactFlowViewportToCamera } from "@/core/three/viewport-sync";
-import { CellFlowNode, type CellFlowNodeData } from "./cell-flow-node";
-import { cellFocusAtom, useCellFocusActions } from "@/core/cells/focus";
 import { variablesAtom } from "@/core/variables/state";
-import {
-  INPUTS_HANDLE_ID,
-  OUTPUTS_HANDLE_ID,
-} from "@/components/graph-common";
-import { SortableCellsProvider } from "@/components/sort/SortableCellsProvider";
+import { useTheme } from "@/theme/useTheme";
+import { CellFlowNode, type CellFlowNodeData } from "./cell-flow-node";
 
 // React Flow カスタムノードタイプ
 const nodeTypes = {
@@ -46,7 +43,10 @@ const SPAWN_OFFSET = 30;
  * ビューポート中央を基準とし、既存セルとの衝突を回避する。
  */
 function calcSpawnPosition(
-  rfScreenToFlowPosition: (pos: { x: number; y: number }) => { x: number; y: number },
+  rfScreenToFlowPosition: (pos: { x: number; y: number }) => {
+    x: number;
+    y: number;
+  },
   screenW: number,
   screenH: number,
   existingPositions: Map<CellId, Cell3DPosition>,
@@ -111,7 +111,9 @@ const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
 
   const rfInstance = useReactFlow();
   const cell3DPositionsRef = useRef(cell3DPositions);
-  const viewportSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const viewportSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   // atom が更新されたら ref も更新
   useEffect(() => {
@@ -213,90 +215,87 @@ const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
 
   // allCellIds / cell3DPositions が変わったらノードを再生成
   useEffect(() => {
-    setNodes((prevNodes) => {
-      const prevNodeMap = new Map(prevNodes.map((n) => [n.id, n]));
-      const newNodes: Node<CellFlowNodeData>[] = [];
-      const positionsToSave = new Map<CellId, Cell3DPosition>();
+    const newNodes: Node<CellFlowNodeData>[] = [];
+    const positionsToSave = new Map<CellId, Cell3DPosition>();
 
-      for (const cellId of allCellIds) {
-        const column = cellIds.findWithId(cellId);
-        const isCollapsed = column ? column.isCollapsed(cellId) : false;
-        const collapseCount = column ? column.getCount(cellId) : 0;
+    for (const cellId of allCellIds) {
+      const column = cellIds.findWithId(cellId);
+      const isCollapsed = column ? column.isCollapsed(cellId) : false;
+      const collapseCount = column ? column.getCount(cellId) : 0;
 
-        // 保存済み位置 or スポーン
-        let savedPos = cell3DPositionsRef.current.get(cellId);
-        if (!savedPos) {
-          const container = sceneManager.getRenderer()?.domElement;
-          const screenW = container?.clientWidth ?? 800;
-          const screenH = container?.clientHeight ?? 600;
-          const spawn = calcSpawnPosition(
-            rfInstance.screenToFlowPosition,
-            screenW,
-            screenH,
-            cell3DPositionsRef.current,
-          );
-          savedPos = { x: spawn.x, y: 600, z: spawn.z };
-          positionsToSave.set(cellId, savedPos);
-          // ref にも即座に保存（次のスポーンが衝突しないように）
-          cell3DPositionsRef.current = new Map(cell3DPositionsRef.current).set(cellId, savedPos);
+      // 保存済み位置 or スポーン
+      let savedPos = cell3DPositionsRef.current.get(cellId);
+      if (!savedPos) {
+        const container = sceneManager.getRenderer()?.domElement;
+        const screenW = container?.clientWidth ?? 800;
+        const screenH = container?.clientHeight ?? 600;
+        const spawn = calcSpawnPosition(
+          rfInstance.screenToFlowPosition,
+          screenW,
+          screenH,
+          cell3DPositionsRef.current,
+        );
+        savedPos = { x: spawn.x, y: 600, z: spawn.z };
+        positionsToSave.set(cellId, savedPos);
+        // ref にも即座に保存（次のスポーンが衝突しないように）
+        cell3DPositionsRef.current = new Map(cell3DPositionsRef.current).set(
+          cellId,
+          savedPos,
+        );
+      }
+
+      const position = { x: savedPos.x, y: savedPos.z }; // World {x,z} → RF {x,y}
+
+      newNodes.push({
+        id: cellId,
+        type: "cellFlowNode",
+        position,
+        dragHandle: ".window-titlebar",
+        data: {
+          cellId,
+          mode,
+          userConfig,
+          appConfig,
+          theme,
+          showPlaceholder: hasOnlyOneCell,
+          canDelete: !hasOnlyOneCell,
+          isCollapsed,
+          collapseCount,
+          canMoveX: appConfig.width === "columns",
+        },
+      });
+    }
+
+    setNodes(newNodes);
+
+    // 新規スポーン位置を atom に永続化
+    if (positionsToSave.size > 0) {
+      setCell3DPositions((prev) => {
+        const next = new Map(prev);
+        for (const [id, pos] of positionsToSave) {
+          next.set(id, pos);
         }
+        return next;
+      });
+    }
 
-        // 既存ノードの位置を維持（ドラッグ中に外部からリセットされないように）
-        const prevNode = prevNodeMap.get(cellId);
-        const position = prevNode
-          ? prevNode.position
-          : { x: savedPos.x, y: savedPos.z }; // World {x,z} → RF {x,y}
-
-        newNodes.push({
-          id: cellId,
-          type: "cellFlowNode",
-          position,
-          dragHandle: ".window-titlebar",
-          data: {
-            cellId,
-            mode,
-            userConfig,
-            appConfig,
-            theme,
-            showPlaceholder: hasOnlyOneCell,
-            canDelete: !hasOnlyOneCell,
-            isCollapsed,
-            collapseCount,
-            canMoveX: appConfig.width === "columns",
-          },
-        });
-      }
-
-      // 新規スポーン位置を atom に永続化
-      if (positionsToSave.size > 0) {
-        setCell3DPositions((prev) => {
-          const next = new Map(prev);
-          for (const [id, pos] of positionsToSave) {
-            next.set(id, pos);
-          }
-          return next;
-        });
-      }
-
-      // 削除されたセルを atom からクリーンアップ
-      const currentIds = new Set(allCellIds);
-      const deletedIds = [...cell3DPositionsRef.current.keys()].filter(
-        (id) => !currentIds.has(id),
-      );
-      if (deletedIds.length > 0) {
-        setCell3DPositions((prev) => {
-          const next = new Map(prev);
-          for (const id of deletedIds) {
-            next.delete(id);
-          }
-          return next;
-        });
-      }
-
-      return newNodes;
-    });
+    // 削除されたセルを atom からクリーンアップ
+    const currentIds = new Set(allCellIds);
+    const deletedIds = [...cell3DPositionsRef.current.keys()].filter(
+      (id) => !currentIds.has(id),
+    );
+    if (deletedIds.length > 0) {
+      setCell3DPositions((prev) => {
+        const next = new Map(prev);
+        for (const id of deletedIds) {
+          next.delete(id);
+        }
+        return next;
+      });
+    }
   }, [
     allCellIds,
+    cell3DPositions,
     cellIds,
     mode,
     userConfig,
@@ -313,24 +312,32 @@ const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
     (changes: NodeChange[]) => {
       // remove は marimo 側の削除フローで処理するため除外
       const filtered = changes.filter((c) => c.type !== "remove");
-      setNodes((nds) => applyNodeChanges(filtered, nds));
+      setNodes((nds) => {
+        const updated = applyNodeChanges(filtered, nds);
 
-      for (const change of changes) {
-        // ドラッグ完了 → 位置を atom に永続化
-        if (change.type === "position" && change.position && !change.dragging) {
-          const pos = change.position;
-          setCell3DPositions((prev) => {
-            const next = new Map(prev);
-            next.set(change.id as CellId, { x: pos.x, y: 600, z: pos.y });
-            return next;
-          });
+        // ドラッグ完了 (dragging=false) 時: change.position は undefined になるため
+        // applyNodeChanges 後のノード状態から最終位置を取得して atom に保存する
+        for (const change of changes) {
+          if (change.type === "position" && !change.dragging) {
+            const node = updated.find((n) => n.id === change.id);
+            if (node?.position) {
+              const pos = node.position;
+              setCell3DPositions((prev) => {
+                const next = new Map(prev);
+                next.set(change.id as CellId, { x: pos.x, y: 600, z: pos.y });
+                return next;
+              });
+            }
+          }
+
+          // セル選択 → フォーカス連携
+          if (change.type === "select" && change.selected) {
+            focusCell({ cellId: change.id as CellId });
+          }
         }
 
-        // セル選択 → フォーカス連携
-        if (change.type === "select" && change.selected) {
-          focusCell({ cellId: change.id as CellId });
-        }
-      }
+        return updated;
+      });
     },
     [setCell3DPositions, focusCell],
   );
@@ -362,7 +369,11 @@ const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
         const cam = sceneManager.getCamera();
         if (cam) {
           setCell3DView({
-            position: { x: cam.position.x, y: cam.position.y, z: cam.position.z },
+            position: {
+              x: cam.position.x,
+              y: cam.position.y,
+              z: cam.position.z,
+            },
             target: { x: target.x, y: target.y, z: target.z },
           });
         }
@@ -408,7 +419,10 @@ const Cell3DRendererInner: React.FC<Cell3DRendererProps> = ({
 
   return (
     <SortableCellsProvider multiColumn={appConfig.width === "columns"}>
-      <div className="cell-3d-flow" style={{ position: "absolute", inset: 0, zIndex: 20 }}>
+      <div
+        className="cell-3d-flow"
+        style={{ position: "absolute", inset: 0, zIndex: 20 }}
+      >
         <ReactFlow
           nodes={nodes}
           edges={styledEdges}

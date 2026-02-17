@@ -49,10 +49,11 @@ import { is3DModeAtom, viewStateAtom } from "./mode";
 import { useRequestClient } from "./network/requests";
 import { useFilename } from "./saving/filename";
 import { lastSavedNotebookAtom } from "./saving/state";
-import { useJotaiEffect } from "./state/jotai";
+import { useJotaiEffect, store } from "./state/jotai";
 import { GridCSS2DService } from "./three/grid-css2d-service";
 import { SceneManager } from "./three/scene-manager";
 import { cell3DViewAtom } from "./three/cell-3d-view";
+import { cell3DPositionsAtom } from "./three/cell-3d-positions";
 import { cameraToReactFlowViewport } from "./three/viewport-sync";
 import { useMarimoKernelConnection } from "./websocket/useMarimoKernelConnection";
 import type { GridLayout } from "../components/editor/renderers/grid-layout/types";
@@ -317,7 +318,13 @@ export const EditApp: React.FC<AppProps> = ({
       const names = cells.map((cell) => cell.name);
       const codes = cells.map((cell) => cell.code);
       const configs = cells.map((cell) => cell.config);
-      setLastSavedNotebook({ names, codes, configs, layout });
+      setLastSavedNotebook({
+        names,
+        codes,
+        configs,
+        layout,
+        savedCell3DPositions: new Map(store.get(cell3DPositionsAtom)),
+      });
     },
     sessionId: getSessionId(),
   });
