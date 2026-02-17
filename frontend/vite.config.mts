@@ -339,10 +339,9 @@ export default defineConfig({
     ],
   },
   experimental: {
-    // Pyodide builds need enableNativePlugin: true for correct native module resolution.
-    // Non-Pyodide (Tauri/Electron) needs 'resolver' to allow vite-plugin-top-level-await
-    // to propagate TLA correctly (enableNativePlugin: true bypasses JS transform plugins).
-    enableNativePlugin: isPyodide ? true : 'resolver',
+    // Use 'resolver' for all builds: enableNativePlugin: true bypasses vite-plugin-top-level-await's
+    // JS transform, preventing TLA propagation to panels.js and causing "sa is not a function".
+    enableNativePlugin: 'resolver',
   },
   worker: {
     format: "es",
