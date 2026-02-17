@@ -36,6 +36,10 @@ import { useShouldShowInterrupt } from "../cell/useShouldShowInterrupt";
 import { HideInKioskMode } from "../kiosk-mode";
 import { LayoutSelect } from "../renderers/layout-select";
 import { CommandPaletteButton } from "./command-palette-button";
+import { BacktestHud } from "@/components/editor/controls/backtest-hud";
+import { SkillTreeButton } from "@/components/editor/controls/skill-tree-button";
+import { useBroadcastChannelRelay } from "@/hooks/useBroadcastChannelRelay";
+import { useProgressSync } from "@/hooks/useProgressSync";
 
 interface ControlsProps {
   presenting: boolean;
@@ -55,6 +59,11 @@ export const Controls = ({
   connectionState,
   running,
 }: ControlsProps): JSX.Element => {
+  // Relay postMessage from iframes to BroadcastChannel (for Pyodide mode)
+  useBroadcastChannelRelay();
+  // Sync progress from Python-side file to playerProgressAtom
+  useProgressSync();
+
   const undoAvailable = useAtomValue(canUndoDeletesAtom);
   const needsRun = useAtomValue(needsRunAtom);
   const { undoDeleteCell } = useCellActions();
@@ -84,6 +93,10 @@ export const Controls = ({
   return (
     <>
       {!presenting && <FindReplace />}
+
+      <div className={topLeftControls}>
+        <BacktestHud />
+      </div>
 
       {!closed && (
         <div className={topRightControls}>
@@ -123,6 +136,7 @@ export const Controls = ({
         </Tooltip>
 
         <CommandPaletteButton />
+        <SkillTreeButton />
         <KeyboardShortcuts />
 
         <div />
@@ -216,3 +230,6 @@ const topRightControls =
 
 const bottomRightControls =
   "absolute bottom-5 right-5 flex flex-col gap-2 items-center print:hidden pointer-events-auto z-30";
+
+const topLeftControls =
+  "absolute top-3 left-5 m-0 flex items-center gap-2 min-h-[28px] no-print pointer-events-auto z-30 print:hidden";

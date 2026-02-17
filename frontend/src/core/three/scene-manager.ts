@@ -3,6 +3,8 @@
 import * as THREE from "three";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import type { GridCSS2DService } from "./grid-css2d-service";
+import { CharacterComponent } from "./character-component";
+import { MoneyMissileEffect } from "./money-missile-effect";
 
 /**
  * SceneManager
@@ -26,6 +28,9 @@ export class SceneManager {
   private readonly MIN_FRAME_INTERVAL = 16; // 約60FPS
   private lastRenderTime = 0;
   private gridCSS2DService?: GridCSS2DService;
+  private characterComponent?: CharacterComponent;
+  private moneyMissileEffect?: MoneyMissileEffect;
+  private tradeEventChannel?: BroadcastChannel;
 
   /**
    * Three.jsシーンを初期化します
@@ -109,6 +114,19 @@ export class SceneManager {
 
     window.addEventListener("resize", this.resizeHandler);
 
+    // キャラクターコンポーネントの初期化
+    if (this.scene && this.camera) {
+      this.characterComponent = new CharacterComponent();
+      this.characterComponent.load(this.scene, this.camera, new THREE.Vector3(0, 0, 0));
+    }
+
+    // マネーミサイルエフェクトの初期化
+    if (this.scene && this.camera) {
+      this.moneyMissileEffect = new MoneyMissileEffect(this.scene);
+      this.moneyMissileEffect.setCamera(this.camera);
+      this.setupTradeEventListener();
+    }
+
     // アニメーションループの開始
     this.startAnimationLoop();
   }
@@ -129,6 +147,24 @@ export class SceneManager {
 
       if (!this.scene || !this.camera || !this.renderer) {
         return;
+      }
+
+      // キャラクターコンポーネントのアニメーション更新
+      if (this.characterComponent) {
+        this.characterComponent.update();
+        if (this.characterComponent.isAnimating) {
+          this.needsRender = true;
+        }
+      }
+
+      // マネーミサイルエフェクトの更新（ホーミング用にドローン位置を渡す）
+      if (this.moneyMissileEffect) {
+        const delta = elapsed / 1000; // ミリ秒から秒に変換
+        const dronePosition = this.characterComponent?.getPosition() ?? undefined;
+        const isAnimating = this.moneyMissileEffect.update(delta, dronePosition);
+        if (isAnimating) {
+          this.needsRender = true;
+        }
       }
 
       // WebGLレンダリング（3Dモデル、z-index: 10）
@@ -192,6 +228,7 @@ export class SceneManager {
     this.camera.position.copy(position);
     this.camera.lookAt(target.x, target.y, target.z);
     this.camera.updateProjectionMatrix();
+    this.characterComponent?.setCameraTarget(target);
     this.markNeedsRender(true);
   }
 
@@ -255,6 +292,24 @@ export class SceneManager {
       this.renderer = undefined;
     }
 
+    // キャラクターコンポーネントのクリーンアップ
+    if (this.characterComponent && this.scene) {
+      this.characterComponent.dispose(this.scene);
+      this.characterComponent = undefined;
+    }
+
+    // マネーミサイルエフェクトのクリーンアップ
+    if (this.moneyMissileEffect) {
+      this.moneyMissileEffect.dispose();
+      this.moneyMissileEffect = undefined;
+    }
+
+    // 取引イベントチャンネルのクリーンアップ
+    if (this.tradeEventChannel) {
+      this.tradeEventChannel.close();
+      this.tradeEventChannel = undefined;
+    }
+
     if (this.scene) {
       // シーン内のオブジェクトをクリーンアップ
       this.scene.traverse((object) => {
@@ -282,5 +337,33 @@ export class SceneManager {
     this.needsCSS2DRender = true;
     this.lastRenderTime = 0;
     this.gridCSS2DService = undefined;
+  }
+
+  private setupTradeEventListener(): void {
+    this.tradeEventChannel = new BroadcastChannel("trade_event_channel");
+
+    this.tradeEventChannel.onmessage = (event: MessageEvent) => {
+      try {
+        if (!event.data || typeof event.data !== "object") return;
+        if (event.data.type !== "trade_event") return;
+        if (!event.data.data) return;
+
+        const { event_type, size } = event.data.data;
+        const dronePosition = this.characterComponent?.getPosition();
+
+        if (!dronePosition || !this.moneyMissileEffect) return;
+
+        if (event_type === "BUY") {
+          this.moneyMissileEffect.triggerBuy(dronePosition, size);
+        } else if (event_type === "SELL") {
+          this.moneyMissileEffect.triggerSell(dronePosition, size);
+        }
+
+        // エフェクトが発生したのでレンダリングが必要
+        this.needsRender = true;
+      } catch {
+        // Silently ignore errors
+      }
+    };
   }
 }

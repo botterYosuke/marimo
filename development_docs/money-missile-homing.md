@@ -77,14 +77,51 @@ update(delta: number, dronePosition?: THREE.Vector3): boolean {
 
 **ファイル:** `frontend/src/core/three/scene-manager.ts`
 
+`moneyMissileEffect`・`tradeEventChannel` フィールドを追加し、以下を統合：
+
+**initialize() 内（リサイズハンドラー後、アニメーションループ開始前）:**
 ```typescript
-// アニメーションループでドローン位置を渡す
-if (this.moneyMissileEffect) {
-  const delta = elapsed / 1000;
-  const dronePosition = this.characterComponent?.getPosition() ?? undefined;
-  const isAnimating = this.moneyMissileEffect.update(delta, dronePosition);
+if (this.scene && this.camera) {
+  this.moneyMissileEffect = new MoneyMissileEffect(this.scene);
+  this.moneyMissileEffect.setCamera(this.camera);
+  this.setupTradeEventListener();
 }
 ```
+
+**startAnimationLoop() 内（early return 後、WebGLレンダリング前）:**
+```typescript
+if (this.moneyMissileEffect) {
+  const delta = elapsed / 1000; // elapsed / 1000 を使う（THREE.Clock 不要）
+  const dronePosition = this.characterComponent?.getPosition() ?? undefined;
+  const isAnimating = this.moneyMissileEffect.update(delta, dronePosition);
+  if (isAnimating) {
+    this.needsRender = true;
+  }
+}
+```
+
+**dispose() 内（renderer 解放後、scene 解放前）:**
+```typescript
+if (this.moneyMissileEffect) {
+  this.moneyMissileEffect.dispose();
+  this.moneyMissileEffect = undefined;
+}
+if (this.tradeEventChannel) {
+  this.tradeEventChannel.close();
+  this.tradeEventChannel = undefined;
+}
+```
+
+**setupTradeEventListener()（プライベートメソッド）:**
+```typescript
+private setupTradeEventListener(): void {
+  this.tradeEventChannel = new BroadcastChannel("trade_event_channel");
+  this.tradeEventChannel.onmessage = (event: MessageEvent) => { ... };
+}
+```
+
+> **BroadcastChannel 名:** `"trade_event_channel"`（旧 `"backtest_channel"` ではない）
+> **イベントフィールド:** `event.data.data.event_type`（`"BUY"` or `"SELL"`）、`event.data.data.size`（`trade_type`/`amount` ではない）
 
 ---
 
@@ -105,3 +142,14 @@ if (this.moneyMissileEffect) {
 1. **dronePosition が null の場合**: BUYパーティクルは最後の既知位置を維持
 2. **パフォーマンス**: `getHubPosition()` は1フレームに1回のみ呼び出し
 3. **ゼロ除算防止**: `initialDistance === 0` の場合は `approachRatio = 0`
+4. **THREE.Clock 不使用**: `delta` は `elapsed / 1000` で計算（`elapsed = currentTime - this.lastRenderTime`）。`THREE.Clock` をフィールドに追加しないこと
+5. **SceneManager の dispose 順序**: `characterComponent.dispose(scene)` が scene 引数を必要とするため、character/missile/channel の解放は `if (this.scene)` ブロックより**前**に行う
+
+---
+
+## 変更履歴
+
+| 日付 | 変更内容 |
+|------|----------|
+| 2026-02-03 | ホーミング機能実装完了 |
+| 2026-02-17 | `scene-manager.ts` 統合完了（`characterComponent` と同ファイルに統合）|

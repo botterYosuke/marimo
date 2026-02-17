@@ -86,7 +86,17 @@
 
 ### Step 6: `Controls.tsx` 修正
 
-`useProgressSync()` を追加（既存の `useBroadcastChannelRelay()` と並べて配置）。
+コンポーネント先頭（`const undoAvailable` より前）に2つのフックを配置：
+
+```typescript
+// Relay postMessage from iframes to BroadcastChannel (for Pyodide mode)
+useBroadcastChannelRelay();
+// Sync progress from Python-side file to playerProgressAtom
+useProgressSync();
+```
+
+> **配置順の注意:** React フックのルール上、`useAtomValue` 等の他フックより前に呼ぶ必要はないが、
+> 両フックは副作用のみ（戻り値なし）のため、コンポーネント先頭にまとめて置くと可読性が高い。
 
 ### Step 7: テストファイル修正
 
