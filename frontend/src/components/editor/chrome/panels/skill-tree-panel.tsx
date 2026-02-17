@@ -38,7 +38,7 @@ const SkillTreePanel: React.FC = memo(() => {
   }, []);
 
   return (
-    <div className="w-full h-full flex-1 mx-auto flex flex-col">
+    <div data-testid="skill-tree-panel" className="w-full h-full flex-1 mx-auto flex flex-col">
       {/* ヘッダー: 進捗サマリー */}
       <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
         <div className="flex items-center gap-2">

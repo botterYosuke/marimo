@@ -46,14 +46,14 @@ test.describe("サンドボックストラック", () => {
 
   test("初期状態: SANDBOX_001 は unlocked", async ({ page }) => {
     // SANDBOX_001 は前提条件なし → 最初から unlocked
-    const status = await getSkillStatus(page, "マーケットへようこそ");
+    const status = await getSkillStatus(page, "SANDBOX_001");
     expect(status).toBe("unlocked");
   });
 
   test("初期状態: SANDBOX_002 は locked（SANDBOX_001 未完了）", async ({
     page,
   }) => {
-    const status = await getSkillStatus(page, "初めての購入");
+    const status = await getSkillStatus(page, "SANDBOX_002");
     expect(status).toBe("locked");
   });
 
@@ -71,8 +71,8 @@ test.describe("サンドボックストラック", () => {
   }) => {
     await emitSkillEvent(context, page, "SANDBOX_001");
 
-    await waitForSkillStatus(page, "マーケットへようこそ", "completed");
-    await waitForSkillStatus(page, "初めての購入", "unlocked");
+    await waitForSkillStatus(page, "SANDBOX_001", "completed");
+    await waitForSkillStatus(page, "SANDBOX_002", "unlocked");
   });
 
   test("SANDBOX_002 完了後、進捗バッジが 2 に増える", async ({ page }) => {
@@ -84,11 +84,11 @@ test.describe("サンドボックストラック", () => {
     }).toPass({ timeout: 5_000 });
   });
 
-  test("SANDBOX_002 完了後、初めての購入ノードが completed になる", async ({
+  test("SANDBOX_002 完了後、SANDBOX_002 ノードが completed になる", async ({
     page,
   }) => {
     await emitSkillSequence(context, page, ["SANDBOX_001", "SANDBOX_002"]);
-    await waitForSkillStatus(page, "初めての購入", "completed");
+    await waitForSkillStatus(page, "SANDBOX_002", "completed");
   });
 
   test("前提条件なしで SANDBOX_002 を単独発火しても completed にならない", async ({
@@ -99,7 +99,7 @@ test.describe("サンドボックストラック", () => {
 
     // completeSkillAtom が prerequisites チェックで弾く
     await page.waitForTimeout(500);
-    const status = await getSkillStatus(page, "初めての購入");
+    const status = await getSkillStatus(page, "SANDBOX_002");
     expect(status).toBe("locked");
   });
 
@@ -122,10 +122,10 @@ test.describe("サンドボックストラック", () => {
     await emitSkillSequence(context, page, sandboxSkills);
 
     // SANDBOX_006 完了 → サンドボックス卒業
-    await waitForSkillStatus(page, "サンドボックス卒業", "completed", 8_000);
+    await waitForSkillStatus(page, "SANDBOX_006", "completed", 8_000);
 
     // BRIDGE_001 が unlocked になっているはず
-    await waitForSkillStatus(page, "データを明かす", "unlocked", 5_000);
+    await waitForSkillStatus(page, "BRIDGE_001", "unlocked", 5_000);
   });
 
   test("SANDBOX_006 完了後に現金残高が増えている", async ({ page }) => {
@@ -157,7 +157,7 @@ test.describe("サンドボックストラック", () => {
     page,
   }) => {
     await emitSkillEvent(context, page, "SANDBOX_001");
-    await waitForSkillStatus(page, "マーケットへようこそ", "completed");
+    await waitForSkillStatus(page, "SANDBOX_001", "completed");
     const countBefore = await getCompletedCount(page);
 
     // 同じイベントを再送

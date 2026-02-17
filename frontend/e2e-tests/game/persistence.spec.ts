@@ -21,6 +21,7 @@ import {
   openSkillTreePanel,
   emitSkillEvent,
   emitSkillSequence,
+  getSkillNodeLocator,
   waitForSkillStatus,
   getCompletedCount,
   resetGameProgress,
@@ -55,17 +56,10 @@ test.describe("進捗の初期化・リセット", () => {
   });
 
   test("ページ初回ロード時、SANDBOX_001 は unlocked", async ({ page }) => {
-    await expect(
-      page.locator(".react-flow__node").filter({ hasText: "マーケットへようこそ" }),
-    ).toBeVisible();
-    // SANDBOX_001 は prerequisites なし → unlocked（opacity-50 なし）
-    const node = page
-      .locator(".react-flow__node")
-      .filter({ hasText: "マーケットへようこそ" });
-    const isLocked = await node.evaluate((el) =>
-      el.className.includes("opacity-50"),
-    );
-    expect(isLocked).toBe(false);
+    const node = getSkillNodeLocator(page, "SANDBOX_001");
+    await expect(node).toBeVisible();
+    // SANDBOX_001 は prerequisites なし → unlocked
+    await expect(node).toHaveAttribute("data-skill-status", "unlocked");
   });
 
   // -------------------------------------------------------------------------
@@ -122,13 +116,14 @@ test.describe("進捗の初期化・リセット", () => {
   test("前提条件チェーンが正しく解除される", async ({ page }) => {
     // SANDBOX_001 → 002 → 003 の前提条件チェーン
     await emitSkillEvent(context, page, "SANDBOX_001");
-    await waitForSkillStatus(page, "マーケットへようこそ", "completed");
+    await waitForSkillStatus(page, "SANDBOX_001", "completed");
 
     await emitSkillEvent(context, page, "SANDBOX_002");
-    await waitForSkillStatus(page, "初めての購入", "completed");
+    await waitForSkillStatus(page, "SANDBOX_002", "completed");
 
     await emitSkillEvent(context, page, "SANDBOX_003");
-    // SANDBOX_003 のタイトルで確認（skill-data.ts を参照）
+    await waitForSkillStatus(page, "SANDBOX_003", "completed");
+
     const count = await getCompletedCount(page);
     expect(count).toBeGreaterThanOrEqual(3);
   });

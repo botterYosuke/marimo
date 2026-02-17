@@ -65,11 +65,15 @@ export const BacktestHud: React.FC<BacktestHudProps> = ({ className }) => {
       >
         <Badge variant="secondary" className="gap-1">
           <ActivityIcon size={12} />
-          待機中
+          Ready
         </Badge>
 
         <HudItem icon={<ClockIcon size={12} />} label="Time" value="-" />
-        <HudItem icon={<BarChart3Icon size={12} />} label="Progress" value="-" />
+        <HudItem
+          icon={<BarChart3Icon size={12} />}
+          label="Progress"
+          value="-"
+        />
         <HudItem icon={<TrendingUpIcon size={12} />} label="Equity" value="-" />
         <HudItem icon={<WalletIcon size={12} />} label="Cash" value="-" />
         <HudItem icon={<ActivityIcon size={12} />} label="Position" value="-" />

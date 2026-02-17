@@ -92,6 +92,8 @@ export const SkillNode = memo((props: SkillNodeProps) => {
 
       {/* Skill card */}
       <div
+        data-skill-id={skill.id}
+        data-skill-status={skill.status}
         className={cn(
           "flex flex-col border rounded-lg overflow-hidden transition-all",
           config.className,

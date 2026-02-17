@@ -64,53 +64,49 @@ test.describe("スキルツリー UI", () => {
   // スキルノードのビジュアル状態
   // -------------------------------------------------------------------------
 
-  test("locked スキルノードは opacity-50 クラスを持つ", async ({ page }) => {
+  test("locked スキルノードは data-skill-status='locked' を持つ", async ({
+    page,
+  }) => {
     // SANDBOX_002 は最初 locked
-    const node = getSkillNodeLocator(page, "初めての購入");
+    const node = getSkillNodeLocator(page, "SANDBOX_002");
     await expect(node).toBeVisible();
-
-    const hasOpacity = await node.evaluate((el) =>
-      el.querySelector("[class*='opacity-50']") !== null ||
-      el.className.includes("opacity-50"),
-    );
-    expect(hasOpacity).toBe(true);
+    await expect(node).toHaveAttribute("data-skill-status", "locked");
   });
 
-  test("completed スキルノードは緑のボーダーを持つ", async ({ page }) => {
+  test("completed スキルノードは data-skill-status='completed' を持つ", async ({
+    page,
+  }) => {
     await emitSkillEvent(context, page, "SANDBOX_001");
     await page.waitForTimeout(500);
 
-    const node = getSkillNodeLocator(page, "マーケットへようこそ");
+    const node = getSkillNodeLocator(page, "SANDBOX_001");
     await expect(node).toBeVisible();
-
-    const hasBorderGreen = await node.evaluate((el) => {
-      // border-green-500/50 クラスまたはインラインスタイルで緑ボーダー
-      return (
-        el.className.includes("border-green-500") ||
-        el.querySelector("[class*='text-green-500']") !== null
-      );
-    });
-    expect(hasBorderGreen).toBe(true);
+    await expect(node).toHaveAttribute("data-skill-status", "completed");
   });
 
   test("スキルノードに難易度スターが表示される", async ({ page }) => {
-    // どのノードにも StarIcon が 5 個ある
-    const firstNode = page.locator(".react-flow__node").first();
-    await expect(firstNode).toBeVisible();
+    // SANDBOX_001 のノードを取得（data-skill-id 経由）
+    const node = getSkillNodeLocator(page, "SANDBOX_001");
+    await expect(node).toBeVisible();
 
-    const starCount = await firstNode.locator("svg").count();
-    // StarIcon 5 個 + Handle 用 SVG など → 少なくとも 5 個以上
+    const starCount = await node.locator("svg").count();
+    // StarIcon 5 個 + その他 SVG → 少なくとも 5 個以上
     expect(starCount).toBeGreaterThanOrEqual(5);
   });
 
   test("スキルノードに報酬バッジが表示される", async ({ page }) => {
     // GiftIcon のある報酬セクションが存在する
-    const giftIcons = page.locator(".react-flow__node svg").filter({
-      // lucide-react は data-lucide 属性を持つ
-    });
-    // 少なくとも 1 つのノードに報酬情報が表示されている
-    const rewardBadge = page.locator(".react-flow__node [class*='Badge']").first();
-    await expect(rewardBadge).toBeVisible({ timeout: 5_000 });
+    const rewardBadge = page
+      .locator('[data-skill-id="SANDBOX_001"] [class*="Badge"], [data-skill-id="SANDBOX_001"] .badge')
+      .first();
+    // フォールバック: react-flow__node 内の Badge でも可
+    const fallback = page
+      .locator(".react-flow__node [class*='Badge']")
+      .first();
+    const isVisible =
+      (await rewardBadge.isVisible().catch(() => false)) ||
+      (await fallback.isVisible().catch(() => false));
+    expect(isVisible).toBe(true);
   });
 
   // -------------------------------------------------------------------------
@@ -129,12 +125,12 @@ test.describe("スキルツリー UI", () => {
       await sandboxTab.click();
 
       // サンドボックスノードが表示されていること
-      const sandboxNode = getSkillNodeLocator(page, "マーケットへようこそ");
+      const sandboxNode = getSkillNodeLocator(page, "SANDBOX_001");
       await expect(sandboxNode).toBeVisible();
 
-      // bridge / full ノードが非表示になっていること（例: TRADE_001）
-      const tradeNode = getSkillNodeLocator(page, "エントリー");
-      await expect(tradeNode).toBeHidden({ timeout: 3_000 }).catch(() => {
+      // bridge ノードが非表示になっていること
+      const bridgeNode = getSkillNodeLocator(page, "BRIDGE_001");
+      await expect(bridgeNode).toBeHidden({ timeout: 3_000 }).catch(() => {
         // フィルターが実装されていない場合はパス
       });
     } else {
@@ -151,7 +147,7 @@ test.describe("スキルツリー UI", () => {
 
     if (await allTab.isVisible().catch(() => false)) {
       await allTab.click();
-      const nodes = page.locator(".react-flow__node");
+      const nodes = page.locator("[data-skill-id]");
       const count = await nodes.count();
       // 全 59 スキル分のノードがある
       expect(count).toBeGreaterThanOrEqual(59);

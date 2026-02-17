@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: #f5f5f5;
@@ -19,23 +21,27 @@
             color: #333;
             padding: 20px;
         }
+
         .container {
             text-align: center;
             width: 100%;
             max-width: 400px;
         }
+
         .logo {
             font-size: 32px;
             font-weight: 700;
             margin-bottom: 20px;
             color: #667eea;
         }
+
         .status {
             font-size: 16px;
             margin-bottom: 15px;
             min-height: 24px;
             color: #666;
         }
+
         .progress-bar {
             width: 100%;
             height: 6px;
@@ -44,6 +50,7 @@
             overflow: hidden;
             margin-bottom: 8px;
         }
+
         .progress-fill {
             height: 100%;
             background: #667eea;
@@ -51,10 +58,12 @@
             transition: width 0.3s ease;
             width: 0%;
         }
+
         .percent {
             font-size: 14px;
             color: #999;
         }
+
         .error {
             display: none;
             margin-top: 15px;
@@ -69,9 +78,10 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <div class="logo">marimo</div>
+        <div class="logo">backcast</div>
         <div class="status" id="status">初期化中...</div>
         <div class="progress-bar">
             <div class="progress-fill" id="progress"></div>
@@ -80,4 +90,5 @@
         <div class="error" id="error"></div>
     </div>
 </body>
+
 </html>

@@ -117,37 +117,38 @@ export async function openSkillTreePanel(page: Page): Promise<void> {
 
 /**
  * スキルノードの Locator を返す。
- * ReactFlow の `.react-flow__node` 内でスキルタイトルで絞り込む。
+ * data-skill-id 属性でスキル ID を直接指定する。
+ * タイトル変更の影響を受けない安定したセレクター。
  */
-export function getSkillNodeLocator(page: Page, skillTitle: string) {
-  return page.locator(".react-flow__node").filter({ hasText: skillTitle });
+export function getSkillNodeLocator(page: Page, skillId: string) {
+  return page.locator(`[data-skill-id="${skillId}"]`);
 }
 
 /**
  * スキルノードの現在のステータスを返す。
- * - completed: CheckCircle2 アイコン（緑）
- * - locked:    Lock アイコン
- * - unlocked:  Circle アイコン
+ * data-skill-status 属性から直接読み取る。
  */
 export async function getSkillStatus(
   page: Page,
-  skillTitle: string,
+  skillId: string,
 ): Promise<"completed" | "unlocked" | "locked"> {
-  const node = getSkillNodeLocator(page, skillTitle);
+  const node = getSkillNodeLocator(page, skillId);
   await expect(node).toBeVisible({ timeout: 5_000 });
 
-  // 完了: 緑の CheckCircle2 → opacity-50 なし、border-green-500
-  const isCompleted = await node.evaluate((el) => {
-    return el.className.includes("border-green-500") ||
-      el.innerHTML.includes("text-green-500");
-  });
+  const status = await node.getAttribute("data-skill-status");
+  if (status === "completed" || status === "unlocked" || status === "locked") {
+    return status;
+  }
+
+  // フォールバック: CSS クラスで判定（data-skill-status 未実装環境向け）
+  const isCompleted = await node.evaluate((el) =>
+    el.className.includes("border-green-500") ||
+    el.innerHTML.includes("text-green-500"),
+  );
   if (isCompleted) return "completed";
 
-  // ロック: opacity-50 クラスが付いている
   const isLocked = await node.evaluate((el) =>
-    el.className.includes("opacity-50") ||
-    el.innerHTML.includes('data-lucide="lock"') ||
-    el.innerHTML.includes("LockIcon"),
+    el.className.includes("opacity-50"),
   );
   if (isLocked) return "locked";
 
@@ -156,15 +157,16 @@ export async function getSkillStatus(
 
 /**
  * スキルが指定ステータスになるまでポーリングして待機する。
+ * @param skillId - スキル ID（例: "SANDBOX_001"）
  */
 export async function waitForSkillStatus(
   page: Page,
-  skillTitle: string,
+  skillId: string,
   expectedStatus: "completed" | "unlocked" | "locked",
   timeout = 5_000,
 ): Promise<void> {
   await expect(async () => {
-    const status = await getSkillStatus(page, skillTitle);
+    const status = await getSkillStatus(page, skillId);
     expect(status).toBe(expectedStatus);
   }).toPass({ timeout });
 }

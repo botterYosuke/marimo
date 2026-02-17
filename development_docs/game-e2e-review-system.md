@@ -1,8 +1,8 @@
 # ゲーム e2e レビューシステム
 
-**ステータス**: 初期実装完了・未実行（セレクター要調整）
+**ステータス**: セレクター安定化完了・型チェック通過（実機実行待ち）
 **場所**: `frontend/e2e-tests/game/`
-**担当**: sasa/ico ブランチで作業
+**担当**: game ブランチで継続作業中
 
 ---
 
@@ -19,14 +19,19 @@
 - [x] `development_docs/index.md` にこのドキュメントをリンク追加
 - [x] BroadcastChannel の「同一コンテキストには届かない」問題を調査・解決
 - [x] `playerProgressAtom` が plain atom（非永続化）であることを確認
+- [x] ✅ `skill-tree-panel.tsx` に `data-testid="skill-tree-panel"` 追加（`openSkillTreePanel()` の安定化）
+- [x] ✅ `skill-node.tsx` のスキルカード div に `data-skill-id` と `data-skill-status` 属性追加
+- [x] ✅ `helpers.ts` を ID ベースセレクターに全面更新（タイトル文字列依存を排除）
+- [x] ✅ `sandbox.spec.ts` / `ui.spec.ts` / `persistence.spec.ts` を skill ID 使用に書き換え
+- [x] ✅ `bridge.spec.ts` 作成（9ケース: BRIDGE_001〜003 の解放条件・完了フロー・ガード）
+- [x] ✅ e2e-tests/tsconfig.json での型チェックがエラー 0 であることを確認
 
 ### ⬜ 未完了・今後の課題
 
-- [ ] ブリッジトラックのテスト（`bridge.spec.ts`）
+- [ ] **最優先**: marimo サーバーを起動してテストを実際に実行し、セレクターを実機確認
+  - `uv run marimo edit e2e-tests/py/game_test.py -p 2718` でサーバー起動
+  - `pnpm playwright test e2e-tests/game/sandbox.spec.ts --headed` でヘッドありテスト
 - [ ] フルトラックのテスト（`trade.spec.ts`, `risk.spec.ts` 等）
-- [ ] スキルツリーパネルに `data-testid="skill-tree-panel"` を追加（セレクター安定化）
-- [ ] スキルノードに `data-skill-id` 属性を追加（ID での直接選択を可能に）
-- [ ] テストの実際の実行確認とセレクター修正
 - [ ] Electron（Tauri）モードでのテスト対応
 - [ ] Python セル実行経由の統合テスト（Backcast エンジン要）
 - [ ] CI への組み込み
@@ -61,7 +66,8 @@ frontend/e2e-tests/game/
 ├── helpers.ts           # 共通ヘルパー（イベント送信・状態取得・パネル操作）
 ├── sandbox.spec.ts      # サンドボックストラック SANDBOX_001〜006（9ケース）
 ├── ui.spec.ts           # パネル UI・視覚状態・報酬表示（11ケース）
-└── persistence.spec.ts  # 進捗の初期化・BroadcastChannel 処理（8ケース）
+├── persistence.spec.ts  # 進捗の初期化・BroadcastChannel 処理（8ケース）
+└── bridge.spec.ts       # ✅ ブリッジトラック BRIDGE_001〜003（9ケース）
 
 frontend/e2e-tests/py/
 └── game_test.py         # テスト用マリモノートブック（最小構成）
@@ -220,7 +226,27 @@ const status = await getSkillStatus(page, "マーケットへようこそ");
 await waitForSkillStatus(page, "マーケットへようこそ", "completed");
 ```
 
-### 6. `openSkillTreePanel()` のセレクターは未確定
+### 6. ハンドオフドキュメントのスキルタイトルが実際と異なっていた
+
+ハンドオフドキュメントに記載されていたスキルタイトル（日本語）は `skill-data.ts` の実際のタイトルと不一致だった。
+
+| ドキュメント記載 | 実際の skill-data.ts | 正解 |
+|---|---|---|
+| BRIDGE_001: "データを明かす" | "データの正体" | `skill-data.ts` が正 |
+| BRIDGE_002: "全モード準備" | "自分でデータを取得" | `skill-data.ts` が正 |
+
+**対策**: `data-skill-id` 属性を導入したことで、タイトル変更がテストを壊さなくなった。
+ハンドオフドキュメントのタイトルが古くても今後は問題なし。
+
+### 7. `data-skill-id` / `data-skill-status` 属性の追加で `getSkillStatus()` が高速化
+
+変更前: CSS クラス（`opacity-50`, `border-green-500`）をパースして判定
+変更後: `data-skill-status` 属性を `getAttribute()` で直接読み取り
+
+`data-skill-status` は `SkillNode` が `statusConfig` に基づいてレンダリング時に付与する。
+React 側の状態と DOM 属性が確実に同期するため、テストの判定精度が上がった。
+
+### 8. `openSkillTreePanel()` のセレクターは未確定
 
 スキルツリーパネルへのアクセス方法はエディタの Chrome レイアウトに依存する。
 現状は複数のセレクターを試すフォールバック実装になっているが、**実際に動くかはアプリを起動して確認が必要**。
@@ -238,9 +264,10 @@ await waitForSkillStatus(page, "マーケットへようこそ", "completed");
 
 | 目的 | セレクター | 備考 |
 |---|---|---|
-| スキルツリーパネル全体 | `[data-testid="skill-tree-panel"]` | 要追加（現状未実装） |
-| スキルノード（タイトル指定） | `.react-flow__node:has-text("タイトル")` | タイトル変更で壊れる |
-| スキルノード（ID 指定） | `[data-skill-id="SANDBOX_001"]` | 要追加（現状未実装） |
+| スキルツリーパネル全体 | `[data-testid="skill-tree-panel"]` | ✅ skill-tree-panel.tsx に追加済み |
+| スキルノード（ID 指定） | `[data-skill-id="SANDBOX_001"]` | ✅ skill-node.tsx に追加済み（推奨） |
+| スキルのステータス確認 | `node.getAttribute("data-skill-status")` | ✅ "completed"\|"unlocked"\|"locked" を返す |
+| スキルノード（タイトル指定） | `.react-flow__node:has-text("タイトル")` | ⚠️ 非推奨（タイトル変更で壊れる） |
 | 進捗バッジ | `text=/\d+\/\d+ スキル/` | パネル内 Badge コンポーネント |
 | 現金表示 | `text=/¥[0-9,]+/` | フッターの CoinsIcon 隣 |
 | 報酬トースト | `[role='status']` | 一時表示のため要タイミング調整 |
