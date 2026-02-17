@@ -5,7 +5,6 @@ import { codecovVitePlugin } from "@codecov/vite-plugin";
 import react from "@vitejs/plugin-react";
 import { JSDOM } from "jsdom";
 import { defineConfig, type Plugin } from "vite";
-import topLevelAwait from "vite-plugin-top-level-await";
 import wasm from "vite-plugin-wasm";
 
 const SERVER_PORT = process.env.SERVER_PORT || 2718;
@@ -293,6 +292,7 @@ export default defineConfig({
     "process.env.DEBUG": JSON.stringify(process.env.DEBUG ?? ""),
   },
   build: {
+    target: "esnext",
     minify: isDev ? false : "oxc", // default is "oxc"
     sourcemap: isDev,
   },
@@ -357,6 +357,5 @@ export default defineConfig({
       uploadToken: process.env.CODECOV_TOKEN,
     }),
     wasm(),
-    topLevelAwait(),
   ],
 });

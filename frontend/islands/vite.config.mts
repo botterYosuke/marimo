@@ -4,7 +4,6 @@ import fs from "node:fs";
 import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
-import topLevelAwait from "vite-plugin-top-level-await";
 import wasm from "vite-plugin-wasm";
 import packageJson from "../package.json";
 
@@ -70,9 +69,9 @@ export default defineConfig({
       },
     }),
     wasm(),
-    topLevelAwait(),
   ],
   build: {
+    target: "esnext",
     emptyOutDir: true,
     lib: {
       entry: path.resolve(__dirname, "../src/core/islands/main.ts"),
