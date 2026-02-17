@@ -339,9 +339,10 @@ export default defineConfig({
     ],
   },
   experimental: {
-    // 'resolver' is required for vite-plugin-top-level-await to propagate TLA correctly.
-    // enableNativePlugin: true breaks JS transform plugins in Pyodide builds.
-    enableNativePlugin: 'resolver',
+    // Pyodide builds need enableNativePlugin: true for correct native module resolution.
+    // Non-Pyodide (Tauri/Electron) needs 'resolver' to allow vite-plugin-top-level-await
+    // to propagate TLA correctly (enableNativePlugin: true bypasses JS transform plugins).
+    enableNativePlugin: isPyodide ? true : 'resolver',
   },
   worker: {
     format: "es",
