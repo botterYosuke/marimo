@@ -1,11 +1,11 @@
 # Security Policy
 
-marimo is committed to providing a secure environment for notebook development and application deployment. For a comprehensive overview of marimo's security model and features, see our [Security documentation](https://docs.marimo.io/security/).
+marimo is committed to providing a secure environment for notebook development and application deployment. For a comprehensive overview of marimo's security model and features, see our [Security documentation](https://backcast-tan.vercel.app/security/).
 
 ## Reporting a Vulnerability
 
 To report a security vulnerability, [please draft an advisory through
-Github](https://github.com/marimo-team/marimo/security/advisories/new), or
+Github](https://github.com/botterYosuke/marimo/security/advisories/new), or
 email the marimo team; security [at] marimo [dot] io.
 
 ### What Warrants a Security Advisory
@@ -16,7 +16,7 @@ We issue CVEs and security advisories when:
 - End-users are directly impacted
 - The issue has security implications beyond normal bug fixes
 
-General safety improvements and hardening work are documented in our [release notes](https://github.com/marimo-team/marimo/releases) without formal advisories.
+General safety improvements and hardening work are documented in our [release notes](https://github.com/botterYosuke/marimo/releases) without formal advisories.
 
 Advisories will be escalated to a CVE and/or a general advisory issued if end-users
 are directly impacted. Attribution for any actionable report will be provided
@@ -24,7 +24,7 @@ in the section below (unless anonymity is preferred).
 
 ### molab Security
 
-For security issues affecting [molab](https://docs.marimo.io/guides/molab/) (our hosted platform):
+For security issues affecting [molab](https://backcast-tan.vercel.app/guides/molab/) (our hosted platform):
 
 - Reports can be submitted through the same channels above
 - We handle disclosure on a case-by-case basis
