@@ -19,7 +19,8 @@ console.log("Building environment:", process.env.NODE_ENV);
 
 const htmlDevPlugin = (): Plugin => {
   return {
-    apply: "serve",
+    // Pyodide production build also needs HTML template replacement
+    apply: isPyodide ? undefined : "serve",
     name: "html-transform",
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
