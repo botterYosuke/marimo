@@ -361,5 +361,21 @@ const categoryColors: Record<SkillCategory, string> = {
 | `skill-tree/skill-tree-graph.tsx` | 3 | layoutElements削除 |
 | `frontend/public/files/backcast.py` | 2,4 | _emit_skill(), サンドボックス初期化 |
 | `skill-tree-panel.tsx` | 4,5,7 | Indicator統合、報酬UI統合 |
+| `editor/controls/Controls.tsx` | 統合 | `<SkillTreeButton />` を `bottomRightControls` 内（`CommandPaletteButton` と `KeyboardShortcuts` の間）に追加 |
 
 全ファイルパスのプレフィックス: `frontend/src/components/` （ノートブックテンプレートは `frontend/public/files/`）
+
+---
+
+## Controls.tsx 統合メモ（2026-02-17）
+
+`SkillTreeButton` は `bottomRightControls` 内の以下の位置に配置：
+
+```tsx
+<CommandPaletteButton />
+<SkillTreeButton />   {/* ← ここ */}
+<KeyboardShortcuts />
+```
+
+同時に `useProgressSync()` / `useBroadcastChannelRelay()` フックもコンポーネント先頭に追加。
+詳細は [progress-persistence.md](progress-persistence.md) 参照。

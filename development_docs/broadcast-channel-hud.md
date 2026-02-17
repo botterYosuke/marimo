@@ -72,12 +72,13 @@ interface BacktestState {
 **ファイル:** `frontend/src/components/editor/controls/Controls.tsx`
 
 ```tsx
-{!closed && (
-  <div className={topLeftControls}>
-    <BacktestHud />
-  </div>
-)}
+<div className={topLeftControls}>
+  <BacktestHud />
+</div>
 ```
+
+> **重要:** `!closed` ガードの**外**に配置すること。接続が切れた状態でも HUD は表示し続ける必要があるため。
+> （`topRightControls` は `!closed` ガード内だが、HUD は別扱い）
 
 ### 4. handlers.ts（WebSocket メッセージ処理）
 
@@ -125,3 +126,4 @@ WebSocket で受信した HTML 出力から `<marimo-broadcast>` 要素を抽出
 |------|----------|
 | 2026-01-26 | 初期実装完了 |
 | 2026-01-28 | HUD 更新問題を修正: WebSocket 受信時に broadcast メッセージを抽出するよう変更 |
+| 2026-02-17 | `Controls.tsx` 統合: `topLeftControls` div を `!closed` ガード**外**に移動（接続切れでも HUD 表示）。`useBroadcastChannelRelay()` / `useProgressSync()` フックを `Controls` 先頭に追加 |
