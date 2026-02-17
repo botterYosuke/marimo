@@ -335,7 +335,7 @@ export default defineConfig({
     ],
   },
   experimental: {
-    enableNativePlugin: true,
+    enableNativePlugin: 'resolver',
   },
   worker: {
     format: "es",

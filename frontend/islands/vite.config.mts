@@ -34,7 +34,7 @@ export default defineConfig({
     dedupe: ["react", "react-dom", "@emotion/react", "@emotion/cache"],
   },
   experimental: {
-    enableNativePlugin: true,
+    enableNativePlugin: 'resolver',
   },
   worker: {
     format: "es",
