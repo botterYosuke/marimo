@@ -4,6 +4,12 @@ version = "0.1.0"
 edition = "2021"
 description = "marimo desktop application"
 
+[features]
+default = []
+# Steam 版ビルド: <exe_dir>/data をデフォルトデータルートにするポータブルモードを有効化
+# ビルド時: cargo tauri build --features steam
+steam = []
+
 [dependencies]
 tauri = { version = "2", features = ["tray-icon", "devtools", "webview-data-url"] }
 tauri-plugin-shell = "2"

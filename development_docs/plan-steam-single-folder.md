@@ -154,6 +154,53 @@ steamapps/common/backcast/
 
 ---
 
+---
+
+## 実装状況（2026-02-18 完了）
+
+すべての実装が完了し、`cargo check` / `cargo check --features steam` 両方でコンパイル成功を確認済み。
+
+### 実装済みタスク
+
+| Step | ファイル | 状態 |
+|------|---------|------|
+| Step 1 | `src-tauri/src/paths.rs` | ✅ 完了 |
+| Step 2 | `src-tauri/src/lib.rs` | ✅ 完了 |
+| Step 3 | `src-tauri/src/server/lifecycle.rs` | ✅ 完了 |
+| Step 4 | `src-tauri/src/environment/bootstrap.rs` | ✅ 変更不要（引数渡しで自動追従） |
+| Step 5 | `marimo/_utils/xdg.py` | ✅ 完了 |
+| Step 6 | `src-tauri/Cargo.toml` | ✅ 完了 |
+| Step 7 | `src-tauri/tauri-steam.conf.json` | ✅ 新規作成済み |
+| Step 8 | `.github/workflows/release-steam.yml` | ✅ 完了 |
+
+### 実装の知見・Tips
+
+#### `cargo check` vs `cargo check --features steam`
+- `cfg!(feature = "steam")` はコンパイル時フラグのため、両方でチェックが必要。
+- 通常の `cargo check` では `is_portable = false` パスのみが評価される。
+
+#### `bundle/nsis/_/` パスの要事前確認
+- Windows CI で `--features steam` + `--config src-tauri/tauri-steam.conf.json` でビルド後、
+  `target/release/bundle/nsis/` 以下のディレクトリ構造を実際に確認すること。
+- ステージングディレクトリ名はTauriバージョンによって異なる可能性がある（`_/` が正しいかを確認）。
+- `if-no-files-found: error` を付けているので CI でパスが違えばすぐに検知できる。
+
+#### macOS の公証（Notarization）
+- Steam に上げる `.app` バンドルが Apple 公証を通っているか確認が必要。
+- 現行 CI の macOS 署名ステップが `bundle/macos/` を対象にしていること（`bundle/dmg/` でない）を確認する。
+
+#### MARIMO_STATE_DIR の設計理由
+- Windows では `XDG_STATE_HOME` が marimo の Python 側コードで無視される（`os.name == "posix"` の分岐）。
+- そのため `MARIMO_STATE_DIR` という専用環境変数でオーバーライドする方式を採用。
+- `XDG_CONFIG_HOME` と `XDG_CACHE_HOME` は既存の xdg.py ロジックがそのまま追従するので変更不要。
+
+#### ポータブルモードのトリガー条件（優先順）
+1. `BACKCAST_DATA_DIR` 環境変数（任意のパスを指定可能）
+2. `--features steam` でコンパイル（CI 専用）
+3. `BACKCAST_PORTABLE=1` 環境変数（デバッグ・テスト用）
+
+---
+
 ## 実装手順と変更ファイル
 
 ### Step 1: `src-tauri/src/paths.rs`

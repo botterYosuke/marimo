@@ -1,5 +1,32 @@
 use std::path::PathBuf;
 
+/// データルートディレクトリを返す。
+///
+/// 優先順:
+///   1. BACKCAST_DATA_DIR 環境変数
+///   2. Steam 版ビルド (feature = "steam") または BACKCAST_PORTABLE=1 →
+///      <exe のディレクトリ>/data（ポータブルモード）
+///   3. 通常配布版 → None を返し、呼び出し側が AppData ベースのパスを使う
+pub fn get_data_root() -> Option<PathBuf> {
+    // 明示的な env var が最優先
+    if let Ok(dir) = std::env::var("BACKCAST_DATA_DIR") {
+        if !dir.trim().is_empty() {
+            return Some(PathBuf::from(dir));
+        }
+    }
+    // Steam 版ビルド または BACKCAST_PORTABLE=1 の場合はポータブルモード
+    let is_portable = cfg!(feature = "steam")
+        || std::env::var("BACKCAST_PORTABLE").as_deref() == Ok("1");
+    if is_portable {
+        if let Ok(exe) = std::env::current_exe() {
+            if let Some(exe_dir) = exe.parent() {
+                return Some(exe_dir.join("data"));
+            }
+        }
+    }
+    None // 通常配布版: 呼び出し側が AppData を使う
+}
+
 /// Get the path to the bundled `uv` binary.
 /// In production, it's in the app's resource directory.
 /// In development, we assume `uv` is on the PATH.
@@ -23,8 +50,12 @@ pub fn get_uv_bin(app: &tauri::AppHandle) -> PathBuf {
 }
 
 /// Get the venv directory for the marimo environment.
-/// Located in the app's data directory.
+/// Steam 版: <exe_dir>/data/marimo-env
+/// 通常配布版: AppData/marimo-env
 pub fn get_env_dir(app: &tauri::AppHandle) -> PathBuf {
+    if let Some(root) = get_data_root() {
+        return root.join("marimo-env");
+    }
     let data_dir = app
         .path()
         .app_data_dir()
@@ -33,8 +64,12 @@ pub fn get_env_dir(app: &tauri::AppHandle) -> PathBuf {
 }
 
 /// Get the directory for Python installations.
-/// Located in the app's data directory.
+/// Steam 版: <exe_dir>/data/python
+/// 通常配布版: AppData/python
 pub fn get_python_install_dir(app: &tauri::AppHandle) -> PathBuf {
+    if let Some(root) = get_data_root() {
+        return root.join("python");
+    }
     let data_dir = app
         .path()
         .app_data_dir()
@@ -52,7 +87,12 @@ pub fn get_venv_python(env_dir: &std::path::Path) -> PathBuf {
 }
 
 /// Get the log directory.
+/// Steam 版: <exe_dir>/data/logs
+/// 通常配布版: AppData/logs
 pub fn get_log_dir(app: &tauri::AppHandle) -> PathBuf {
+    if let Some(root) = get_data_root() {
+        return root.join("logs");
+    }
     let data_dir = app
         .path()
         .app_data_dir()
@@ -61,8 +101,12 @@ pub fn get_log_dir(app: &tauri::AppHandle) -> PathBuf {
 }
 
 /// Get the notebooks workspace directory.
-/// Uses %APPDATA%/marimo/notebooks (same location as other marimo settings).
+/// Steam 版: <exe_dir>/data/notebooks
+/// 通常配布版: %AppData%/marimo/notebooks
 pub fn get_notebooks_dir(app: &tauri::AppHandle) -> PathBuf {
+    if let Some(root) = get_data_root() {
+        return root.join("notebooks");
+    }
     let config_dir = app
         .path()
         .config_dir()
@@ -104,10 +148,17 @@ struct RecentFilesState {
 
 /// recent_files.toml のパスを返す。
 ///
-/// Python 側 (marimo/_utils/xdg.py) と同じパス解決ロジックを使用:
+/// Steam 版: <exe_dir>/data/state/recent_files.toml
+/// 通常配布版: Python 側 (marimo/_utils/xdg.py) と同じパス解決ロジックを使用:
 /// - Windows: {USERPROFILE}/.marimo/recent_files.toml
 /// - Unix:    {XDG_STATE_HOME:-~/.local/state}/marimo/recent_files.toml
 pub fn get_recent_files_path() -> Option<PathBuf> {
+    // ポータブルモード (Steam 版) の場合は data/state/recent_files.toml
+    if let Some(root) = get_data_root() {
+        return Some(root.join("state").join("recent_files.toml"));
+    }
+
+    // 通常配布版: 既存のプラットフォーム別ロジック
     #[cfg(target_os = "windows")]
     {
         let home = std::env::var("USERPROFILE").ok()?;

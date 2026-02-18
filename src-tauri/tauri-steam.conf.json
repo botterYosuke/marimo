@@ -1,0 +1,10 @@
+{
+  "bundle": {
+    "targets": ["nsis", "macos", "appimage"],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "skip"
+      }
+    }
+  }
+}

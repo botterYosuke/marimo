@@ -93,6 +93,24 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
     env.insert("PYTHONIOENCODING".into(), "utf-8".into());
     env.insert("PYTHONUNBUFFERED".into(), "1".into());
 
+    // Steam 版 / ポータブルモード: Python 側のデータパスを data/ 配下にリダイレクト
+    if let Some(data_root) = paths::get_data_root() {
+        env.insert(
+            "XDG_CONFIG_HOME".into(),
+            data_root.join("config").to_string_lossy().into_owned(),
+        );
+        env.insert(
+            "XDG_CACHE_HOME".into(),
+            data_root.join("cache").to_string_lossy().into_owned(),
+        );
+        env.insert(
+            "MARIMO_STATE_DIR".into(),
+            data_root.join("state").to_string_lossy().into_owned(),
+        );
+        info!("Portable mode: XDG_CONFIG_HOME={}/config, XDG_CACHE_HOME={}/cache, MARIMO_STATE_DIR={}/state",
+            data_root.display(), data_root.display(), data_root.display());
+    }
+
     // Use a dedicated notebooks directory as the workspace so that
     // marimo doesn't scan the entire HOME directory (which causes timeout).
     // %APPDATA%/marimo/notebooks — same location as other marimo settings.

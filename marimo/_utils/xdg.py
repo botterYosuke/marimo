@@ -73,12 +73,18 @@ def marimo_cache_dir() -> Path:
 def marimo_state_dir() -> Path:
     """Get marimo state directory using XDG specification.
 
+    If MARIMO_STATE_DIR is set and non-empty, returns that path directly.
+    This is used by the portable (Steam) build to redirect state to <exe_dir>/data/state.
+
     On Linux/macOS/Unix, returns:
     $XDG_STATE_HOME/marimo if set, otherwise ~/.local/state/marimo
 
     On Windows, returns:
     ~/.marimo
     """
+    override = os.getenv("MARIMO_STATE_DIR")
+    if override and override.strip():
+        return Path(override)
     if os.name == "posix":
         return xdg_state_home() / "marimo"
     else:

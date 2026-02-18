@@ -15,7 +15,12 @@ use tauri::Manager;
 use state::{BootstrapState, BootstrapStatus, ServerState, WindowState};
 
 fn get_log_file_path() -> PathBuf {
-    // Get log directory path before Tauri app starts
+    // Steam 版 / ポータブルモード: data/logs/marimo-desktop.log
+    if let Some(root) = paths::get_data_root() {
+        return root.join("logs").join("marimo-desktop.log");
+    }
+
+    // 通常配布版フォールバック: 既存のプラットフォーム別ロジックを維持
     #[cfg(target_os = "windows")]
     {
         if let Ok(appdata) = std::env::var("APPDATA") {

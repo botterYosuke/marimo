@@ -84,7 +84,7 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: cargo tauri build
+        run: cargo tauri build --features steam --config src-tauri/tauri-steam.conf.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -92,7 +92,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: steam-windows-${{ env.MARIMO_VERSION }}
-          path: src-tauri/target/release/bundle/nsis/
+          # NSIS ステージングディレクトリ: インストーラー生成前のゲームファイル群
+          # (backcast.exe + resources/) が展開される。Steam depot にはこれをアップロードする。
+          # ⚠️ パスは Tauri バージョンに依存する。実ビルドで target/release/bundle/nsis/ 以下を確認し適宜修正。
+          path: src-tauri/target/release/bundle/nsis/_/
+          if-no-files-found: error
           retention-days: 7
 
   build_macos:
@@ -158,7 +162,7 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: cargo tauri build
+        run: cargo tauri build --features steam --config src-tauri/tauri-steam.conf.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -166,7 +170,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: steam-macos-${{ env.MARIMO_VERSION }}
-          path: src-tauri/target/release/bundle/dmg/
+          # Steam には .dmg でなく .app バンドルが必要。Tauri v2 では "macos" ターゲットで生成される。
+          path: src-tauri/target/release/bundle/macos/
           if-no-files-found: error
           retention-days: 7
 
@@ -242,7 +247,7 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: cargo tauri build
+        run: cargo tauri build --features steam --config src-tauri/tauri-steam.conf.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
