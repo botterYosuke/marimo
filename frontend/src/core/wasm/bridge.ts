@@ -41,6 +41,8 @@ import { fallbackFileStore, notebookFileStore } from "./store";
 import { isWasm } from "./utils";
 import type { SaveWorkerSchema } from "./worker/save-worker";
 import type { WorkerSchema } from "./worker/worker";
+import saveWorkerUrl from "./worker/save-worker.ts?worker&url";
+import workerUrl from "./worker/worker.ts?worker&url";
 
 type SaveWorker = ReturnType<
   typeof getWorkerRPC<SaveWorkerSchema>
@@ -75,16 +77,10 @@ export class PyodideBridge implements RunRequests, EditRequests {
     }
 
     // Create save worker
-    const saveWorker = new Worker(
-      // eslint-disable-next-line unicorn/relative-url-style
-      new URL("./worker/save-worker.ts", import.meta.url),
-      {
-        type: "module",
-        // Pass the version to the worker
-        /* @vite-ignore */
-        name: getMarimoVersion(),
-      },
-    );
+    const saveWorker = new Worker(saveWorkerUrl, {
+      type: "module",
+      name: getMarimoVersion(),
+    });
 
     return getWorkerRPC<SaveWorkerSchema>(saveWorker).proxy.request;
   }
@@ -95,16 +91,10 @@ export class PyodideBridge implements RunRequests, EditRequests {
     }
 
     // Create a worker
-    const worker = new Worker(
-      // eslint-disable-next-line unicorn/relative-url-style
-      new URL("./worker/worker.ts", import.meta.url),
-      {
-        type: "module",
-        // Pass the version to the worker
-        /* @vite-ignore */
-        name: getMarimoVersion(),
-      },
-    );
+    const worker = new Worker(workerUrl, {
+      type: "module",
+      name: getMarimoVersion(),
+    });
 
     // Create the RPC
     this.rpc = getWorkerRPC<WorkerSchema>(worker);

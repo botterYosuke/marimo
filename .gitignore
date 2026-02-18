@@ -141,3 +141,4 @@ src-tauri/build.log
 src-tauri/build_utf8.log
 NUL
 src-tauri/resources/
+frontend/dist-pyodide/
