@@ -5,7 +5,10 @@ import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 import packageJson from "../package.json";
+
+const isPyodide = process.env.PYODIDE === "true";
 
 const htmlDevPlugin = (): Plugin => {
   return {
@@ -33,7 +36,7 @@ export default defineConfig({
     dedupe: ["react", "react-dom", "@emotion/react", "@emotion/cache"],
   },
   experimental: {
-    enableNativePlugin: 'resolver',
+    enableNativePlugin: isPyodide ? false : "resolver",
   },
   worker: {
     format: "es",
@@ -69,9 +72,10 @@ export default defineConfig({
       },
     }),
     wasm(),
+    ...(isPyodide ? [topLevelAwait()] : []),
   ],
   build: {
-    target: "esnext",
+    ...(isPyodide ? { target: "es2020" } : { target: "esnext" }),
     emptyOutDir: true,
     lib: {
       entry: path.resolve(__dirname, "../src/core/islands/main.ts"),

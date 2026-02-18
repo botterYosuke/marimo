@@ -28,8 +28,13 @@ build: {
   // Pyodide ビルドでは vite-plugin-top-level-await による変換を強制するため、target を es2020 に固定
   // 通常ビルドは引き続き esnext を使用
   ...(isPyodide ? { target: "es2020" } : { target: "esnext" }),
-  // ...
-}
+  // oxc ミニファイアで発生する CJS 系の問題を避けるため、Pyodide ビルドでは esbuild を使用
+  minify: isPyodide ? "esbuild" : "oxc",
+},
+experimental: {
+  // Rolldown のネイティブプラグインを無効化し、JSベースのプラグイン（TLA等）が確実に動作するようにする
+  enableNativePlugin: isPyodide ? false : "resolver",
+},
 ```
 
 - **設計思想**:

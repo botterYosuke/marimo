@@ -2,7 +2,7 @@ name: Deploy to Firebase
 
 on:
   push:
-    branches: [game]
+    branches: [game, sasa/pyodide]
 
 concurrency:
   group: "firebase-deploy"
