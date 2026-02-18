@@ -34,30 +34,53 @@ const wkmod = ... ? wasmModuleOrExports : await import('./loro_wasm_bg.wasm');
 
 ## 対応と設計思想（最終版）
 
-### 根本解決: loro-crdt をスタブに置き換え（2026-02-18 確定）
+### 根本解決: loro-crdt スタブ + topLevelAwait プラグイン除去（2026-02-18 最終確定）
 
-`enableNativePlugin: true` による修正は失敗した（実デプロイで `panels-g80ohNGS.js` の同エラーを確認）。rolldown-vite 7.3.1 では **JS プラグインでもネイティブプラグインでも** TLA チェーン伝播が失敗するため、バンドラー側での修正は不可能。
+#### 修正の2本柱
 
-**根本解決**: Pyodide ビルドで `loro-crdt` を TLA なしのスタブにエイリアス。
+1. **loro-crdt をスタブに置き換え**: Pyodide ビルドで `loro-crdt` を TLA なしのスタブにエイリアス。
+2. **`vite-plugin-top-level-await` プラグインを除去**: スタブにより TLA ソースが除去済みのため、このプラグインは不要。プラグインを残すと rolldown-vite との連携不良でチャンク間の `__tla` 伝播に失敗し、エラーの原因となる。
+
+#### 修正の経緯
+
+| 修正 | 変更内容 | 結果 |
+|------|----------|------|
+| 第1次 | `enableNativePlugin: true` | ❌ `panels-g80ohNGS.js` で同エラー |
+| 第2次 | loro-crdt スタブ + `enableNativePlugin: "resolver"` | ❌ `panels-Cmgv8pHD.js` で `re is not a function` |
+| 第3次 | `topLevelAwait()` プラグインを除去 | ✅ TLA が完全排除 |
+
+#### 第2次修正が失敗した理由
+
+loro-crdt スタブにより TLA ソースは除去されたが、`vite-plugin-top-level-await` 自体が残っていた。
+このプラグインが index チャンク全体を async IIFE (`hir=(async()=>{...})()`) でラップし、`__tla` としてエクスポート。
+rolldown-vite が `panels` チャンクへの `__tla` チェーン伝播に失敗し、`layout` チャンクの `Ct`（= `WidthProvider(Responsive)`）が未初期化のまま呼び出されてエラー発生。
 
 **修正ファイル一覧:**
 - `frontend/src/stubs/loro-crdt.ts` (新規): TLA なしのスタブクラス群
-- `frontend/vite.config.mts`: resolve.alias に loro-crdt スタブを追加、enableNativePlugin を `"resolver"` に統一
+- `frontend/vite.config.mts`:
+  - resolve.alias に loro-crdt スタブを追加
+  - enableNativePlugin を `"resolver"` に統一
+  - `vite-plugin-top-level-await` の import と使用を削除
 
-**`frontend/vite.config.mts` の変更:**
+**`frontend/vite.config.mts` の最終状態:**
 ```typescript
+// import topLevelAwait は削除済み
+
 resolve: {
   alias: isPyodide ? {
     "@": path.resolve(__dirname, "src"),
     zod: path.resolve(__dirname, "node_modules/zod"),
-    // loro-crdt の TLA を依存グラフから完全除去
     "loro-crdt": path.resolve(__dirname, "src/stubs/loro-crdt.ts"),
   } : { /* vega-lite aliases */ },
 },
 experimental: {
-  // TLA の根本原因を解消したので両ビルドで "resolver" を使用
   enableNativePlugin: "resolver",
 },
+plugins: [
+  // topLevelAwait() は含めない — TLA ソースが除去済みのため不要
+  // 残すと rolldown-vite との連携不良でエラーの原因となる
+  wasm(),
+],
 ```
 
 ### なぜスタブで安全か
@@ -75,21 +98,21 @@ experimental: {
 
 - **Isolation (隔離)**: 通常の Web ビルドは実際の loro-crdt (WASM 付き) を使用。Pyodide 版のみスタブに切り替え。
 - **Determinism (確定性)**: スタブには TLA・WASM が一切なく、バンドラーの挙動に依存しない。
-- **Simplicity (単純性)**: バンドラーのバグ回避策（enableNativePlugin の調整など）より、依存グラフからの除去が確実。
+- **Simplicity (単純性)**: バンドラーのバグ回避策よりも、依存グラフからの除去 + 不要プラグインの除去が確実。
 
 ## Tips: 開発者向け情報
-- **Minified エラーのデバッグ**: `na is not a function` のようなエラーが出た場合、それがアプリケーションコードのバグではなく、ビルドツールが生成したヘルパー関数の不整合である可能性を疑ってください。特に TLA 変換プラグインを使用している場合、`target` と `enableNativePlugin` 設定が重要です。
-- **Vite と TLA**: `vite-plugin-top-level-await` は `target` がモダンすぎると動作しない（必要ないと判断される）ことがあります。意図的にプラグインを効かせたい場合は `es2020` 程度にターゲットを落とすのが定石です。
-- **CI/CD の確認**: `deploy-firebase.yml` などのワークフローで `PYODIDE: "true"` が設定されているビルドが、修正後の挙動になっているか確認してください。
+- **Minified エラーのデバッグ**: `na is not a function` や `re is not a function` のようなエラーが出た場合、ビルドツールが生成した TLA ヘルパー関数の不整合を疑ってください。
+- **`vite-plugin-top-level-await` の注意点**: このプラグインは rolldown-vite ではチャンク間の `__tla` 伝播に失敗するバグがあります。TLA ソースをスタブ等で除去している場合は、**プラグインも除去すること**。
+- **CI/CD の確認**: `deploy-firebase.yml` で `PYODIDE: "true"` 設定のビルドが修正後の挙動になっているか確認してください。
 
 ## 作業進捗
 - [✅] エラーログの分析と根本原因の特定（`loro-crdt` の TLA + rolldown-vite での JS プラグイン伝播失敗）
 - [✅] デプロイ済みファイル (`panels-DHtfoB8g.js`, `layout-CPGHYliC.js`, `cells-6eW1MVv5.js`) の解析
-- [✅] 第1次修正: `enableNativePlugin: true` → **失敗**（`panels-g80ohNGS.js` で同エラー継続）
-- [✅] 根本解決: `frontend/src/stubs/loro-crdt.ts` 作成 + `resolve.alias` でスタブに置き換え
-- [✅] `enableNativePlugin` を `"resolver"` に統一
+- [✅] 第1次修正: `enableNativePlugin: true` → **失敗**
+- [✅] 第2次修正: loro-crdt スタブ + alias → スタブは機能するが `topLevelAwait()` プラグインが残存して **失敗**
+- [✅] 第3次修正: `topLevelAwait()` プラグインを完全除去 → TLA 完全排除
 - [✅] ドキュメント更新
-- [ ] デプロイして実動作確認（`loro-crdt` スタブで TLA が依存グラフから除去されるか）
+- [ ] デプロイして実動作確認
 
 ---
 

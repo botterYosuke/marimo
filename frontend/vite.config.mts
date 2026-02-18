@@ -7,7 +7,7 @@ import { codecovVitePlugin } from "@codecov/vite-plugin";
 import react from "@vitejs/plugin-react";
 import { JSDOM } from "jsdom";
 import { defineConfig, type Plugin } from "vite";
-import topLevelAwait from "vite-plugin-top-level-await";
+
 import wasm from "vite-plugin-wasm";
 
 const SERVER_PORT = process.env.SERVER_PORT || 2718;
@@ -367,11 +367,10 @@ export default defineConfig({
   },
   experimental: {
     // Use native resolver for both Pyodide and non-Pyodide builds.
-    // "resolver" enables the native Rust resolver while keeping JS plugins active
-    // (including vite-plugin-top-level-await and wasm() for safety).
-    // The root cause of "na is not a function" (loro-crdt TLA) is fixed by
-    // aliasing loro-crdt to a stub in Pyodide builds (see resolve.alias above),
-    // so enableNativePlugin no longer needs to be true for Pyodide.
+    // "resolver" enables the native Rust resolver while keeping JS plugins active.
+    // TLA is fully eliminated from Pyodide builds via loro-crdt stub (see resolve.alias);
+    // vite-plugin-top-level-await is NOT used because it wraps chunks in async IIFEs
+    // and rolldown-vite fails to propagate __tla chains across chunk boundaries.
     enableNativePlugin: "resolver",
   },
   worker: {
@@ -400,6 +399,5 @@ export default defineConfig({
       uploadToken: process.env.CODECOV_TOKEN,
     }),
     wasm(),
-    ...(isPyodide ? [topLevelAwait()] : []),
   ],
 });
