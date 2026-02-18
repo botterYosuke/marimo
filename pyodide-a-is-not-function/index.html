@@ -21,7 +21,7 @@
     
     
       
-        <title>Pyodideビルドにおける "na is not a function" エラーの調査と対応 - marimo Developer Docs</title>
+        <title>Pyodideビルドにおける "X is not a function" エラーの調査と対応 - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#pyodide-na-is-not-a-function" class="md-skip">
+        <a href="#pyodide-x-is-not-a-function" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Pyodideビルドにおける "na is not a function" エラーの調査と対応
+              Pyodideビルドにおける "X is not a function" エラーの調査と対応
             
           </span>
         </div>
@@ -1390,22 +1390,110 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#history" class="md-nav__link">
+  <a href="#2-rpc-2026-02-18" class="md-nav__link">
     <span class="md-ellipsis">
       
-        履歴 (History)
+        第2の問題: ワーカーバンドリング失敗による RPC タイムアウト（2026-02-18）
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="履歴 (History)">
+    <nav class="md-nav" aria-label="第2の問題: ワーカーバンドリング失敗による RPC タイムアウト（2026-02-18）">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#2026-02-18_1" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2026-02-18: 調査初期メモ
+        症状
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        根本原因
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題箇所
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        試して失敗したこと
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workerurl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解決策: ?worker&amp;url サフィックスによる明示的インポート
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正後の出力
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viteconfigmts-worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        補足: vite.config.mts の worker セクション
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tips_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        作業進捗
       
     </span>
   </a>
@@ -1434,14 +1522,18 @@
 
 
 
-<h1 id="pyodide-na-is-not-a-function">Pyodideビルドにおける "na is not a function" エラーの調査と対応<a class="headerlink" href="#pyodide-na-is-not-a-function" title="Permanent link">&para;</a></h1>
+<h1 id="pyodide-x-is-not-a-function">Pyodideビルドにおける "X is not a function" エラーの調査と対応<a class="headerlink" href="#pyodide-x-is-not-a-function" title="Permanent link">&para;</a></h1>
 <h2 id="_1">状況<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>discord-release.yml</code> でデプロイされた Pyodide 版 marimo において、ブラウザコンソールに以下のエラーが発生し、アプリケーションが正常に起動しない問題が確認されました。</p>
-<div class="highlight"><pre><span></span><code>cells-6eW1MVv5.js:9 TypeError: na is not a function
+<p><code>deploy-firebase.yml</code> でデプロイされた Pyodide 版 marimo において、ブラウザコンソールに以下のエラーが発生し、アプリケーションが正常に起動しない問題が確認されました。</p>
+<div class="highlight"><pre><span></span><code>// 第1・2次修正前
+cells-6eW1MVv5.js:9 TypeError: na is not a function
     at panels-DHtfoB8g.js:1:35016
-...
+
+// 第2次修正後（loro-crdt スタブ導入後も再発）
+index-Bf54jHWc.js:9 TypeError: re is not a function
+    at panels-Cmgv8pHD.js:1:33493
 </code></pre></div>
-<p>このエラーは <code>panels-*.js</code> や <code>cells-*.js</code> などのチャンク読み込み時、特に Top-Level Await (TLA) を含むモジュールの初期化中に発生します。ミニファイされた変数 <code>na</code>（あるいは類似の短い変数名）が関数として呼び出されていますが、実体が存在しない状態です。</p>
+<p>このエラーは <code>panels-*.js</code> チャンク読み込み時に発生します。ミニファイされた変数（<code>na</code>、<code>re</code> 等）が関数として呼び出されていますが、実体が未初期化の状態です。</p>
 <h2 id="2026-02-18">確定した根本原因（2026-02-18 解析完了）<a class="headerlink" href="#2026-02-18" title="Permanent link">&para;</a></h2>
 <h3 id="tla">TLA の根源<a class="headerlink" href="#tla" title="Permanent link">&para;</a></h3>
 <p><code>loro-crdt@1.10.6</code> の <code>bundler/loro_wasm.js</code> が WebAssembly 初期化に <strong>Top-Level Await</strong> を使用：</p>
@@ -1499,13 +1591,18 @@
 rolldown-vite が <code>panels</code> チャンクへの <code>__tla</code> チェーン伝播に失敗し、<code>layout</code> チャンクの <code>Ct</code>（= <code>WidthProvider(Responsive)</code>）が未初期化のまま呼び出されてエラー発生。</p>
 <p><strong>修正ファイル一覧:</strong>
 - <code>frontend/src/stubs/loro-crdt.ts</code> (新規): TLA なしのスタブクラス群
-- <code>frontend/vite.config.mts</code>:
-  - resolve.alias に loro-crdt スタブを追加
-  - enableNativePlugin を <code>"resolver"</code> に統一
-  - <code>vite-plugin-top-level-await</code> の import と使用を削除</p>
-<p><strong><code>frontend/vite.config.mts</code> の最終状態:</strong>
+- <code>frontend/vite.config.mts</code>: loro-crdt スタブの alias 追加、<code>vite-plugin-top-level-await</code> の import と使用を削除
+- <code>frontend/package.json</code>: <code>vite-plugin-top-level-await</code> devDependency を削除</p>
+<p><strong><code>frontend/vite.config.mts</code> の最終状態（抜粋）:</strong>
 <div class="highlight"><pre><span></span><code><span class="c1">// import topLevelAwait は削除済み</span>
+<span class="k">import</span><span class="w"> </span><span class="nx">path</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;node:path&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">fileURLToPath</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;node:url&quot;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">__dirname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">path</span><span class="p">.</span><span class="nx">dirname</span><span class="p">(</span><span class="nx">fileURLToPath</span><span class="p">(</span><span class="k">import</span><span class="p">.</span><span class="nx">meta</span><span class="p">.</span><span class="nx">url</span><span class="p">));</span>
 
+<span class="nx">build</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="p">...(</span><span class="nx">isPyodide</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">target</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;es2020&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">target</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;esnext&quot;</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">minify</span><span class="o">:</span><span class="w"> </span><span class="kt">isDev</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">false</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">isPyodide</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s2">&quot;esbuild&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;oxc&quot;</span><span class="p">,</span>
+<span class="p">},</span>
 <span class="nx">resolve</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nx">alias</span><span class="o">:</span><span class="w"> </span><span class="kt">isPyodide</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="s2">&quot;@&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;src&quot;</span><span class="p">),</span>
@@ -1518,7 +1615,6 @@ rolldown-vite が <code>panels</code> チャンクへの <code>__tla</code> チ�
 <span class="p">},</span>
 <span class="nx">plugins</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">  </span><span class="c1">// topLevelAwait() は含めない — TLA ソースが除去済みのため不要</span>
-<span class="w">  </span><span class="c1">// 残すと rolldown-vite との連携不良でエラーの原因となる</span>
 <span class="w">  </span><span class="nx">wasm</span><span class="p">(),</span>
 <span class="p">],</span>
 </code></pre></div></p>
@@ -1551,25 +1647,71 @@ rolldown-vite が <code>panels</code> チャンクへの <code>__tla</code> チ�
 <li>[✅] デプロイ済みファイル (<code>panels-DHtfoB8g.js</code>, <code>layout-CPGHYliC.js</code>, <code>cells-6eW1MVv5.js</code>) の解析</li>
 <li>[✅] 第1次修正: <code>enableNativePlugin: true</code> → <strong>失敗</strong></li>
 <li>[✅] 第2次修正: loro-crdt スタブ + alias → スタブは機能するが <code>topLevelAwait()</code> プラグインが残存して <strong>失敗</strong></li>
-<li>[✅] 第3次修正: <code>topLevelAwait()</code> プラグインを完全除去 → TLA 完全排除</li>
+<li>[✅] 第3次修正: <code>topLevelAwait()</code> プラグインを完全除去 + <code>package.json</code> からも削除 → TLA 完全排除</li>
+<li>[✅] Firebase デプロイで実動作確認済み（<code>https://backcast-tan.web.app/</code>）</li>
 <li>[✅] ドキュメント更新</li>
-<li>[ ] デプロイして実動作確認</li>
 </ul>
 <hr />
-<h2 id="history">履歴 (History)<a class="headerlink" href="#history" title="Permanent link">&para;</a></h2>
-<h3 id="2026-02-18_1">2026-02-18: 調査初期メモ<a class="headerlink" href="#2026-02-18_1" title="Permanent link">&para;</a></h3>
-<p>当初の調査および対応案の記録です。</p>
+<h2 id="2-rpc-2026-02-18">第2の問題: ワーカーバンドリング失敗による RPC タイムアウト（2026-02-18）<a class="headerlink" href="#2-rpc-2026-02-18" title="Permanent link">&para;</a></h2>
+<h3 id="_9">症状<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>TLA 問題の修正後、デプロイ済みサイト <code>https://backcast-tan.web.app/</code> が「Initializing...」で停止し続ける。コンソールには以下が出力される。</p>
+<div class="highlight"><pre><span></span><code>sendListFiles Error: RPC request timed out
+</code></pre></div>
+<h3 id="_10">根本原因<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p><code>rolldown-vite@7.3.1</code> が <code>new Worker(new URL("./worker.ts", import.meta.url), {...})</code> という<strong>暗黙的パターン</strong>をワーカーバンドル対象として認識できず、ワーカーファイルを<strong>トランスパイルせずに生 TypeScript のまま <code>.ts</code> 拡張子で出力</strong>していた。</p>
 <ul>
-<li><strong>根本原因</strong>: Vite のビルドターゲット設定。</li>
-<li><strong>メカニズム</strong>: <code>esnext</code> ターゲット時に <code>vite-plugin-top-level-await</code> の変換がスキップされ、Pyodide環境で未定義ヘルパー関数（ミニファイされた <code>na</code> 等）の呼び出しエラーが発生。</li>
-<li><strong>初期の対応案</strong>: <code>isPyodide ? { target: "es2020" } : { target: "esnext" }</code> による分岐。</li>
-<li><strong>特記事項 (ディレクトリパス)</strong>:<ul>
-<li>ローカル環境での検証時、以下のディレクトリパス設定の不整合が確認された。</li>
-<li>修正前: <code>"C:\Users\sasai\Downloads\backcast_files"</code></li>
-<li>修正後: <code>"C:\Users\sasai\Downloads\backcast-v2_files"</code></li>
-<li>ファイル構成自体の差異（<code>index-*.js</code> のサイズ差など）も、ビルド設定の変更によって発生することを確認した。</li>
+<li><strong>出力例 (修正前)</strong>: <code>dist-pyodide/assets/worker-YlKTPkry.ts</code>（中身は <code>import type</code> 等を含む生 TypeScript）</li>
+<li>ブラウザの Web Worker は TypeScript を実行できない → ワーカーが即死 → 全 RPC 通信が 20 秒後にタイムアウト</li>
 </ul>
-</li>
+<h3 id="_11">問題箇所<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p><code>frontend/src/core/wasm/bridge.ts</code> の Worker コンストラクタ（修正前）:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// worker.ts と save-worker.ts の両方で同じパターン</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">worker</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Worker</span><span class="p">(</span>
+<span class="w">  </span><span class="ow">new</span><span class="w"> </span><span class="nx">URL</span><span class="p">(</span><span class="s2">&quot;./worker/worker.ts&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">import</span><span class="p">.</span><span class="nx">meta</span><span class="p">.</span><span class="nx">url</span><span class="p">),</span><span class="w">  </span><span class="c1">// rolldown-vite が検出できない</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;module&quot;</span><span class="p">,</span><span class="w"> </span><span class="cm">/* @vite-ignore */</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">getMarimoVersion</span><span class="p">()</span><span class="w"> </span><span class="p">}</span>
+<span class="p">);</span>
+</code></pre></div>
+<h3 id="_12">試して失敗したこと<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>vite.config.mts</code> の <code>worker</code> セクションに <code>rollupOptions.output.entryFileNames: "[name]-[hash].js"</code> を追加 → 無視される（依然 <code>.ts</code> 出力）</li>
+<li><code>worker.plugins: () =&gt; [wasm()]</code> を追加 → 効果なし</li>
+</ul>
+<h3 id="workerurl">解決策: <code>?worker&amp;url</code> サフィックスによる明示的インポート<a class="headerlink" href="#workerurl" title="Permanent link">&para;</a></h3>
+<p><code>islands/bridge.ts</code> で既に採用されていた標準 Vite パターンを <code>wasm/bridge.ts</code> にも適用する。</p>
+<p><strong>修正ファイル:</strong> <code>frontend/src/core/wasm/bridge.ts</code></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 追加: トップレベルで ?worker&amp;url インポート</span>
+<span class="k">import</span><span class="w"> </span><span class="nx">saveWorkerUrl</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./worker/save-worker.ts?worker&amp;url&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="nx">workerUrl</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./worker/worker.ts?worker&amp;url&quot;</span><span class="p">;</span>
+
+<span class="c1">// 変更: new URL(...) パターンを URL 変数に置き換え</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">worker</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Worker</span><span class="p">(</span><span class="nx">workerUrl</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;module&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">getMarimoVersion</span><span class="p">(),</span>
+<span class="p">});</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">saveWorker</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Worker</span><span class="p">(</span><span class="nx">saveWorkerUrl</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;module&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">getMarimoVersion</span><span class="p">(),</span>
+<span class="p">});</span>
+</code></pre></div>
+<p><code>?worker&amp;url</code> サフィックスは Vite に「このファイルはワーカーとしてバンドルし、URLを返せ」と明示指示する。rolldown-vite でも正しく解釈され、<code>.js</code> ファイルとして出力される。</p>
+<h3 id="_13">修正後の出力<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>dist-pyodide/assets/worker-Caj8-YsL.js       87.86 kB  # トランスパイル済み JS
+dist-pyodide/assets/save-worker-fCYKAyeJ.js  83.71 kB  # トランスパイル済み JS
+</code></pre></div>
+<h3 id="viteconfigmts-worker">補足: <code>vite.config.mts</code> の <code>worker</code> セクション<a class="headerlink" href="#viteconfigmts-worker" title="Permanent link">&para;</a></h3>
+<p><code>worker.plugins: () =&gt; [wasm()]</code> はそのまま有効で、<code>?worker&amp;url</code> でバンドルされるワーカー内でも WASM プラグインが適用される。</p>
+<h3 id="tips_1">Tips<a class="headerlink" href="#tips_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>new Worker(new URL(..., import.meta.url))</code> は rolldown-vite で動作しない</strong>: 標準 Vite では動くが rolldown-vite ではワーカーを未処理で出力することがある。代わりに <code>?worker&amp;url</code> を使う。</li>
+<li><strong>参考実装</strong>: <code>frontend/src/core/islands/bridge.ts</code> の <code>import workerUrl from "./worker/worker.tsx?worker&amp;url"</code> が正しいパターン。</li>
+</ul>
+<h3 id="_14">作業進捗<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[✅] 症状の特定（RPC タイムアウト、<code>sendListFiles Error</code>）</li>
+<li>[✅] 根本原因の特定（<code>.ts</code> 拡張子のまま出力されるワーカーファイル）</li>
+<li>[✅] <code>?worker&amp;url</code> パターンへの変更（<code>wasm/bridge.ts</code>）</li>
+<li>[✅] ローカル Pyodide ビルドで <code>.js</code> 出力を確認（<code>worker-*.js</code>, <code>save-worker-*.js</code>）</li>
 </ul>
 
 
