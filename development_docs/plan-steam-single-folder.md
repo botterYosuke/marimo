@@ -123,9 +123,9 @@ Steam では起動オプションに環境変数を渡す必要はない。
 steamapps/common/backcast/
 ├── backcast.exe
 ├── resources/
-│   ├── binaries/
-│   │   └── uv.exe
 │   ├── resources/
+│   │   ├── binaries/
+│   │   │   └── uv.exe
 │   │   ├── marimo/          ← Python ソース（バンドル済み）
 │   │   ├── files/           ← サンプルノートブック
 │   │   └── pyproject.toml など
@@ -171,6 +171,7 @@ steamapps/common/backcast/
 | Step 6 | `src-tauri/Cargo.toml` | ✅ 完了 |
 | Step 7 | `src-tauri/tauri-steam.conf.json` | ✅ 新規作成済み |
 | Step 8 | `.github/workflows/release-steam.yml` | ✅ 完了 |
+| Step 9 | `src-tauri/prepare-resources.js` | ✅ 完了（UV バンドル修正） |
 
 ### 実装の知見・Tips
 
@@ -472,6 +473,20 @@ path: src-tauri/target/release/bundle/macos/
 `bundle/appimage/` に生成される `.AppImage` は Steam Linux Runtime で動作する。
 パスはそのまま維持。
 
+### Step 9: `src-tauri/prepare-resources.js`（修正）
+
+#### 問題: `uv` バイナリのバンドル漏れ
+
+`binaries/uv*` という設定では、特定条件下で `uv.exe` がバンドルされない問題（Environment construction error）が発生。
+
+#### 変更: `resources/binaries/` への明示的コピー
+
+1.  `prepare-resources.js` で `src-tauri/binaries/uv.exe` を `src-tauri/resources/binaries/uv.exe` にコピーする処理を追加。
+2.  `tauri.conf.json` の `bundle.resources` を `binaries/uv*` から `resources/binaries/uv*` に変更。
+3.  `paths.rs` の `get_uv_bin` を `resource_dir/resources/binaries/uv.exe` を指すように更新。
+
+これにより、`uv` バイナリが確実にリソースとしてバンドルされる。
+
 ---
 
 ## 変更ファイル一覧
@@ -485,6 +500,8 @@ path: src-tauri/target/release/bundle/macos/
 | `src-tauri/tauri-steam.conf.json` | 新規作成。`webviewInstallMode: skip`、`targets` を `["nsis", "app", "appimage"]` に設定 |
 | `src-tauri/Cargo.toml` | `[features]` に `steam = []` を追加 |
 | `.github/workflows/release-steam.yml` | Windows: depot パスを `bundle/nsis/_/` に変更、`--features steam` を追加。macOS: depot パスを `bundle/macos/` に変更 |
+| `src-tauri/prepare-resources.js` | `uv.exe` を `resources/binaries/` にコピーする処理を追加 |
+| `src-tauri/tauri.conf.json` | `binaries/uv*` を `resources/binaries/uv*` に変更 |
 
 **変更しないファイル:**
 

@@ -26,7 +26,7 @@
       "icons/icon.ico"
     ],
     "resources": [
-      "binaries/uv*",
+      "resources/binaries/uv*",
       "resources/marimo",
       "resources/files",
       "resources/pyproject.toml",

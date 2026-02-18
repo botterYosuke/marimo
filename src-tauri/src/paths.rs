@@ -45,7 +45,10 @@ pub fn get_uv_bin(app: &tauri::AppHandle) -> PathBuf {
             .resource_dir()
             .expect("failed to get resource dir");
         let bin_name = if cfg!(windows) { "uv.exe" } else { "uv" };
-        resource_dir.join("binaries").join(bin_name)
+        resource_dir
+            .join("resources")
+            .join("binaries")
+            .join(bin_name)
     }
 }
 

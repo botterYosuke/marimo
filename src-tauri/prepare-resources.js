@@ -64,6 +64,38 @@ if (fs.existsSync(pyprojectSrc)) {
   process.exit(1);
 }
 
+// Copy binaries (uv)
+const binariesDir = path.join(srcTauriDir, 'binaries');
+const resourcesBinariesDir = path.join(resourcesDir, 'binaries');
+if (!fs.existsSync(resourcesBinariesDir)) {
+  fs.mkdirSync(resourcesBinariesDir, { recursive: true });
+}
+
+// Check for uv or uv.exe
+const uvBinaryName = process.platform === 'win32' ? 'uv.exe' : 'uv';
+const uvSrc = path.join(binariesDir, uvBinaryName);
+const uvDest = path.join(resourcesBinariesDir, uvBinaryName);
+
+console.log(`Copying binary: ${uvSrc} -> ${uvDest}`);
+if (fs.existsSync(uvSrc)) {
+  fs.copyFileSync(uvSrc, uvDest);
+  console.log(`✓ ${uvBinaryName} copied`);
+} else {
+  // Try to find any file starting with uv in binaries
+  const files = fs.existsSync(binariesDir) ? fs.readdirSync(binariesDir) : [];
+  const uvFile = files.find(f => f.startsWith('uv'));
+  if (uvFile) {
+     const src = path.join(binariesDir, uvFile);
+     const dest = path.join(resourcesBinariesDir, uvFile);
+     fs.copyFileSync(src, dest);
+     console.log(`✓ ${uvFile} copied (fallback match)`);
+  } else {
+    console.error(`✗ uv binary not found in ${binariesDir}!`);
+    console.error('Please run: node scripts/download-uv.js');
+    process.exit(1);
+  }
+}
+
 // Copy other necessary files
 const otherFiles = ['LICENSE', 'README.md', 'MANIFEST.in'];
 otherFiles.forEach(file => {
