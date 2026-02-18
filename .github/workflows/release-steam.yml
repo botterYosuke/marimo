@@ -84,18 +84,22 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: cargo tauri build --features steam --config src-tauri/tauri-steam.conf.json
+        run: cargo tauri build --features steam --config src-tauri/tauri-steam-windows.conf.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📁 Package Windows files
+        shell: pwsh
+        run: |
+          mkdir steam-build
+          Copy-Item src-tauri/target/release/marimo-desktop.exe -Destination steam-build/backcast.exe
+          Copy-Item -Path src-tauri/target/release/resources -Destination steam-build/resources -Recurse
 
       - name: 📤 Upload Windows artifacts (Steam)
         uses: actions/upload-artifact@v4
         with:
           name: steam-windows-${{ env.MARIMO_VERSION }}
-          # NSIS ステージングディレクトリ: インストーラー生成前のゲームファイル群
-          # (backcast.exe + resources/) が展開される。Steam depot にはこれをアップロードする。
-          # ⚠️ パスは Tauri バージョンに依存する。実ビルドで target/release/bundle/nsis/ 以下を確認し適宜修正。
-          path: src-tauri/target/release/bundle/nsis/_/
+          path: steam-build/
           if-no-files-found: error
           retention-days: 7
 
@@ -162,7 +166,7 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: cargo tauri build --features steam --config src-tauri/tauri-steam.conf.json
+        run: cargo tauri build --features steam --config src-tauri/tauri-steam-mac.conf.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -247,7 +251,7 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: cargo tauri build --features steam --config src-tauri/tauri-steam.conf.json
+        run: cargo tauri build --features steam --config src-tauri/tauri-steam-linux.conf.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
