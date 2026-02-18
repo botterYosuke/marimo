@@ -51,8 +51,9 @@ const htmlDevPlugin = (): Plugin => {
       if (isPyodide) {
         // If VITE_MARIMO_VERSION is defined, use it directly to avoid requiring
         // uv/marimo to be installed in the CI environment.
-        const marimoVersion = process.env.VITE_MARIMO_VERSION
-          ?? execSync("uv run marimo --version").toString().trim();
+        const marimoVersion =
+          process.env.VITE_MARIMO_VERSION ??
+          execSync("uv run marimo --version").toString().trim();
         const modeFromUrl = ctx.originalUrl?.includes("mode=read")
           ? "read"
           : "edit";
@@ -298,9 +299,9 @@ export default defineConfig({
   build: {
     // Pyodide requires topLevelAwait plugin to transform top-level await;
     // esnext target would output it natively and break Pyodide environments.
-    ...(isPyodide ? {} : { target: "esnext" }),
+    ...(isPyodide ? { target: "es2020" } : { target: "esnext" }),
     // Pyodide builds use esbuild to avoid CJS module issues with oxc minifier.
-    minify: isDev ? false : (isPyodide ? "esbuild" : "oxc"),
+    minify: isDev ? false : isPyodide ? "esbuild" : "oxc",
     sourcemap: isDev,
   },
   resolve: {
@@ -308,30 +309,42 @@ export default defineConfig({
     // Fix for rolldown-vite 7.3.1 type-only import resolution.
     // When isPyodide, enableNativePlugin is false so tsconfigPaths doesn't work;
     // manually add the tsconfig paths aliases so "@/..." imports resolve correctly.
-    alias: isPyodide ? {
-      '@': path.resolve(__dirname, 'src'),
-      'zod': path.resolve(__dirname, 'node_modules/zod'),
-    } : {
-      // vega-lite exports types via ./types_unstable/* -> ./build/*
-      // but only .d.ts files exist, not .js files
-      'vega-lite/types_unstable/channeldef.js': 'vega-lite/build/channeldef.d.ts',
-      'vega-lite/types_unstable/encoding.js': 'vega-lite/build/encoding.d.ts',
-      'vega-lite/types_unstable/spec/unit.js': 'vega-lite/build/spec/unit.d.ts',
-      'vega-lite/types_unstable/channel.js': 'vega-lite/build/channel.d.ts',
-      'vega-lite/types_unstable/compositemark/index.js': 'vega-lite/build/compositemark/index.d.ts',
-      'vega-lite/types_unstable/data.js': 'vega-lite/build/data.d.ts',
-      'vega-lite/types_unstable/mark.js': 'vega-lite/build/mark.d.ts',
-      'vega-lite/types_unstable/selection.js': 'vega-lite/build/selection.d.ts',
-      'vega-lite/types_unstable/spec/facet.js': 'vega-lite/build/spec/facet.d.ts',
-      'vega-lite/types_unstable/spec/layer.js': 'vega-lite/build/spec/layer.d.ts',
-      'vega-lite/types_unstable/spec/index.js': 'vega-lite/build/spec/index.d.ts',
-      'vega-lite/types_unstable/spec/toplevel.js': 'vega-lite/build/spec/toplevel.d.ts',
-      'vega-lite/types_unstable/type.js': 'vega-lite/build/type.d.ts',
-      'vega-lite/types_unstable/aggregate.js': 'vega-lite/build/aggregate.d.ts',
-      'vega-lite/types_unstable/bin.js': 'vega-lite/build/bin.d.ts',
-      'vega-lite/types_unstable/scale.js': 'vega-lite/build/scale.d.ts',
-      'vega-lite/types_unstable/resolve.js': 'vega-lite/build/resolve.d.ts',
-    },
+    alias: isPyodide
+      ? {
+          "@": path.resolve(__dirname, "src"),
+          zod: path.resolve(__dirname, "node_modules/zod"),
+        }
+      : {
+          // vega-lite exports types via ./types_unstable/* -> ./build/*
+          // but only .d.ts files exist, not .js files
+          "vega-lite/types_unstable/channeldef.js":
+            "vega-lite/build/channeldef.d.ts",
+          "vega-lite/types_unstable/encoding.js":
+            "vega-lite/build/encoding.d.ts",
+          "vega-lite/types_unstable/spec/unit.js":
+            "vega-lite/build/spec/unit.d.ts",
+          "vega-lite/types_unstable/channel.js": "vega-lite/build/channel.d.ts",
+          "vega-lite/types_unstable/compositemark/index.js":
+            "vega-lite/build/compositemark/index.d.ts",
+          "vega-lite/types_unstable/data.js": "vega-lite/build/data.d.ts",
+          "vega-lite/types_unstable/mark.js": "vega-lite/build/mark.d.ts",
+          "vega-lite/types_unstable/selection.js":
+            "vega-lite/build/selection.d.ts",
+          "vega-lite/types_unstable/spec/facet.js":
+            "vega-lite/build/spec/facet.d.ts",
+          "vega-lite/types_unstable/spec/layer.js":
+            "vega-lite/build/spec/layer.d.ts",
+          "vega-lite/types_unstable/spec/index.js":
+            "vega-lite/build/spec/index.d.ts",
+          "vega-lite/types_unstable/spec/toplevel.js":
+            "vega-lite/build/spec/toplevel.d.ts",
+          "vega-lite/types_unstable/type.js": "vega-lite/build/type.d.ts",
+          "vega-lite/types_unstable/aggregate.js":
+            "vega-lite/build/aggregate.d.ts",
+          "vega-lite/types_unstable/bin.js": "vega-lite/build/bin.d.ts",
+          "vega-lite/types_unstable/scale.js": "vega-lite/build/scale.d.ts",
+          "vega-lite/types_unstable/resolve.js": "vega-lite/build/resolve.d.ts",
+        },
     dedupe: [
       "react",
       "react-dom",
@@ -351,14 +364,14 @@ export default defineConfig({
     // causing "na/ra/sa is not a function" errors at runtime.
     // Pyodide builds MUST use false so topLevelAwait() plugin transforms TLA correctly.
     // Non-Pyodide builds use 'resolver' (only native resolver, JS plugins still run).
-    enableNativePlugin: isPyodide ? false : 'resolver',
+    enableNativePlugin: isPyodide ? false : "resolver",
   },
   worker: {
     format: "es",
     rollupOptions: {
       output: {
-        entryFileNames: '[name]-[hash].js',
-        chunkFileNames: '[name]-[hash].js',
+        entryFileNames: "[name]-[hash].js",
+        chunkFileNames: "[name]-[hash].js",
       },
     },
   },
