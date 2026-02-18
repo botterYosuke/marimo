@@ -11,14 +11,26 @@ cells-6eW1MVv5.js:9 TypeError: na is not a function
 
 このエラーは `panels-*.js` や `cells-*.js` などのチャンク読み込み時、特に Top-Level Await (TLA) を含むモジュールの初期化中に発生します。ミニファイされた変数 `na`（あるいは類似の短い変数名）が関数として呼び出されていますが、実体が存在しない状態です。
 
-## 新たな知見と原因
-- **原因**: Vite (Rolldown) のビルド設定において、以下の複合要因により TLA のコード変換が正しく行われなかったことが主因です。
-    1. `build.target` が `esnext` であったため、ビルドツールが「変換不要（ブラウザがネイティブ対応）」と判断した。
-    2. `experimental.enableNativePlugin` が有効（デフォルト等）であったため、Rolldown のネイティブ実装が JS ベースのプラグイン（`vite-plugin-top-level-await`）をスキップしていた。
-- **メカニズム**:
-    - プロジェクトでは `vite-plugin-top-level-await` を使用して TLA をサポートしています。
-    - Rolldown のネイティブ最適化と衝突すると、期待される `__tla` ヘルパー関数の定義や初期化順序が崩れ、実行時に未定義の変数を呼び出そうとしてエラー（`na is not a function`）が発生します。
-    - また、新しいミニファイア（`oxc`）が特定の条件（CJS/ESM混在環境など）で正しく動作しないケースがあることも判明しました。
+## 確定した根本原因（2026-02-18 解析完了）
+
+### TLA の根源
+`loro-crdt@1.10.6` の `bundler/loro_wasm.js` が WebAssembly 初期化に **Top-Level Await** を使用：
+
+```javascript
+// loro_wasm.js:47, 62, 71, 75, 81 など — モジュールトップレベルに await
+({ instance } = await WebAssembly.instantiate(wasmModuleOrExports, {...}));
+const wkmod = ... ? wasmModuleOrExports : await import('./loro_wasm_bg.wasm');
+```
+
+### 伝播チェーン
+1. `loro_wasm.js` (TLA 源) → `loro-crdt` インポート元 (`rtc/loro/sync.ts` 等)
+2. → `cells-6eW1MVv5.js` チャンク: TLA により `EP = (async()=>{...})()` でラップ、`EP as __tla` エクスポート
+3. → `layout-CPGHYliC.js` チャンク: cells の `__tla` をチェーン、`Ct`（`react-grid-layout` ラッパー）を `__tla` の `.then()` 内で初期化、`Ct as _` および `Ma as __tla` エクスポート
+4. → `panels-DHtfoB8g.js`: `layout` から `_ as na` をインポートするが **`__tla` をインポートせず TLA チェーンが欠落**
+5. 結果: `var JA = na()` 実行時に `Ct` が未初期化 (undefined) → `TypeError: na is not a function`
+
+### JS プラグインが失敗する理由
+`enableNativePlugin: false` では `vite-plugin-top-level-await` (JS プラグイン) が実行されるが、rolldown-vite 7.3.1 では `panels.js` への TLA チェーン伝播に失敗する（プラグインのバグ）。
 
 ## 対応と設計思想
 ### Pyodide 環境への影響を限定する修正
@@ -27,15 +39,18 @@ cells-6eW1MVv5.js:9 TypeError: na is not a function
 **修正内容 (`frontend/vite.config.mts`, `frontend/islands/vite.config.mts`):**
 ```typescript
 build: {
-  // Pyodide ビルドでは vite-plugin-top-level-await による変換を強制するため、target を es2020 に固定
-  // 通常ビルドは引き続き esnext を使用
+  // Pyodide ビルドでは TLA を es2020 向けに低下させるため target を固定
   ...(isPyodide ? { target: "es2020" } : { target: "esnext" }),
   // oxc ミニファイアで発生する可能性のある問題を避けるため、Pyodide ビルドでは安定した esbuild を使用
   minify: isPyodide ? "esbuild" : "oxc",
 },
 experimental: {
-  // Rolldown のネイティブプラグインを無効化し、JSベースのプラグイン（TLA等）が確実に動作するようにする
-  enableNativePlugin: isPyodide ? false : "resolver",
+  // Pyodide ビルドでは enableNativePlugin: true を使用。
+  // false にすると vite-plugin-top-level-await (JS プラグイン) が動作するが、
+  // rolldown-vite 7.3.1 では panels.js への TLA チェーン伝播に失敗する。
+  // true にすると rolldown のネイティブトランスフォームが TLA を正しく処理する。
+  // (resolve.alias で @/* と zod のパスを手動設定済みのため tsconfigPaths 問題はない)
+  enableNativePlugin: isPyodide ? true : "resolver",
 },
 ```
 
@@ -50,12 +65,12 @@ experimental: {
 - **CI/CD の確認**: `deploy-firebase.yml` などのワークフローで `PYODIDE: "true"` が設定されているビルドが、修正後の挙動になっているか確認してください。
 
 ## 作業進捗
-- [✅] エラーログの分析と原因特定 (`target: esnext` と TLA プラグイン、ネイティブプラグインの競合)
-- [✅] `frontend/vite.config.mts` の修正 (Pyodide ビルド時の `target`, `minify`, `enableNativePlugin` の調整)
-- [✅] `frontend/islands/vite.config.mts` への修正展開 (アイランドコンポーネント用)
-- [✅] `deploy-firebase.yml` へのデプロイ分岐（`sasa/pyodide` ブランチ）の追加 (USER側で実施)
-- [✅] ドキュメントへの最新の知見と設計思想の反映
-- [✅] Pyodide 版以外（通常ビルド）への影響がないことの確認
+- [✅] エラーログの分析と根本原因の特定（`loro-crdt` の TLA + rolldown-vite での JS プラグイン伝播失敗）
+- [✅] デプロイ済みファイル (`panels-DHtfoB8g.js`, `layout-CPGHYliC.js`, `cells-6eW1MVv5.js`) の解析
+- [✅] `frontend/vite.config.mts` の修正 (`enableNativePlugin: isPyodide ? true : "resolver"`)
+- [✅] `deploy-firebase.yml` へのデプロイ分岐（`sasa/pyodide` ブランチ）の追加
+- [✅] ドキュメントへの確定原因と設計思想の反映
+- [ ] デプロイして実動作確認（`enableNativePlugin: true` で TLA が正しく伝播するか）
 
 ---
 

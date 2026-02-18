@@ -359,12 +359,20 @@ export default defineConfig({
     ],
   },
   experimental: {
-    // enableNativePlugin: true enables Rolldown's native plugins, which bypass JS-based Vite plugins
-    // like vite-plugin-top-level-await. This prevents TLA transformation in panels.js,
-    // causing "na/ra/sa is not a function" errors at runtime.
-    // Pyodide builds MUST use false so topLevelAwait() plugin transforms TLA correctly.
-    // Non-Pyodide builds use 'resolver' (only native resolver, JS plugins still run).
-    enableNativePlugin: isPyodide ? false : "resolver",
+    // Root cause of "na is not a function" (panels-DHtfoB8g.js):
+    //   loro-crdt/bundler/loro_wasm.js uses TLA (await WebAssembly.instantiate) for WASM init.
+    //   TLA propagates: loro_wasm.js → cells.js → layout-CPGHYliC.js (exports Ct as _/__tla)
+    //   panels.js imports `_ as na` from layout but vite-plugin-top-level-await (JS plugin)
+    //   fails to add __tla chaining to panels.js in rolldown-vite 7.3.1.
+    //   Result: na (= Ct) is undefined when panels.js evaluates var JA=na().
+    //
+    // Fix: enableNativePlugin: true lets rolldown's native transform handle TLA for es2020 target,
+    //   correctly propagating TLA through the full chunk graph (including panels.js).
+    //   The JS-based topLevelAwait() plugin is bypassed but no longer needed.
+    //   resolve.alias already provides @/* and zod paths for tsconfigPaths.
+    //
+    // Non-Pyodide builds use 'resolver' (native resolver only, JS plugins still run).
+    enableNativePlugin: isPyodide ? true : "resolver",
   },
   worker: {
     format: "es",
