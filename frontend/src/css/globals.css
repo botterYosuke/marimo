@@ -51,6 +51,9 @@
 
     /* Radix dark colors: https://github.com/radix-ui/colors/blob/main/src/dark.ts */
 
+    /* Grid Layout */
+    --grid-bordered-bg: light-dark(#6f8591, #4a5a64);
+
     /* Base colors. */
     --background: light-dark(hsl(0deg 0% 100%), hsl(150deg 7.7% 10.2%));
     --foreground: light-dark(hsl(222.2deg 47.4% 11.2%), hsl(155deg 7% 93%));

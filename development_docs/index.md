@@ -16,10 +16,12 @@ Internal documentation for marimo developers.
 - [Prompts](prompts.md)
 - [Traces](traces.md)
 - [Game e2e レビューシステム](game-e2e-review-system.md)
+- [Frontend Build](frontend_build.md)
 
 ### Pyodide
 - [Pyodide](pyodide.md)
 - [Custom Wheel](pyodide-custom-wheel.md)
+- [Pyodide "na is not a function" Error](pyodide-a-is-not-function.md)
 
 ### Fixes & Improvements
 - [Chart Widget Caching](chart-widget-caching-fix.md)
@@ -39,11 +41,11 @@ Internal documentation for marimo developers.
 - [Skill Tree Implementation](skill-tree-implementation.md)
 - [Progress Persistence](progress-persistence.md)
 - [Money Missile Homing](money-missile-homing.md)
+- [Tauri: Auto Open Recent File](tauri_auto_open_recent_file.md)
+- [Tauri: Seed Notebooks](tauri_seed_notebooks.md)
 
 ### Security
 - [Python Sandbox Security](python-sandbox-security.md)
 
 ### Deployment
-- [Electron Startup](electron-startup-config.md)
-- [Steam Deploy](steam-deploy.md)
-- [Steam Integration Fixes](steam-integration-fixes.md)
+- [Steam Single Folder (Portable)](steam-single-folder.md)

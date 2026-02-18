@@ -297,8 +297,8 @@ export default defineConfig({
     "process.env.DEBUG": JSON.stringify(process.env.DEBUG ?? ""),
   },
   build: {
-    // Pyodide requires topLevelAwait plugin to transform top-level await;
-    // esnext target would output it natively and break Pyodide environments.
+    // Pyodide builds target es2020 for broader browser compatibility and
+    // deterministic output. loro-crdt TLA is handled via stub (not target).
     ...(isPyodide ? { target: "es2020" } : { target: "esnext" }),
     // Pyodide builds use esbuild to avoid CJS module issues with oxc minifier.
     minify: isDev ? false : isPyodide ? "esbuild" : "oxc",
@@ -306,13 +306,20 @@ export default defineConfig({
   },
   resolve: {
     tsconfigPaths: true,
-    // Fix for rolldown-vite 7.3.1 type-only import resolution.
-    // When isPyodide, enableNativePlugin is false so tsconfigPaths doesn't work;
-    // manually add the tsconfig paths aliases so "@/..." imports resolve correctly.
+    // Pyodide builds alias loro-crdt to a no-op stub (src/stubs/loro-crdt.ts).
+    // loro-crdt uses WebAssembly with Top-Level Await (TLA) in loro_wasm.js.
+    // rolldown-vite 7.3.1 fails to propagate TLA chains across chunk boundaries
+    // (both JS plugin and native plugin modes are affected), causing
+    // "na is not a function" at runtime. Aliasing removes TLA from the
+    // dependency graph entirely; the real API is never called in Pyodide mode
+    // because isWasm() is true and RTC always returns early.
+    // "@" and "zod" are aliased manually since tsconfigPaths may not resolve
+    // them correctly in all rolldown-vite configurations.
     alias: isPyodide
       ? {
           "@": path.resolve(__dirname, "src"),
           zod: path.resolve(__dirname, "node_modules/zod"),
+          "loro-crdt": path.resolve(__dirname, "src/stubs/loro-crdt.ts"),
         }
       : {
           // vega-lite exports types via ./types_unstable/* -> ./build/*
@@ -359,20 +366,13 @@ export default defineConfig({
     ],
   },
   experimental: {
-    // Root cause of "na is not a function" (panels-DHtfoB8g.js):
-    //   loro-crdt/bundler/loro_wasm.js uses TLA (await WebAssembly.instantiate) for WASM init.
-    //   TLA propagates: loro_wasm.js → cells.js → layout-CPGHYliC.js (exports Ct as _/__tla)
-    //   panels.js imports `_ as na` from layout but vite-plugin-top-level-await (JS plugin)
-    //   fails to add __tla chaining to panels.js in rolldown-vite 7.3.1.
-    //   Result: na (= Ct) is undefined when panels.js evaluates var JA=na().
-    //
-    // Fix: enableNativePlugin: true lets rolldown's native transform handle TLA for es2020 target,
-    //   correctly propagating TLA through the full chunk graph (including panels.js).
-    //   The JS-based topLevelAwait() plugin is bypassed but no longer needed.
-    //   resolve.alias already provides @/* and zod paths for tsconfigPaths.
-    //
-    // Non-Pyodide builds use 'resolver' (native resolver only, JS plugins still run).
-    enableNativePlugin: isPyodide ? true : "resolver",
+    // Use native resolver for both Pyodide and non-Pyodide builds.
+    // "resolver" enables the native Rust resolver while keeping JS plugins active
+    // (including vite-plugin-top-level-await and wasm() for safety).
+    // The root cause of "na is not a function" (loro-crdt TLA) is fixed by
+    // aliasing loro-crdt to a stub in Pyodide builds (see resolve.alias above),
+    // so enableNativePlugin no longer needs to be true for Pyodide.
+    enableNativePlugin: "resolver",
   },
   worker: {
     format: "es",

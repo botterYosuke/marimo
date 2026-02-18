@@ -1,10 +1,11 @@
 # AnyWidget バックエンド→フロントエンド同期
 
-> **ステータス:** 解決済み (2026-01-26)
+> **ステータス:** 未適用 (コードベースと不一致)
 
 ## 概要
 
-`mo.Thread` からの AnyWidget トレイト更新がフロントエンドに反映されない問題を修正。
+`mo.Thread` からの AnyWidget トレイト更新がフロントエンドに反映されない問題の調査。
+以前、`skipGlobalNotify` フラグを用いた修正が提案されたが、現在のコードベースには反映されていない。
 
 ---
 
@@ -12,7 +13,7 @@
 
 **現象:** `mo.Thread` 内で AnyWidget のトレイトを更新しても、フロントエンドのチャートが更新されない。
 
-## 根本原因
+## 根本原因（調査結果）
 
 ### UIElement レジストリのエントリ削除問題
 
@@ -30,32 +31,30 @@
 
 ---
 
-## 解決策
+## 提案された解決策（未実装）
 
-### 変更ファイル: `frontend/src/core/websocket/useMarimoKernelConnection.tsx`
+以下の修正が提案されたが、現在の実装 (`frontend/src/plugins/impl/anywidget/model.ts`, `useMarimoKernelConnection.tsx`) にはこの変更が含まれていない。
+
+### 変更案: `skipGlobalNotify` の導入
+
+`frontend/src/core/websocket/useMarimoKernelConnection.tsx`:
 
 ```typescript
-// Before (問題あり):
-handleWidgetMessage({
-  ...
-  skipGlobalNotify: Boolean(uiElement),  // uiElement があれば global callback をスキップ
-});
-
-// After (修正済み):
+// 提案された変更:
 handleWidgetMessage({
   ...
   skipGlobalNotify: false,  // 常に global callback を使用
 });
 ```
 
-**なぜこれで動くか:**
+**意図:**
 - `skipGlobalNotify: false` により、`notifyGlobalModelUpdate()` が常に呼ばれる
 - グローバルコールバック → AnyWidgetPlugin.tsx の `registerGlobalModelUpdateCallback` → ローカルモデル更新
 - この経路は `UI_ELEMENT_REGISTRY` に依存しないため、エントリ削除の影響を受けない
 
 ---
 
-## メッセージフロー
+## メッセージフロー（想定）
 
 ```
 Backend → WebSocket → useMarimoKernelConnection
@@ -75,16 +74,16 @@ Backend → WebSocket → useMarimoKernelConnection
 
 ---
 
-## 修正されたファイル一覧
+## 修正が必要なファイル一覧
 
 | ファイル | 変更内容 | 重要度 |
 |---------|---------|--------|
-| `frontend/src/core/websocket/useMarimoKernelConnection.tsx` | `skipGlobalNotify: false` に変更 | **必須** |
-| `frontend/src/plugins/impl/anywidget/model.ts` | `skipGlobalNotify` パラメータ追加 | 参考 |
+| `frontend/src/core/websocket/useMarimoKernelConnection.tsx` | `skipGlobalNotify: false` に変更 (未適用) | **必須** |
+| `frontend/src/plugins/impl/anywidget/model.ts` | `skipGlobalNotify` パラメータ追加 (未適用) | 参考 |
 
 ---
 
-## 学んだこと
+## 学んだこと（調査ログ）
 
 1. **ログは正しい場所に追加する**: `Model.emit` のリスナー数や `UIRegistry.broadcastMessage` のエントリ状態をログに出すことで問題が明確になった
 

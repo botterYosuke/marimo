@@ -32,32 +32,50 @@ const wkmod = ... ? wasmModuleOrExports : await import('./loro_wasm_bg.wasm');
 ### JS プラグインが失敗する理由
 `enableNativePlugin: false` では `vite-plugin-top-level-await` (JS プラグイン) が実行されるが、rolldown-vite 7.3.1 では `panels.js` への TLA チェーン伝播に失敗する（プラグインのバグ）。
 
-## 対応と設計思想
-### Pyodide 環境への影響を限定する修正
-この問題は Pyodide 版（Wasm版）特有のビルド制約に起因するため、修正は `isPyodide` フラグを用いて **Pyodide ビルドのみ** に適用しました。
+## 対応と設計思想（最終版）
 
-**修正内容 (`frontend/vite.config.mts`, `frontend/islands/vite.config.mts`):**
+### 根本解決: loro-crdt をスタブに置き換え（2026-02-18 確定）
+
+`enableNativePlugin: true` による修正は失敗した（実デプロイで `panels-g80ohNGS.js` の同エラーを確認）。rolldown-vite 7.3.1 では **JS プラグインでもネイティブプラグインでも** TLA チェーン伝播が失敗するため、バンドラー側での修正は不可能。
+
+**根本解決**: Pyodide ビルドで `loro-crdt` を TLA なしのスタブにエイリアス。
+
+**修正ファイル一覧:**
+- `frontend/src/stubs/loro-crdt.ts` (新規): TLA なしのスタブクラス群
+- `frontend/vite.config.mts`: resolve.alias に loro-crdt スタブを追加、enableNativePlugin を `"resolver"` に統一
+
+**`frontend/vite.config.mts` の変更:**
 ```typescript
-build: {
-  // Pyodide ビルドでは TLA を es2020 向けに低下させるため target を固定
-  ...(isPyodide ? { target: "es2020" } : { target: "esnext" }),
-  // oxc ミニファイアで発生する可能性のある問題を避けるため、Pyodide ビルドでは安定した esbuild を使用
-  minify: isPyodide ? "esbuild" : "oxc",
+resolve: {
+  alias: isPyodide ? {
+    "@": path.resolve(__dirname, "src"),
+    zod: path.resolve(__dirname, "node_modules/zod"),
+    // loro-crdt の TLA を依存グラフから完全除去
+    "loro-crdt": path.resolve(__dirname, "src/stubs/loro-crdt.ts"),
+  } : { /* vega-lite aliases */ },
 },
 experimental: {
-  // Pyodide ビルドでは enableNativePlugin: true を使用。
-  // false にすると vite-plugin-top-level-await (JS プラグイン) が動作するが、
-  // rolldown-vite 7.3.1 では panels.js への TLA チェーン伝播に失敗する。
-  // true にすると rolldown のネイティブトランスフォームが TLA を正しく処理する。
-  // (resolve.alias で @/* と zod のパスを手動設定済みのため tsconfigPaths 問題はない)
-  enableNativePlugin: isPyodide ? true : "resolver",
+  // TLA の根本原因を解消したので両ビルドで "resolver" を使用
+  enableNativePlugin: "resolver",
 },
 ```
 
-- **設計思想**:
-    - **Isolation (隔離)**: 通常の Web ビルド (`esnext`, `oxc`) は最新の機能を活用し、パフォーマンスとバンドルサイズを最適化します。Pyodide 版の修正が通常版に影響を与えないように `isPyodide` で分岐させています。
-    - **Determinism (確定性)**: Pyodide 環境は Wasm の初期化と TLA が密接に絡むため、魔法のような最適化を避け、`es2020` ターゲットと `esbuild` ミニファイアで確定的な出力を得られるようにしています。
-    - **Consistency (一貫性)**: Islands ビルド (`frontend/islands/vite.config.mts`) にも同様の修正を適用し、静的に書き出されたノートブックでも同様の問題が発生しないようにしました。
+### なぜスタブで安全か
+
+- Pyodide では `isWasm()` が `true` を返す
+- `realTimeCollaboration()` は `{ extension: [], code: initialCode }` で即座にリターン
+- モジュールレベルのコード (`new LoroDoc()`, `new Awareness(...)` 等) は実行されるが、それらが登録するコールバックは Pyodide では発火しない (`isRtcEnabled()` が false、または WebSocket が接続されない)
+
+### 副次効果（ボーナス）
+
+- Pyodide バンドルから `loro_wasm_bg.wasm` (~3.2 MB) と `loro_wasm_bg-*.js` (~85 kB) が除外される
+- ページ初期ロードが高速化
+
+### 設計思想
+
+- **Isolation (隔離)**: 通常の Web ビルドは実際の loro-crdt (WASM 付き) を使用。Pyodide 版のみスタブに切り替え。
+- **Determinism (確定性)**: スタブには TLA・WASM が一切なく、バンドラーの挙動に依存しない。
+- **Simplicity (単純性)**: バンドラーのバグ回避策（enableNativePlugin の調整など）より、依存グラフからの除去が確実。
 
 ## Tips: 開発者向け情報
 - **Minified エラーのデバッグ**: `na is not a function` のようなエラーが出た場合、それがアプリケーションコードのバグではなく、ビルドツールが生成したヘルパー関数の不整合である可能性を疑ってください。特に TLA 変換プラグインを使用している場合、`target` と `enableNativePlugin` 設定が重要です。
@@ -67,10 +85,11 @@ experimental: {
 ## 作業進捗
 - [✅] エラーログの分析と根本原因の特定（`loro-crdt` の TLA + rolldown-vite での JS プラグイン伝播失敗）
 - [✅] デプロイ済みファイル (`panels-DHtfoB8g.js`, `layout-CPGHYliC.js`, `cells-6eW1MVv5.js`) の解析
-- [✅] `frontend/vite.config.mts` の修正 (`enableNativePlugin: isPyodide ? true : "resolver"`)
-- [✅] `deploy-firebase.yml` へのデプロイ分岐（`sasa/pyodide` ブランチ）の追加
-- [✅] ドキュメントへの確定原因と設計思想の反映
-- [ ] デプロイして実動作確認（`enableNativePlugin: true` で TLA が正しく伝播するか）
+- [✅] 第1次修正: `enableNativePlugin: true` → **失敗**（`panels-g80ohNGS.js` で同エラー継続）
+- [✅] 根本解決: `frontend/src/stubs/loro-crdt.ts` 作成 + `resolve.alias` でスタブに置き換え
+- [✅] `enableNativePlugin` を `"resolver"` に統一
+- [✅] ドキュメント更新
+- [ ] デプロイして実動作確認（`loro-crdt` スタブで TLA が依存グラフから除去されるか）
 
 ---
 
