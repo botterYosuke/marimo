@@ -1,15 +1,19 @@
-# Pyodideビルドにおける "na is not a function" エラーの調査と対応
+# Pyodideビルドにおける "X is not a function" エラーの調査と対応
 
 ## 状況
-`discord-release.yml` でデプロイされた Pyodide 版 marimo において、ブラウザコンソールに以下のエラーが発生し、アプリケーションが正常に起動しない問題が確認されました。
+`deploy-firebase.yml` でデプロイされた Pyodide 版 marimo において、ブラウザコンソールに以下のエラーが発生し、アプリケーションが正常に起動しない問題が確認されました。
 
 ```
+// 第1・2次修正前
 cells-6eW1MVv5.js:9 TypeError: na is not a function
     at panels-DHtfoB8g.js:1:35016
-...
+
+// 第2次修正後（loro-crdt スタブ導入後も再発）
+index-Bf54jHWc.js:9 TypeError: re is not a function
+    at panels-Cmgv8pHD.js:1:33493
 ```
 
-このエラーは `panels-*.js` や `cells-*.js` などのチャンク読み込み時、特に Top-Level Await (TLA) を含むモジュールの初期化中に発生します。ミニファイされた変数 `na`（あるいは類似の短い変数名）が関数として呼び出されていますが、実体が存在しない状態です。
+このエラーは `panels-*.js` チャンク読み込み時に発生します。ミニファイされた変数（`na`、`re` 等）が関数として呼び出されていますが、実体が未初期化の状態です。
 
 ## 確定した根本原因（2026-02-18 解析完了）
 
@@ -57,15 +61,20 @@ rolldown-vite が `panels` チャンクへの `__tla` チェーン伝播に失�
 
 **修正ファイル一覧:**
 - `frontend/src/stubs/loro-crdt.ts` (新規): TLA なしのスタブクラス群
-- `frontend/vite.config.mts`:
-  - resolve.alias に loro-crdt スタブを追加
-  - enableNativePlugin を `"resolver"` に統一
-  - `vite-plugin-top-level-await` の import と使用を削除
+- `frontend/vite.config.mts`: loro-crdt スタブの alias 追加、`vite-plugin-top-level-await` の import と使用を削除
+- `frontend/package.json`: `vite-plugin-top-level-await` devDependency を削除
 
-**`frontend/vite.config.mts` の最終状態:**
+**`frontend/vite.config.mts` の最終状態（抜粋）:**
 ```typescript
 // import topLevelAwait は削除済み
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+build: {
+  ...(isPyodide ? { target: "es2020" } : { target: "esnext" }),
+  minify: isDev ? false : isPyodide ? "esbuild" : "oxc",
+},
 resolve: {
   alias: isPyodide ? {
     "@": path.resolve(__dirname, "src"),
@@ -78,7 +87,6 @@ experimental: {
 },
 plugins: [
   // topLevelAwait() は含めない — TLA ソースが除去済みのため不要
-  // 残すと rolldown-vite との連携不良でエラーの原因となる
   wasm(),
 ],
 ```
@@ -110,22 +118,6 @@ plugins: [
 - [✅] デプロイ済みファイル (`panels-DHtfoB8g.js`, `layout-CPGHYliC.js`, `cells-6eW1MVv5.js`) の解析
 - [✅] 第1次修正: `enableNativePlugin: true` → **失敗**
 - [✅] 第2次修正: loro-crdt スタブ + alias → スタブは機能するが `topLevelAwait()` プラグインが残存して **失敗**
-- [✅] 第3次修正: `topLevelAwait()` プラグインを完全除去 → TLA 完全排除
+- [✅] 第3次修正: `topLevelAwait()` プラグインを完全除去 + `package.json` からも削除 → TLA 完全排除
+- [✅] Firebase デプロイで実動作確認済み（`https://backcast-tan.web.app/`）
 - [✅] ドキュメント更新
-- [ ] デプロイして実動作確認
-
----
-
-## 履歴 (History)
-
-### 2026-02-18: 調査初期メモ
-当初の調査および対応案の記録です。
-
-- **根本原因**: Vite のビルドターゲット設定。
-- **メカニズム**: `esnext` ターゲット時に `vite-plugin-top-level-await` の変換がスキップされ、Pyodide環境で未定義ヘルパー関数（ミニファイされた `na` 等）の呼び出しエラーが発生。
-- **初期の対応案**: `isPyodide ? { target: "es2020" } : { target: "esnext" }` による分岐。
-- **特記事項 (ディレクトリパス)**:
-    - ローカル環境での検証時、以下のディレクトリパス設定の不整合が確認された。
-    - 修正前: `"C:\Users\sasai\Downloads\backcast_files"`
-    - 修正後: `"C:\Users\sasai\Downloads\backcast-v2_files"`
-    - ファイル構成自体の差異（`index-*.js` のサイズ差など）も、ビルド設定の変更によって発生することを確認した。
