@@ -1278,6 +1278,34 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        履歴 (History)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="履歴 (History)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2026-02-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-02-18: 調査初期メモ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1305,43 +1333,72 @@
 <p>このエラーは <code>panels-*.js</code> や <code>cells-*.js</code> などのチャンク読み込み時、特に Top-Level Await (TLA) を含むモジュールの初期化中に発生します。ミニファイされた変数 <code>na</code>（あるいは類似の短い変数名）が関数として呼び出されていますが、実体が存在しない状態です。</p>
 <h2 id="_2">新たな知見と原因<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>原因</strong>: Vite のビルド設定において、Pyodide 版の <code>build.target</code> が <code>esnext</code>（またはデフォルト）になっていたことが主因です。</li>
+<li><strong>原因</strong>: Vite (Rolldown) のビルド設定において、以下の複合要因により TLA のコード変換が正しく行われなかったことが主因です。<ol>
+<li><code>build.target</code> が <code>esnext</code> であったため、ビルドツールが「変換不要（ブラウザがネイティブ対応）」と判断した。</li>
+<li><code>experimental.enableNativePlugin</code> が有効（デフォルト等）であったため、Rolldown のネイティブ実装が JS ベースのプラグイン（<code>vite-plugin-top-level-await</code>）をスキップしていた。</li>
+</ol>
+</li>
 <li><strong>メカニズム</strong>:<ul>
 <li>プロジェクトでは <code>vite-plugin-top-level-await</code> を使用して TLA をサポートしています。</li>
-<li>ビルドターゲットが <code>esnext</code> の場合、Vite（および基盤となる Rollup/Rolldown）は「ターゲット環境がネイティブで TLA をサポートしている」と判断し、プラグインによるコード変換がスキップされる、あるいは競合する形で出力される場合があります。</li>
-<li>その結果、Pyodide 環境でのモジュール初期化順序において、期待される変換コードが含まれず、未定義のヘルパー関数（<code>na</code> などにミニファイされたもの）を参照してエラーとなりました。</li>
+<li>Rolldown のネイティブ最適化と衝突すると、期待される <code>__tla</code> ヘルパー関数の定義や初期化順序が崩れ、実行時に未定義の変数を呼び出そうとしてエラー（<code>na is not a function</code>）が発生します。</li>
+<li>また、新しいミニファイア（<code>oxc</code>）が特定の条件（CJS/ESM混在環境など）で正しく動作しないケースがあることも判明しました。</li>
 </ul>
 </li>
 </ul>
 <h2 id="_3">対応と設計思想<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <h3 id="pyodide">Pyodide 環境への影響を限定する修正<a class="headerlink" href="#pyodide" title="Permanent link">&para;</a></h3>
 <p>この問題は Pyodide 版（Wasm版）特有のビルド制約に起因するため、修正は <code>isPyodide</code> フラグを用いて <strong>Pyodide ビルドのみ</strong> に適用しました。</p>
-<p><strong>修正内容 (<code>frontend/vite.config.mts</code>):</strong>
+<p><strong>修正内容 (<code>frontend/vite.config.mts</code>, <code>frontend/islands/vite.config.mts</code>):</strong>
 <div class="highlight"><pre><span></span><code><span class="nx">build</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="c1">// Pyodide ビルドでは vite-plugin-top-level-await による変換を強制するため、target を es2020 に固定</span>
 <span class="w">  </span><span class="c1">// 通常ビルドは引き続き esnext を使用</span>
 <span class="w">  </span><span class="p">...(</span><span class="nx">isPyodide</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">target</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;es2020&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">target</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;esnext&quot;</span><span class="w"> </span><span class="p">}),</span>
-<span class="w">  </span><span class="c1">// ...</span>
-<span class="p">}</span>
+<span class="w">  </span><span class="c1">// oxc ミニファイアで発生する可能性のある問題を避けるため、Pyodide ビルドでは安定した esbuild を使用</span>
+<span class="w">  </span><span class="nx">minify</span><span class="o">:</span><span class="w"> </span><span class="kt">isPyodide</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s2">&quot;esbuild&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;oxc&quot;</span><span class="p">,</span>
+<span class="p">},</span>
+<span class="nx">experimental</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Rolldown のネイティブプラグインを無効化し、JSベースのプラグイン（TLA等）が確実に動作するようにする</span>
+<span class="w">  </span><span class="nx">enableNativePlugin</span><span class="o">:</span><span class="w"> </span><span class="kt">isPyodide</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;resolver&quot;</span><span class="p">,</span>
+<span class="p">},</span>
 </code></pre></div></p>
 <ul>
 <li><strong>設計思想</strong>:<ul>
-<li><strong>Isolation (隔離)</strong>: 通常の Web ビルド (<code>esnext</code>) は最新のブラウザ機能を活用し、パフォーマンスとバンドルサイズを最適化します。Pyodide 版の修正が通常版に影響を与えないようにします。</li>
-<li><strong>Compatibility (互換性)</strong>: Pyodide ビルドは Wasm や Python 環境の初期化と密接に関わるため、TLA の挙動がクリティカルです。<code>es2020</code> をターゲットとすることで、プラグインによる確実なポリフィル/変換を保証します。</li>
+<li><strong>Isolation (隔離)</strong>: 通常の Web ビルド (<code>esnext</code>, <code>oxc</code>) は最新の機能を活用し、パフォーマンスとバンドルサイズを最適化します。Pyodide 版の修正が通常版に影響を与えないように <code>isPyodide</code> で分岐させています。</li>
+<li><strong>Determinism (確定性)</strong>: Pyodide 環境は Wasm の初期化と TLA が密接に絡むため、魔法のような最適化を避け、<code>es2020</code> ターゲットと <code>esbuild</code> ミニファイアで確定的な出力を得られるようにしています。</li>
+<li><strong>Consistency (一貫性)</strong>: Islands ビルド (<code>frontend/islands/vite.config.mts</code>) にも同様の修正を適用し、静的に書き出されたノートブックでも同様の問題が発生しないようにしました。</li>
 </ul>
 </li>
 </ul>
 <h2 id="tips">Tips: 開発者向け情報<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Minified エラーのデバッグ</strong>: <code>na is not a function</code> のようなエラーが出た場合、それがアプリケーションコードのバグではなく、ビルドツールが生成したヘルパー関数の不整合である可能性を疑ってください。特に <code>vite-plugin-top-level-await</code> や <code>vite-plugin-wasm</code> を使用している場合、<code>target</code> 設定が重要です。</li>
+<li><strong>Minified エラーのデバッグ</strong>: <code>na is not a function</code> のようなエラーが出た場合、それがアプリケーションコードのバグではなく、ビルドツールが生成したヘルパー関数の不整合である可能性を疑ってください。特に TLA 変換プラグインを使用している場合、<code>target</code> と <code>enableNativePlugin</code> 設定が重要です。</li>
 <li><strong>Vite と TLA</strong>: <code>vite-plugin-top-level-await</code> は <code>target</code> がモダンすぎると動作しない（必要ないと判断される）ことがあります。意図的にプラグインを効かせたい場合は <code>es2020</code> 程度にターゲットを落とすのが定石です。</li>
+<li><strong>CI/CD の確認</strong>: <code>deploy-firebase.yml</code> などのワークフローで <code>PYODIDE: "true"</code> が設定されているビルドが、修正後の挙動になっているか確認してください。</li>
 </ul>
 <h2 id="_4">作業進捗<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <ul>
-<li>[x] エラーログの分析と原因特定 (<code>target: esnext</code> と TLA プラグインの競合)</li>
-<li>[x] <code>vite.config.mts</code> の修正 (Pyodide ビルド時の <code>target</code> を <code>es2020</code> に変更)</li>
-<li>[x] Pyodide 版以外への影響がないことの確認 (条件分岐による適用)</li>
-<li>[x] ドキュメントへの知見の共有</li>
+<li>[✅] エラーログの分析と原因特定 (<code>target: esnext</code> と TLA プラグイン、ネイティブプラグインの競合)</li>
+<li>[✅] <code>frontend/vite.config.mts</code> の修正 (Pyodide ビルド時の <code>target</code>, <code>minify</code>, <code>enableNativePlugin</code> の調整)</li>
+<li>[✅] <code>frontend/islands/vite.config.mts</code> への修正展開 (アイランドコンポーネント用)</li>
+<li>[✅] <code>deploy-firebase.yml</code> へのデプロイ分岐（<code>sasa/pyodide</code> ブランチ）の追加 (USER側で実施)</li>
+<li>[✅] ドキュメントへの最新の知見と設計思想の反映</li>
+<li>[✅] Pyodide 版以外（通常ビルド）への影響がないことの確認</li>
+</ul>
+<hr />
+<h2 id="history">履歴 (History)<a class="headerlink" href="#history" title="Permanent link">&para;</a></h2>
+<h3 id="2026-02-18">2026-02-18: 調査初期メモ<a class="headerlink" href="#2026-02-18" title="Permanent link">&para;</a></h3>
+<p>当初の調査および対応案の記録です。</p>
+<ul>
+<li><strong>根本原因</strong>: Vite のビルドターゲット設定。</li>
+<li><strong>メカニズム</strong>: <code>esnext</code> ターゲット時に <code>vite-plugin-top-level-await</code> の変換がスキップされ、Pyodide環境で未定義ヘルパー関数（ミニファイされた <code>na</code> 等）の呼び出しエラーが発生。</li>
+<li><strong>初期の対応案</strong>: <code>isPyodide ? { target: "es2020" } : { target: "esnext" }</code> による分岐。</li>
+<li><strong>特記事項 (ディレクトリパス)</strong>:<ul>
+<li>ローカル環境での検証時、以下のディレクトリパス設定の不整合が確認された。</li>
+<li>修正前: <code>"C:\Users\sasai\Downloads\backcast_files"</code></li>
+<li>修正後: <code>"C:\Users\sasai\Downloads\backcast-v2_files"</code></li>
+<li>ファイル構成自体の差異（<code>index-*.js</code> のサイズ差など）も、ビルド設定の変更によって発生することを確認した。</li>
+</ul>
+</li>
 </ul>
 
 

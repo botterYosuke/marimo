@@ -1606,6 +1606,45 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#step-9-src-tauriprepare-resourcesjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: src-tauri/prepare-resources.js（修正）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: src-tauri/prepare-resources.js（修正）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題: uv バイナリのバンドル漏れ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resourcesbinaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更: resources/binaries/ への明示的コピー
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1861,16 +1900,12 @@ NSIS インストーラーは <code>BACKCAST_DATA_DIR</code> を設定しない�
 </tr>
 <tr>
 <td>macOS</td>
-<td><code>macos</code>（.app バンドル）、<code>dmg</code></td>
-</tr>
-<tr>
-<td>Linux</td>
-<td><code>appimage</code>、<code>deb</code>、<code>rpm</code></td>
+<td><code>app</code>（.app バンドル）、<code>dmg</code></td>
 </tr>
 </tbody>
 </table>
 <p><code>"app"</code> というターゲットは Tauri v2 には存在しない（v1 の名称）。
-macOS の .app バンドルは <code>"macos"</code> が正しいターゲット名。</p>
+macOS の .app バンドルは <code>"app"</code> が正しいターゲット名。</p>
 <hr />
 <h2 id="_5">変更方針<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <h3 id="_6">データ保存先の決定ロジック（優先順）<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
@@ -1886,9 +1921,9 @@ macOS の .app バンドルは <code>"macos"</code> が正しいターゲット�
 <div class="highlight"><pre><span></span><code>steamapps/common/backcast/
 ├── backcast.exe
 ├── resources/
-│   ├── binaries/
-│   │   └── uv.exe
 │   ├── resources/
+│   │   ├── binaries/
+│   │   │   └── uv.exe
 │   │   ├── marimo/          ← Python ソース（バンドル済み）
 │   │   ├── files/           ← サンプルノートブック
 │   │   └── pyproject.toml など
@@ -1967,6 +2002,11 @@ Python 側のログ (<code>marimo_log_dir()</code>) は <code>XDG_CACHE_HOME/mar
 <td>Step 8</td>
 <td><code>.github/workflows/release-steam.yml</code></td>
 <td>✅ 完了</td>
+</tr>
+<tr>
+<td>Step 9</td>
+<td><code>src-tauri/prepare-resources.js</code></td>
+<td>✅ 完了（UV バンドル修正）</td>
 </tr>
 </tbody>
 </table>
@@ -2160,7 +2200,7 @@ Rust 側から env を設定するだけで追従する。変更不要。</p>
 <p><code>tauri-steam.conf.json</code> は差分のみ記述し、Tauri が <code>tauri.conf.json</code> とマージする:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;bundle&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;nsis&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;macos&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;appimage&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;targets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;nsis&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;appimage&quot;</span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;windows&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;webviewInstallMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;skip&quot;</span>
@@ -2174,9 +2214,9 @@ Rust 側から env を設定するだけで追従する。変更不要。</p>
 - <strong>Windows <code>nsis</code></strong>: インストーラーの生成は副産物として許容し、Steam depot には
   ステージングディレクトリ（<code>bundle/nsis/_/</code>）の内容をアップロードする。
   <code>webviewInstallMode: skip</code> により WebView2 BootStrapper のダウンロードは行われない。
-- <strong>macOS <code>macos</code></strong>: <code>.app</code> バンドル（<code>bundle/macos/*.app</code>）を生成。
+- <strong>macOS <code>app</code></strong>: <code>.app</code> バンドル（<code>bundle/macos/*.app</code>）を生成。
   Steam には <code>.app</code> バンドルが必要なため <code>dmg</code> でなくこちらを使う。
-  Tauri v2 では <code>"app"</code> という名称は無効。正しくは <code>"macos"</code>。
+  Tauri v2 では <code>"app"</code> ターゲットを指定する。
 - <strong>Linux <code>appimage</code></strong>: 従来通り（変更なし）。</p>
 </blockquote>
 <p>Steam ビルド時は <code>--config src-tauri/tauri-steam.conf.json</code> で指定する（Step 8 参照）。
@@ -2233,6 +2273,16 @@ Steam depot には <strong>このステージングディレクトリの内容</
 <h4 id="linux">Linux は変更不要<a class="headerlink" href="#linux" title="Permanent link">&para;</a></h4>
 <p><code>bundle/appimage/</code> に生成される <code>.AppImage</code> は Steam Linux Runtime で動作する。
 パスはそのまま維持。</p>
+<h3 id="step-9-src-tauriprepare-resourcesjs">Step 9: <code>src-tauri/prepare-resources.js</code>（修正）<a class="headerlink" href="#step-9-src-tauriprepare-resourcesjs" title="Permanent link">&para;</a></h3>
+<h4 id="uv">問題: <code>uv</code> バイナリのバンドル漏れ<a class="headerlink" href="#uv" title="Permanent link">&para;</a></h4>
+<p><code>binaries/uv*</code> という設定では、特定条件下で <code>uv.exe</code> がバンドルされない問題（Environment construction error）が発生。</p>
+<h4 id="resourcesbinaries">変更: <code>resources/binaries/</code> への明示的コピー<a class="headerlink" href="#resourcesbinaries" title="Permanent link">&para;</a></h4>
+<ol>
+<li><code>prepare-resources.js</code> で <code>src-tauri/binaries/uv.exe</code> を <code>src-tauri/resources/binaries/uv.exe</code> にコピーする処理を追加。</li>
+<li><code>tauri.conf.json</code> の <code>bundle.resources</code> を <code>binaries/uv*</code> から <code>resources/binaries/uv*</code> に変更。</li>
+<li><code>paths.rs</code> の <code>get_uv_bin</code> を <code>resource_dir/resources/binaries/uv.exe</code> を指すように更新。</li>
+</ol>
+<p>これにより、<code>uv</code> バイナリが確実にリソースとしてバンドルされる。</p>
 <hr />
 <h2 id="_11">変更ファイル一覧<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
 <table>
@@ -2261,7 +2311,7 @@ Steam depot には <strong>このステージングディレクトリの内容</
 </tr>
 <tr>
 <td><code>src-tauri/tauri-steam.conf.json</code></td>
-<td>新規作成。<code>webviewInstallMode: skip</code>、<code>targets</code> を <code>["nsis", "macos", "appimage"]</code> に設定</td>
+<td>新規作成。<code>webviewInstallMode: skip</code>、<code>targets</code> を <code>["nsis", "app", "appimage"]</code> に設定</td>
 </tr>
 <tr>
 <td><code>src-tauri/Cargo.toml</code></td>
@@ -2270,6 +2320,14 @@ Steam depot には <strong>このステージングディレクトリの内容</
 <tr>
 <td><code>.github/workflows/release-steam.yml</code></td>
 <td>Windows: depot パスを <code>bundle/nsis/_/</code> に変更、<code>--features steam</code> を追加。macOS: depot パスを <code>bundle/macos/</code> に変更</td>
+</tr>
+<tr>
+<td><code>src-tauri/prepare-resources.js</code></td>
+<td><code>uv.exe</code> を <code>resources/binaries/</code> にコピーする処理を追加</td>
+</tr>
+<tr>
+<td><code>src-tauri/tauri.conf.json</code></td>
+<td><code>binaries/uv*</code> を <code>resources/binaries/uv*</code> に変更</td>
 </tr>
 </tbody>
 </table>
