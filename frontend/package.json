@@ -190,6 +190,7 @@
     "ci": "cross-env CI=true run-s lint typecheck test build",
     "start": "vite",
     "dev": "vite",
+    "dev:pyodide": "cross-env PYODIDE=true vite",
     "build:watch": "vite build --watch --outDir ../marimo/_static",
     "build": "cross-env vite build",
     "test": "vitest",

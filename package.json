@@ -15,6 +15,7 @@
     "dev": "node scripts/dev-with-cleanup.mjs",
     "dev:frontend": "pnpm run --filter @marimo-team/frontend dev",
     "dev:backend": ".venv\\Scripts\\python.exe -m marimo edit --no-token --headless %APPDATA%\\marimo\\notebooks --port 2718",
+    "dev:pyodide": "pnpm run --filter @marimo-team/frontend dev:pyodide",
     "tauri:dev": "node src-tauri/prepare-resources.js && node scripts/tauri-dev-with-cleanup.mjs",
     "tauri:build": "pnpm run setup && node src-tauri/prepare-resources.js && cargo tauri build",
     "tauri:build:win": "pnpm run setup:win && node src-tauri/prepare-resources.js && cargo tauri build",

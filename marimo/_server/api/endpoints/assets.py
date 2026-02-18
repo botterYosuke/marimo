@@ -77,6 +77,19 @@ try:
 except RuntimeError:
     LOGGER.error("Static files not found, skipping mount")
 
+sci_fi_drone_dir = root / "sci-fi-drone"
+try:
+    router.mount(
+        "/sci-fi-drone",
+        app=StaticFiles(
+            directory=sci_fi_drone_dir,
+            follow_symlink=follow_symlinks,
+        ),
+        name="sci-fi-drone",
+    )
+except RuntimeError:
+    LOGGER.error("sci-fi-drone static files not found, skipping mount")
+
 FILE_QUERY_PARAM_KEY = "file"
 
 
