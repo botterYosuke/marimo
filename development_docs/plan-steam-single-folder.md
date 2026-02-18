@@ -94,11 +94,10 @@ Tauri v2 で有効な bundle targets は次のとおり。
 | プラットフォーム | 有効な targets |
 |----------------|--------------|
 | Windows | `nsis`、`msi` |
-| macOS | `macos`（.app バンドル）、`dmg` |
-| Linux | `appimage`、`deb`、`rpm` |
+| macOS | `app`（.app バンドル）、`dmg` |
 
 `"app"` というターゲットは Tauri v2 には存在しない（v1 の名称）。
-macOS の .app バンドルは `"macos"` が正しいターゲット名。
+macOS の .app バンドルは `"app"` が正しいターゲット名。
 
 ---
 
@@ -380,7 +379,7 @@ Steam 版の設定は **既存の `tauri.conf.json` を変更せず**、専用�
 ```json
 {
   "bundle": {
-    "targets": ["nsis", "macos", "appimage"],
+    "targets": ["nsis", "app", "appimage"],
     "windows": {
       "webviewInstallMode": {
         "type": "skip"
@@ -394,9 +393,9 @@ Steam 版の設定は **既存の `tauri.conf.json` を変更せず**、専用�
 > - **Windows `nsis`**: インストーラーの生成は副産物として許容し、Steam depot には
 >   ステージングディレクトリ（`bundle/nsis/_/`）の内容をアップロードする。
 >   `webviewInstallMode: skip` により WebView2 BootStrapper のダウンロードは行われない。
-> - **macOS `macos`**: `.app` バンドル（`bundle/macos/*.app`）を生成。
+> - **macOS `app`**: `.app` バンドル（`bundle/macos/*.app`）を生成。
 >   Steam には `.app` バンドルが必要なため `dmg` でなくこちらを使う。
->   Tauri v2 では `"app"` という名称は無効。正しくは `"macos"`。
+>   Tauri v2 では `"app"` ターゲットを指定する。
 > - **Linux `appimage`**: 従来通り（変更なし）。
 
 Steam ビルド時は `--config src-tauri/tauri-steam.conf.json` で指定する（Step 8 参照）。
@@ -483,7 +482,7 @@ path: src-tauri/target/release/bundle/macos/
 | `src-tauri/src/lib.rs` | `get_log_file_path()` を `get_data_root()` ベースに変更（`None` 時は既存ロジックにフォールバック） |
 | `src-tauri/src/server/lifecycle.rs` | `start_server()` で `get_data_root()` が `Some` の場合のみ XDG env 変数を Python プロセスに注入 |
 | `marimo/_utils/xdg.py` | `marimo_state_dir()` に `MARIMO_STATE_DIR` オーバーライドを追加 |
-| `src-tauri/tauri-steam.conf.json` | 新規作成。`webviewInstallMode: skip`、`targets` を `["nsis", "macos", "appimage"]` に設定 |
+| `src-tauri/tauri-steam.conf.json` | 新規作成。`webviewInstallMode: skip`、`targets` を `["nsis", "app", "appimage"]` に設定 |
 | `src-tauri/Cargo.toml` | `[features]` に `steam = []` を追加 |
 | `.github/workflows/release-steam.yml` | Windows: depot パスを `bundle/nsis/_/` に変更、`--features steam` を追加。macOS: depot パスを `bundle/macos/` に変更 |
 
