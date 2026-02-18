@@ -1385,10 +1385,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#6-openskilltreepanel" class="md-nav__link">
+  <a href="#6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6. openSkillTreePanel() のセレクターは未確定
+        6. ハンドオフドキュメントのスキルタイトルが実際と異なっていた
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-data-skill-id-data-skill-status-getskillstatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. data-skill-id / data-skill-status 属性の追加で getSkillStatus() が高速化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-openskilltreepanel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. openSkillTreePanel() のセレクターは未確定
       
     </span>
   </a>
@@ -1540,9 +1562,9 @@
 
 
 <h1 id="e2e">ゲーム e2e レビューシステム<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h1>
-<p><strong>ステータス</strong>: 初期実装完了・未実行（セレクター要調整）
+<p><strong>ステータス</strong>: セレクター安定化完了・型チェック通過（実機実行待ち）
 <strong>場所</strong>: <code>frontend/e2e-tests/game/</code>
-<strong>担当</strong>: sasa/ico ブランチで作業</p>
+<strong>担当</strong>: game ブランチで継続作業中</p>
 <hr />
 <h2 id="_1">作業進捗<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <h3 id="_2">✅ 完了<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
@@ -1556,14 +1578,19 @@
 <li>[x] <code>development_docs/index.md</code> にこのドキュメントをリンク追加</li>
 <li>[x] BroadcastChannel の「同一コンテキストには届かない」問題を調査・解決</li>
 <li>[x] <code>playerProgressAtom</code> が plain atom（非永続化）であることを確認</li>
+<li>[x] ✅ <code>skill-tree-panel.tsx</code> に <code>data-testid="skill-tree-panel"</code> 追加（<code>openSkillTreePanel()</code> の安定化）</li>
+<li>[x] ✅ <code>skill-node.tsx</code> のスキルカード div に <code>data-skill-id</code> と <code>data-skill-status</code> 属性追加</li>
+<li>[x] ✅ <code>helpers.ts</code> を ID ベースセレクターに全面更新（タイトル文字列依存を排除）</li>
+<li>[x] ✅ <code>sandbox.spec.ts</code> / <code>ui.spec.ts</code> / <code>persistence.spec.ts</code> を skill ID 使用に書き換え</li>
+<li>[x] ✅ <code>bridge.spec.ts</code> 作成（9ケース: BRIDGE_001〜003 の解放条件・完了フロー・ガード）</li>
+<li>[x] ✅ e2e-tests/tsconfig.json での型チェックがエラー 0 であることを確認</li>
 </ul>
 <h3 id="_3">⬜ 未完了・今後の課題<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <ul>
-<li>[ ] ブリッジトラックのテスト（<code>bridge.spec.ts</code>）</li>
+<li>[ ] <strong>最優先</strong>: marimo サーバーを起動してテストを実際に実行し、セレクターを実機確認</li>
+<li><code>uv run marimo edit e2e-tests/py/game_test.py -p 2718</code> でサーバー起動</li>
+<li><code>pnpm playwright test e2e-tests/game/sandbox.spec.ts --headed</code> でヘッドありテスト</li>
 <li>[ ] フルトラックのテスト（<code>trade.spec.ts</code>, <code>risk.spec.ts</code> 等）</li>
-<li>[ ] スキルツリーパネルに <code>data-testid="skill-tree-panel"</code> を追加（セレクター安定化）</li>
-<li>[ ] スキルノードに <code>data-skill-id</code> 属性を追加（ID での直接選択を可能に）</li>
-<li>[ ] テストの実際の実行確認とセレクター修正</li>
 <li>[ ] Electron（Tauri）モードでのテスト対応</li>
 <li>[ ] Python セル実行経由の統合テスト（Backcast エンジン要）</li>
 <li>[ ] CI への組み込み</li>
@@ -1588,7 +1615,8 @@
 ├── helpers.ts           # 共通ヘルパー（イベント送信・状態取得・パネル操作）
 ├── sandbox.spec.ts      # サンドボックストラック SANDBOX_001〜006（9ケース）
 ├── ui.spec.ts           # パネル UI・視覚状態・報酬表示（11ケース）
-└── persistence.spec.ts  # 進捗の初期化・BroadcastChannel 処理（8ケース）
+├── persistence.spec.ts  # 進捗の初期化・BroadcastChannel 処理（8ケース）
+└── bridge.spec.ts       # ✅ ブリッジトラック BRIDGE_001〜003（9ケース）
 
 frontend/e2e-tests/py/
 └── game_test.py         # テスト用マリモノートブック（最小構成）
@@ -1695,7 +1723,37 @@ frontend/e2e-tests/py/
 <span class="c1">// ✅ ポーリングで確実に待つ</span>
 <span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;マーケットへようこそ&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">);</span>
 </code></pre></div>
-<h3 id="6-openskilltreepanel">6. <code>openSkillTreePanel()</code> のセレクターは未確定<a class="headerlink" href="#6-openskilltreepanel" title="Permanent link">&para;</a></h3>
+<h3 id="6">6. ハンドオフドキュメントのスキルタイトルが実際と異なっていた<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
+<p>ハンドオフドキュメントに記載されていたスキルタイトル（日本語）は <code>skill-data.ts</code> の実際のタイトルと不一致だった。</p>
+<table>
+<thead>
+<tr>
+<th>ドキュメント記載</th>
+<th>実際の skill-data.ts</th>
+<th>正解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BRIDGE_001: "データを明かす"</td>
+<td>"データの正体"</td>
+<td><code>skill-data.ts</code> が正</td>
+</tr>
+<tr>
+<td>BRIDGE_002: "全モード準備"</td>
+<td>"自分でデータを取得"</td>
+<td><code>skill-data.ts</code> が正</td>
+</tr>
+</tbody>
+</table>
+<p><strong>対策</strong>: <code>data-skill-id</code> 属性を導入したことで、タイトル変更がテストを壊さなくなった。
+ハンドオフドキュメントのタイトルが古くても今後は問題なし。</p>
+<h3 id="7-data-skill-id-data-skill-status-getskillstatus">7. <code>data-skill-id</code> / <code>data-skill-status</code> 属性の追加で <code>getSkillStatus()</code> が高速化<a class="headerlink" href="#7-data-skill-id-data-skill-status-getskillstatus" title="Permanent link">&para;</a></h3>
+<p>変更前: CSS クラス（<code>opacity-50</code>, <code>border-green-500</code>）をパースして判定
+変更後: <code>data-skill-status</code> 属性を <code>getAttribute()</code> で直接読み取り</p>
+<p><code>data-skill-status</code> は <code>SkillNode</code> が <code>statusConfig</code> に基づいてレンダリング時に付与する。
+React 側の状態と DOM 属性が確実に同期するため、テストの判定精度が上がった。</p>
+<h3 id="8-openskilltreepanel">8. <code>openSkillTreePanel()</code> のセレクターは未確定<a class="headerlink" href="#8-openskilltreepanel" title="Permanent link">&para;</a></h3>
 <p>スキルツリーパネルへのアクセス方法はエディタの Chrome レイアウトに依存する。
 現状は複数のセレクターを試すフォールバック実装になっているが、<strong>実際に動くかはアプリを起動して確認が必要</strong>。</p>
 <p>最も確実な対策: <code>SkillTreePanel</code> のルート要素または開閉ボタンに <code>data-testid</code> を追加する。</p>
@@ -1716,17 +1774,22 @@ frontend/e2e-tests/py/
 <tr>
 <td>スキルツリーパネル全体</td>
 <td><code>[data-testid="skill-tree-panel"]</code></td>
-<td>要追加（現状未実装）</td>
-</tr>
-<tr>
-<td>スキルノード（タイトル指定）</td>
-<td><code>.react-flow__node:has-text("タイトル")</code></td>
-<td>タイトル変更で壊れる</td>
+<td>✅ skill-tree-panel.tsx に追加済み</td>
 </tr>
 <tr>
 <td>スキルノード（ID 指定）</td>
 <td><code>[data-skill-id="SANDBOX_001"]</code></td>
-<td>要追加（現状未実装）</td>
+<td>✅ skill-node.tsx に追加済み（推奨）</td>
+</tr>
+<tr>
+<td>スキルのステータス確認</td>
+<td><code>node.getAttribute("data-skill-status")</code></td>
+<td>✅ "completed"|"unlocked"|"locked" を返す</td>
+</tr>
+<tr>
+<td>スキルノード（タイトル指定）</td>
+<td><code>.react-flow__node:has-text("タイトル")</code></td>
+<td>⚠️ 非推奨（タイトル変更で壊れる）</td>
 </tr>
 <tr>
 <td>進捗バッジ</td>
