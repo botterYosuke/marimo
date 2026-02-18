@@ -121,3 +121,87 @@ plugins: [
 - [✅] 第3次修正: `topLevelAwait()` プラグインを完全除去 + `package.json` からも削除 → TLA 完全排除
 - [✅] Firebase デプロイで実動作確認済み（`https://backcast-tan.web.app/`）
 - [✅] ドキュメント更新
+
+---
+
+## 第2の問題: ワーカーバンドリング失敗による RPC タイムアウト（2026-02-18）
+
+### 症状
+
+TLA 問題の修正後、デプロイ済みサイト `https://backcast-tan.web.app/` が「Initializing...」で停止し続ける。コンソールには以下が出力される。
+
+```
+sendListFiles Error: RPC request timed out
+```
+
+### 根本原因
+
+`rolldown-vite@7.3.1` が `new Worker(new URL("./worker.ts", import.meta.url), {...})` という**暗黙的パターン**をワーカーバンドル対象として認識できず、ワーカーファイルを**トランスパイルせずに生 TypeScript のまま `.ts` 拡張子で出力**していた。
+
+- **出力例 (修正前)**: `dist-pyodide/assets/worker-YlKTPkry.ts`（中身は `import type` 等を含む生 TypeScript）
+- ブラウザの Web Worker は TypeScript を実行できない → ワーカーが即死 → 全 RPC 通信が 20 秒後にタイムアウト
+
+### 問題箇所
+
+`frontend/src/core/wasm/bridge.ts` の Worker コンストラクタ（修正前）:
+
+```typescript
+// worker.ts と save-worker.ts の両方で同じパターン
+const worker = new Worker(
+  new URL("./worker/worker.ts", import.meta.url),  // rolldown-vite が検出できない
+  { type: "module", /* @vite-ignore */ name: getMarimoVersion() }
+);
+```
+
+### 試して失敗したこと
+
+- `vite.config.mts` の `worker` セクションに `rollupOptions.output.entryFileNames: "[name]-[hash].js"` を追加 → 無視される（依然 `.ts` 出力）
+- `worker.plugins: () => [wasm()]` を追加 → 効果なし
+
+### 解決策: `?worker&url` サフィックスによる明示的インポート
+
+`islands/bridge.ts` で既に採用されていた標準 Vite パターンを `wasm/bridge.ts` にも適用する。
+
+**修正ファイル:** `frontend/src/core/wasm/bridge.ts`
+
+```typescript
+// 追加: トップレベルで ?worker&url インポート
+import saveWorkerUrl from "./worker/save-worker.ts?worker&url";
+import workerUrl from "./worker/worker.ts?worker&url";
+
+// 変更: new URL(...) パターンを URL 変数に置き換え
+const worker = new Worker(workerUrl, {
+  type: "module",
+  name: getMarimoVersion(),
+});
+
+const saveWorker = new Worker(saveWorkerUrl, {
+  type: "module",
+  name: getMarimoVersion(),
+});
+```
+
+`?worker&url` サフィックスは Vite に「このファイルはワーカーとしてバンドルし、URLを返せ」と明示指示する。rolldown-vite でも正しく解釈され、`.js` ファイルとして出力される。
+
+### 修正後の出力
+
+```
+dist-pyodide/assets/worker-Caj8-YsL.js       87.86 kB  # トランスパイル済み JS
+dist-pyodide/assets/save-worker-fCYKAyeJ.js  83.71 kB  # トランスパイル済み JS
+```
+
+### 補足: `vite.config.mts` の `worker` セクション
+
+`worker.plugins: () => [wasm()]` はそのまま有効で、`?worker&url` でバンドルされるワーカー内でも WASM プラグインが適用される。
+
+### Tips
+
+- **`new Worker(new URL(..., import.meta.url))` は rolldown-vite で動作しない**: 標準 Vite では動くが rolldown-vite ではワーカーを未処理で出力することがある。代わりに `?worker&url` を使う。
+- **参考実装**: `frontend/src/core/islands/bridge.ts` の `import workerUrl from "./worker/worker.tsx?worker&url"` が正しいパターン。
+
+### 作業進捗
+
+- [✅] 症状の特定（RPC タイムアウト、`sendListFiles Error`）
+- [✅] 根本原因の特定（`.ts` 拡張子のまま出力されるワーカーファイル）
+- [✅] `?worker&url` パターンへの変更（`wasm/bridge.ts`）
+- [✅] ローカル Pyodide ビルドで `.js` 出力を確認（`worker-*.js`, `save-worker-*.js`）
