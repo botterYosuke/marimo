@@ -883,12 +883,12 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        根本原因
+        根本原因（調査結果）
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="根本原因">
+    <nav class="md-nav" aria-label="根本原因（調査結果）">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -911,19 +911,19 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        解決策
+        提案された解決策（未実装）
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="解決策">
+    <nav class="md-nav" aria-label="提案された解決策（未実装）">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#frontendsrccorewebsocketusemarimokernelconnectiontsx" class="md-nav__link">
+  <a href="#skipglobalnotify" class="md-nav__link">
     <span class="md-ellipsis">
       
-        変更ファイル: frontend/src/core/websocket/useMarimoKernelConnection.tsx
+        変更案: skipGlobalNotify の導入
       
     </span>
   </a>
@@ -939,7 +939,7 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        メッセージフロー
+        メッセージフロー（想定）
       
     </span>
   </a>
@@ -950,7 +950,7 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        修正されたファイル一覧
+        修正が必要なファイル一覧
       
     </span>
   </a>
@@ -961,7 +961,7 @@
   <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        学んだこと
+        学んだこと（調査ログ）
       
     </span>
   </a>
@@ -1396,12 +1396,12 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        根本原因
+        根本原因（調査結果）
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="根本原因">
+    <nav class="md-nav" aria-label="根本原因（調査結果）">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1424,19 +1424,19 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        解決策
+        提案された解決策（未実装）
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="解決策">
+    <nav class="md-nav" aria-label="提案された解決策（未実装）">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#frontendsrccorewebsocketusemarimokernelconnectiontsx" class="md-nav__link">
+  <a href="#skipglobalnotify" class="md-nav__link">
     <span class="md-ellipsis">
       
-        変更ファイル: frontend/src/core/websocket/useMarimoKernelConnection.tsx
+        変更案: skipGlobalNotify の導入
       
     </span>
   </a>
@@ -1452,7 +1452,7 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        メッセージフロー
+        メッセージフロー（想定）
       
     </span>
   </a>
@@ -1463,7 +1463,7 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        修正されたファイル一覧
+        修正が必要なファイル一覧
       
     </span>
   </a>
@@ -1474,7 +1474,7 @@
   <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        学んだこと
+        学んだこと（調査ログ）
       
     </span>
   </a>
@@ -1500,14 +1500,15 @@
 
 <h1 id="anywidget">AnyWidget バックエンド→フロントエンド同期<a class="headerlink" href="#anywidget" title="Permanent link">&para;</a></h1>
 <blockquote>
-<p><strong>ステータス:</strong> 解決済み (2026-01-26)</p>
+<p><strong>ステータス:</strong> 未適用 (コードベースと不一致)</p>
 </blockquote>
 <h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>mo.Thread</code> からの AnyWidget トレイト更新がフロントエンドに反映されない問題を修正。</p>
+<p><code>mo.Thread</code> からの AnyWidget トレイト更新がフロントエンドに反映されない問題の調査。
+以前、<code>skipGlobalNotify</code> フラグを用いた修正が提案されたが、現在のコードベースには反映されていない。</p>
 <hr />
 <h2 id="_2">問題<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p><strong>現象:</strong> <code>mo.Thread</code> 内で AnyWidget のトレイトを更新しても、フロントエンドのチャートが更新されない。</p>
-<h2 id="_3">根本原因<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h2 id="_3">根本原因（調査結果）<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <h3 id="uielement">UIElement レジストリのエントリ削除問題<a class="headerlink" href="#uielement" title="Permanent link">&para;</a></h3>
 <ol>
 <li>セルが再実行されると、<code>UI_ELEMENT_REGISTRY.removeElementsByCell()</code> が呼ばれる</li>
@@ -1521,26 +1522,22 @@
 [UIRegistry.broadcastMessage] objectId=vblA-0, entry=missing, elements=0    ← エントリがない！
 </code></pre></div></p>
 <hr />
-<h2 id="_4">解決策<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<h3 id="frontendsrccorewebsocketusemarimokernelconnectiontsx">変更ファイル: <code>frontend/src/core/websocket/useMarimoKernelConnection.tsx</code><a class="headerlink" href="#frontendsrccorewebsocketusemarimokernelconnectiontsx" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1">// Before (問題あり):</span>
-<span class="nx">handleWidgetMessage</span><span class="p">({</span>
-<span class="w">  </span><span class="p">...</span>
-<span class="w">  </span><span class="nx">skipGlobalNotify</span><span class="o">:</span><span class="w"> </span><span class="kt">Boolean</span><span class="p">(</span><span class="nx">uiElement</span><span class="p">),</span><span class="w">  </span><span class="c1">// uiElement があれば global callback をスキップ</span>
-<span class="p">});</span>
-
-<span class="c1">// After (修正済み):</span>
+<h2 id="_4">提案された解決策（未実装）<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>以下の修正が提案されたが、現在の実装 (<code>frontend/src/plugins/impl/anywidget/model.ts</code>, <code>useMarimoKernelConnection.tsx</code>) にはこの変更が含まれていない。</p>
+<h3 id="skipglobalnotify">変更案: <code>skipGlobalNotify</code> の導入<a class="headerlink" href="#skipglobalnotify" title="Permanent link">&para;</a></h3>
+<p><code>frontend/src/core/websocket/useMarimoKernelConnection.tsx</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 提案された変更:</span>
 <span class="nx">handleWidgetMessage</span><span class="p">({</span>
 <span class="w">  </span><span class="p">...</span>
 <span class="w">  </span><span class="nx">skipGlobalNotify</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span><span class="w">  </span><span class="c1">// 常に global callback を使用</span>
 <span class="p">});</span>
 </code></pre></div>
-<p><strong>なぜこれで動くか:</strong>
+<p><strong>意図:</strong>
 - <code>skipGlobalNotify: false</code> により、<code>notifyGlobalModelUpdate()</code> が常に呼ばれる
 - グローバルコールバック → AnyWidgetPlugin.tsx の <code>registerGlobalModelUpdateCallback</code> → ローカルモデル更新
 - この経路は <code>UI_ELEMENT_REGISTRY</code> に依存しないため、エントリ削除の影響を受けない</p>
 <hr />
-<h2 id="_5">メッセージフロー<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h2 id="_5">メッセージフロー（想定）<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>Backend → WebSocket → useMarimoKernelConnection
                             ↓
             ┌───────────────┴───────────────┐
@@ -1555,7 +1552,7 @@
 </code></pre></div>
 <p><strong>重要:</strong> 両方の経路が同じことをしようとしているが、UIElementRegistry は不安定（エントリ削除）。</p>
 <hr />
-<h2 id="_6">修正されたファイル一覧<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h2 id="_6">修正が必要なファイル一覧<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -1567,18 +1564,18 @@
 <tbody>
 <tr>
 <td><code>frontend/src/core/websocket/useMarimoKernelConnection.tsx</code></td>
-<td><code>skipGlobalNotify: false</code> に変更</td>
+<td><code>skipGlobalNotify: false</code> に変更 (未適用)</td>
 <td><strong>必須</strong></td>
 </tr>
 <tr>
 <td><code>frontend/src/plugins/impl/anywidget/model.ts</code></td>
-<td><code>skipGlobalNotify</code> パラメータ追加</td>
+<td><code>skipGlobalNotify</code> パラメータ追加 (未適用)</td>
 <td>参考</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="_7">学んだこと<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h2 id="_7">学んだこと（調査ログ）<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
 <p><strong>ログは正しい場所に追加する</strong>: <code>Model.emit</code> のリスナー数や <code>UIRegistry.broadcastMessage</code> のエントリ状態をログに出すことで問題が明確になった</p>

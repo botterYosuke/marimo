@@ -21,7 +21,7 @@
     
     
       
-        <title>進捗保存リファクタリング: LocalStorage → ファイルベース - marimo Developer Docs</title>
+        <title>進捗保存システムの仕様 - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#localstorage" class="md-skip">
+        <a href="#_1" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              進捗保存リファクタリング: LocalStorage → ファイルベース
+              進捗保存システムの仕様
             
           </span>
         </div>
@@ -1207,201 +1207,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#context" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Context
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        設計判断
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="設計判断">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-deriverank" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. deriveRank() は存在しない
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. ノートブックファイル名からプログレスファイルを導出
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. マイグレーション不要
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. 起動時ブロードキャストのタイミング
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-_triggered_skills" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. _triggered_skills の初期化
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. 状態導出の集約
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#stemprogressjson" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ファイル形式: .{stem}.progress.json
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装内容
+        概要
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="実装内容">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1-progress_managerpy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 1: progress_manager.py 新規作成
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-2-skill_eventspy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 2: skill_events.py 修正
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-3-game_setuppy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 3: game_setup.py 修正
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4-atomsts" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: atoms.ts 修正
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-5-useprogresssyncts" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 5: useProgressSync.ts 新規作成
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-6-controlstsx" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 6: Controls.tsx 修正
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 7: テストファイル修正
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1409,19 +1221,19 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        データフロー
+        データ保存場所と形式
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="データフロー">
+    <nav class="md-nav" aria-label="データ保存場所と形式">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        起動 / ページリロード時
+        保存場所と命名規則
       
     </span>
   </a>
@@ -1429,10 +1241,49 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#json-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        データフォーマット (JSON Schema)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        スキル達成時
+        計算ロジック
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="計算ロジック">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-initial-cash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 基本資金 (Initial Cash)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-earned-rewards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 獲得報酬 (Earned Rewards)
       
     </span>
   </a>
@@ -1448,10 +1299,116 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        変更ファイル一覧
+        データフローとアーキテクチャ
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="データフローとアーキテクチャ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. アプリケーション起動時 (Initialization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-skill-completion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. スキル獲得時 (Skill Completion)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コンポーネント詳細
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="コンポーネント詳細">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backend-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend (Python)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frontend-typescriptreact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frontend (TypeScript/React)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        トラブルシューティング
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="トラブルシューティング">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q. 進捗をリセットしたい場合は？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-backtesthud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q. BacktestHudの金額と実際の残高が合わない
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1472,204 +1429,155 @@
 
 
 
-<h1 id="localstorage">進捗保存リファクタリング: LocalStorage → ファイルベース<a class="headerlink" href="#localstorage" title="Permanent link">&para;</a></h1>
-<p><strong>ステータス</strong>: 完了</p>
-<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p>スキルツリー進捗がブラウザ localStorage に保存されている現状の問題:
-1. <code>.py</code> ファイルを削除・再作成しても進捗がリセットされない
-2. ブラウザを変えると進捗が消える
-3. Python 側の <code>_triggered_skills</code>（メモリ上 set）と localStorage が非同期</p>
-<p><strong>目標</strong>: Python 側を Single Source of Truth にし、ノートブックディレクトリにサイドカー JSON で永続化する。</p>
-<hr />
-<h2 id="_1">設計判断<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<h3 id="1-deriverank">1. <code>deriveRank()</code> は存在しない<a class="headerlink" href="#1-deriverank" title="Permanent link">&para;</a></h3>
-<p><code>atoms.ts:21</code> で <code>rank</code> は固定値 <code>"bronze"</code>。ランク昇格は未実装。
-→ <code>"bronze"</code> 固定で OK。ファイルに保存も復元もしない。</p>
-<h3 id="2">2. ノートブックファイル名からプログレスファイルを導出<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
-<p><code>get_context().filename</code> からファイル名を導出: <code>backcast.py</code> → <code>.backcast.progress.json</code></p>
-<h3 id="3">3. マイグレーション不要<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
-<p>後方互換は考慮しない。<code>atomWithStorage</code> → 通常 <code>atom</code> に単純置換。</p>
-<h3 id="4">4. 起動時ブロードキャストのタイミング<a class="headerlink" href="#4" title="Permanent link">&para;</a></h3>
-<p><code>mo.output.append(Html('&lt;marimo-broadcast ...&gt;'))</code> パターンを使用（<code>skill_events.py:47</code> と同じ）。セル出力として永続化されるため、ページリロード時も <code>handlers.ts</code> で再処理される。</p>
-<h3 id="5-_triggered_skills">5. <code>_triggered_skills</code> の初期化<a class="headerlink" href="#5-_triggered_skills" title="Permanent link">&para;</a></h3>
-<p><code>skill_events.py</code> のモジュールレベルで <code>load_progress()</code> から直接初期化。<code>sync_triggered_skills()</code> 呼び出しが不要になる。</p>
-<h3 id="6">6. 状態導出の集約<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
-<p><code>deriveProgressFromSkills(completedSkills)</code> 関数を新設し、<code>calculateTotalRewards()</code> を内部で呼んで全状態を導出。</p>
-<hr />
-<h2 id="stemprogressjson">ファイル形式: <code>.{stem}.progress.json</code><a class="headerlink" href="#stemprogressjson" title="Permanent link">&para;</a></h2>
-<p>ノートブック名から導出: <code>backcast.py</code> → <code>.backcast.progress.json</code></p>
+<h1 id="_1">進捗保存システムの仕様<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<p>このドキュメントでは、marimoアプリケーションにおけるゲーム進捗（スキルアンロック、報酬など）の保存・管理の仕組みについて解説します。</p>
+<h2 id="_2">概要<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>本アプリケーションの進捗管理システムは、<strong>「File-Based Single Source of Truth」</strong> という設計思想に基づいています。
+すべての永続的な進捗情報は、ノートブックファイルと対になる隠しJSONファイルに保存され、Backend (Python) がその正本を管理します。Frontend (React) は、Backendから通知された情報に基づいて表示を行います。</p>
+<h2 id="_3">データ保存場所と形式<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_4">保存場所と命名規則<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>進捗情報は、実行中の <code>.py</code> ノートブックと同じディレクトリに、以下の命名規則で保存されます。</p>
+<ul>
+<li><strong>ルール</strong>: <code>.[ノートブック名].progress.json</code></li>
+<li><strong>例</strong>: <code>sandbox.py</code> を実行中の場合 → <code>.sandbox.progress.json</code></li>
+<li><strong>属性</strong>: ドット <code>.</code> で始まるファイル名（Unix系OSでの隠しファイル慣習を採用）</li>
+</ul>
+<blockquote>
+<p><strong>Note</strong>: Windows環境でもファイルエクスプローラーの設定によっては隠しファイルとして扱われない場合がありますが、アプリケーションロジック上は設定ファイルとして扱われます。</p>
+</blockquote>
+<h3 id="json-schema">データフォーマット (JSON Schema)<a class="headerlink" href="#json-schema" title="Permanent link">&para;</a></h3>
+<p>保存されるJSONファイルは以下の単純な構造を持ちます。</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;completed_skills&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;SANDBOX_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_002&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">&quot;completed_skills&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;SANDBOX_001&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;SANDBOX_002&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;BRIDGE_001&quot;</span>
+<span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><code>currentCash</code> / <code>earnedTitles</code> / <code>sandboxCompleted</code> 等は保存しない。<code>completed_skills</code> から <code>calculateTotalRewards()</code> で常に導出。</p>
-<hr />
-<h2 id="_2">実装内容<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<h3 id="step-1-progress_managerpy">Step 1: <code>progress_manager.py</code> 新規作成<a class="headerlink" href="#step-1-progress_managerpy" title="Permanent link">&para;</a></h3>
-<p><strong>ファイル</strong>: <code>frontend/public/files/progress_manager.py</code></p>
 <table>
 <thead>
 <tr>
-<th>関数</th>
-<th>役割</th>
+<th>キー</th>
+<th>型</th>
+<th>説明</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>_get_progress_path()</code></td>
-<td><code>get_context().filename</code> から stem を取得し <code>mo.notebook_dir() / f".{stem}.progress.json"</code> を返す</td>
+<td><code>version</code></td>
+<td>number</td>
+<td>データ形式のバージョン番号（現在は <code>1</code> 固定）</td>
 </tr>
 <tr>
-<td><code>load_progress()</code></td>
-<td>JSON 読み込み。不在/壊れ → デフォルト値</td>
-</tr>
-<tr>
-<td><code>save_progress(completed_skills)</code></td>
-<td>JSON 書き込み</td>
-</tr>
-<tr>
-<td><code>add_completed_skill(skill_id)</code></td>
-<td>リストに追加 → 保存</td>
-</tr>
-<tr>
-<td><code>broadcast_progress()</code></td>
-<td><code>mo.output.append(Html('&lt;marimo-broadcast channel="progress_channel" ...&gt;'))</code></td>
+<td><code>completed_skills</code></td>
+<td>string[]</td>
+<td>完了したスキルのIDリスト</td>
 </tr>
 </tbody>
 </table>
-<h3 id="step-2-skill_eventspy">Step 2: <code>skill_events.py</code> 修正<a class="headerlink" href="#step-2-skill_eventspy" title="Permanent link">&para;</a></h3>
-<p><code>_triggered_skills</code> の初期化を <code>load_progress()</code> から行う（モジュールレベル）。<code>emit_skill()</code> 内で <code>add_completed_skill(skill_id)</code> を呼ぶ。</p>
-<h3 id="step-3-game_setuppy">Step 3: <code>game_setup.py</code> 修正<a class="headerlink" href="#step-3-game_setuppy" title="Permanent link">&para;</a></h3>
-<p>モジュール初期化時に <code>broadcast_progress()</code> を1行追加。
-<strong>順序の注意</strong>: <code>publish_state_headless</code> は <code>mo.output.replace()</code> でセル出力をセットし、<code>broadcast_progress</code> は <code>mo.output.append()</code> で追記する。逆にすると <code>replace</code> で progress の broadcast が消える。</p>
-<h3 id="step-4-atomsts">Step 4: <code>atoms.ts</code> 修正<a class="headerlink" href="#step-4-atomsts" title="Permanent link">&para;</a></h3>
+<p><strong>重要なポイント</strong>:
+- <strong>所持金 (Cash) や称号 (Titles) は直接保存されません。</strong>
+- これらは、保存された <code>completed_skills</code> リストをもとに、アプリケーション起動時に再計算されます。</p>
+<h2 id="_5">計算ロジック<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>ユーザーの現在のステータス（所持金など）は、以下の要素から導出されます。</p>
+<h3 id="1-initial-cash">1. 基本資金 (Initial Cash)<a class="headerlink" href="#1-initial-cash" title="Permanent link">&para;</a></h3>
+<p>実行中のノートブック内で <code>Backtest</code> クラスが初期化される際に設定される金額です。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 例: sandbox.py</span>
+<span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span>
+    <span class="n">cash</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span>  <span class="c1"># ← これが基本資金</span>
+    <span class="c1"># ...</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>この値は <code>BacktestHud</code> などのコンポーネントで参照される <code>state.cash</code> のベースとなります。</p>
+<h3 id="2-earned-rewards">2. 獲得報酬 (Earned Rewards)<a class="headerlink" href="#2-earned-rewards" title="Permanent link">&para;</a></h3>
+<p>保存された <code>completed_skills</code> リストに基づき、フロントエンドで報酬総額が再計算されます。
+計算ロジックは <code>frontend/src/components/skill-tree/rewards/reward-system.ts</code> に実装されています。</p>
+<p><strong>計算式</strong>:
+<div class="highlight"><pre><span></span><code><span class="nx">現在の所持金</span><span class="p">(</span><span class="nx">Display</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">基本資金</span><span class="p">(</span><span class="nx">Backtest</span><span class="p">.</span><span class="nx">cash</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">スキル報酬合計</span><span class="p">(</span><span class="nx">TotalSkillRewards</span><span class="p">)</span>
+</code></pre></div></p>
 <ul>
-<li><code>atomWithStorage</code> → 通常 <code>atom</code>（localStorage 全廃）</li>
-<li><code>deriveProgressFromSkills()</code> 関数を新設</li>
-<li><code>initProgressFromFileAtom</code> を追加</li>
+<li><strong>スキル報酬</strong>: 各スキルに設定された <code>cash</code> 報酬の合計</li>
+<li><strong>マイルストーンボーナス</strong>: 完了スキル数が一定に達するごとのボーナス（例: 5個完了で+¥10,000）</li>
 </ul>
-<h3 id="step-5-useprogresssyncts">Step 5: <code>useProgressSync.ts</code> 新規作成<a class="headerlink" href="#step-5-useprogresssyncts" title="Permanent link">&para;</a></h3>
-<p><code>BroadcastChannel("progress_channel")</code> をリッスンし、<code>initProgressFromFileAtom</code> を呼ぶ。</p>
-<h3 id="step-6-controlstsx">Step 6: <code>Controls.tsx</code> 修正<a class="headerlink" href="#step-6-controlstsx" title="Permanent link">&para;</a></h3>
-<p>コンポーネント先頭（<code>const undoAvailable</code> より前）に2つのフックを配置：</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// Relay postMessage from iframes to BroadcastChannel (for Pyodide mode)</span>
-<span class="nx">useBroadcastChannelRelay</span><span class="p">();</span>
-<span class="c1">// Sync progress from Python-side file to playerProgressAtom</span>
-<span class="nx">useProgressSync</span><span class="p">();</span>
-</code></pre></div>
-<blockquote>
-<p><strong>配置順の注意:</strong> React フックのルール上、<code>useAtomValue</code> 等の他フックより前に呼ぶ必要はないが、
-両フックは副作用のみ（戻り値なし）のため、コンポーネント先頭にまとめて置くと可読性が高い。</p>
-</blockquote>
-<h3 id="step-7">Step 7: テストファイル修正<a class="headerlink" href="#step-7" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>ファイル</th>
-<th>変更内容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>__tests__/atoms.test.ts</code></td>
-<td>L435-525 の localStorage 永続化テスト（P1-3）を削除。L23-37 の Storage モック削除</td>
-</tr>
-<tr>
-<td><code>__tests__/cumulative-cash-hud.test.ts</code></td>
-<td>Storage モック削除</td>
-</tr>
-<tr>
-<td><code>__tests__/all-59-skills-prerequisites.test.ts</code></td>
-<td>Storage モック削除</td>
-</tr>
-<tr>
-<td><code>__tests__/reward-backtest-sync.test.ts</code></td>
-<td>Storage モック削除</td>
-</tr>
-</tbody>
-</table>
+<p>この合算値が、画面右上のHUD（<code>BacktestHud</code>）の <code>Equity</code> や <code>Cash</code> として表示されます。</p>
+<h2 id="_6">データフローとアーキテクチャ<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="1-initialization">1. アプリケーション起動時 (Initialization)<a class="headerlink" href="#1-initialization" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Python (Backend)</strong>:</li>
+<li><code>progress_manager.py</code> が <code>.progress.json</code> を読み込む。</li>
+<li>BroadcastChannel <code>progress_channel</code> を通じて <code>completed_skills</code> を送信。</li>
+<li>
+<p><code>mo.output.append</code> を使用してHTMLとして埋め込むことで、確実にフロントエンドに伝達。</p>
+</li>
+<li>
+<p><strong>Frontend</strong>:</p>
+</li>
+<li><code>useProgressSync.ts</code> が <code>progress_channel</code> をリッスン。</li>
+<li>受信した <code>completed_skills</code> を <code>initProgressFromFileAtom</code> (Jotai) に渡す。</li>
+<li><code>deriveProgressFromSkills</code> 関数が報酬総額を再計算し、<code>playerProgressAtom</code> を更新。</li>
+</ol>
+<h3 id="2-skill-completion">2. スキル獲得時 (Skill Completion)<a class="headerlink" href="#2-skill-completion" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Frontend</strong>:</li>
+<li>ユーザーアクションなどでスキル条件を達成。</li>
+<li>
+<p>Python側にイベント送信（<code>mo.emit_skill(skill_id)</code> 相当の処理）。</p>
+</li>
+<li>
+<p><strong>Python (Backend)</strong>:</p>
+</li>
+<li><code>progress_manager.add_completed_skill(skill_id)</code> が呼び出される。</li>
+<li><code>.progress.json</code> に新しいスキルIDを追加して上書き保存。</li>
+<li>
+<p>最新の状態を再度 <code>progress_channel</code> でブロードキャスト。</p>
+</li>
+<li>
+<p><strong>Frontend</strong>:</p>
+</li>
+<li>更新通知を受け取り、UI（ロック解除、トースト通知、所持金表示）を更新。</li>
+</ol>
+<h2 id="_7">コンポーネント詳細<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h3 id="backend-python">Backend (Python)<a class="headerlink" href="#backend-python" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>src-tauri/sample-notebooks/progress_manager.py</code></strong></li>
+<li>ファイルI/Oを管轄。</li>
+<li><code>load_progress()</code>: ファイル読み込み（存在しない場合はデフォルト値を返す）。</li>
+<li><code>save_progress()</code>: ファイル書き込み。</li>
+<li><code>broadcast_progress()</code>: フロントエンドへの通知。</li>
+</ul>
+<h3 id="frontend-typescriptreact">Frontend (TypeScript/React)<a class="headerlink" href="#frontend-typescriptreact" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>frontend/src/components/skill-tree/atoms.ts</code></strong></li>
+<li>状態管理 (Jotai Atoms)。</li>
+<li><code>playerProgressAtom</code>: アプリケーション内の進捗情報の正本。</li>
+<li>
+<p><code>deriveProgressFromSkills()</code>: スキルリストから全ステータス（Cash, Rank等）を復元する純粋関数。</p>
+</li>
+<li>
+<p><strong><code>frontend/src/components/skill-tree/rewards/reward-system.ts</code></strong></p>
+</li>
+<li>報酬計算のビジネスロジック。</li>
+<li>
+<p><code>calculateTotalRewards()</code>: 累積報酬の計算。</p>
+</li>
+<li>
+<p><strong><code>frontend/src/hooks/useProgressSync.ts</code></strong></p>
+</li>
+<li>Backendとの通信ブリッジ。</li>
+</ul>
+<h2 id="_8">トラブルシューティング<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="q">Q. 進捗をリセットしたい場合は？<a class="headerlink" href="#q" title="Permanent link">&para;</a></h3>
+<p>対象のノートブックに対応する <code>.json</code> ファイル（例: <code>.sandbox.progress.json</code>）を削除してから、アプリケーション（marimoカーネル）を再起動してください。</p>
+<h3 id="q-backtesthud">Q. BacktestHudの金額と実際の残高が合わない<a class="headerlink" href="#q-backtesthud" title="Permanent link">&para;</a></h3>
+<p>Backtestのシミュレーション上の残高（トレード損益込み）と、スキルツリーシステム上の所持金（スキル報酬）は、UI上で合算して表示される場合がありますが、内部管理は別々です。
+- <code>state.equity</code>: トレード結果による現在の資産評価額
+- <code>rewardCash</code>: アンロックしたスキルから得られた固定報酬額</p>
+<p>HUD表示: <code>FormatYen(state.equity + rewardCash)</code></p>
 <hr />
-<h2 id="_3">データフロー<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<h3 id="_4">起動 / ページリロード時<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>game_setup.py import
-  → broadcast_progress()
-    → mo.output.append(Html(&#39;&lt;marimo-broadcast channel=&quot;progress_channel&quot; ...&gt;&#39;))
-      → handlers.ts: extractAndSendBroadcastMessages()
-        → BroadcastChannel(&quot;progress_channel&quot;).postMessage(...)
-          → useProgressSync → initProgressFromFileAtom(completedSkills)
-            → deriveProgressFromSkills() → playerProgressAtom 復元
-</code></pre></div>
-<h3 id="_5">スキル達成時<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>game_setup.buy() → emit_skill(&quot;SANDBOX_002&quot;)
-  ├→ add_completed_skill(&quot;SANDBOX_002&quot;)
-  │    → .backcast_progress.json に保存
-  └→ skill_event_channel にブロードキャスト（既存）
-       → completeSkillWithRewardAtom → playerProgressAtom 更新 + トースト
-</code></pre></div>
-<hr />
-<h2 id="_6">変更ファイル一覧<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>ファイル</th>
-<th>種別</th>
-<th>変更量</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>frontend/public/files/progress_manager.py</code></td>
-<td>新規</td>
-<td>~70行</td>
-</tr>
-<tr>
-<td><code>frontend/public/files/skill_events.py</code></td>
-<td>修正</td>
-<td>~5行変更</td>
-</tr>
-<tr>
-<td><code>frontend/public/files/game_setup.py</code></td>
-<td>修正</td>
-<td>2行追加</td>
-</tr>
-<tr>
-<td><code>frontend/src/components/skill-tree/atoms.ts</code></td>
-<td>修正</td>
-<td>~30行変更</td>
-</tr>
-<tr>
-<td><code>frontend/src/hooks/useProgressSync.ts</code></td>
-<td>新規</td>
-<td>~25行</td>
-</tr>
-<tr>
-<td><code>frontend/src/components/editor/controls/Controls.tsx</code></td>
-<td>修正</td>
-<td>2行追加</td>
-</tr>
-<tr>
-<td><code>frontend/src/components/skill-tree/__tests__/atoms.test.ts</code></td>
-<td>修正</td>
-<td>~91行削除</td>
-</tr>
-<tr>
-<td><code>frontend/src/components/skill-tree/__tests__/cumulative-cash-hud.test.ts</code></td>
-<td>修正</td>
-<td>モック削除</td>
-</tr>
-<tr>
-<td><code>frontend/src/components/skill-tree/__tests__/all-59-skills-prerequisites.test.ts</code></td>
-<td>修正</td>
-<td>モック削除</td>
-</tr>
-<tr>
-<td><code>frontend/src/components/skill-tree/__tests__/reward-backtest-sync.test.ts</code></td>
-<td>修正</td>
-<td>モック削除</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Revision History</strong>:
+- 2026-02-18: ドキュメントの全面改訂。仕様の詳細化と現状の実装との整合性確保。</p>
 
 
 
