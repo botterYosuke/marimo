@@ -1,9 +1,9 @@
 # ゲーム e2e レビューシステム
 
-**ステータス**: `sandbox.spec.ts` 全 10 件パス済み・**接続安定化ループ付き・「Reconnected」問題解決済み**
+**ステータス**: 全 4 スイート パス済み（37 passed / 3 skipped / 0 failed）
 **場所**: `frontend/e2e-tests/game/`
 **担当**: game ブランチで継続作業中
-**最終確認日**: 2026-02-19（Playwright テスト実行 10 passed / 2.4m・接続安定化ループ確認付き）
+**最終確認日**: 2026-02-19（全 E2E テスト実行確認完了）
 
 ---
 
@@ -57,9 +57,25 @@
 - [x] ✅ **`beforeEach` 最適化**: 初回テストのみ `page.goto()` で navigate、テスト 2 以降はナビゲーションをスキップして WebSocket 再接続を回避
 - [x] ✅ **`sandbox.spec.ts` 安定パス確認**: Kernel healthy 確認付きで全 10 件パス（2.0m）
 
+### ✅ 完了（2026-02-19 カバレッジギャップ修正セッション）
+
+E2E テスト（案 E）がバイパスしていたレイヤー①③⑤をユニットテストで個別カバー。詳細分析は `.claude/plans/e2e-test-coverage-gap-analysis.md` を参照。
+
+- [x] ✅ **レイヤー① Python `emit_skill()` HTML 生成テスト**: `src-tauri/resources/files/test_skill_events.py`（12件パス）— HTML タグ・属性名・base64 payload・重複防止・フロントエンドとの契約テスト
+- [x] ✅ **レイヤー③ HTML パーステスト**: `frontend/src/core/kernel/__tests__/extractBroadcast.test.ts`（10件パス）— Pattern 1（`<marimo-broadcast>` タグ）/ Pattern 2（`data-marimo-broadcast` 属性）/ emit_skill() 出力との契約テスト
+- [x] ✅ **レイヤー⑤ BroadcastChannel リスナーテスト**: `frontend/src/components/skill-tree/__tests__/skill-complete-handler.test.ts`（11件パス）— 正常系・異常系・クリーンアップ・sendBroadcastMessage() との結合テスト
+- [x] ✅ **`handlers.ts` の `extractAndSendBroadcastMessages` を `export` に変更**: テストからのアクセスのため
+
+### ✅ 完了（2026-02-19 全スイート実行確認セッション）
+
+- [x] ✅ **`sandbox.spec.ts`**: 10 passed (2.2m)
+- [x] ✅ **`ui.spec.ts`**: 9 passed / 3 skipped (1.9m) — 報酬バッジセレクター修正（知見 22）
+- [x] ✅ **`persistence.spec.ts`**: 8 passed (1.7m)
+- [x] ✅ **`bridge.spec.ts`**: 10 passed (2.3m)
+- [x] ✅ **`ui.spec.ts` の報酬バッジテスト修正**: Badge コンポーネントは `<div>` に Tailwind クラスを付与するだけで `class` に "Badge" 文字列が含まれないため、`[class*="Badge"]` → `.border-t .rounded-full` セレクターに変更
+
 ### ⬜ 未完了・今後の課題
 
-- [ ] `ui.spec.ts`（11ケース）、`persistence.spec.ts`（8ケース）、`bridge.spec.ts`（9ケース）の実行・パス確認
 - [ ] フルトラックのテスト（`trade.spec.ts`, `risk.spec.ts` 等）
 - [ ] Electron（Tauri）モードでのテスト対応
 - [ ] Python セル実行経由の統合テスト（Backcast エンジン要）
@@ -133,6 +149,16 @@ frontend/e2e-tests/game/
 
 frontend/e2e-tests/py/
 └── game_test.py         # テスト用マリモノートブック（grid レイアウト）
+
+# ユニットテスト（レイヤー①③⑤のカバレッジギャップ修正）
+src-tauri/resources/files/
+└── test_skill_events.py                    # ① emit_skill() HTML 生成テスト（12件）
+
+frontend/src/core/kernel/__tests__/
+└── extractBroadcast.test.ts                # ③ HTML パーステスト（10件）
+
+frontend/src/components/skill-tree/__tests__/
+└── skill-complete-handler.test.ts          # ⑤ BroadcastChannel リスナーテスト（11件）
 ```
 
 既存テストとの対比:
@@ -652,6 +678,43 @@ for (let attempt = 0; attempt < maxAttempts; attempt++) {
 
 **`dismissReconnectedBanner()` も改善**: 複数バナーに対応するためループ化（最大 5 回 dismiss）。`bannersAtom` は配列のため、複数の再接続イベントで複数バナーが蓄積される可能性がある。
 
+### 22. カバレッジギャップ修正のユニットテスト（2026-02-19 追加）
+
+案 E がバイパスするレイヤー①③⑤を**契約テスト（Contract Test）**のアプローチでカバー。各テストはレイヤー間の通信プロトコル（HTML 属性名・JSON キー名・BroadcastChannel チャネル名）が両端で一致することを検証し、一方が変更された場合に検知できる。
+
+**Python テスト（レイヤー①）の注意点**:
+- `skill_events.py` の `_triggered_skills` はモジュールグローバルな `set`。テストごとに `sys.modules.pop("skill_events", None)` でリロードが必要
+- `Html` オブジェクトは `str()` で HTML を返さない。`.text` プロパティを使う
+- 実行: `uvx hatch run +py=3.12 test:test src-tauri/resources/files/test_skill_events.py -v`
+
+**TypeScript パーステスト（レイヤー③）の注意点**:
+- `extractAndSendBroadcastMessages` は元々非公開だったが `export` に変更済み（`handlers.ts` L232）
+- `sendBroadcastMessage` をモックしてパース結果（channel, type, payload）をキャプチャ
+- 実行: `cd frontend && pnpm test src/core/kernel/__tests__/extractBroadcast.test.ts`
+
+**TypeScript リスナーテスト（レイヤー⑤）の注意点**:
+- jsdom は `BroadcastChannel` をサポートしないため `MockBroadcastChannel` クラスを使用
+- `vi.resetModules()` + 動的 `import()` でモック適用後のモジュールを取得
+- `msg.data.skill_id`（snake_case）であることが検証の要点。camelCase `skillId` では動かない
+- 実行: `cd frontend && pnpm test src/components/skill-tree/__tests__/skill-complete-handler.test.ts`
+
+### 23. Badge コンポーネントのセレクターには "Badge" が含まれない（2026-02-19 修正）
+
+**問題**: `ui.spec.ts` の「スキルノードに報酬バッジが表示される」テストが `[class*="Badge"]` / `.badge` で Badge を探していたが、Badge コンポーネント（`components/ui/badge.tsx`）は `<div>` に `inline-flex items-center border rounded-full ...` の Tailwind クラスを付与するだけで、"Badge" という文字列はクラスに含まれない。
+
+**修正**: 報酬セクション（`border-t` クラスを持つ div）内の `rounded-full` 要素で Badge の存在を判定する方式に変更。
+
+```typescript
+// ❌ 旧セレクター（class に "Badge" が含まれないため一致しない）
+page.locator('[data-skill-id="SANDBOX_001"] [class*="Badge"]')
+
+// ✅ 新セレクター（Badge の Tailwind クラス rounded-full で判定）
+const rewardSection = page.locator('[data-skill-id="SANDBOX_001"] .border-t').first();
+const badge = rewardSection.locator(".rounded-full").first();
+```
+
+**教訓**: shadcn/ui の Badge や Button 等のコンポーネントは、レンダリング時にコンポーネント名をクラスに含めない。Tailwind の実際のクラス名か `data-testid` 属性でセレクターを構成する必要がある。
+
 ---
 
 ## セレクター早見表
@@ -771,14 +834,30 @@ cd frontend && pnpm dev
 
 ---
 
+## テストカバレッジ全体像
+
+本番フローの 7 レイヤーに対するテストカバレッジ:
+
+| レイヤー | 内容 | テスト | テスト種別 |
+|---|---|---|---|
+| ① Python `emit_skill()` | HTML 生成・base64 エンコード | ✅ カバー済 | Python ユニットテスト（`test_skill_events.py`） |
+| ② WebSocket 転送 | Python → Frontend 通信 | — スキップ | Web 標準 API（テスト不要） |
+| ③ HTML パース | `extractAndSendBroadcastMessages()` | ✅ カバー済 | TypeScript ユニットテスト（`extractBroadcast.test.ts`） |
+| ④ BroadcastChannel 送信 | `postMessage()` | — スキップ | Web 標準 API（テスト不要） |
+| ⑤ リスナー受信・検証 | `setupSkillEventListener()` | ✅ カバー済 | TypeScript ユニットテスト（`skill-complete-handler.test.ts`） |
+| ⑥ Jotai atom 更新 | 前提条件・報酬計算 | ✅ カバー済 | E2E テスト（案 E: `sandbox.spec.ts`） |
+| ⑦ React UI 反映 | DOM 更新 | ✅ カバー済 | E2E テスト（案 E: `sandbox.spec.ts`） |
+
+---
+
 ## 既知の非カバー範囲と理由
 
 | 非カバー範囲 | 理由 | 対策案 |
 |---|---|---|
-| BroadcastChannel 受信経路 | テストフック方式に変更したため（知見 14） | 手動確認済み・本番での動作は担保済み |
+| ①〜⑤の結合テスト（レイヤー間の通しテスト） | 各レイヤーはユニットテストで個別カバー済だが、結合テストはなし | 選択肢 3（HTML 注入方式）で③〜⑦の結合テストを検討 |
 | Electron の cell injection | Tauri 環境が必要 | `tauri/` サブフォルダに別テスト作成 |
 | `progress_manager.py` のファイル永続化 | Python バックエンドの統合が必要 | Python 側のユニットテストで担保 |
-| Python `emit_skill()` → DOM 経路 | Backcast エンジン依存 | 別途統合テスト環境を用意 |
+| Python `emit_skill()` → DOM 経路（全経路統合） | Backcast エンジン依存 | 別途統合テスト環境を用意 |
 | `SkillRewardToast` の表示 | タイムアウトが短く不安定 | `waitFor` タイムアウトを調整して有効化 |
 | ブリッジ・フルトラック | `bridge.spec.ts` 作成済み・実行未検証 | sandbox 安定確認後に実行 |
 
@@ -895,7 +974,9 @@ test.describe("統合テスト（Backcast 環境必須）", () => {
 | ファイル | 役割 | テストへの影響 | 修正状況 |
 |---|---|---|---|
 | `frontend/e2e-tests/game/helpers.ts` | テストフック呼び出し・接続確認・バナー dismiss・パネル操作 | セレクター変更時ここを修正 | ✅ 修正済み |
-| `frontend/src/components/skill-tree/skill-complete-handler.ts` | BroadcastChannel 受信 + `__testCompleteSkill` / `__testResetProgress` フック公開 | フック名変更時にテストが壊れる | ✅ 修正済み |
+| `frontend/src/components/skill-tree/skill-complete-handler.ts` | BroadcastChannel 受信 + `__testCompleteSkill` / `__testResetProgress` フック公開 | フック名変更時にテストが壊れる。ユニットテストあり | ✅ 修正済み |
+| `frontend/src/core/kernel/handlers.ts` | `extractAndSendBroadcastMessages()` — HTML パース + BroadcastChannel 送信 | `export` 追加済み。ユニットテストあり | ✅ |
+| `src-tauri/resources/files/skill_events.py` | `emit_skill()` — `<marimo-broadcast>` HTML 生成 | HTML 属性名変更時にテストが壊れる。ユニットテストあり | ✅ |
 | `frontend/src/components/skill-tree/atoms.ts` | prerequisites チェック・atom 更新 | ガードロジックの変更を検知 | ✅ console.log 削除済み |
 | `frontend/src/components/skill-tree/skill-tree-graph.tsx` | React Flow ノード・エッジの表示 | `useEffect` 同期が必須（知見 17） | ✅ 修正済み |
 | `frontend/src/components/skill-tree/skill-node.tsx` | `data-skill-id` / `data-skill-status` 属性 | テスト通過確認済み | ✅ |

@@ -229,7 +229,7 @@ export function handleRemoveUIElements(
  * This is called at WebSocket receive time to ensure all messages are processed,
  * even when React batches state updates and only renders the final state.
  */
-function extractAndSendBroadcastMessages(html: string): void {
+export function extractAndSendBroadcastMessages(html: string): void {
   // Quick check before running regex
   if (!html.includes("marimo-broadcast")) {
     return;

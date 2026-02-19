@@ -95,18 +95,17 @@ test.describe("スキルツリー UI", () => {
   });
 
   test("スキルノードに報酬バッジが表示される", async ({ page }) => {
-    // GiftIcon のある報酬セクションが存在する
-    const rewardBadge = page
-      .locator('[data-skill-id="SANDBOX_001"] [class*="Badge"], [data-skill-id="SANDBOX_001"] .badge')
+    // Badge コンポーネントは <div> に Tailwind クラス (inline-flex rounded-full) を付与する。
+    // "Badge" という文字列はクラスに含まれないため、
+    // GiftIcon を含む報酬セクション内の rounded-full 要素で判定する。
+    const rewardSection = page
+      .locator('[data-skill-id="SANDBOX_001"] .border-t')
       .first();
-    // フォールバック: react-flow__node 内の Badge でも可
-    const fallback = page
-      .locator(".react-flow__node [class*='Badge']")
-      .first();
-    const isVisible =
-      (await rewardBadge.isVisible().catch(() => false)) ||
-      (await fallback.isVisible().catch(() => false));
-    expect(isVisible).toBe(true);
+    await expect(rewardSection).toBeVisible();
+
+    // Badge（rounded-full の div）が報酬セクション内に存在する
+    const badge = rewardSection.locator(".rounded-full").first();
+    await expect(badge).toBeVisible();
   });
 
   // -------------------------------------------------------------------------
