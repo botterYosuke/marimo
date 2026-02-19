@@ -1,0 +1,27 @@
+{
+  "type": "grid",
+  "data": {
+    "columns": 24,
+    "rowHeight": 20,
+    "maxWidth": 1400,
+    "bordered": true,
+    "cells": [
+      {
+        "position": null,
+        "position3D": {
+          "x": 443.5,
+          "y": 600,
+          "z": 441
+        }
+      },
+      {
+        "position": null,
+        "position3D": {
+          "x": -100.56518520460916,
+          "y": 600,
+          "z": 492.0023848245589
+        }
+      }
+    ]
+  }
+}

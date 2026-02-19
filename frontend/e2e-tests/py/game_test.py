@@ -1,25 +1,28 @@
 import marimo
 
-__generated_with = "0.1.0"
-app = marimo.App(width="medium", app_title="Game Test")
+__generated_with = "0.19.11"
+app = marimo.App(
+    width="grid",
+    app_title="Game Test",
+    layout_file="layouts/game_test.grid.json",
+)
 
 
 @app.cell
-def __():
+def _():
     import marimo as mo
+
     return (mo,)
 
 
 @app.cell
-def __(mo):
-    mo.md(
-        r"""
-        # Game Test Notebook
+def _(mo):
+    mo.md(r"""
+    # Game Test Notebook
 
-        このノートブックはスキルツリーゲームの e2e テスト用です。
-        """
-    )
-    return ()
+    このノートブックはスキルツリーゲームの e2e テスト用です。
+    """)
+    return
 
 
 if __name__ == "__main__":

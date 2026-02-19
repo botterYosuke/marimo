@@ -19,8 +19,8 @@ export type ServerOptions =
       readonly port?: number;
     };
 
-// Location of python files needed for testing
-const pydir = path.join("e2e-tests", "py");
+// Location of python files needed for testing (absolute to avoid CWD ambiguity with uv run)
+const pydir = path.resolve(import.meta.dirname!, "e2e-tests", "py");
 
 // Each app is served by a different server.
 const EDIT_PORT = 2718;

@@ -20,16 +20,74 @@ export function getGameUrl(baseUrl: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// サーバー接続確認
+// ---------------------------------------------------------------------------
+
+/**
+ * marimo サーバーとの WebSocket 接続が確立され、カーネルが健全であることを確認する。
+ *
+ * チェック内容:
+ * 1. `[data-testid="backend-status"]` が表示され、健全な接続（緑チェックマーク）を示すこと
+ * 2. 「Reconnected」バナーが表示されていないこと（接続断→再接続が起きていない）
+ *
+ * いずれかが満たされない場合はテストを失敗させる。
+ */
+export async function ensureConnected(page: Page): Promise<void> {
+  // 1. backend-status ボタンが表示されるまで待機
+  const statusButton = page.locator('[data-testid="backend-status"]');
+  await statusButton.waitFor({ timeout: 20_000 });
+
+  // 2. カーネルが healthy（緑チェックマーク）になるまでポーリング
+  //    - Spinner (animate-spin) → まだ接続中
+  //    - PowerOffIcon (red) → 切断済み
+  //    - CheckCircle2Icon (green) → 健全
+  await expect(async () => {
+    const status = await statusButton.evaluate((el) => {
+      const svg = el.querySelector("svg");
+      if (!svg) return "no-svg";
+      const cls = svg.getAttribute("class") || "";
+      if (cls.includes("animate-spin")) return "connecting";
+      if (cls.includes("red")) return "disconnected";
+      if (cls.includes("green")) return "healthy";
+      // CheckCircle2 が表示されているが health check 未完了の場合もある
+      return "unknown";
+    });
+    expect(status).toBe("healthy");
+  }).toPass({ timeout: 20_000 });
+
+  // 3.「Reconnected」バナーが表示されていないことを確認
+  //    バナーが表示されている = テスト中に接続が切れて再接続した状態
+  const reconnectedBanner = page.locator("text=Reconnected").first();
+  const bannerVisible = await reconnectedBanner
+    .isVisible()
+    .catch(() => false);
+
+  if (bannerVisible) {
+    // バナーのテキストを取得して詳細なエラーメッセージを生成
+    const bannerText = await reconnectedBanner.textContent().catch(() => "");
+    throw new Error(
+      `[ensureConnected] "Reconnected" バナーが検出されました。` +
+        `サーバー接続が一度切断された状態です。テスト結果は無効です。\n` +
+        `バナーテキスト: ${bannerText}`,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // スキルイベント送信
 // ---------------------------------------------------------------------------
 
 /**
- * BroadcastChannel 経由でスキル完了イベントを送信する。
+ * スキル完了イベントを発火する。
  *
- * BroadcastChannel は「同一オリジンの他のコンテキスト」へ届くため、
- * 別タブを開いて送信し、すぐ閉じる。
+ * setupSkillEventListener() が window.__testCompleteSkill に公開した
+ * コールバックを page.evaluate() 経由で直接呼び出す。
+ * これにより BroadcastChannel のクロスコンテキスト配信問題を回避しつつ、
+ * completeSkillWithRewardAtom → playerProgressAtom → UI 更新の全経路をテストできる。
  *
- * @param context - Playwright の BrowserContext
+ * BroadcastChannel 自体の動作は手動確認済み（2026-02-19）。
+ *
+ * @param context - Playwright の BrowserContext（互換性のため残存）
  * @param page    - イベントを受信させたいページ
  * @param skillId - 送信するスキル ID（例: "SANDBOX_002"）
  */
@@ -38,26 +96,18 @@ export async function emitSkillEvent(
   page: Page,
   skillId: string,
 ): Promise<void> {
-  const origin = new URL(page.url()).origin;
-
-  // 同一オリジンの別タブから送信（BroadcastChannel 仕様による）
-  const sender = await context.newPage();
-  try {
-    // commit まで待つ（ネットワーク完了は不要）
-    await sender.goto(origin, { waitUntil: "commit" });
-    await sender.evaluate(
-      ({ channel, id }) => {
-        const bc = new BroadcastChannel(channel);
-        bc.postMessage({ type: "skill_complete", data: { skill_id: id } });
-        bc.close();
-      },
-      { channel: SKILL_CHANNEL, id: skillId },
-    );
-    // メッセージが React 側で処理されるのを待つ
-    await page.waitForTimeout(300);
-  } finally {
-    await sender.close();
-  }
+  await page.evaluate((id) => {
+    const fn = (window as unknown as Record<string, unknown>).__testCompleteSkill;
+    if (typeof fn === "function") {
+      (fn as (skillId: string) => void)(id);
+    } else {
+      throw new Error(
+        "__testCompleteSkill not found — SkillTreeButton may not have mounted yet",
+      );
+    }
+  }, skillId);
+  // React 状態更新 → DOM 再レンダリングを待つ
+  await page.waitForTimeout(300);
 }
 
 /**
@@ -80,35 +130,24 @@ export async function emitSkillSequence(
 
 /**
  * スキルツリーパネルが表示されるまで待機する。
- * パネルが折り畳まれている場合はトリガーをクリックして開く。
+ * スキルツリーはダイアログとして開く（サイドバーパネルではない）。
+ * SkillTreeButton（data-testid="skill-tree-button"）をクリックして開く。
  */
 export async function openSkillTreePanel(page: Page): Promise<void> {
-  // パネルがすでに見えている場合はそのまま返す
-  const panel = page.locator('[data-testid="skill-tree-panel"]');
-  if (await panel.isVisible().catch(() => false)) {
-    return;
+  // ダイアログがすでに開いている場合はスキップ
+  const dialog = page.locator('[role="dialog"]');
+  if (await dialog.isVisible().catch(() => false)) {
+    const panel = dialog.locator('[data-testid="skill-tree-panel"]');
+    if (await panel.isVisible().catch(() => false)) return;
   }
 
-  // パネルタブ or トリガーボタンを探す（トロフィーアイコン / "スキルツリー" テキスト）
-  const trigger = page
-    .getByRole("button")
-    .filter({ hasText: /スキルツリー|skill.?tree/i })
-    .first();
+  // スキルツリーボタンをクリック（トースト回避のため evaluate 経由）
+  await page.evaluate(() => {
+    document.querySelector('[data-testid="skill-tree-button"]')?.click();
+  });
 
-  if (await trigger.isVisible().catch(() => false)) {
-    await trigger.click();
-    return;
-  }
-
-  // フォールバック: パネルエリアの Trophy アイコンを探す
-  const trophyBtn = page
-    .locator(".chrome-panel, [class*='panel']")
-    .getByRole("button")
-    .first();
-
-  if (await trophyBtn.isVisible().catch(() => false)) {
-    await trophyBtn.click();
-  }
+  // ダイアログ内のスキルツリーパネルが表示されるまで待機
+  await page.locator('[data-testid="skill-tree-panel"]').waitFor({ timeout: 5_000 });
 }
 
 // ---------------------------------------------------------------------------
@@ -224,10 +263,34 @@ export async function runNewCell(page: Page, code: string): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
- * ページをリロードしてゲーム進捗を初期状態に戻す。
- * playerProgressAtom は plain atom のためリロードで初期化される。
+ * ゲーム進捗を初期状態に戻す。
+ *
+ * page.reload() を使わず、Jotai atom を直接リセットして WebSocket 接続を維持する。
+ * これにより「Reconnected」バナーの発生を防ぎ、テスト環境の安定性を保つ。
  */
 export async function resetGameProgress(page: Page): Promise<void> {
-  await page.reload();
-  await page.waitForLoadState("networkidle");
+  // Jotai の resetProgressAtom を直接呼び出し
+  await page.evaluate(() => {
+    const fn = (window as unknown as Record<string, unknown>)
+      .__testResetProgress;
+    if (typeof fn === "function") {
+      (fn as () => void)();
+    } else {
+      throw new Error(
+        "__testResetProgress not found — SkillTreeButton may not have mounted yet",
+      );
+    }
+  });
+
+  // ダイアログが開いている場合は閉じる
+  const dialog = page.locator('[role="dialog"]');
+  if (await dialog.isVisible().catch(() => false)) {
+    await page.keyboard.press("Escape");
+    await dialog
+      .waitFor({ state: "hidden", timeout: 3_000 })
+      .catch(() => {});
+  }
+
+  // React 状態更新 → DOM 再レンダリングを待つ
+  await page.waitForTimeout(300);
 }

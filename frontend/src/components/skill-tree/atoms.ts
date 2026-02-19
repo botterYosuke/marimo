@@ -191,7 +191,8 @@ export const completeSkillWithRewardAtom = atom(
     }
 
     // prerequisites 未完了ならスキップ
-    if (!skill.prerequisites.every(p => progress.completedSkills.includes(p))) {
+    const prereqsMet = skill.prerequisites.every(p => progress.completedSkills.includes(p));
+    if (!prereqsMet) {
       return;
     }
 

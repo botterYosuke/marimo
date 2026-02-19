@@ -41,8 +41,14 @@ export const SkillTreeGraph = ({ data, onSkillClick }: Props) => {
   // elements.ts 内でトラック別レイアウトを行うため、直接使用
   const initial = useMemo(() => createSkillElements(data.skills), [data]);
 
-  const [nodes, , onNodesChange] = useNodesState(initial.nodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
+
+  // data.skills が変化したら（atom 更新時）ノードとエッジを同期する
+  useEffect(() => {
+    setNodes(initial.nodes);
+    setEdges(initial.edges);
+  }, [initial, setNodes, setEdges]);
   const [selection, setSelection] = useState<SkillSelection>();
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
 

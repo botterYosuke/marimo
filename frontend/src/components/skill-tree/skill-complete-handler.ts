@@ -115,12 +115,23 @@ export async function loadProgressFromNotebook(): Promise<GameProgress | null> {
  * BroadcastChannelでスキルイベントを監視するリスナーを設定
  */
 export function setupSkillEventListener(
-  onSkillComplete: (skillId: string) => void
+  onSkillComplete: (skillId: string) => void,
+  onReset?: () => void,
 ): () => void {
+  // e2e テスト用フック: page.evaluate() から直接スキル完了/リセットを発火できる
+  (window as unknown as Record<string, unknown>).__testCompleteSkill =
+    onSkillComplete;
+  if (onReset) {
+    (window as unknown as Record<string, unknown>).__testResetProgress = onReset;
+  }
+
   // BroadcastChannel APIが使用可能か確認
   if (typeof BroadcastChannel === "undefined") {
     console.warn("[SkillHandler] BroadcastChannel not available");
-    return () => {};
+    return () => {
+      delete (window as unknown as Record<string, unknown>).__testCompleteSkill;
+      delete (window as unknown as Record<string, unknown>).__testResetProgress;
+    };
   }
 
   const channel = new BroadcastChannel("skill_event_channel");
@@ -142,6 +153,8 @@ export function setupSkillEventListener(
 
   // クリーンアップ関数を返す
   return () => {
+    delete (window as unknown as Record<string, unknown>).__testCompleteSkill;
+    delete (window as unknown as Record<string, unknown>).__testResetProgress;
     channel.removeEventListener("message", handleMessage);
     channel.close();
   };

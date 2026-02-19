@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(PYODIDE=true VITE_MARIMO_VERSION=0.19.2 pnpm build:*)",
+      "Read(//c/Users/sasac/AppData/Roaming/Antigravity/User/**)",
+      "Read(//c/Users/sasac/.claude/**)",
+      "Read(//tmp/claude/d--Documents-marimo/tasks/**)",
+      "Bash(PYODIDE=true npx vite:*)",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(pkill:*)",
+      "mcp__playwright__browser_tabs",
+      "Bash(tasklist:*)"
+    ],
+    "additionalDirectories": [
+      "d:\\Documents\\marimo\\.claude\\skills"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "playwright"
+  ]
+}

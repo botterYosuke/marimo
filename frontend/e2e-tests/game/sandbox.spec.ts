@@ -11,6 +11,7 @@
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { getAppUrl } from "../../playwright.config";
 import {
+  ensureConnected,
   openSkillTreePanel,
   emitSkillEvent,
   emitSkillSequence,
@@ -28,11 +29,19 @@ test.describe("サンドボックストラック", () => {
 
   test.beforeEach(async ({ page }, info) => {
     context = page.context();
-    await page.goto(getAppUrl(APP));
-    if (info.retry) {
-      await page.reload();
+
+    // 初回テストまたはリトライ時のみページナビゲーション
+    // テスト間は page.reload() を避けて WebSocket 接続を維持する
+    const needsNavigation =
+      !page.url().includes("game_test.py") || info.retry;
+
+    if (needsNavigation) {
+      await page.goto(getAppUrl(APP));
+      await page.waitForLoadState("networkidle");
     }
-    await page.waitForLoadState("networkidle");
+
+    // サーバーとの接続が確立・健全であることを確認してからテスト開始
+    await ensureConnected(page);
     await openSkillTreePanel(page);
   });
 
