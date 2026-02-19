@@ -11,10 +11,6 @@
       
       
       
-        <link rel="prev" href="../broadcast-channel-hud/">
-      
-      
-        <link rel="next" href="../skill-tree-panel/">
       
       
         
@@ -25,7 +21,7 @@
     
     
       
-        <title>Chart Theme - marimo Developer Docs</title>
+        <title>作業依頼：#code/ URL埋め込み機能のバグ修正 - marimo Developer Docs</title>
       
     
     
@@ -76,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#color-theme" class="md-skip">
+        <a href="#code-url" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Chart Theme
+              作業依頼：#code/ URL埋め込み機能のバグ修正
             
           </span>
         </div>
@@ -912,20 +908,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
@@ -946,7 +940,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -989,37 +983,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Chart Theme
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../chart-theme/" class="md-nav__link">
         
   
   
@@ -1035,170 +1002,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        問題
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        関連ファイル
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        仮説
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="仮説">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-widgetoptions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        仮説1: widget.options にテーマ色が渡っていない
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        仮説2: ウィジェットキャッシュが原因
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-javascript-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        仮説3: JavaScript側で options を読み取れていない
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        デバッグ手順
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="デバッグ手順">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 1: ログ追加
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 2: 実行と確認
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 3: 原因特定と修正
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: ログ削除
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        期待する動作
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1407,7 +1210,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        問題
+        背景・詳細仕様
       
     </span>
   </a>
@@ -1418,7 +1221,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        関連ファイル
+        状況サマリー
       
     </span>
   </a>
@@ -1429,69 +1232,19 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        仮説
+        依頼内容
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="仮説">
+    <nav class="md-nav" aria-label="依頼内容">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-widgetoptions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        仮説1: widget.options にテーマ色が渡っていない
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        仮説2: ウィジェットキャッシュが原因
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-javascript-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        仮説3: JavaScript側で options を読み取れていない
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        デバッグ手順
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="デバッグ手順">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 1: ログ追加
+        修正対象ファイル
       
     </span>
   </a>
@@ -1499,32 +1252,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2" class="md-nav__link">
+  <a href="#url" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: 実行と確認
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 3: 原因特定と修正
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: ログ削除
+        動作確認URL
       
     </span>
   </a>
@@ -1533,17 +1264,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        期待する動作
-      
-    </span>
-  </a>
   
 </li>
       
@@ -1564,56 +1284,37 @@
 
 
 
-<h1 id="color-theme">Color Theme デバッグ作業依頼<a class="headerlink" href="#color-theme" title="Permanent link">&para;</a></h1>
-<h2 id="_1">問題<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>Backtest(color_theme="light")</code> を指定しても、チャートがライトテーマで表示されない。</p>
-<h2 id="_2">関連ファイル<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h1 id="code-url">作業依頼：<code>#code/</code> URL埋め込み機能のバグ修正<a class="headerlink" href="#code-url" title="Permanent link">&para;</a></h1>
+<h2 id="_1">背景・詳細仕様<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p><a href="file:///D:/Documents/marimo/development_docs/code_url_embedding.md"><code>development_docs/code_url_embedding.md</code></a> を参照してください。
+根本原因・修正案・関連ファイルがすべて記載されています。</p>
+<h2 id="_2">状況サマリー<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>BackcastPro</strong>: <code>C:\Users\sasai\Documents\BackcastPro\src\BackcastPro\</code></li>
-<li><code>backtest.py</code> - <code>__init__</code>で<code>color_theme</code>受け取り、<code>chart()</code>で使用</li>
-<li><code>api/chart.py</code> - <code>CHART_THEMES</code>, <code>get_theme_colors()</code>, <code>chart_by_df()</code>, JavaScript ESM</li>
-<li><strong>サンプル</strong>: <code>C:\Users\sasai\AppData\Roaming\marimo\notebooks\backcast.py</code></li>
+<li><code>https://backcast-tan.web.app/</code> にデプロイ済みのWASMアプリで <code>#code/</code> URLが<strong>無視される</strong>バグがある</li>
+<li>根本原因：<code>frontend/src/core/wasm/store.ts</code> の <code>notebookFileStore</code> の優先順位で <code>urlFileStore</code>（URLフラグメント読み込み）が最後になっており、<code>mountConfigFileStore</code> が先に値を返すと到達しない</li>
 </ul>
-<h2 id="_3">仮説<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<h3 id="1-widgetoptions">仮説1: widget.options にテーマ色が渡っていない<a class="headerlink" href="#1-widgetoptions" title="Permanent link">&para;</a></h3>
-<p><code>chart_by_df()</code> で <code>widget.options</code> に <code>theme_colors</code> を展開しているが、正しく設定されていない可能性。</p>
-<h3 id="2">仮説2: ウィジェットキャッシュが原因<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
-<p><code>_chart_widgets</code> にキャッシュされた古いウィジェットが再利用され、新しいテーマ設定が反映されない。</p>
-<h3 id="3-javascript-options">仮説3: JavaScript側で options を読み取れていない<a class="headerlink" href="#3-javascript-options" title="Permanent link">&para;</a></h3>
-<p>ESM の <code>render()</code> 関数で <code>model.get("options")</code> が空または不正な値を返している。</p>
-<h2 id="_4">デバッグ手順<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<h3 id="step-1">Step 1: ログ追加<a class="headerlink" href="#step-1" title="Permanent link">&para;</a></h3>
-<p><strong>backtest.py</strong> (<code>chart()</code> メソッド内、<code>chart_by_df</code> 呼び出し前):
-<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[DEBUG] Backtest.chart() - color_theme: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_color_theme</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</code></pre></div></p>
-<p><strong>api/chart.py</strong> (<code>chart_by_df()</code> 関数内):
-<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[DEBUG] chart_by_df() - theme: </span><span class="si">{</span><span class="n">theme</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[DEBUG] chart_by_df() - theme_colors: </span><span class="si">{</span><span class="n">theme_colors</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[DEBUG] chart_by_df() - widget.options: </span><span class="si">{</span><span class="n">widget</span><span class="o">.</span><span class="n">options</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</code></pre></div></p>
-<p><strong>api/chart.py</strong> (JavaScript ESM、<code>render()</code> 関数内):
-<div class="highlight"><pre><span></span><code><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[DEBUG] LWC render - options:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">options</span><span class="p">);</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[DEBUG] LWC render - backgroundColor:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">options</span><span class="p">.</span><span class="nx">backgroundColor</span><span class="p">);</span>
-</code></pre></div></p>
-<h3 id="step-2">Step 2: 実行と確認<a class="headerlink" href="#step-2" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>asai<span class="se">\D</span>ocuments<span class="se">\m</span>arimo
-marimo<span class="w"> </span>edit<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\s</span>asai<span class="se">\A</span>ppData<span class="se">\R</span>oaming<span class="se">\m</span>arimo<span class="se">\n</span>otebooks<span class="se">\b</span>ackcast.py
+<h2 id="_3">依頼内容<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>以下の修正を実施し、動作確認してください。</p>
+<h3 id="_4">修正対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p><code>frontend/src/core/wasm/store.ts</code> の <code>notebookFileStore</code> 定義（125〜130行目付近）：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 現状（問題あり）</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">notebookFileStore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">CompositeFileStore</span><span class="p">([</span>
+<span class="w">  </span><span class="nx">mountConfigFileStore</span><span class="p">,</span><span class="w">   </span><span class="c1">// 1番目</span>
+<span class="w">  </span><span class="nx">domElementFileStore</span><span class="p">,</span><span class="w">    </span><span class="c1">// 2番目</span>
+<span class="w">  </span><span class="nx">urlFileStore</span><span class="p">,</span><span class="w">           </span><span class="c1">// 3番目（URLフラグメント）← 無視される</span>
+<span class="p">]);</span>
 </code></pre></div>
-- Pythonログはターミナルで確認
-- JSログはブラウザのDevTools Console で確認</p>
-<h3 id="step-3">Step 3: 原因特定と修正<a class="headerlink" href="#step-3" title="Permanent link">&para;</a></h3>
-<p>ログから以下を確認:
-1. <code>self._color_theme</code> が "light" になっているか
-2. <code>theme_colors</code> に正しい値が入っているか
-3. <code>widget.options</code> にテーマ色が含まれているか
-4. JS側で options が受け取れているか</p>
-<h3 id="step-4">Step 4: ログ削除<a class="headerlink" href="#step-4" title="Permanent link">&para;</a></h3>
-<p>修正完了後、追加した <code>print()</code> と <code>console.log()</code> をすべて削除。</p>
-<h2 id="_5">期待する動作<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<p><code>color_theme="light"</code> 指定時:
-- 背景色: <code>#ffffff</code>
-- テキスト色: <code>#191919</code>
-- グリッド色: <code>#e1e1e1</code></p>
+<p><code>#code/</code> フラグメントがURLにある場合は <code>urlFileStore</code> を最優先にするよう変更してください（詳細な修正案は <code>code_url_embedding.md</code> の「修正案」セクション参照）。</p>
+<h3 id="url">動作確認URL<a class="headerlink" href="#url" title="Permanent link">&para;</a></h3>
+<p>修正後、以下のURLをブラウザで開き、<code>:rocket: :smile:</code> を含むセルが表示されることを確認してください：</p>
+<div class="highlight"><pre><span></span><code>https://backcast-tan.web.app/#code/JYWwDg9gTgLgBCAhlUECwAoTB9bBzAUwDsCpEYCATbAd2BgAs4BeOAIgAYA6ARgE4uAdjaZEYMCwTJUXAILiAFAEpMqjAAExYLgGMCAG30KGwSgWw6IZ5gBUoAVwIqMZgGZxsCkBCUAuTHCBCBBcIJQKUGxRAUEAqgDOBHCW+hBEcPEAnkQwiAAecIjxhRkM0DA69vCu0HAAVHUE3gBWwPENcMDpmRD2UFJQM41MAodgiIgQOZsCxWGxcEgurg2J8glouA4iMpMEA64HKA1QhWK3jUcz+yzg+wANM
+</code></pre></div>
+<blockquote>
+<p>[!NOTE]
+確認のためには修正後に <code>pnpm build</code> + Firebase へのデプロイが必要になる場合があります。
+ローカルでは <code>pnpm dev</code> の WebSocket モードでは <code>#code/</code> は動作しないため、
+WASMモード（<code>pnpm dev:wasm</code> 等）で確認するか、デプロイして確認してください。</p>
+</blockquote>
 
 
 
