@@ -30,8 +30,8 @@ test.describe("サンドボックストラック", () => {
   test.beforeEach(async ({ page }, info) => {
     context = page.context();
 
-    // 初回テストまたはリトライ時のみページナビゲーション
-    // テスト間は page.reload() を避けて WebSocket 接続を維持する
+    // 初回テストまたはリトライ時のみページナビゲーション。
+    // テスト間は page.reload() を避けて WebSocket 接続を維持する。
     const needsNavigation =
       !page.url().includes("game_test.py") || info.retry;
 
@@ -40,7 +40,12 @@ test.describe("サンドボックストラック", () => {
       await page.waitForLoadState("networkidle");
     }
 
-    // サーバーとの接続が確立・健全であることを確認してからテスト開始
+    // 実際のユーザーと同じフローでサーバー接続の安定を待つ:
+    // 1. カーネル healthy（緑チェックマーク）を確認
+    // 2. Reconnected バナーが出ていれば dismiss
+    // 3. バナーが再出現しないことを確認（接続安定化）
+    // 4. 最終的にカーネル healthy を再確認
+    // この安定化が完了してからゲーム操作を開始する。
     await ensureConnected(page);
     await openSkillTreePanel(page);
   });

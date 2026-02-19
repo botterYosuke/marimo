@@ -1,11 +1,9 @@
 # ゲーム e2e レビューシステム
 
-**ステータス**: `sandbox.spec.ts` 全 10 件パス済み・**ただし「Reconnected」問題の安定性確認が未完了**
+**ステータス**: `sandbox.spec.ts` 全 10 件パス済み・**接続安定化ループ付き・「Reconnected」問題解決済み**
 **場所**: `frontend/e2e-tests/game/`
 **担当**: game ブランチで継続作業中
-**最終確認日**: 2026-02-19（Playwright テスト実行 10 passed / 1.8m）
-
-> **注意**: テスト実行中に marimo サーバーとの WebSocket 接続が切れ「Reconnected（既存セッションに再接続しました）」バナーが表示されたままテストが走り続ける事象が観測された。10 passed の結果は接続不安定な状態でのものであり、再実行による安定性確認が必要。詳細は知見 16 を参照。
+**最終確認日**: 2026-02-19（Playwright テスト実行 10 passed / 2.4m・接続安定化ループ確認付き）
 
 ---
 
@@ -49,10 +47,15 @@
 - [x] ✅ **`diag.spec.ts` 診断テスト削除**: デバッグ用に一時作成したファイルをクリーンアップ
 - [x] ✅ **`sandbox.spec.ts` 全 10 件パス**: `npx playwright test e2e-tests/game/sandbox.spec.ts --headed` → 10 passed (1.8m)
 
-### ⚠️ 要確認（安定性）
+### ✅ 完了（2026-02-19 サーバー接続安定化セッション）
 
-- [ ] **「Reconnected」問題の再現確認と対策** — テスト中に WebSocket 切断→再接続が発生（知見 16）。テスト結果に影響する可能性あり
-- [ ] **`sandbox.spec.ts` の安定性確認** — サーバー接続が安定した状態で再実行し、全 10 件パスを再確認
+- [x] ✅ **「Reconnected」問題の原因特定**: marimo edit モードは 1 ファイル 1 カーネルを永続するため、`page.reload()` / `page.goto()` のたびに既存セッションへの再接続が発生しバナーが表示される（知見 16 → 知見 19 で解決）
+- [x] ✅ **`ensureConnected()` 追加**: `[data-testid="backend-status"]` の緑チェックマーク（Kernel healthy）をポーリング確認してからテスト開始（知見 19）
+- [x] ✅ **`dismissReconnectedBanner()` 追加**: "Reconnected" バナーを検出→閉じる共通ヘルパー。`ensureConnected()` と `openSkillTreePanel()` の両方で使用
+- [x] ✅ **`resetGameProgress()` 全面書き換え**: `page.reload()` → `window.__testResetProgress` に変更。WebSocket 接続を維持したまま Jotai atom をリセット（知見 20）
+- [x] ✅ **`window.__testResetProgress` テストフック追加**: `setupSkillEventListener()` に `onReset` パラメータ追加、`skill-tree-button.tsx` から `resetProgressAtom` を渡す
+- [x] ✅ **`beforeEach` 最適化**: 初回テストのみ `page.goto()` で navigate、テスト 2 以降はナビゲーションをスキップして WebSocket 再接続を回避
+- [x] ✅ **`sandbox.spec.ts` 安定パス確認**: Kernel healthy 確認付きで全 10 件パス（2.0m）
 
 ### ⬜ 未完了・今後の課題
 
@@ -86,7 +89,7 @@
 | 報酬トースト | **OK** | 完了時にトースト表示（通知エリアに出現を確認） |
 | `SkillTreeButton` | **OK** | ダイアログモードで正常にスキルツリー表示 |
 | `openSkillTreePanel()` | **✅ 修正済み** | ダイアログモードに対応（知見 8） |
-| Playwright e2e テスト | **✅ 10 passed** | ブロッカー 2 件解消 + 追加修正 4 件で全パス（⚠️ Reconnected 問題あり） |
+| Playwright e2e テスト | **✅ 10 passed** | ブロッカー解消 + Kernel healthy 確認付き・Reconnected 問題解決済み |
 
 ### コンソールログでの受信確認
 
@@ -209,19 +212,31 @@ BroadcastChannel 自体の動作は手動で確認済みのため、テストで
 
 ### テスト分離戦略
 
-各テストは `afterEach` でページをリロードして初期状態に戻す。
-`playerProgressAtom` は `atomWithStorage` を使わない plain atom のため、リロードで自動的にリセットされる。
+各テストは `afterEach` で Jotai atom を直接リセットして初期状態に戻す。
+`page.reload()` は使わない — WebSocket 接続を維持し「Reconnected」バナーを防ぐため（知見 19・20）。
 
 ```typescript
+test.beforeEach(async ({ page }, info) => {
+  // 初回テストまたはリトライ時のみナビゲーション
+  const needsNavigation = !page.url().includes("game_test.py") || info.retry;
+  if (needsNavigation) {
+    await page.goto(getAppUrl(APP));
+    await page.waitForLoadState("networkidle");
+  }
+  await ensureConnected(page);   // 接続安定化ループ（知見 19・21）
+  await openSkillTreePanel(page);
+});
+
 test.afterEach(async ({ page }) => {
-  await resetGameProgress(page); // = page.reload() + waitForLoadState
+  await resetGameProgress(page); // = __testResetProgress + ダイアログ close
 });
 ```
 
 これにより:
-- テスト間の状態汚染ゼロ
-- `localStorage` の手動クリア不要
-- `atomWithStorage` に変更された場合にテストが自然に失敗（検知できる）
+- テスト間の状態汚染ゼロ（atom 直接リセット）
+- WebSocket 接続を維持（再接続なし・「Reconnected」バナーなし）
+- 各テスト開始前に Kernel healthy を確認（切断状態でのテスト実行を防止）
+- `atomWithStorage` に変更された場合は `__testResetProgress` の修正が必要（検知可能）
 
 ---
 
@@ -466,7 +481,7 @@ export function setupSkillEventListener(
 
 **教訓**: サイドバーパネル版とダイアログ版で UI 要素が乖離していた。テストが前提とする UI 要素が、テスト対象のコンポーネントに実際に存在するか事前確認が必要。
 
-### 16. ⚠️ テスト中に「Reconnected」バナーが表示される問題（未解決）
+### 16. ~~⚠️ テスト中に「Reconnected」バナーが表示される問題~~ → ✅ 解決済み（知見 19・20）
 
 **症状**: `sandbox.spec.ts` の実行中、ページスナップショットに以下が表示される:
 ```yaml
@@ -475,28 +490,9 @@ export function setupSkillEventListener(
 - button "Restart"
 ```
 
-テスト結果は「10 passed」だが、アプリケーションが再接続状態のままテストが走っていた可能性がある。
+**原因（確定）**: marimo の edit モードは 1 ファイルにつき 1 カーネルを永続する。`page.reload()` や `page.goto()` のたびに既存カーネルへの WebSocket 再接続が発生し、サーバーが「Reconnected」通知を送信する。接続自体は健全（Green チェック確認済み）。
 
-**考えられる原因**:
-1. `afterEach` の `page.reload()` が新セッション開始ではなく既存セッションへの再接続になっている
-2. Playwright の webServer プロセスが不安定で WebSocket が切断される
-3. テスト間で marimo サーバーのセッション状態が引き継がれている
-
-**調査ポイント**:
-- `beforeEach` で「Reconnected」バナーが表示されていないことをアサーションする
-- `page.reload()` 後に `page.locator('text=Reconnected').isVisible()` でチェック
-- もし出ていたら「Restart」ボタンをクリックして新セッションを開始する
-
-```typescript
-// beforeEach に追加する案
-await page.waitForLoadState("networkidle");
-const reconnected = page.locator('text=Reconnected');
-if (await reconnected.isVisible({ timeout: 1_000 }).catch(() => false)) {
-  // Restart ボタンを押して新セッションにする
-  await page.locator('button:has-text("Restart")').click();
-  await page.waitForLoadState("networkidle");
-}
-```
+**解決策**: 知見 19（`ensureConnected` + バナー dismiss）と知見 20（`page.reload()` 廃止）で対処済み。
 
 ### 17. React Flow の `useNodesState` は初期値しか使わない（2026-02-19 修正で発見）
 
@@ -544,6 +540,118 @@ taskkill //F //IM marimo.exe
 
 **`import.meta.dirname`**: TypeScript では `!` (non-null assertion) が必要。`import.meta.dirname!`
 
+### 19. `ensureConnected()` パターン — テスト前のサーバー接続確認（2026-02-19 追加・知見 21 で強化）
+
+**問題**: テストが marimo サーバーとの WebSocket 接続が確立されていない状態（切断中・未接続・再接続中）で走ると、テスト結果が信頼できない。`window.__testCompleteSkill` はフロントエンドの Jotai atom を直接操作するため、サーバー未接続でもテストが通ってしまう。
+
+**解決**: `beforeEach` で `ensureConnected(page)` を呼び出し、実際のユーザーと同じフローで接続安定を待ってからテストを開始する:
+
+1. **Kernel healthy 確認**: `waitForKernelHealthy()` で `[data-testid="backend-status"]` 内の SVG が `green` クラスを持つまで最大 20 秒ポーリング
+2. **接続安定化ループ**: "Reconnected" バナーが出ていれば dismiss し、1 秒間バナーが再出現しないことを確認してから安定と判定（知見 21）
+3. **最終 healthy 確認**: 安定化後にカーネルが健全であることを再確認
+
+```typescript
+export async function ensureConnected(page: Page): Promise<void> {
+  // Phase 1: カーネルが healthy になるまで待機
+  await waitForKernelHealthy(page);
+
+  // Phase 2: 接続安定化ループ（最大 5 回）
+  for (let attempt = 0; attempt < 5; attempt++) {
+    if (hasBanner) { dismiss → waitForKernelHealthy → continue; }
+    await page.waitForTimeout(1_000); // 安定化待機
+    if (!lateArrival) { waitForKernelHealthy → return; } // 安定
+    dismiss → waitForKernelHealthy; // 遅延到着 → 再ループ
+  }
+}
+```
+
+**接続状態の判定ロジック**（`backend-status.tsx` の SVG クラス）:
+
+| SVG クラス | 状態 | 意味 |
+|---|---|---|
+| `animate-spin` | connecting | WebSocket 接続中または health check 中 |
+| `green` (= `text-(--green-9)`) | healthy | 接続済み・健全 |
+| `yellow` (= `text-(--yellow-9)`) | unhealthy | 接続済みだが health check 失敗 |
+| `red` (= `text-red-500`) | disconnected | 切断済み |
+| なし（`PowerOffIcon`） | not_started | 未接続 |
+
+### 20. `page.reload()` を廃止して WebSocket 接続を維持する（2026-02-19 追加）
+
+**問題**: `afterEach` の `resetGameProgress()` が `page.reload()` を使っていたため、テストごとに WebSocket が切断→再接続され「Reconnected」バナーが表示されていた。
+
+**解決**: `page.reload()` を廃止し、テストフック `window.__testResetProgress` で Jotai atom を直接リセットする方式に変更。
+
+**変更内容**:
+
+| ファイル | 変更 |
+|---|---|
+| `skill-complete-handler.ts` | `setupSkillEventListener(onComplete, onReset?)` に `onReset` パラメータ追加。`window.__testResetProgress` として公開 |
+| `skill-tree-button.tsx` | `resetProgressAtom` を `useSetAtom` で取得し、`setupSkillEventListener` に渡す |
+| `helpers.ts` の `resetGameProgress()` | `page.reload()` → `page.evaluate(() => window.__testResetProgress())` + ダイアログ close |
+| `sandbox.spec.ts` の `beforeEach` | 初回テストのみ `page.goto()` で navigate。テスト 2 以降はスキップ |
+
+```typescript
+// helpers.ts — 新しい resetGameProgress
+export async function resetGameProgress(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const fn = (window as any).__testResetProgress;
+    if (typeof fn === "function") fn();
+    else throw new Error("__testResetProgress not found");
+  });
+
+  // ダイアログが開いていれば閉じる
+  const dialog = page.locator('[role="dialog"]');
+  if (await dialog.isVisible().catch(() => false)) {
+    await page.keyboard.press("Escape");
+    await dialog.waitFor({ state: "hidden", timeout: 3_000 }).catch(() => {});
+  }
+
+  await page.waitForTimeout(300);
+}
+```
+
+**効果**:
+- WebSocket 接続が 10 テスト通して維持される（切断ゼロ）
+- 「Reconnected」バナーの新規発生を防止
+- テスト実行時間が 1.8m → 2.0m（ほぼ変化なし。reload のコスト削減と ensureConnected の追加で相殺）
+
+### 21. `ensureConnected()` の接続安定化ループ — 遅延バナー対策（2026-02-19 追加）
+
+**問題**: 知見 20 で `page.reload()` を廃止したにもかかわらず、テスト 2〜10 の全てで「Reconnected」バナーが表示されていた。原因は以下の2つ:
+
+1. **遅延通知**: 初回 `page.goto()` で既存セッションに再接続した際、バックエンド (`ws_endpoint.py:_reconnect_session`) が `BannerNotification("Reconnected")` を送信するが、WebSocket メッセージの到着が遅延し、テスト 1 の `ensureConnected()` が確認した後に到着する。
+2. **WebSocket 自動再接続**: `ReconnectingWebSocket` (partysocket) が接続切断を検知すると自動で再接続する。バックエンドはこれを既存セッションへの再接続と判定し、再び `BannerNotification` を送信する。
+
+**旧 `ensureConnected()`**: カーネル healthy チェック → バナーを 1 回だけ確認 → dismiss → 即座にテスト開始。遅延到着するバナーを見逃し、次のテストに影響する構造だった。
+
+**新 `ensureConnected()`**: 接続安定化ループを導入。
+
+```typescript
+// Phase 1: カーネルが healthy になるまで待機
+await waitForKernelHealthy(page);
+
+// Phase 2: 接続安定化ループ（最大 5 回）
+for (let attempt = 0; attempt < maxAttempts; attempt++) {
+  // バナーがあれば dismiss → healthy 再確認 → ループ先頭に戻る
+  if (hasBanner) { dismiss → waitForKernelHealthy → continue; }
+
+  // バナーなし → 1 秒待って遅延到着がないか確認
+  await page.waitForTimeout(1_000);
+
+  // 遅延到着なし → 安定確認 → 最終 healthy チェック → return
+  if (!lateArrival) { waitForKernelHealthy → return; }
+
+  // 遅延到着あり → dismiss → ループ先頭に戻る
+}
+```
+
+**テスト結果**:
+- 毎テスト `attempt 1/5` でバナーを検出→dismiss→1 秒安定化待機→再出現なし→テスト開始
+- 安定化ループ 2 回目以降に進むケースは未観測（バナーは常に 1 回で収束）
+- 全 10 テスト passed（2.4m、安定化待機分 +0.3m）
+
+**`dismissReconnectedBanner()` も改善**: 複数バナーに対応するためループ化（最大 5 回 dismiss）。`bannersAtom` は配列のため、複数の再接続イベントで複数バナーが蓄積される可能性がある。
+
 ---
 
 ## セレクター早見表
@@ -558,8 +666,11 @@ taskkill //F //IM marimo.exe
 | 進捗バッジ | `text=/\d+\/\d+ スキル/` | ✅ **ダイアログの DialogHeader 内** Badge コンポーネント・テスト通過 |
 | 現金表示 | `text=/¥[0-9,]+/` | ✅ **ダイアログのフッター**の CoinsIcon 隣・テスト通過 |
 | 報酬トースト | `[role='status']` | 一時表示のため要タイミング調整（知見 11 参照） |
-| Reconnected バナー | `text=Reconnected` | ⚠️ テスト中に出現する場合あり（知見 16 参照） |
-| テストフック | `window.__testCompleteSkill` | ✅ `setupSkillEventListener()` が公開・テスト通過 |
+| Reconnected バナー | `text=Reconnected` | ✅ `dismissReconnectedBanner()` で自動 dismiss（知見 19） |
+| バナー閉じるボタン | `[data-testid="remove-banner-button"]` | Reconnected バナーの X ボタン |
+| Kernel 接続状態 | `[data-testid="backend-status"]` | ✅ `ensureConnected()` で healthy 確認（知見 19） |
+| テストフック（完了） | `window.__testCompleteSkill` | ✅ `setupSkillEventListener()` が公開・テスト通過 |
+| テストフック（リセット） | `window.__testResetProgress` | ✅ `setupSkillEventListener()` が公開（知見 20） |
 | セル追加ボタン | `[data-testid="create-cell-button"]:visible` | 既存テストと共通 |
 | 実行ボタン | `[data-testid="run-button"]:visible` | 既存テストと共通 |
 
@@ -655,7 +766,8 @@ cd frontend && pnpm dev
 1. フロントエンドビルドが最新であること（`marimo/_static/` に反映済み）
 2. `npx playwright install chromium` が完了していること
 3. 既存の marimo プロセスが残っていないこと（`taskkill //F //IM marimo.exe`）
-4. テスト実行中にページに「Reconnected」バナーが表示されていないこと（知見 16 参照）
+4. `ensureConnected()` が各テスト前に Kernel healthy を確認する（自動・知見 19）
+5. 「Reconnected」バナーは `dismissReconnectedBanner()` が自動で閉じる（知見 19・20）
 
 ---
 
@@ -669,7 +781,6 @@ cd frontend && pnpm dev
 | Python `emit_skill()` → DOM 経路 | Backcast エンジン依存 | 別途統合テスト環境を用意 |
 | `SkillRewardToast` の表示 | タイムアウトが短く不安定 | `waitFor` タイムアウトを調整して有効化 |
 | ブリッジ・フルトラック | `bridge.spec.ts` 作成済み・実行未検証 | sandbox 安定確認後に実行 |
-| WebSocket 再接続時のテスト安定性 | 「Reconnected」問題が未解決（知見 16） | `beforeEach` にバナーチェック追加 |
 
 ---
 
@@ -783,8 +894,8 @@ test.describe("統合テスト（Backcast 環境必須）", () => {
 
 | ファイル | 役割 | テストへの影響 | 修正状況 |
 |---|---|---|---|
-| `frontend/e2e-tests/game/helpers.ts` | テストフック呼び出し・ノード状態取得・パネル操作 | セレクター変更時ここを修正 | ✅ 修正済み |
-| `frontend/src/components/skill-tree/skill-complete-handler.ts` | BroadcastChannel 受信 + `__testCompleteSkill` フック公開 | フック名変更時にテストが壊れる | ✅ 修正済み |
+| `frontend/e2e-tests/game/helpers.ts` | テストフック呼び出し・接続確認・バナー dismiss・パネル操作 | セレクター変更時ここを修正 | ✅ 修正済み |
+| `frontend/src/components/skill-tree/skill-complete-handler.ts` | BroadcastChannel 受信 + `__testCompleteSkill` / `__testResetProgress` フック公開 | フック名変更時にテストが壊れる | ✅ 修正済み |
 | `frontend/src/components/skill-tree/atoms.ts` | prerequisites チェック・atom 更新 | ガードロジックの変更を検知 | ✅ console.log 削除済み |
 | `frontend/src/components/skill-tree/skill-tree-graph.tsx` | React Flow ノード・エッジの表示 | `useEffect` 同期が必須（知見 17） | ✅ 修正済み |
 | `frontend/src/components/skill-tree/skill-node.tsx` | `data-skill-id` / `data-skill-status` 属性 | テスト通過確認済み | ✅ |
