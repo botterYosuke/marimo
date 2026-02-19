@@ -27,6 +27,14 @@ import {
   getCompletedCount,
   resetGameProgress,
 } from "./helpers";
+import {
+  SANDBOX_SKILL_IDS,
+  BRIDGE_SKILL_IDS,
+  getTotalCashAfterSkills,
+} from "./constants";
+
+/** スキルステータス待機の統一タイムアウト */
+const SKILL_STATUS_TIMEOUT = 10_000;
 
 const APP: import("../../playwright.config").ApplicationNames = "game_test.py";
 
@@ -74,8 +82,8 @@ test.describe("ブリッジトラック", () => {
     await emitSkillSequence(context, page, [...SANDBOX_ALL]);
 
     // SANDBOX_006 完了を確認してから BRIDGE_001 の状態を検証
-    await waitForSkillStatus(page, "SANDBOX_006", "completed", 10_000);
-    await waitForSkillStatus(page, "BRIDGE_001", "unlocked", 5_000);
+    await waitForSkillStatus(page, "SANDBOX_006", "completed", SKILL_STATUS_TIMEOUT);
+    await waitForSkillStatus(page, "BRIDGE_001", "unlocked", SKILL_STATUS_TIMEOUT);
   });
 
   test("SANDBOX_005 のみ完了しても BRIDGE_001 は locked のまま", async ({
@@ -89,7 +97,7 @@ test.describe("ブリッジトラック", () => {
       "SANDBOX_004",
       "SANDBOX_005",
     ]);
-    await waitForSkillStatus(page, "SANDBOX_005", "completed", 8_000);
+    await waitForSkillStatus(page, "SANDBOX_005", "completed", SKILL_STATUS_TIMEOUT);
 
     const status = await getSkillStatus(page, "BRIDGE_001");
     expect(status).toBe("locked");
@@ -103,13 +111,13 @@ test.describe("ブリッジトラック", () => {
     // サンドボックス全完了 → BRIDGE_001 完了
     await emitSkillSequence(context, page, [...SANDBOX_ALL, "BRIDGE_001"]);
 
-    await waitForSkillStatus(page, "BRIDGE_001", "completed", 10_000);
-    await waitForSkillStatus(page, "BRIDGE_002", "unlocked", 5_000);
+    await waitForSkillStatus(page, "BRIDGE_001", "completed", SKILL_STATUS_TIMEOUT);
+    await waitForSkillStatus(page, "BRIDGE_002", "unlocked", SKILL_STATUS_TIMEOUT);
   });
 
-  test("BRIDGE_001 完了後に現金が増える（+15,000円）", async ({ page }) => {
+  test("BRIDGE_001 完了後に現金が増える", async ({ page }) => {
     await emitSkillSequence(context, page, [...SANDBOX_ALL]);
-    await waitForSkillStatus(page, "SANDBOX_006", "completed", 10_000);
+    await waitForSkillStatus(page, "SANDBOX_006", "completed", SKILL_STATUS_TIMEOUT);
 
     // SANDBOX 完了後の現金を記録
     const cashBefore = await page
@@ -143,8 +151,8 @@ test.describe("ブリッジトラック", () => {
       "BRIDGE_002",
     ]);
 
-    await waitForSkillStatus(page, "BRIDGE_002", "completed", 12_000);
-    await waitForSkillStatus(page, "BRIDGE_003", "unlocked", 5_000);
+    await waitForSkillStatus(page, "BRIDGE_002", "completed", SKILL_STATUS_TIMEOUT);
+    await waitForSkillStatus(page, "BRIDGE_003", "unlocked", SKILL_STATUS_TIMEOUT);
   });
 
   // -------------------------------------------------------------------------
@@ -159,7 +167,7 @@ test.describe("ブリッジトラック", () => {
       "BRIDGE_003",
     ]);
 
-    await waitForSkillStatus(page, "BRIDGE_003", "completed", 15_000);
+    await waitForSkillStatus(page, "BRIDGE_003", "completed", SKILL_STATUS_TIMEOUT);
 
     // ブリッジ 3 スキル + サンドボックス 6 スキル = 9 スキル以上完了
     await expect(async () => {
@@ -179,7 +187,7 @@ test.describe("ブリッジトラック", () => {
       "BRIDGE_003",
     ]);
 
-    await waitForSkillStatus(page, "BRIDGE_003", "completed", 15_000);
+    await waitForSkillStatus(page, "BRIDGE_003", "completed", SKILL_STATUS_TIMEOUT);
 
     await expect(async () => {
       const cashText = await page
@@ -187,7 +195,9 @@ test.describe("ブリッジトラック", () => {
         .first()
         .textContent();
       const cash = Number((cashText ?? "¥0").replace(/[¥,]/g, ""));
-      expect(cash).toBeGreaterThanOrEqual(210_000);
+      expect(cash).toBeGreaterThanOrEqual(
+        getTotalCashAfterSkills([...SANDBOX_SKILL_IDS, ...BRIDGE_SKILL_IDS]),
+      );
     }).toPass({ timeout: 5_000 });
   });
 
@@ -208,23 +218,23 @@ test.describe("ブリッジトラック", () => {
     ]);
 
     await emitSkillEvent(context, page, "BRIDGE_001");
-    await page.waitForTimeout(500);
 
-    const status = await getSkillStatus(page, "BRIDGE_001");
-    expect(status).toBe("locked");
+    await expect(async () => {
+      expect(await getSkillStatus(page, "BRIDGE_001")).toBe("locked");
+    }).toPass({ timeout: 3_000 });
   });
 
   test("BRIDGE_001 未完了のまま BRIDGE_002 を発火しても completed にならない", async ({
     page,
   }) => {
     await emitSkillSequence(context, page, [...SANDBOX_ALL]);
-    await waitForSkillStatus(page, "SANDBOX_006", "completed", 10_000);
+    await waitForSkillStatus(page, "SANDBOX_006", "completed", SKILL_STATUS_TIMEOUT);
 
     // BRIDGE_001 を飛ばして BRIDGE_002 を発火
     await emitSkillEvent(context, page, "BRIDGE_002");
-    await page.waitForTimeout(500);
 
-    const status = await getSkillStatus(page, "BRIDGE_002");
-    expect(status).toBe("locked");
+    await expect(async () => {
+      expect(await getSkillStatus(page, "BRIDGE_002")).toBe("locked");
+    }).toPass({ timeout: 3_000 });
   });
 });

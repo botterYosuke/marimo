@@ -2,6 +2,7 @@
 
 import { getInjectionTemplate } from "./injection-templates";
 import type { GameProgress } from "./types";
+import { extractAndSendBroadcastMessages } from "@/core/kernel/handlers";
 
 /**
  * Electron API の型定義
@@ -124,6 +125,13 @@ export function setupSkillEventListener(
   if (onReset) {
     (window as unknown as Record<string, unknown>).__testResetProgress = onReset;
   }
+  // e2e 統合テスト用フック: emit_skill() 形式の HTML を本番パイプライン（③→⑦）経由で処理する
+  // extractAndSendBroadcastMessages() → sendBroadcastMessage() → BroadcastChannel → listener → atom → UI
+  (window as unknown as Record<string, unknown>).__testInjectBroadcastHTML = (
+    html: string,
+  ) => {
+    extractAndSendBroadcastMessages(html);
+  };
 
   // BroadcastChannel APIが使用可能か確認
   if (typeof BroadcastChannel === "undefined") {
@@ -131,6 +139,7 @@ export function setupSkillEventListener(
     return () => {
       delete (window as unknown as Record<string, unknown>).__testCompleteSkill;
       delete (window as unknown as Record<string, unknown>).__testResetProgress;
+      delete (window as unknown as Record<string, unknown>).__testInjectBroadcastHTML;
     };
   }
 
@@ -155,6 +164,7 @@ export function setupSkillEventListener(
   return () => {
     delete (window as unknown as Record<string, unknown>).__testCompleteSkill;
     delete (window as unknown as Record<string, unknown>).__testResetProgress;
+    delete (window as unknown as Record<string, unknown>).__testInjectBroadcastHTML;
     channel.removeEventListener("message", handleMessage);
     channel.close();
   };

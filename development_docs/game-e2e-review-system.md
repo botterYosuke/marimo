@@ -1,9 +1,9 @@
 # ゲーム e2e レビューシステム
 
-**ステータス**: 全 4 スイート パス済み（37 passed / 3 skipped / 0 failed）
+**ステータス**: 全 5 スイート パス済み（46 passed / 3 fixme / 0 failed）
 **場所**: `frontend/e2e-tests/game/`
 **担当**: game ブランチで継続作業中
-**最終確認日**: 2026-02-19（全 E2E テスト実行確認完了）
+**最終確認日**: 2026-02-19（E2E カバレッジ改善完了・統合テスト追加）
 
 ---
 
@@ -74,6 +74,19 @@ E2E テスト（案 E）がバイパスしていたレイヤー①③⑤をユ�
 - [x] ✅ **`bridge.spec.ts`**: 10 passed (2.3m)
 - [x] ✅ **`ui.spec.ts` の報酬バッジテスト修正**: Badge コンポーネントは `<div>` に Tailwind クラスを付与するだけで `class` に "Badge" 文字列が含まれないため、`[class*="Badge"]` → `.border-t .rounded-full` セレクターに変更
 
+### ✅ 完了（2026-02-19 E2E カバレッジ改善セッション）
+
+計画書: `.claude/plans/refactored-discovering-map.md`（全 6 Step）
+
+- [x] ✅ **Step 1: ユニットテスト失敗修正**: `skill-complete-handler.test.ts` の 3 件のタイムアウト/失敗を修正。原因は `extractAndSendBroadcastMessages` の import が `vi.resetModules()` + 動的 `import()` でカーネル初期化の重い副作用を再実行していたこと。`vi.mock("@/core/kernel/handlers")` で解決（テスト時間 21.7s → 3.2s）（知見 24）
+- [x] ✅ **Step 1: `__testInjectBroadcastHTML` フック追加済み**: `skill-complete-handler.ts` に HTML パイプライン（③→⑦）経由のテストフックを追加（知見 25）
+- [x] ✅ **Step 2: `emitSkillEventViaHTML()` ヘルパー追加**: `helpers.ts` に HTML 注入方式のヘルパーを追加。`emitSkillSequenceViaHTML()` も追加
+- [x] ✅ **Step 3: `integration.spec.ts` 新規作成**: HTML パイプライン経由の統合テスト 9 件（全通過）。BroadcastChannel 同一コンテキスト配信が動作することを確認（知見 25）
+- [x] ✅ **Step 4: 弱いアサーション修正**: `persistence.spec.ts` の `.catch(() => {})` トースト握りつぶし除去。`ui.spec.ts` の `if/else test.skip()` パターン 3 箇所を `test.fixme()` に変更（知見 26）
+- [x] ✅ **Step 5: タイムアウト改善**: `sandbox.spec.ts` / `bridge.spec.ts` の `waitForTimeout` → `expect().toPass()` 状態ベース待機に変更。`bridge.spec.ts` のエスカレーティングタイムアウトを `SKILL_STATUS_TIMEOUT` 定数に統一（知見 29）
+- [x] ✅ **Step 6: マジックナンバー排除**: `constants.ts` を新規作成。`TOTAL_SKILL_COUNT`, `SANDBOX_SKILL_IDS`, `BRIDGE_SKILL_IDS`, `getTotalCashAfterSkills()`, `FIRST_MILESTONE` を production コード（`skill-data.ts`, `reward-system.ts`）から導出（知見 28）
+- [x] ✅ **最終検証**: ユニットテスト 21/21 passed、E2E テスト 46 passed / 3 fixme / 0 failed (7.0m)
+
 ### ⬜ 未完了・今後の課題
 
 - [ ] フルトラックのテスト（`trade.spec.ts`, `risk.spec.ts` 等）
@@ -141,11 +154,13 @@ E2E テスト（案 E）がバイパスしていたレイヤー①③⑤をユ�
 
 ```
 frontend/e2e-tests/game/
-├── helpers.ts           # 共通ヘルパー（イベント送信・状態取得・パネル操作）
-├── sandbox.spec.ts      # サンドボックストラック SANDBOX_001〜006（9ケース）
-├── ui.spec.ts           # パネル UI・視覚状態・報酬表示（11ケース）
+├── helpers.ts           # 共通ヘルパー（イベント送信・HTML注入・状態取得・パネル操作）
+├── constants.ts         # ✅ production コードから導出した定数（マジックナンバー排除）
+├── sandbox.spec.ts      # サンドボックストラック SANDBOX_001〜006（10ケース）
+├── ui.spec.ts           # パネル UI・視覚状態・報酬表示（9ケース + 3 fixme）
 ├── persistence.spec.ts  # 進捗の初期化・BroadcastChannel 処理（8ケース）
-└── bridge.spec.ts       # ✅ ブリッジトラック BRIDGE_001〜003（9ケース）
+├── bridge.spec.ts       # ブリッジトラック BRIDGE_001〜003（10ケース）
+└── integration.spec.ts  # ✅ HTML パイプライン統合テスト（9ケース）③→⑦経路
 
 frontend/e2e-tests/py/
 └── game_test.py         # テスト用マリモノートブック（grid レイアウト）
@@ -226,6 +241,24 @@ e2e-tests/
 BroadcastChannel 自体の動作は手動で確認済みのため、テストではフック経由に切り替えた。
 
 `helpers.ts` の `emitSkillEvent()` が案 E を実装している。
+
+**案 F: HTML 注入方式（③→⑦統合テスト）** ← **2026-02-19 追加・テスト通過**
+```
+テスト → page.evaluate() で window.__testInjectBroadcastHTML(html) を呼ぶ
+       → extractAndSendBroadcastMessages() が HTML をパース
+       → sendBroadcastMessage() が BroadcastChannel で配信
+       → setupSkillEventListener() のリスナーが受信
+       → completeSkillWithRewardAtom → playerProgressAtom → UI 更新
+```
+- ✅ レイヤー③→⑦の全経路をテスト（案 E より広いカバレッジ）
+- ✅ BroadcastChannel の同一コンテキスト配信が動作することを確認済み
+- ✅ emit_skill() と同じ HTML フォーマットを使用（契約テスト的側面）
+- △ 案 E より若干遅い（HTML パース + BroadcastChannel 配信のオーバーヘッド）
+- △ テスト専用フックのため、レイヤー①②（Python HTML 生成・WebSocket 転送）はテストされない
+
+**案 E と案 F の使い分け**:
+- 案 E（`emitSkillEvent`）: 回帰テスト・既存テストスイートに使用。高速・安定
+- 案 F（`emitSkillEventViaHTML`）: 統合テスト（`integration.spec.ts`）に使用。パイプライン全体を検証
 
 ### Jotai ストアを直接操作しなかった理由
 
@@ -715,6 +748,127 @@ const badge = rewardSection.locator(".rounded-full").first();
 
 **教訓**: shadcn/ui の Badge や Button 等のコンポーネントは、レンダリング時にコンポーネント名をクラスに含めない。Tailwind の実際のクラス名か `data-testid` 属性でセレクターを構成する必要がある。
 
+### 24. `vi.mock()` で重い依存をモックしてユニットテスト高速化（2026-02-19 追加）
+
+**問題**: `skill-complete-handler.test.ts` の正常系テスト 3 件がタイムアウト（5s）していた。`vi.resetModules()` + 動的 `import("../skill-complete-handler")` のたびに `@/core/kernel/handlers` モジュール全体が再初期化され、カーネルセッション開始（"Starting a new session"）やバージョン取得（"Failed to get version from mount config"）などの重い副作用が走っていた。
+
+**原因**: Step 1 で `skill-complete-handler.ts` に追加した `import { extractAndSendBroadcastMessages } from "@/core/kernel/handlers"` が、テストの動的インポート時に `handlers.ts` → `broadcastChannel.ts` → その他カーネル依存を丸ごと引き込んでいた。
+
+**修正**: テストファイルの先頭で `vi.mock()` を追加。Vitest の `vi.mock()` は自動ホイストされ、`vi.resetModules()` 後の動的インポートでも mock factory が再適用される。
+
+```typescript
+vi.mock("@/core/kernel/handlers", () => ({
+  extractAndSendBroadcastMessages: vi.fn(),
+}));
+```
+
+**効果**: テスト時間 21.7s → 3.2s（6.8x 高速化）。11 テスト全通過。
+
+**教訓**: ユニットテストで `vi.resetModules()` + 動的 import を使う場合、テスト対象モジュールの import グラフ全体が再初期化される。テストに不要な重い依存は `vi.mock()` で切り離すべき。
+
+### 25. `__testInjectBroadcastHTML` フック — HTML パイプライン統合テスト（2026-02-19 追加）
+
+**背景**: 既存の `__testCompleteSkill` フックはレイヤー⑥→⑦（atom 更新→UI 反映）のみをテストし、③→⑤（HTML パース→BroadcastChannel 送信→リスナー受信）をバイパスしていた。
+
+**新フック**: `setupSkillEventListener()` に `__testInjectBroadcastHTML` を追加。`extractAndSendBroadcastMessages(html)` を呼び出し、本番と同じ HTML パース→BroadcastChannel 配信→リスナー受信→atom 更新→UI 反映の経路（③→⑦）を通す。
+
+```typescript
+// skill-complete-handler.ts 内
+(window as any).__testInjectBroadcastHTML = (html: string) => {
+  extractAndSendBroadcastMessages(html);
+};
+```
+
+**テストヘルパー**: `emitSkillEventViaHTML(page, skillId)` が emit_skill() と同じ HTML を生成して注入する。
+
+```typescript
+const payload = btoa(JSON.stringify({ skill_id: id, context: {}, timestamp: Date.now() }));
+const html = `<marimo-broadcast channel="skill_event_channel" type="skill_complete" payload="${payload}" style="display:none;"></marimo-broadcast>`;
+```
+
+**BroadcastChannel 同一コンテキスト配信の確認**: `integration.spec.ts` のテスト 1 が通過したことで、`sendBroadcastMessage()` の送信インスタンスと `setupSkillEventListener()` の受信インスタンスが別の `BroadcastChannel` オブジェクトであるため、Web 仕様どおり配信されることを確認。フォールバック不要。
+
+**テスト範囲の使い分け**:
+- `emitSkillEvent()` (案 E): 高速・安定。既存テストの回帰テストに最適
+- `emitSkillEventViaHTML()` (新規): ③→⑦のパイプライン全体を検証。統合テストに使用
+
+### 26. `test.fixme()` vs `test.skip()` — 意図の明示（2026-02-19 追加）
+
+**問題**: `ui.spec.ts` に `if (await element.isVisible()) { test } else { test.skip() }` パターンが 3 箇所あった。このパターンは「UI が消えたら skip」= 機能が消失しても気づかない。さらに `.catch(() => {})` でアサーション失敗を握りつぶすパターンも併用されており、テストが「失敗しても通る」状態だった。
+
+**修正**: `test.fixme("理由", async () => { ... })` に変更。
+
+| パターン | テスト結果 | レポート表示 | 検知力 |
+|---|---|---|---|
+| `if (visible) test else test.skip()` | UI 消失 → skip | "skipped" | **弱い**: 機能消失を隠蔽 |
+| `test.fixme("理由", ...)` | 実行スキップ | **"fixme"** | **強い**: テスト数にカウント、レポートで目立つ |
+| `.catch(() => {})` | 失敗 → 警告のみ | passed（偽陽性） | **なし**: 失敗を完全に握りつぶす |
+
+**教訓**: `test.skip()` は「このテストは今は関係ない」。`test.fixme()` は「この機能は未実装だが、実装されたら有効化すべき」。意図を区別して使い分ける。`.catch(() => {})` でアサーション失敗を握りつぶすのは**決してやらない**。
+
+### 27. ビルド反映忘れ — 本番コード変更後は `pnpm turbo build` 必須（2026-02-19 追加）
+
+**問題**: Step 1 で `skill-complete-handler.ts` に `__testInjectBroadcastHTML` フックを追加したが、ビルドせずに E2E テストを実行したところ、全統合テスト（9 件）が `__testInjectBroadcastHTML not found` で失敗した。
+
+**原因**: E2E テストは `marimo/_static/` のプリビルド済みフロントエンドを使う。ソースコードの変更はビルドしないと反映されない（知見 10 と同根）。
+
+**対策**: 本番コード（`frontend/src/` 以下）を変更したら必ず以下を実行:
+
+```bash
+cd frontend && pnpm turbo build && cp -R dist/* ../marimo/_static/
+```
+
+**チェックポイント**: テストで `not found` エラーが出たら、まずビルド反映漏れを疑う。
+
+### 28. `constants.ts` で production コードからテスト定数を導出（2026-02-19 追加）
+
+**問題**: テストコードにマジックナンバーが散在していた。例: `59`（総スキル数）、`210_000`（全スキル報酬合計）、`50_000`（第 1 マイルストーンボーナス）。スキル追加・報酬変更のたびにテストも修正が必要で、乖離に気づけない。
+
+**解決**: `frontend/e2e-tests/game/constants.ts` を新規作成し、production コードからデータを導出:
+
+```typescript
+import { skillDefinitions, milestones } from "../../src/components/skill-tree/skill-data";
+import { calculateTotalRewards } from "../../src/components/skill-tree/rewards/reward-system";
+
+export const TOTAL_SKILL_COUNT = skillDefinitions.length;           // 59
+export const SANDBOX_SKILL_IDS = skillDefinitions.filter(...).map(s => s.id);
+export const BRIDGE_SKILL_IDS = skillDefinitions.filter(...).map(s => s.id);
+export function getTotalCashAfterSkills(skillIds: string[]): number { ... }
+export const FIRST_MILESTONE = milestones[0];                       // { skillCount: 10, bonus: 50000 }
+```
+
+**前提条件**: Playwright テストは Node.js で実行される。`skill-data.ts` と `reward-system.ts` はブラウザ API 非依存の純粋データ/ロジックファイルのため Node.js から直接 import 可能。`e2e-tests/tsconfig.json` に `"@/*": ["../src/*"]` パスマッピングあり。
+
+**教訓**: テストのマジックナンバーは production コードから導出できる場合、直接 import して導出する。「59」と書くよりも `skillDefinitions.length` と書くほうが、スキル追加時に自動で追従する。
+
+### 29. `expect().toPass()` で状態ベース待機に統一（2026-02-19 追加）
+
+**問題**: `waitForTimeout(500)` / `waitForTimeout(300)` による固定時間待機が散在していた。テスト環境の速度によって不安定になる（速い環境: 足りない、遅い環境: 無駄に待つ）。また `bridge.spec.ts` では `10_000` → `12_000` → `15_000` とエスカレーティングタイムアウトが使われ、根拠が不明だった。
+
+**修正パターン**:
+
+```typescript
+// ❌ 固定時間待機
+await page.waitForTimeout(500);
+const status = await getSkillStatus(page, "SANDBOX_002");
+expect(status).toBe("locked");
+
+// ✅ 状態ベース待機（ポーリング）
+await expect(async () => {
+  expect(await getSkillStatus(page, "SANDBOX_002")).toBe("locked");
+}).toPass({ timeout: 3_000 });
+```
+
+**`bridge.spec.ts` のタイムアウト統一**:
+
+```typescript
+const SKILL_STATUS_TIMEOUT = 10_000;
+// 全 waitForSkillStatus で統一使用
+await waitForSkillStatus(page, "BRIDGE_003", "completed", SKILL_STATUS_TIMEOUT);
+```
+
+**教訓**: `waitForTimeout` は「最低でもこの時間待つ」であり、「この時間で十分」の保証がない。`expect().toPass()` はタイムアウト内でポーリングし、条件成立時点で即座に次に進むため、速くかつ確実。
+
 ---
 
 ## セレクター早見表
@@ -732,7 +886,8 @@ const badge = rewardSection.locator(".rounded-full").first();
 | Reconnected バナー | `text=Reconnected` | ✅ `dismissReconnectedBanner()` で自動 dismiss（知見 19） |
 | バナー閉じるボタン | `[data-testid="remove-banner-button"]` | Reconnected バナーの X ボタン |
 | Kernel 接続状態 | `[data-testid="backend-status"]` | ✅ `ensureConnected()` で healthy 確認（知見 19） |
-| テストフック（完了） | `window.__testCompleteSkill` | ✅ `setupSkillEventListener()` が公開・テスト通過 |
+| テストフック（完了） | `window.__testCompleteSkill` | ✅ `setupSkillEventListener()` が公開・テスト通過（⑥→⑦のみ） |
+| テストフック（HTML注入） | `window.__testInjectBroadcastHTML` | ✅ `setupSkillEventListener()` が公開（③→⑦経路）（知見 25） |
 | テストフック（リセット） | `window.__testResetProgress` | ✅ `setupSkillEventListener()` が公開（知見 20） |
 | セル追加ボタン | `[data-testid="create-cell-button"]:visible` | 既存テストと共通 |
 | 実行ボタン | `[data-testid="run-button"]:visible` | 既存テストと共通 |
@@ -842,11 +997,11 @@ cd frontend && pnpm dev
 |---|---|---|---|
 | ① Python `emit_skill()` | HTML 生成・base64 エンコード | ✅ カバー済 | Python ユニットテスト（`test_skill_events.py`） |
 | ② WebSocket 転送 | Python → Frontend 通信 | — スキップ | Web 標準 API（テスト不要） |
-| ③ HTML パース | `extractAndSendBroadcastMessages()` | ✅ カバー済 | TypeScript ユニットテスト（`extractBroadcast.test.ts`） |
-| ④ BroadcastChannel 送信 | `postMessage()` | — スキップ | Web 標準 API（テスト不要） |
-| ⑤ リスナー受信・検証 | `setupSkillEventListener()` | ✅ カバー済 | TypeScript ユニットテスト（`skill-complete-handler.test.ts`） |
-| ⑥ Jotai atom 更新 | 前提条件・報酬計算 | ✅ カバー済 | E2E テスト（案 E: `sandbox.spec.ts`） |
-| ⑦ React UI 反映 | DOM 更新 | ✅ カバー済 | E2E テスト（案 E: `sandbox.spec.ts`） |
+| ③ HTML パース | `extractAndSendBroadcastMessages()` | ✅ カバー済 | ユニットテスト + **E2E 統合テスト**（`integration.spec.ts`） |
+| ④ BroadcastChannel 送信 | `postMessage()` | ✅ カバー済 | **E2E 統合テスト**（`integration.spec.ts`） |
+| ⑤ リスナー受信・検証 | `setupSkillEventListener()` | ✅ カバー済 | ユニットテスト + **E2E 統合テスト**（`integration.spec.ts`） |
+| ⑥ Jotai atom 更新 | 前提条件・報酬計算 | ✅ カバー済 | E2E テスト（案 E + 案 F） |
+| ⑦ React UI 反映 | DOM 更新 | ✅ カバー済 | E2E テスト（案 E + 案 F） |
 
 ---
 
@@ -854,31 +1009,27 @@ cd frontend && pnpm dev
 
 | 非カバー範囲 | 理由 | 対策案 |
 |---|---|---|
-| ①〜⑤の結合テスト（レイヤー間の通しテスト） | 各レイヤーはユニットテストで個別カバー済だが、結合テストはなし | 選択肢 3（HTML 注入方式）で③〜⑦の結合テストを検討 |
+| ①〜⑤の結合テスト（レイヤー間の通しテスト） | ✅ ③→⑦は `integration.spec.ts` でカバー済（案 F）。①②は未カバー | Python → WebSocket → Frontend の全経路統合は Backcast 環境が必要 |
 | Electron の cell injection | Tauri 環境が必要 | `tauri/` サブフォルダに別テスト作成 |
 | `progress_manager.py` のファイル永続化 | Python バックエンドの統合が必要 | Python 側のユニットテストで担保 |
 | Python `emit_skill()` → DOM 経路（全経路統合） | Backcast エンジン依存 | 別途統合テスト環境を用意 |
-| `SkillRewardToast` の表示 | タイムアウトが短く不安定 | `waitFor` タイムアウトを調整して有効化 |
-| ブリッジ・フルトラック | `bridge.spec.ts` 作成済み・実行未検証 | sandbox 安定確認後に実行 |
+| `SkillRewardToast` の表示 | タイムアウトが短く不安定 | `.catch()` 握りつぶしを除去済み（知見 26）。失敗なら fail に |
+| ブリッジ・フルトラック | ✅ `bridge.spec.ts` 10 ケース全通過 | 完了 |
 
 ---
 
 ## 今後のテスト拡張ガイド
 
-### ブリッジトラックのテストを追加する
+### ✅ ブリッジトラックのテスト — 完了
 
-```typescript
-// bridge.spec.ts の骨格（作成済み・実行未検証）
-test("BRIDGE_001 完了でデータが開示される", async ({ page }) => {
-  // 前提: サンドボックス全スキルを完了（前提条件チェーン）
-  const sandboxSkills = ["SANDBOX_001", ..., "SANDBOX_006"];
-  await emitSkillSequence(context, page, sandboxSkills);
+`bridge.spec.ts` で 10 ケース全通過。`SKILL_STATUS_TIMEOUT` で統一、`waitForTimeout` → 状態ベース待機に改善済み（知見 29）。
 
-  // BRIDGE_001 を完了
-  await emitSkillEvent(context, page, "BRIDGE_001");
-  await waitForSkillStatus(page, "BRIDGE_001", "completed");
-});
-```
+### 新しいスキルを追加した場合のテスト手順
+
+1. `skill-data.ts` にスキル定義を追加
+2. `constants.ts` は自動追従（`skillDefinitions` から動的に導出するため修正不要）
+3. 必要に応じて spec ファイルにテストケースを追加
+4. ビルド反映: `cd frontend && pnpm turbo build && cp -R dist/* ../marimo/_static/`
 
 ### セル実行経由の統合テストを追加する
 
@@ -973,7 +1124,9 @@ test.describe("統合テスト（Backcast 環境必須）", () => {
 
 | ファイル | 役割 | テストへの影響 | 修正状況 |
 |---|---|---|---|
-| `frontend/e2e-tests/game/helpers.ts` | テストフック呼び出し・接続確認・バナー dismiss・パネル操作 | セレクター変更時ここを修正 | ✅ 修正済み |
+| `frontend/e2e-tests/game/helpers.ts` | テストフック呼び出し・HTML注入・接続確認・バナー dismiss・パネル操作 | セレクター変更時ここを修正 | ✅ 修正済み |
+| `frontend/e2e-tests/game/constants.ts` | production コードから導出したテスト定数（知見 28） | スキル追加時に自動追従 | ✅ 新規作成 |
+| `frontend/e2e-tests/game/integration.spec.ts` | HTML パイプライン統合テスト（③→⑦）9 ケース | パイプライン変更時に検知 | ✅ 新規作成 |
 | `frontend/src/components/skill-tree/skill-complete-handler.ts` | BroadcastChannel 受信 + `__testCompleteSkill` / `__testResetProgress` フック公開 | フック名変更時にテストが壊れる。ユニットテストあり | ✅ 修正済み |
 | `frontend/src/core/kernel/handlers.ts` | `extractAndSendBroadcastMessages()` — HTML パース + BroadcastChannel 送信 | `export` 追加済み。ユニットテストあり | ✅ |
 | `src-tauri/resources/files/skill_events.py` | `emit_skill()` — `<marimo-broadcast>` HTML 生成 | HTML 属性名変更時にテストが壊れる。ユニットテストあり | ✅ |

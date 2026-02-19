@@ -174,12 +174,7 @@ test.describe("BroadcastChannel イベント処理", () => {
       .locator("[role='status'], [class*='toast'], [class*='Toast']")
       .first();
 
-    await expect(toast)
-      .toBeVisible({ timeout: 3_000 })
-      .catch(() => {
-        // toast が実装されていない場合は警告のみ
-        console.warn("[test] RewardToast が表示されませんでした");
-      });
+    await expect(toast).toBeVisible({ timeout: 3_000 });
   });
 
   test("prerequisites 未完了のスキル ID を送信しても completed にならない", async ({

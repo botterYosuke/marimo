@@ -212,6 +212,57 @@ export async function emitSkillSequence(
 }
 
 // ---------------------------------------------------------------------------
+// スキルイベント送信（HTML パイプライン経由 — レイヤー③→⑦）
+// ---------------------------------------------------------------------------
+
+/**
+ * emit_skill() と同じ HTML を生成し、本番パイプライン（③→⑦）経由でスキルを完了。
+ *
+ * __testCompleteSkill（⑥→⑦のみ）とは異なり、HTML パース・BroadcastChannel を通過する:
+ *   extractAndSendBroadcastMessages() → sendBroadcastMessage() → BroadcastChannel → listener → atom → UI
+ *
+ * @param page    - イベントを受信させたいページ
+ * @param skillId - 送信するスキル ID（例: "SANDBOX_002"）
+ */
+export async function emitSkillEventViaHTML(
+  page: Page,
+  skillId: string,
+): Promise<void> {
+  await page.evaluate((id) => {
+    const fn = (window as unknown as Record<string, unknown>)
+      .__testInjectBroadcastHTML;
+    if (typeof fn !== "function") {
+      throw new Error(
+        "__testInjectBroadcastHTML not found — SkillTreeButton may not have mounted yet",
+      );
+    }
+    const payload = btoa(
+      JSON.stringify({
+        skill_id: id,
+        context: {},
+        timestamp: Date.now(),
+      }),
+    );
+    const html = `<marimo-broadcast channel="skill_event_channel" type="skill_complete" payload="${payload}" style="display:none;"></marimo-broadcast>`;
+    (fn as (html: string) => void)(html);
+  }, skillId);
+  // React 状態更新 → DOM 再レンダリングを待つ
+  await page.waitForTimeout(300);
+}
+
+/**
+ * 複数のスキルを HTML パイプライン経由で順番に完了させる。
+ */
+export async function emitSkillSequenceViaHTML(
+  page: Page,
+  skillIds: string[],
+): Promise<void> {
+  for (const skillId of skillIds) {
+    await emitSkillEventViaHTML(page, skillId);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // スキルツリーパネル操作
 // ---------------------------------------------------------------------------
 

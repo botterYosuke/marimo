@@ -112,9 +112,9 @@ test.describe("サンドボックストラック", () => {
     await emitSkillEvent(context, page, "SANDBOX_002");
 
     // completeSkillAtom が prerequisites チェックで弾く
-    await page.waitForTimeout(500);
-    const status = await getSkillStatus(page, "SANDBOX_002");
-    expect(status).toBe("locked");
+    await expect(async () => {
+      expect(await getSkillStatus(page, "SANDBOX_002")).toBe("locked");
+    }).toPass({ timeout: 3_000 });
   });
 
   // -------------------------------------------------------------------------
@@ -176,9 +176,9 @@ test.describe("サンドボックストラック", () => {
 
     // 同じイベントを再送
     await emitSkillEvent(context, page, "SANDBOX_001");
-    await page.waitForTimeout(300);
-    const countAfter = await getCompletedCount(page);
 
-    expect(countAfter).toBe(countBefore);
+    await expect(async () => {
+      expect(await getCompletedCount(page)).toBe(countBefore);
+    }).toPass({ timeout: 3_000 });
   });
 });

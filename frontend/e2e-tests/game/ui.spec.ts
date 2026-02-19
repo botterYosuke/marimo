@@ -21,6 +21,7 @@ import {
   getCompletedCount,
   resetGameProgress,
 } from "./helpers";
+import { TOTAL_SKILL_COUNT, FIRST_MILESTONE } from "./constants";
 
 const APP: import("../../playwright.config").ApplicationNames = "game_test.py";
 
@@ -51,7 +52,9 @@ test.describe("スキルツリー UI", () => {
   });
 
   test("進捗バッジに総スキル数 59 が表示される", async ({ page }) => {
-    await expect(page.locator("text=/\\d+\\/59 スキル/")).toBeVisible();
+    await expect(
+      page.locator(`text=/\\d+\\/${TOTAL_SKILL_COUNT} スキル/`),
+    ).toBeVisible();
   });
 
   test("初期の現金残高が ¥0 または初期値を表示する", async ({ page }) => {
@@ -112,72 +115,58 @@ test.describe("スキルツリー UI", () => {
   // トラック切り替え
   // -------------------------------------------------------------------------
 
-  test("トラック切り替え: sandbox フィルターでサンドボックスノードのみ表示", async ({
+  test.fixme("トラック切り替え: sandbox フィルターでサンドボックスノードのみ表示", async ({
     page,
   }) => {
-    // TrackSwitcher のタブ
+    // トラックフィルター UI 未実装のため fixme
+    // 実装されたら test() に昇格し、以下のアサーションを有効化
     const sandboxTab = page
       .getByRole("button", { name: /sandbox|サンドボックス/i })
       .first();
+    await expect(sandboxTab).toBeVisible({ timeout: 3_000 });
+    await sandboxTab.click();
 
-    if (await sandboxTab.isVisible().catch(() => false)) {
-      await sandboxTab.click();
+    const sandboxNode = getSkillNodeLocator(page, "SANDBOX_001");
+    await expect(sandboxNode).toBeVisible();
 
-      // サンドボックスノードが表示されていること
-      const sandboxNode = getSkillNodeLocator(page, "SANDBOX_001");
-      await expect(sandboxNode).toBeVisible();
-
-      // bridge ノードが非表示になっていること
-      const bridgeNode = getSkillNodeLocator(page, "BRIDGE_001");
-      await expect(bridgeNode).toBeHidden({ timeout: 3_000 }).catch(() => {
-        // フィルターが実装されていない場合はパス
-      });
-    } else {
-      test.skip();
-    }
+    const bridgeNode = getSkillNodeLocator(page, "BRIDGE_001");
+    await expect(bridgeNode).toBeHidden({ timeout: 3_000 });
   });
 
-  test("トラック切り替え: all でサンドボックスと全スキルが表示される", async ({
+  test.fixme("トラック切り替え: all でサンドボックスと全スキルが表示される", async ({
     page,
   }) => {
+    // トラックフィルター UI 未実装のため fixme
+    // 実装されたら test() に昇格
     const allTab = page
       .getByRole("button", { name: /all|すべて/i })
       .first();
-
-    if (await allTab.isVisible().catch(() => false)) {
-      await allTab.click();
-      const nodes = page.locator("[data-skill-id]");
-      const count = await nodes.count();
-      // 全 59 スキル分のノードがある
-      expect(count).toBeGreaterThanOrEqual(59);
-    } else {
-      test.skip();
-    }
+    await expect(allTab).toBeVisible({ timeout: 3_000 });
+    await allTab.click();
+    const nodes = page.locator("[data-skill-id]");
+    const count = await nodes.count();
+    expect(count).toBeGreaterThanOrEqual(59);
   });
 
   // -------------------------------------------------------------------------
   // 報酬サマリー
   // -------------------------------------------------------------------------
 
-  test("フッターボタンをクリックで報酬サマリーが展開する", async ({
+  test.fixme("フッターボタンをクリックで報酬サマリーが展開する", async ({
     page,
   }) => {
-    // フッターの展開ボタン（CoinsIcon のある行）
+    // 報酬サマリー展開 UI 未実装のため fixme
+    // 実装されたら test() に昇格
     const footerToggle = page
       .locator("button")
       .filter({ hasText: /¥/ })
       .first();
+    await expect(footerToggle).toBeVisible({ timeout: 3_000 });
+    await footerToggle.click();
 
-    if (await footerToggle.isVisible().catch(() => false)) {
-      await footerToggle.click();
-
-      // RewardSummary が展開して表示される
-      await expect(
-        page.locator("[class*='overflow-y-auto']").first(),
-      ).toBeVisible({ timeout: 3_000 });
-    } else {
-      test.skip();
-    }
+    await expect(
+      page.locator("[class*='overflow-y-auto']").first(),
+    ).toBeVisible({ timeout: 3_000 });
   });
 
   // -------------------------------------------------------------------------
@@ -235,7 +224,7 @@ test.describe("スキルツリー UI", () => {
         .first()
         .textContent();
       const cash = Number((cashText ?? "¥0").replace(/[¥,]/g, ""));
-      expect(cash).toBeGreaterThan(50_000);
+      expect(cash).toBeGreaterThan(FIRST_MILESTONE.bonus);
     }).toPass({ timeout: 5_000 });
   });
 });

@@ -13,6 +13,15 @@
  */
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
+// --- handlers モック ---
+// skill-complete-handler.ts が import する @/core/kernel/handlers は
+// カーネル/セッション初期化の副作用を持つ重いモジュール。
+// vi.resetModules() + 動的 import() と組み合わせるとモジュール再初期化で
+// タイムアウトするため、テストに不要な依存をモックで切り離す。
+vi.mock("@/core/kernel/handlers", () => ({
+  extractAndSendBroadcastMessages: vi.fn(),
+}));
+
 // --- BroadcastChannel モック ---
 type MessageHandler = (event: MessageEvent) => void;
 
