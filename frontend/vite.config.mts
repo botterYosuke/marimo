@@ -1,10 +1,13 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { execSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { codecovVitePlugin } from "@codecov/vite-plugin";
 import react from "@vitejs/plugin-react";
 import { JSDOM } from "jsdom";
 import { defineConfig, type Plugin } from "vite";
+
 import wasm from "vite-plugin-wasm";
 
 const SERVER_PORT = process.env.SERVER_PORT || 2718;
@@ -13,12 +16,14 @@ const TARGET = `http://${HOST}:${SERVER_PORT}`;
 const isDev = process.env.NODE_ENV === "development";
 const isStorybook = process.env.npm_lifecycle_script?.includes("storybook");
 const isPyodide = process.env.PYODIDE === "true";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 console.log("Building environment:", process.env.NODE_ENV);
 
 const htmlDevPlugin = (): Plugin => {
   return {
-    apply: "serve",
+    // Pyodide production build also needs HTML template replacement
+    apply: isPyodide ? undefined : "serve",
     name: "html-transform",
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
@@ -44,9 +49,11 @@ const htmlDevPlugin = (): Plugin => {
       }
 
       if (isPyodide) {
-        const marimoVersion = execSync("uv run marimo --version")
-          .toString()
-          .trim();
+        // If VITE_MARIMO_VERSION is defined, use it directly to avoid requiring
+        // uv/marimo to be installed in the CI environment.
+        const marimoVersion =
+          process.env.VITE_MARIMO_VERSION ??
+          execSync("uv run marimo --version").toString().trim();
         const modeFromUrl = ctx.originalUrl?.includes("mode=read")
           ? "read"
           : "edit";
@@ -57,9 +64,7 @@ const htmlDevPlugin = (): Plugin => {
           JSON.stringify({
             filename: "notebook.py",
             mode: modeFromUrl,
-            // If VITE_MARIMO_VERSION is defined, pull the local version of marimo
-            // Otherwise, pull the latest version of marimo from PyPI
-            version: process.env.VITE_MARIMO_VERSION ?? marimoVersion,
+            version: marimoVersion,
             config: {
               // Add/remove user config here while developing
               // runtime: {
@@ -292,35 +297,61 @@ export default defineConfig({
     "process.env.DEBUG": JSON.stringify(process.env.DEBUG ?? ""),
   },
   build: {
-    target: "esnext",
-    minify: isDev ? false : "oxc", // default is "oxc"
+    // Pyodide builds target es2020 for broader browser compatibility and
+    // deterministic output. loro-crdt TLA is handled via stub (not target).
+    ...(isPyodide ? { target: "es2020" } : { target: "esnext" }),
+    // Pyodide builds use esbuild to avoid CJS module issues with oxc minifier.
+    minify: isDev ? false : isPyodide ? "esbuild" : "oxc",
     sourcemap: isDev,
   },
   resolve: {
     tsconfigPaths: true,
-    alias: {
-      // Fix for rolldown-vite 7.3.1 type-only import resolution
-      // vega-lite exports types via ./types_unstable/* -> ./build/*
-      // but only .d.ts files exist, not .js files
-      // Specific aliases for each vega-lite type module
-      'vega-lite/types_unstable/channeldef.js': 'vega-lite/build/channeldef.d.ts',
-      'vega-lite/types_unstable/encoding.js': 'vega-lite/build/encoding.d.ts',
-      'vega-lite/types_unstable/spec/unit.js': 'vega-lite/build/spec/unit.d.ts',
-      'vega-lite/types_unstable/channel.js': 'vega-lite/build/channel.d.ts',
-      'vega-lite/types_unstable/compositemark/index.js': 'vega-lite/build/compositemark/index.d.ts',
-      'vega-lite/types_unstable/data.js': 'vega-lite/build/data.d.ts',
-      'vega-lite/types_unstable/mark.js': 'vega-lite/build/mark.d.ts',
-      'vega-lite/types_unstable/selection.js': 'vega-lite/build/selection.d.ts',
-      'vega-lite/types_unstable/spec/facet.js': 'vega-lite/build/spec/facet.d.ts',
-      'vega-lite/types_unstable/spec/layer.js': 'vega-lite/build/spec/layer.d.ts',
-      'vega-lite/types_unstable/spec/index.js': 'vega-lite/build/spec/index.d.ts',
-      'vega-lite/types_unstable/spec/toplevel.js': 'vega-lite/build/spec/toplevel.d.ts',
-      'vega-lite/types_unstable/type.js': 'vega-lite/build/type.d.ts',
-      'vega-lite/types_unstable/aggregate.js': 'vega-lite/build/aggregate.d.ts',
-      'vega-lite/types_unstable/bin.js': 'vega-lite/build/bin.d.ts',
-      'vega-lite/types_unstable/scale.js': 'vega-lite/build/scale.d.ts',
-      'vega-lite/types_unstable/resolve.js': 'vega-lite/build/resolve.d.ts',
-    },
+    // Pyodide builds alias loro-crdt to a no-op stub (src/stubs/loro-crdt.ts).
+    // loro-crdt uses WebAssembly with Top-Level Await (TLA) in loro_wasm.js.
+    // rolldown-vite 7.3.1 fails to propagate TLA chains across chunk boundaries
+    // (both JS plugin and native plugin modes are affected), causing
+    // "na is not a function" at runtime. Aliasing removes TLA from the
+    // dependency graph entirely; the real API is never called in Pyodide mode
+    // because isWasm() is true and RTC always returns early.
+    // "@" and "zod" are aliased manually since tsconfigPaths may not resolve
+    // them correctly in all rolldown-vite configurations.
+    alias: isPyodide
+      ? {
+          "@": path.resolve(__dirname, "src"),
+          zod: path.resolve(__dirname, "node_modules/zod"),
+          "loro-crdt": path.resolve(__dirname, "src/stubs/loro-crdt.ts"),
+        }
+      : {
+          // vega-lite exports types via ./types_unstable/* -> ./build/*
+          // but only .d.ts files exist, not .js files
+          "vega-lite/types_unstable/channeldef.js":
+            "vega-lite/build/channeldef.d.ts",
+          "vega-lite/types_unstable/encoding.js":
+            "vega-lite/build/encoding.d.ts",
+          "vega-lite/types_unstable/spec/unit.js":
+            "vega-lite/build/spec/unit.d.ts",
+          "vega-lite/types_unstable/channel.js": "vega-lite/build/channel.d.ts",
+          "vega-lite/types_unstable/compositemark/index.js":
+            "vega-lite/build/compositemark/index.d.ts",
+          "vega-lite/types_unstable/data.js": "vega-lite/build/data.d.ts",
+          "vega-lite/types_unstable/mark.js": "vega-lite/build/mark.d.ts",
+          "vega-lite/types_unstable/selection.js":
+            "vega-lite/build/selection.d.ts",
+          "vega-lite/types_unstable/spec/facet.js":
+            "vega-lite/build/spec/facet.d.ts",
+          "vega-lite/types_unstable/spec/layer.js":
+            "vega-lite/build/spec/layer.d.ts",
+          "vega-lite/types_unstable/spec/index.js":
+            "vega-lite/build/spec/index.d.ts",
+          "vega-lite/types_unstable/spec/toplevel.js":
+            "vega-lite/build/spec/toplevel.d.ts",
+          "vega-lite/types_unstable/type.js": "vega-lite/build/type.d.ts",
+          "vega-lite/types_unstable/aggregate.js":
+            "vega-lite/build/aggregate.d.ts",
+          "vega-lite/types_unstable/bin.js": "vega-lite/build/bin.d.ts",
+          "vega-lite/types_unstable/scale.js": "vega-lite/build/scale.d.ts",
+          "vega-lite/types_unstable/resolve.js": "vega-lite/build/resolve.d.ts",
+        },
     dedupe: [
       "react",
       "react-dom",
@@ -335,10 +366,16 @@ export default defineConfig({
     ],
   },
   experimental: {
-    enableNativePlugin: 'resolver',
+    // Use native resolver for both Pyodide and non-Pyodide builds.
+    // "resolver" enables the native Rust resolver while keeping JS plugins active.
+    // TLA is fully eliminated from Pyodide builds via loro-crdt stub (see resolve.alias);
+    // vite-plugin-top-level-await is NOT used because it wraps chunks in async IIFEs
+    // and rolldown-vite fails to propagate __tla chains across chunk boundaries.
+    enableNativePlugin: "resolver",
   },
   worker: {
     format: "es",
+    plugins: () => [wasm()],
   },
   plugins: [
     htmlDevPlugin(),

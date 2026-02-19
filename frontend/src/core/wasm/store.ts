@@ -122,12 +122,15 @@ export class CompositeFileStore implements FileStore {
   }
 }
 
-export const notebookFileStore = new CompositeFileStore([
-  // Prefer mount config, then <marimo-code>, then URL
-  mountConfigFileStore,
-  domElementFileStore,
-  urlFileStore,
-]);
+// When #code/ fragment is present in the URL, prioritize urlFileStore
+// so that shared code URLs are not ignored by mountConfigFileStore or domElementFileStore.
+const hasCodeInHash = PyodideRouter.getCodeFromHash() != null;
+
+export const notebookFileStore = new CompositeFileStore(
+  hasCodeInHash
+    ? [urlFileStore, mountConfigFileStore, domElementFileStore]
+    : [mountConfigFileStore, domElementFileStore, urlFileStore],
+);
 
 export const fallbackFileStore = new CompositeFileStore([
   // Prefer then local storage, then remote default, then empty
