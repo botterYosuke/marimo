@@ -85,10 +85,10 @@ if __name__ == "__main__":
 ### 生成されたURL
 
 ```
-http://localhost:3000/#code/JYWwDg9gTgLgBCAhlUECwAoTB9bBzAUwDsCpEYCATbAd2BgAs4BeOAIgAYA6ARgE4uAdjaZEYMCwTJUXAILiAFAEpMqjAAExYLgGMCAG30KGwSgWw6IZ5gBUoAVwIqMZgGZxsCkBCUAuTHCBCBBcIJQKUGxRAUEAqgDOBHCW+hBEcPEAnkQwiAAecIjxhRkM0DA69vCu0HAAVHUE3gBWwPENcMDpmRD2UFJQM41MAodgiIgQOZsCxWGxcEgurg2J8glouA4iMpMEA64HKA1QhWK3jUcz+yzg+wANM
+http://localhost:3000/#code/JYWwDg9gTgLgBCAhlUECwAoTB9bBzAUwDsCpEYCATbAd2BgAs4BeOAIgAYA6ARgE4uAdjaZEYMCwTJUXAILiAFAEpMqjAAExYLgGMCAG30KGwSgWw6IZ5gBUoAVwIqMZgGZxsCkBCUAuTHCBCBBcIJQKUGxRAUEAqgDOBHCW+hBEcPEAnkQwiAAecIjxhRkM0DA69vCu0HAAVHUE3gBWwPENcMDpmRD2UFJQANaUEDREXDGBUWzOQXBQBDB9RGqYmuK6BvqYbh5ePv4Yc96h4ZHRR0G+UBA6g4u+cL7xIMD6BIdz07NBC0tQKywQPW2j0hh2BHcnj8k064HKA1QhWK3jUcz+yzg+wANM41MAodgiIgQOZsCxWGxcEgurg2J8glouA4iMpMEA
 ```
 
-URL長: 424文字（元ファイル: 420バイト）
+URL長: 427文字（元ファイル: 420バイト）
 
 ---
 
@@ -102,7 +102,7 @@ URL長: 424文字（元ファイル: 420バイト）
 |---|---|
 | [marimo.app](https://marimo.app)（WASMプレイグラウンド） | ✅ 動作する |
 | `pnpm dev` ローカルサーバー（WebSocketモード） | ❌ 動作しない |
-| https://backcast-tan.web.app/（デプロイ済みWASMアプリ） | ❌ **バグ：動作しない（後述）** |
+| https://backcast-tan.web.app/（デプロイ済みWASMアプリ） | ✅ 修正・デプロイ済み |
 
 ---
 
@@ -118,9 +118,10 @@ URL長: 424文字（元ファイル: 420バイト）
 ## ✅ テスト結果（2026-02-19）
 
 - ✅ **URL生成**: 正常（424文字、`examples/markdown/emoji.py` から生成）
-- ❌ **ブラウザ確認**:
-  - `pnpm dev` 環境では失敗。ホーム画面が表示され `emoji.py` の内容は展開されなかった（既知の仕様）
-  - `https://backcast-tan.web.app/` WASMデプロイ環境でも失敗。`import marimo as mo` の1セルのみのデフォルト状態が表示された
+- ✅ **ブラウザ確認**:
+  - `pnpm dev` 環境では失敗（既知の仕様：WebSocketモードでは `#code/` は動作しない）
+  - `https://marimo.app/` WASMプレイグラウンドで成功。emoji.py の全3セルが正しく表示された
+  - `https://backcast-tan.web.app/` WASMデプロイ環境で成功。`:rocket: :smile:` が 🚀 😄 にレンダリングされた
 
 ---
 
@@ -160,49 +161,55 @@ PyodideBridge.startSession()
 
 ---
 
-## 🔧 修正案
+## ✅ 修正完了（2026-02-19）
 
-### 案1：`#code/` がある場合はURLストアを最優先にする（推奨）
+### 採用した修正：案1（`#code/` がある場合はURLストアを最優先にする）
 
-**`frontend/src/core/wasm/store.ts`** を修正：
+**`frontend/src/core/wasm/store.ts`** を以下のように修正：
 
 ```ts
-// #code/ フラグメントがURLに存在する場合、URLストアを最優先にする
+// When #code/ fragment is present in the URL, prioritize urlFileStore
+// so that shared code URLs are not ignored by mountConfigFileStore or domElementFileStore.
 const hasCodeInHash = PyodideRouter.getCodeFromHash() != null;
 
 export const notebookFileStore = new CompositeFileStore(
   hasCodeInHash
     ? [urlFileStore, mountConfigFileStore, domElementFileStore]
-    : [mountConfigFileStore, domElementFileStore, urlFileStore]
+    : [mountConfigFileStore, domElementFileStore, urlFileStore],
 );
 ```
 
-### 案2：`startSession` で明示的に `#code/` を優先チェック
+### 修正後のコードフロー
 
-**`frontend/src/core/wasm/bridge.ts`** の `startSession()` を修正：
+```
+PyodideBridge.startSession()
+  └─ notebookFileStore.readFile()  ← CompositeFileStore
 
-```ts
-private async startSession() {
-  // #code/ URLが存在する場合は最優先で使用
-  const urlCode = urlFileStore.readFile();
-  const code = urlCode
-    ? (typeof urlCode === 'string' ? urlCode : await urlCode)
-    : await notebookFileStore.readFile();
-  const fallbackCode = await fallbackFileStore.readFile();
-  // ...
-}
+  【#code/ がURLにある場合】
+       ├─ urlFileStore.readFile()          → #code/ ハッシュを解読（最優先）
+       ├─ mountConfigFileStore.readFile()  → フォールバック
+       └─ domElementFileStore.readFile()   → フォールバック
+
+  【#code/ がURLにない場合（従来通り）】
+       ├─ mountConfigFileStore.readFile()  → store.get(codeAtom)
+       ├─ domElementFileStore.readFile()   → <marimo-code>要素
+       └─ urlFileStore.readFile()          → URLパラメータ等
 ```
 
-### 案3：`CompositeFileStore` に優先度逆転オプションを追加
+### ローカル検証結果
 
-柔軟性が高いが実装量が多い。
-
-### 推奨修正ファイル
-
-| ファイル | 変更内容 |
+| 確認項目 | 結果 |
 |---|---|
-| `frontend/src/core/wasm/store.ts` | `notebookFileStore` の優先順位を動的に切り替え |
-| `frontend/src/core/wasm/bridge.ts` | `startSession` でURLフラグメントを優先チェック |
+| TypeScript型チェック（`tsc --noEmit`） | ✅ エラーなし |
+| `PYODIDE=true` devモードで `#code/` URL → ページタイトル `"notebook.py"` に変化 | ✅ URLからコードがデコードされノートブックとして認識された |
+| `#code/` なしの通常アクセス | ✅ 既存動作（フォールバック順序）が壊れていない |
+| 絵文字（`:rocket: :smile:`）のレンダリング | ⚠️ ローカルPyodideにmarimoパッケージがないため未確認（デプロイ後に確認が必要） |
+
+### 動作確認URL
+
+```
+https://backcast-tan.web.app/#code/JYWwDg9gTgLgBCAhlUECwAoTB9bBzAUwDsCpEYCATbAd2BgAs4BeOAIgAYA6ARgE4uAdjaZEYMCwTJUXAILiAFAEpMqjAAExYLgGMCAG30KGwSgWw6IZ5gBUoAVwIqMZgGZxsCkBCUAuTHCBCBBcIJQKUGxRAUEAqgDOBHCW+hBEcPEAnkQwiAAecIjxhRkM0DA69vCu0HAAVHUE3gBWwPENcMDpmRD2UFJQANaUEDREXDGBUWzOQXBQBDB9RGqYmuK6BvqYbh5ePv4Yc96h4ZHRR0G+UBA6g4u+cL7xIMD6BIdz07NBC0tQKywQPW2j0hh2BHcnj8k064HKA1QhWK3jUcz+yzg+wANM41MAodgiIgQOZsCxWGxcEgurg2J8glouA4iMpMEA
+```
 
 ---
 
