@@ -79,6 +79,7 @@ export class PyodideBridge implements RunRequests, EditRequests {
     // Create save worker
     const saveWorker = new Worker(saveWorkerUrl, {
       type: "module",
+      // Pass the version to the worker
       name: getMarimoVersion(),
     });
 
@@ -93,6 +94,7 @@ export class PyodideBridge implements RunRequests, EditRequests {
     // Create a worker
     const worker = new Worker(workerUrl, {
       type: "module",
+      // Pass the version to the worker
       name: getMarimoVersion(),
     });
 
