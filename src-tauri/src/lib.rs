@@ -116,14 +116,7 @@ fn seed_recent_files(app: &tauri::AppHandle) {
 }
 
 fn copy_sample_files_to_notebooks(app: &tauri::AppHandle) {
-    let src_dir = if cfg!(debug_assertions) {
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("sample-notebooks")
-    } else {
-        app.path()
-            .resource_dir()
-            .expect("failed to get resource dir")
-            .join("resources").join("files")
-    };
+    let src_dir = paths::get_sample_dir(app);
     let dst_dir = paths::get_notebooks_dir(app);
 
     if let Err(e) = std::fs::create_dir_all(&dst_dir) {
@@ -458,8 +451,22 @@ pub fn run() {
             let id = event.id().as_ref();
             match id {
                 "new_notebook" => {
-                    // Open home page to create new notebook
-                    let _ = window::manager::open_window(app, None);
+                    let app_clone = app.clone();
+                    let ts = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap_or_default()
+                        .as_millis();
+                    let file_key = format!("__new__menu_{}", ts);
+                    tauri::async_runtime::spawn(async move {
+                        if let Err(e) = commands::window_open_notebook(
+                            app_clone,
+                            Some(file_key),
+                        )
+                        .await
+                        {
+                            log::error!("Failed to open new notebook: {}", e);
+                        }
+                    });
                 }
                 "open_file" => {
                     let app_clone = app.clone();

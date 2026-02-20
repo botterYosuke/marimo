@@ -58,6 +58,7 @@ class AppFileManager:
         *,
         storage: Optional[StorageInterface] = None,
         defaults: Optional[AppDefaults] = None,
+        template: Optional[str] = None,
     ) -> None:
         self._filename = _maybe_path(filename)
 
@@ -66,8 +67,13 @@ class AppFileManager:
         # Configuration defaults
         self._defaults = defaults or AppDefaults()
 
-        # Load the app
-        self.app = self._load_app(self.path)
+        # Load the app: use template content if unnamed and template provided
+        load_path = (
+            template
+            if filename is None and template and os.path.exists(template)
+            else self.path
+        )
+        self.app = self._load_app(load_path)
 
         # Track the last saved content to avoid reloading our own writes
         self._last_saved_content: Optional[str] = None
@@ -263,6 +269,12 @@ class AppFileManager:
         result = InternalApp(app)
         # Ensure at least one cell
         result.cell_manager.ensure_one_cell()
+
+        # If loaded from a template (filename is None but app has content),
+        # clear the internal filename to keep the notebook unnamed
+        if self._is_unnamed():
+            result._app._filename = None
+
         return result
 
     def rename(self, new_filename: str | Path) -> str:

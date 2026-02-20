@@ -84,11 +84,16 @@ pub fn open_window(
 
     let title = match file_path {
         Some(path) => {
-            let name = path
-                .file_name()
-                .map(|n| n.to_string_lossy().to_string())
-                .unwrap_or_else(|| "Notebook".to_string());
-            format!("backcast - {}", name)
+            let name = path.to_string_lossy();
+            if name.starts_with("__new__") {
+                "backcast - New Notebook".to_string()
+            } else {
+                let basename = path
+                    .file_name()
+                    .map(|n| n.to_string_lossy().to_string())
+                    .unwrap_or_else(|| "Notebook".to_string());
+                format!("backcast - {}", basename)
+            }
         }
         None => "backcast".to_string(),
     };

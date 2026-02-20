@@ -10,7 +10,8 @@
       "Bash(pkill:*)",
       "mcp__playwright__browser_tabs",
       "Bash(tasklist:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Read(//c/Users/sasai/.claude/plans/**)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\marimo\\.claude\\skills",

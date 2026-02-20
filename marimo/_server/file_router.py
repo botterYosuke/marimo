@@ -335,7 +335,13 @@ class LazyListOfFilesAppFileRouter(AppFileRouter):
         defaults = defaults or AppDefaults()
         resolved_path = self.resolve_file_path(key)
         if resolved_path is None:
-            return AppFileManager(None, defaults=defaults)
+            # For __new__ keys, look for backcast.py as a template
+            template = None
+            if key.startswith(AppFileRouter.NEW_FILE):
+                candidate = os.path.join(self._directory, "backcast.py")
+                if os.path.exists(candidate):
+                    template = candidate
+            return AppFileManager(None, defaults=defaults, template=template)
         return AppFileManager(resolved_path, defaults=defaults)
 
     def resolve_file_path(self, key: MarimoFileKey) -> str | None:

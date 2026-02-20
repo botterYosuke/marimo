@@ -103,6 +103,21 @@ pub fn get_log_dir(app: &tauri::AppHandle) -> PathBuf {
     data_dir.join("logs")
 }
 
+/// サンプルノートブックディレクトリのパスを返す。
+/// 開発時: <CARGO_MANIFEST_DIR>/sample-notebooks
+/// 本番: <resource_dir>/resources/files
+pub fn get_sample_dir(app: &tauri::AppHandle) -> PathBuf {
+    if cfg!(debug_assertions) {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("sample-notebooks")
+    } else {
+        app.path()
+            .resource_dir()
+            .expect("failed to get resource dir")
+            .join("resources")
+            .join("files")
+    }
+}
+
 /// Get the notebooks workspace directory.
 /// Steam 版: <exe_dir>/data/notebooks
 /// 通常配布版: %AppData%/marimo/notebooks

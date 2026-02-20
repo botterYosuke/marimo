@@ -118,6 +118,23 @@ pub async fn start_server(app: &tauri::AppHandle, port: u16) -> Result<()> {
     std::fs::create_dir_all(&notebooks_dir).ok();
     let notebooks_dir_str = notebooks_dir.to_string_lossy().to_string();
 
+    // Add notebooks directory to PYTHONPATH so that unnamed notebooks
+    // can import game modules (e.g., `import game_setup`)
+    {
+        let delimiter = if cfg!(windows) { ";" } else { ":" };
+        let current_pythonpath = env.get("PYTHONPATH").cloned().unwrap_or_default();
+        if !current_pythonpath.contains(&notebooks_dir_str) {
+            env.insert(
+                "PYTHONPATH".into(),
+                if current_pythonpath.is_empty() {
+                    notebooks_dir_str.clone()
+                } else {
+                    format!("{}{}{}", notebooks_dir_str, delimiter, current_pythonpath)
+                },
+            );
+        }
+    }
+
     // Use the user's home directory as cwd to avoid Python importing
     // a local `marimo/` package from the current working directory
     let home_dir = std::env::var("USERPROFILE")

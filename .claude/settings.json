@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"/c/Users/sasai/AppData/Local/hatch/env/virtual/marimo/xK6oz_Ou/test.py3.12/Scripts/python.exe\" -m pytest tests/_server/test_template_notebook.py -v)",
+      "Bash(python:*)"
+    ]
+  }
+}
