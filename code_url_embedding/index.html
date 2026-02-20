@@ -1379,22 +1379,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#2026-02-19_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🔧 修正案
+        ✅ 修正完了（2026-02-19）
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="🔧 修正案">
+    <nav class="md-nav" aria-label="✅ 修正完了（2026-02-19）">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#1code-url" class="md-nav__link">
     <span class="md-ellipsis">
       
-        案1：#code/ がある場合はURLストアを最優先にする（推奨）
+        採用した修正：案1（#code/ がある場合はURLストアを最優先にする）
       
     </span>
   </a>
@@ -1402,21 +1402,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2startsession-code" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        案2：startSession で明示的に #code/ を優先チェック
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3compositefilestore" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        案3：CompositeFileStore に優先度逆転オプションを追加
+        修正後のコードフロー
       
     </span>
   </a>
@@ -1427,7 +1416,18 @@
   <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
-        推奨修正ファイル
+        ローカル検証結果
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#url_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        動作確認URL
       
     </span>
   </a>
@@ -1535,9 +1535,9 @@
     <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="url">生成されたURL<a class="headerlink" href="#url" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>http://localhost:3000/#code/JYWwDg9gTgLgBCAhlUECwAoTB9bBzAUwDsCpEYCATbAd2BgAs4BeOAIgAYA6ARgE4uAdjaZEYMCwTJUXAILiAFAEpMqjAAExYLgGMCAG30KGwSgWw6IZ5gBUoAVwIqMZgGZxsCkBCUAuTHCBCBBcIJQKUGxRAUEAqgDOBHCW+hBEcPEAnkQwiAAecIjxhRkM0DA69vCu0HAAVHUE3gBWwPENcMDpmRD2UFJQM41MAodgiIgQOZsCxWGxcEgurg2J8glouA4iMpMEA64HKA1QhWK3jUcz+yzg+wANM
+<div class="highlight"><pre><span></span><code>http://localhost:3000/#code/JYWwDg9gTgLgBCAhlUECwAoTB9bBzAUwDsCpEYCATbAd2BgAs4BeOAIgAYA6ARgE4uAdjaZEYMCwTJUXAILiAFAEpMqjAAExYLgGMCAG30KGwSgWw6IZ5gBUoAVwIqMZgGZxsCkBCUAuTHCBCBBcIJQKUGxRAUEAqgDOBHCW+hBEcPEAnkQwiAAecIjxhRkM0DA69vCu0HAAVHUE3gBWwPENcMDpmRD2UFJQANaUEDREXDGBUWzOQXBQBDB9RGqYmuK6BvqYbh5ePv4Yc96h4ZHRR0G+UBA6g4u+cL7xIMD6BIdz07NBC0tQKywQPW2j0hh2BHcnj8k064HKA1QhWK3jUcz+yzg+wANM41MAodgiIgQOZsCxWGxcEgurg2J8glouA4iMpMEA
 </code></pre></div>
-<p>URL長: 424文字（元ファイル: 420バイト）</p>
+<p>URL長: 427文字（元ファイル: 420バイト）</p>
 <hr />
 <h2 id="_5">動作環境<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <blockquote>
@@ -1563,7 +1563,7 @@
 </tr>
 <tr>
 <td>https://backcast-tan.web.app/（デプロイ済みWASMアプリ）</td>
-<td>❌ <strong>バグ：動作しない（後述）</strong></td>
+<td>✅ 修正・デプロイ済み</td>
 </tr>
 </tbody>
 </table>
@@ -1579,9 +1579,10 @@
 <h2 id="2026-02-19">✅ テスト結果（2026-02-19）<a class="headerlink" href="#2026-02-19" title="Permanent link">&para;</a></h2>
 <ul>
 <li>✅ <strong>URL生成</strong>: 正常（424文字、<code>examples/markdown/emoji.py</code> から生成）</li>
-<li>❌ <strong>ブラウザ確認</strong>:</li>
-<li><code>pnpm dev</code> 環境では失敗。ホーム画面が表示され <code>emoji.py</code> の内容は展開されなかった（既知の仕様）</li>
-<li><code>https://backcast-tan.web.app/</code> WASMデプロイ環境でも失敗。<code>import marimo as mo</code> の1セルのみのデフォルト状態が表示された</li>
+<li>✅ <strong>ブラウザ確認</strong>:</li>
+<li><code>pnpm dev</code> 環境では失敗（既知の仕様：WebSocketモードでは <code>#code/</code> は動作しない）</li>
+<li><code>https://marimo.app/</code> WASMプレイグラウンドで成功。emoji.py の全3セルが正しく表示された</li>
+<li><code>https://backcast-tan.web.app/</code> WASMデプロイ環境で成功。<code>:rocket: :smile:</code> が 🚀 😄 にレンダリングされた</li>
 </ul>
 <hr />
 <h2 id="2026-02-19_1">🔍 根本原因の特定（2026-02-19）<a class="headerlink" href="#2026-02-19_1" title="Permanent link">&para;</a></h2>
@@ -1607,51 +1608,63 @@
        └─ urlFileStore.readFile()          → #code/ ハッシュを解読（ここに届かない）
 </code></pre></div>
 <hr />
-<h2 id="_9">🔧 修正案<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
-<h3 id="1code-url">案1：<code>#code/</code> がある場合はURLストアを最優先にする（推奨）<a class="headerlink" href="#1code-url" title="Permanent link">&para;</a></h3>
-<p><strong><code>frontend/src/core/wasm/store.ts</code></strong> を修正：</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// #code/ フラグメントがURLに存在する場合、URLストアを最優先にする</span>
+<h2 id="2026-02-19_2">✅ 修正完了（2026-02-19）<a class="headerlink" href="#2026-02-19_2" title="Permanent link">&para;</a></h2>
+<h3 id="1code-url">採用した修正：案1（<code>#code/</code> がある場合はURLストアを最優先にする）<a class="headerlink" href="#1code-url" title="Permanent link">&para;</a></h3>
+<p><strong><code>frontend/src/core/wasm/store.ts</code></strong> を以下のように修正：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// When #code/ fragment is present in the URL, prioritize urlFileStore</span>
+<span class="c1">// so that shared code URLs are not ignored by mountConfigFileStore or domElementFileStore.</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">hasCodeInHash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">PyodideRouter</span><span class="p">.</span><span class="nx">getCodeFromHash</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
 
 <span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">notebookFileStore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">CompositeFileStore</span><span class="p">(</span>
 <span class="w">  </span><span class="nx">hasCodeInHash</span>
 <span class="w">    </span><span class="o">?</span><span class="w"> </span><span class="p">[</span><span class="nx">urlFileStore</span><span class="p">,</span><span class="w"> </span><span class="nx">mountConfigFileStore</span><span class="p">,</span><span class="w"> </span><span class="nx">domElementFileStore</span><span class="p">]</span>
-<span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">mountConfigFileStore</span><span class="p">,</span><span class="w"> </span><span class="nx">domElementFileStore</span><span class="p">,</span><span class="w"> </span><span class="nx">urlFileStore</span><span class="p">]</span>
+<span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">mountConfigFileStore</span><span class="p">,</span><span class="w"> </span><span class="nx">domElementFileStore</span><span class="p">,</span><span class="w"> </span><span class="nx">urlFileStore</span><span class="p">],</span>
 <span class="p">);</span>
 </code></pre></div>
-<h3 id="2startsession-code">案2：<code>startSession</code> で明示的に <code>#code/</code> を優先チェック<a class="headerlink" href="#2startsession-code" title="Permanent link">&para;</a></h3>
-<p><strong><code>frontend/src/core/wasm/bridge.ts</code></strong> の <code>startSession()</code> を修正：</p>
-<div class="highlight"><pre><span></span><code><span class="k">private</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="nx">startSession</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// #code/ URLが存在する場合は最優先で使用</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">urlCode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">urlFileStore</span><span class="p">.</span><span class="nx">readFile</span><span class="p">();</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">code</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">urlCode</span>
-<span class="w">    </span><span class="o">?</span><span class="w"> </span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">urlCode</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;string&#39;</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">urlCode</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">await</span><span class="w"> </span><span class="nx">urlCode</span><span class="p">)</span>
-<span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">notebookFileStore</span><span class="p">.</span><span class="nx">readFile</span><span class="p">();</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">fallbackCode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fallbackFileStore</span><span class="p">.</span><span class="nx">readFile</span><span class="p">();</span>
-<span class="w">  </span><span class="c1">// ...</span>
-<span class="p">}</span>
+<h3 id="_9">修正後のコードフロー<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>PyodideBridge.startSession()
+  └─ notebookFileStore.readFile()  ← CompositeFileStore
+
+  【#code/ がURLにある場合】
+       ├─ urlFileStore.readFile()          → #code/ ハッシュを解読（最優先）
+       ├─ mountConfigFileStore.readFile()  → フォールバック
+       └─ domElementFileStore.readFile()   → フォールバック
+
+  【#code/ がURLにない場合（従来通り）】
+       ├─ mountConfigFileStore.readFile()  → store.get(codeAtom)
+       ├─ domElementFileStore.readFile()   → &lt;marimo-code&gt;要素
+       └─ urlFileStore.readFile()          → URLパラメータ等
 </code></pre></div>
-<h3 id="3compositefilestore">案3：<code>CompositeFileStore</code> に優先度逆転オプションを追加<a class="headerlink" href="#3compositefilestore" title="Permanent link">&para;</a></h3>
-<p>柔軟性が高いが実装量が多い。</p>
-<h3 id="_10">推奨修正ファイル<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<h3 id="_10">ローカル検証結果<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>ファイル</th>
-<th>変更内容</th>
+<th>確認項目</th>
+<th>結果</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>frontend/src/core/wasm/store.ts</code></td>
-<td><code>notebookFileStore</code> の優先順位を動的に切り替え</td>
+<td>TypeScript型チェック（<code>tsc --noEmit</code>）</td>
+<td>✅ エラーなし</td>
 </tr>
 <tr>
-<td><code>frontend/src/core/wasm/bridge.ts</code></td>
-<td><code>startSession</code> でURLフラグメントを優先チェック</td>
+<td><code>PYODIDE=true</code> devモードで <code>#code/</code> URL → ページタイトル <code>"notebook.py"</code> に変化</td>
+<td>✅ URLからコードがデコードされノートブックとして認識された</td>
+</tr>
+<tr>
+<td><code>#code/</code> なしの通常アクセス</td>
+<td>✅ 既存動作（フォールバック順序）が壊れていない</td>
+</tr>
+<tr>
+<td>絵文字（<code>:rocket: :smile:</code>）のレンダリング</td>
+<td>⚠️ ローカルPyodideにmarimoパッケージがないため未確認（デプロイ後に確認が必要）</td>
 </tr>
 </tbody>
 </table>
+<h3 id="url_1">動作確認URL<a class="headerlink" href="#url_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>https://backcast-tan.web.app/#code/JYWwDg9gTgLgBCAhlUECwAoTB9bBzAUwDsCpEYCATbAd2BgAs4BeOAIgAYA6ARgE4uAdjaZEYMCwTJUXAILiAFAEpMqjAAExYLgGMCAG30KGwSgWw6IZ5gBUoAVwIqMZgGZxsCkBCUAuTHCBCBBcIJQKUGxRAUEAqgDOBHCW+hBEcPEAnkQwiAAecIjxhRkM0DA69vCu0HAAVHUE3gBWwPENcMDpmRD2UFJQANaUEDREXDGBUWzOQXBQBDB9RGqYmuK6BvqYbh5ePv4Yc96h4ZHRR0G+UBA6g4u+cL7xIMD6BIdz07NBC0tQKywQPW2j0hh2BHcnj8k064HKA1QhWK3jUcz+yzg+wANM41MAodgiIgQOZsCxWGxcEgurg2J8glouA4iMpMEA
+</code></pre></div>
 <hr />
 <h2 id="tips">Tips・注意事項<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
 <ul>
