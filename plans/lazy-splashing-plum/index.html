@@ -21,7 +21,7 @@
     
     
       
-        <title>ゲームプレイ UX レポート — 離脱ポイント分析 - marimo Developer Docs</title>
+        <title>Fix: スキル完了のフィードバックが無い / 進捗ゼロのまま - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ux" class="md-skip">
+        <a href="#fix" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ゲームプレイ UX レポート — 離脱ポイント分析
+              Fix: スキル完了のフィードバックが無い / 進捗ゼロのまま
             
           </span>
         </div>
@@ -1207,33 +1207,50 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#context" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実施内容
+        Context
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        根本原因
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        離脱ポイント一覧（深刻度順）
+        変更内容（フロントエンド 3ファイルのみ）
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="離脱ポイント一覧（深刻度順）">
+    <nav class="md-nav" aria-label="変更内容（フロントエンド 3ファイルのみ）">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1" class="md-nav__link">
+  <a href="#1-broadcastchannelts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. 🔴 スキル完了のフィードバックが無い / 進捗ゼロのまま
+        1. broadcastChannel.ts — ラストバリューキャッシュ追加
       
     </span>
   </a>
@@ -1241,10 +1258,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-btbuy" class="md-nav__link">
+  <a href="#2-useprogresssyncts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. ✅ bt.buy() の出力が意味不明
+        2. useProgressSync.ts — マウント時にキャッシュを再生
       
     </span>
   </a>
@@ -1252,10 +1269,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-btstep-true" class="md-nav__link">
+  <a href="#3-skill-complete-handlerts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. ✅ bt.step() の出力が True のみ
+        3. skill-complete-handler.ts — マウント時にキャッシュを再生
       
     </span>
   </a>
@@ -1263,76 +1280,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-grid" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. 🟠 Grid レイアウトのセル重なり
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-ai-fix" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. 🟠 AI Fix 提案が全セルに表示される
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. 🟠 「どこにコードを入力するか」がわからない
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#7-step" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        7. 🟡 チャートが step() 後に意味不明な表示になる
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#8-reconnected" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        8. 🟡 「Reconnected」バナーが意味不明
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#9-progress-00" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        9. 🟡 ステータスバーが Progress: 0.0% のまま
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        10. 🟡 スキルツリーボタンの存在に気づけない
+        テスト
       
     </span>
   </a>
@@ -1348,7 +1299,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        総合評価
+        全体フロー（修正後）
       
     </span>
   </a>
@@ -1359,7 +1310,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        改善履歴
+        修正ファイル一覧
       
     </span>
   </a>
@@ -1367,22 +1318,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tips" class="md-nav__link">
+  <a href="#2026-02-20" class="md-nav__link">
     <span class="md-ellipsis">
       
-        知見・設計思想・Tips
+        ✅ 実装完了（2026-02-20）
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="知見・設計思想・Tips">
+    <nav class="md-nav" aria-label="✅ 実装完了（2026-02-20）">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        出力改善のパターン
+        テスト結果
       
     </span>
   </a>
@@ -1390,10 +1341,22 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#bt_broker_instancelast_pricecode" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        bt._broker_instance.last_price(code) について
+        実装の詳細
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装の詳細">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-broadcastchannelts-" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. ✅ broadcastChannel.ts - キャッシュ機構の追加
       
     </span>
   </a>
@@ -1401,10 +1364,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_format_step_summary" class="md-nav__link">
+  <a href="#2-useprogresssyncts-" class="md-nav__link">
     <span class="md-ellipsis">
       
-        _format_step_summary() の分岐
+        2. ✅ useProgressSync.ts - 進捗同期のリプレイ対応
       
     </span>
   </a>
@@ -1412,10 +1375,109 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#pypi" class="md-nav__link">
+  <a href="#3-skill-complete-handlerts-" class="md-nav__link">
     <span class="md-ellipsis">
       
-        PyPI バージョン問題
+        3. ✅ skill-complete-handler.ts - スキルイベントのリプレイ対応
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-broadcastchanneltestts-" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. ✅ broadcastChannel.test.ts - 新規テストスイート
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        検証方法
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計背景と知見
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="設計背景と知見">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        なぜラストバリューキャッシュを採用したか
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        自動クリアの設計判断
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テストフラグとの互換性
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        タイミング問題の根本解決
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        副作用と影響範囲
       
     </span>
   </a>
@@ -1428,13 +1490,63 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#tips-for-future-developers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        検証スクリーンショット
+        Tips for Future Developers
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Tips for Future Developers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        キャッシュのライフサイクル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        新しいチャネルを追加する場合
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        デバッグ時の確認ポイント
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e2e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E2E テストへの影響
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1455,274 +1567,217 @@
 
 
 
-<h1 id="ux">ゲームプレイ UX レポート — 離脱ポイント分析<a class="headerlink" href="#ux" title="Permanent link">&para;</a></h1>
-<p><strong>日時</strong>: 2026-02-20
-<strong>対象</strong>: <code>src-tauri/sample-notebooks/backcast.py</code>（サンドボックスモード）
-<strong>環境</strong>: marimo edit (port 2718) + Vite dev server (port 3000)
-<strong>参考</strong>: <code>development_docs/game-e2e-review-system.md</code></p>
-<hr />
-<h2 id="_1">実施内容<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<ol>
-<li><code>backcast.py</code> をmarimo editで起動</li>
-<li>チャート表示（<code>bt.chart("7203")</code>）を確認</li>
-<li><code>bt.buy()</code> を入力・実行</li>
-<li><code>bt.step()</code> を入力・実行</li>
-<li>スキルツリーダイアログを開いて進捗確認</li>
-<li>各段階でスクリーンショット取得・UI検証</li>
-</ol>
-<hr />
-<h2 id="_2">離脱ポイント一覧（深刻度順）<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<h3 id="1">1. 🔴 スキル完了のフィードバックが無い / 進捗ゼロのまま<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
-<p><strong>深刻度: 致命的</strong></p>
-<p><code>bt.buy()</code> と <code>bt.step()</code> を実行した後にスキルツリーを開いたところ、<strong>0/59 スキル</strong>のまま。SANDBOX_001（マーケットへようこそ）すら完了扱いになっていない。</p>
-<p><strong>原因推定</strong>:
-- 既存セッションへの再接続（Reconnected）により、<code>bt.chart("7203")</code> の emit_skill("SANDBOX_001") が発火したタイミングではフロントエンドのスキルツリーリスナーが未接続だった
-- BroadcastChannel メッセージはリアルタイムのみ送信で、過去の発火は受け取れない</p>
-<p><strong>離脱理由</strong>: 「買ったのに何も起きない」「ゲームが壊れている」と感じて閉じる</p>
-<p><strong>改善案</strong>:
-- ページロード時にカーネルから現在の <code>get_triggered_skills()</code> 状態を取得し、フロントエンドと同期する仕組み
-- または、セル出力再送時にスキルイベントを再発火する</p>
-<hr />
-<h3 id="2-btbuy">2. ✅ <code>bt.buy()</code> の出力が意味不明<a class="headerlink" href="#2-btbuy" title="Permanent link">&para;</a></h3>
-<p><strong>深刻度: 高</strong> → <strong>対応済み (2026-02-20)</strong></p>
-<p><code>bt.buy()</code> を実行すると、Outputs パネルに以下が表示されていた:</p>
-<div class="highlight"><pre><span></span><code>&lt;BackcastPro.order.Order object at 0x000001D007657CB0&gt;
+<h1 id="fix">Fix: スキル完了のフィードバックが無い / 進捗ゼロのまま<a class="headerlink" href="#fix" title="Permanent link">&para;</a></h1>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>UXレポート Issue #1: セッション再接続後、スキルツリーが 0/59 のまま表示される致命的バグ。
+<code>bt.chart("7203")</code> で <code>emit_skill("SANDBOX_001")</code> が発火しても、フロントエンドに反映されない。</p>
+<h3 id="_1">根本原因<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p><code>emit_skill()</code> は <code>mo.output.append()</code> で <code>&lt;marimo-broadcast&gt;</code> タグを送信する。
+初回実行時は <code>handleCellNotificationeration()</code> が cell-op の <code>data.output</code> からタグを抽出し BroadcastChannel に送信する。</p>
+<p><strong>再接続時の問題</strong>: BroadcastChannel はリアルタイムのみ（fire-and-forget）。
+SessionView の再生時に <code>extractAndSendBroadcastMessages()</code> → <code>sendBroadcastMessage()</code> が呼ばれるが、
+React コンポーネント（<code>useProgressSync</code>, <code>setupSkillEventListener</code>）のマウント前に送信されたメッセージは消失する。</p>
+<h2 id="3">変更内容（フロントエンド 3ファイルのみ）<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="1-broadcastchannelts">1. <code>broadcastChannel.ts</code> — ラストバリューキャッシュ追加<a class="headerlink" href="#1-broadcastchannelts" title="Permanent link">&para;</a></h3>
+<p><strong>ファイル</strong>: <code>frontend/src/utils/broadcastChannel.ts</code></p>
+<p><code>BroadcastChannelManager</code> に channel+type をキーとした最新値キャッシュを追加:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// channel → Map&lt;type, message&gt;</span>
+<span class="k">private</span><span class="w"> </span><span class="nx">lastMessages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nb">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="w"> </span><span class="p">}</span><span class="o">&gt;&gt;</span><span class="p">();</span>
 </code></pre></div>
-<p>初心者にはこのPythonオブジェクトの repr() は完全に意味不明。「買えたの？ 買えなかったの？ エラー？」と混乱する。</p>
-<p><strong>離脱理由</strong>: 「何が起きたかわからない」「エラーっぽい文字列が出た」</p>
-<p><strong>実施した改善</strong>:</p>
-<p><code>game_setup.py</code> の <code>buy()</code> / <code>sell()</code> 関数で <code>mo.output.append(mo.callout(...))</code> を使い、フレンドリーなメッセージを表示するようにした。</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># buy() — 緑の callout で即座にフィードバック</span>
-<span class="n">price</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">_broker_instance</span><span class="o">.</span><span class="n">last_price</span><span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
-<span class="n">mo</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mo</span><span class="o">.</span><span class="n">callout</span><span class="p">(</span>
-    <span class="n">mo</span><span class="o">.</span><span class="n">md</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**買い注文を出しました** — </span><span class="si">{</span><span class="n">order</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s2"> @ ¥</span><span class="si">{</span><span class="n">price</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
-    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;success&quot;</span><span class="p">,</span>
-<span class="p">))</span>
+<ul>
+<li><code>sendBroadcastMessage()</code> 呼出時、BroadcastChannel 送信に加えてキャッシュにも保存</li>
+<li><code>consumeLastMessage(channelName, type)</code> で最新メッセージを取得し <strong>自動クリア</strong>（取得と同時に削除）</li>
+<li><code>replayBufferedMessages(channelName, handler)</code> ヘルパーで、指定チャネルの全キャッシュメッセージをハンドラに渡して消費</li>
+</ul>
+<p><strong>設計判断</strong>:
+- <code>progress_init</code> は全進捗状態を含むため最新1件あれば十分 → 汎用バッファ不要
+- <code>skill_complete</code> も <code>completeSkillWithRewardAtom</code> が冪等なので最新値で十分
+- <code>consumeLastMessage</code> で自動クリアするため、ライフサイクル管理が不要</p>
+<h3 id="2-useprogresssyncts">2. <code>useProgressSync.ts</code> — マウント時にキャッシュを再生<a class="headerlink" href="#2-useprogresssyncts" title="Permanent link">&para;</a></h3>
+<p><strong>ファイル</strong>: <code>frontend/src/hooks/useProgressSync.ts</code></p>
+<p><code>useEffect</code> 内で BroadcastChannel リスナー設定後、<code>replayBufferedMessages("progress_channel", handler)</code> で
+キャッシュ済みの <code>progress_init</code> メッセージを処理。<code>__testSuppressProgressSync</code> フラグも考慮。</p>
+<h3 id="3-skill-complete-handlerts">3. <code>skill-complete-handler.ts</code> — マウント時にキャッシュを再生<a class="headerlink" href="#3-skill-complete-handlerts" title="Permanent link">&para;</a></h3>
+<p><strong>ファイル</strong>: <code>frontend/src/components/skill-tree/skill-complete-handler.ts</code></p>
+<p><code>setupSkillEventListener()</code> 内で BroadcastChannel リスナー設定後、<code>replayBufferedMessages("skill_event_channel", handler)</code> で
+キャッシュ済みの <code>skill_complete</code> メッセージを処理。<code>suppressBroadcast</code> フラグも考慮。</p>
+<h3 id="_2">テスト<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>frontend/src/utils/__tests__/broadcastChannel.test.ts</code> — キャッシュとヘルパーのユニットテスト</li>
+</ul>
+<h2 id="_3">全体フロー（修正後）<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>[再接続時]
+1. カーネルが SessionView.notifications を再生
+2. Cell の cell-op が到着 (output に &lt;marimo-broadcast&gt; タグ含む)
+3. handleCellNotificationeration() → extractAndSendBroadcastMessages()
+4. sendBroadcastMessage() → BroadcastChannel に送信 + キャッシュに保存  ← NEW
+5. (React マウント中のためリスナーは未接続 → BroadcastChannel メッセージは消失)
+6. useProgressSync マウント → replayBufferedMessages() でキャッシュから再生  ← NEW
+7. setupSkillEventListener マウント → replayBufferedMessages() でキャッシュから再生  ← NEW
+8. playerProgressAtom が更新 → スキルツリー UI に反映
 </code></pre></div>
-<p>表示例: 緑の callout「<strong>買い注文を出しました</strong> — 7203 @ ¥3,138」</p>
-<p><strong>設計判断と背景</strong>:
-- <code>Order.__repr__()</code> の変更ではなく <code>mo.output.append()</code> を採用した理由:
-  - <code>Order</code> クラスは BackcastPro ライブラリ（別リポジトリ）に属しており、ゲーム固有の日本語メッセージを埋め込むのは不適切
-  - <code>mo.callout</code> は marimo の UI コンポーネントとして色付き（success=緑）で表示され、視認性が高い
-  - <code>repr()</code> は依然として <code>&lt;Order object&gt;</code> だが、callout がその上に表示されるため実質的に目立たない
-- <code>bt._broker_instance.last_price(order.code)</code> で現在の終値を取得。注文は成行注文（size &lt; 1 は資金比率）のため約定価格は次の step() まで確定しないが、参考価格としてユーザーに提示
-- <code>sell()</code> にも同様の改善を適用済み</p>
-<p><strong>変更ファイル</strong>: <code>src-tauri/sample-notebooks/game_setup.py</code> (buy: L83-94, sell: L96-110)</p>
-<p><strong>検証</strong>: sandbox.spec.ts 10/10 passed</p>
-<hr />
-<h3 id="3-btstep-true">3. ✅ <code>bt.step()</code> の出力が <code>True</code> のみ<a class="headerlink" href="#3-btstep-true" title="Permanent link">&para;</a></h3>
-<p><strong>深刻度: 高</strong> → <strong>対応済み (2026-02-20)</strong></p>
-<p><code>bt.step()</code> を実行すると Outputs に <code>True</code> とだけ表示されていた。</p>
-<ul>
-<li>「何日に進んだの？」</li>
-<li>「株価は上がった？ 下がった？」</li>
-<li>「買い注文は約定した？」</li>
-</ul>
-<p>何の情報もなく、ユーザーは次に何をすべきかわからない。</p>
-<p><strong>離脱理由</strong>: 「True って何？」「ゲームが進んでるのかわからない」</p>
-<p><strong>実施した改善</strong>:</p>
-<p><code>game_setup.py</code> に <code>_format_step_summary()</code> ヘルパーを追加し、<code>step()</code> 実行後に情報豊富な callout を表示するようにした。</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># step() が True を返す場合（次の日に進んだ）:</span>
-<span class="c1">#   青 callout「**2024-01-15** に進みました  株価: ¥3,200 | 資産: **¥102,500** | 含み損益: ¥+2,500」</span>
-<span class="c1"># step() が False を返す場合（最終日に到達）:</span>
-<span class="c1">#   緑/赤 callout「**最終日に到達しました！** 最終資産: **¥105,000** | リターン: **+5.0%**」</span>
-</code></pre></div>
-<p><strong>設計判断と背景</strong>:
-- <code>result=True</code>（進行中）と <code>result=False</code>（終了）で表示を分岐
-- 進行中: 日付・株価・資産額・含み損益を一覧表示（<code>kind="info"</code> 青）
-- 終了時: 最終資産とリターン%を表示（利益なら <code>kind="success"</code> 緑、損失なら <code>kind="danger"</code> 赤）
-- 株価は <code>bt._current_data</code> から取得。ポジションがない場合は含み損益を非表示
-- 戻り値は <code>True</code>/<code>False</code> のまま変更しない（後方互換性維持）</p>
-<p><strong>変更ファイル</strong>: <code>src-tauri/sample-notebooks/game_setup.py</code> (step: L112-125, _format_step_summary: L168-203)</p>
-<p><strong>検証</strong>: sandbox.spec.ts 10/10 passed</p>
-<hr />
-<h3 id="4-grid">4. 🟠 Grid レイアウトのセル重なり<a class="headerlink" href="#4-grid" title="Permanent link">&para;</a></h3>
-<p><strong>深刻度: 中</strong></p>
-<p>ゲーム起動直後、4つのセルが grid レイアウト上で重なり合っている:</p>
-<ul>
-<li>cell-1（説明マークダウン）がチャートの上に被さる</li>
-<li>cell-2（<code>bt.chart("7203")</code>）とcell-3（入力セル）が画面下部で重なる</li>
-<li>cell-4（AI自動生成の空セル）が中央に浮いている</li>
-</ul>
-<p><strong>離脱理由</strong>: 「画面がぐちゃぐちゃで何がどこかわからない」</p>
-<p><strong>改善案</strong>:
-- grid レイアウトの初期配置を改善（セルが重ならないように）
-- チャートを上半分、説明+入力を下半分に明確に分離</p>
-<hr />
-<h3 id="5-ai-fix">5. 🟠 AI Fix 提案が全セルに表示される<a class="headerlink" href="#5-ai-fix" title="Permanent link">&para;</a></h3>
-<p><strong>深刻度: 中</strong></p>
-<p>全てのコードセルに「Fix generated」「Showing fix」「Accept / Reject」バナーが表示されている。これはゲームとは無関係のAIコード修正提案で、ゲーム初心者を大いに混乱させる。</p>
-<p><strong>離脱理由</strong>: 「Accept? Reject? 何を承認するの？」「ゲームの一部？」</p>
-<p><strong>改善案</strong>:
-- ゲームモード（backcast テンプレート）では AI Fix を自動非表示にする
-- または <code>app.setup</code> や metadata でフラグ設定</p>
-<hr />
-<h3 id="6">6. 🟠 「どこにコードを入力するか」がわからない<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
-<p><strong>深刻度: 中</strong></p>
-<p>説明には「黒いウィンドウに <code>bt.buy()</code> と入力して実行」と書いてあるが:</p>
-<ul>
-<li>cell-3（意図された入力セル）は画面下端で小さく表示</li>
-<li>cell-4（AI が生成した空セル）も「黒いウィンドウ」に見える</li>
-<li>複数のテキストボックスがあり、どれが「正しい入力場所」か判断できない</li>
-</ul>
-<p><strong>離脱理由</strong>: 「どこに書けばいいの？」</p>
-<p><strong>改善案</strong>:
-- 入力セルを目立たせる（ハイライト、矢印アイコン、プレースホルダーテキスト改善）
-- 「ここに入力 →」のような視覚的ガイド
-- 不要なセル（cell-4）の自動生成を抑制</p>
-<hr />
-<h3 id="7-step">7. 🟡 チャートが step() 後に意味不明な表示になる<a class="headerlink" href="#7-step" title="Permanent link">&para;</a></h3>
-<p><strong>深刻度: 低〜中</strong></p>
-<p><code>bt.step()</code> 実行後、TradingView チャートが大きく変化する:
-- ローソク足が 1 本しかない極端にズームされた表示
-- チャートの大部分が空白
-- 「BUY」マーカーは表示されるが、それだけ</p>
-<p><strong>離脱理由</strong>: 「チャートが壊れた？」</p>
-<p><strong>改善案</strong>:
-- step() 後のチャート再描画時に適切なズームレベルを維持
-- 直近N日分のローソク足が見える範囲にフィット</p>
-<hr />
-<h3 id="8-reconnected">8. 🟡 「Reconnected」バナーが意味不明<a class="headerlink" href="#8-reconnected" title="Permanent link">&para;</a></h3>
-<p><strong>深刻度: 低〜中</strong></p>
-<p>開発サーバー経由で接続すると「Reconnected: You have reconnected to an existing session.」バナーが表示される。ゲームプレイヤーにとっては意味不明。</p>
-<p><strong>離脱理由</strong>: 「何かエラー？ Restartすべき？」</p>
-<p><strong>改善案</strong>:
-- ゲームモードでは自動 dismiss
-- またはゲーム向けのメッセージに変更（「前回の続きから再開しました」等）</p>
-<hr />
-<h3 id="9-progress-00">9. 🟡 ステータスバーが Progress: 0.0% のまま<a class="headerlink" href="#9-progress-00" title="Permanent link">&para;</a></h3>
-<p><strong>深刻度: 低</strong></p>
-<p>画面上部のステータスバーに <code>Progress: 0.0%</code> が表示されるが、操作しても変わらない。<code>Time: -</code> も常にハイフンのまま。</p>
-<p><strong>離脱理由</strong>: 「操作してるのに何も進んでない」</p>
-<p><strong>改善案</strong>:
-- <code>bt.step()</code> 実行後に Time と Progress を更新
-- 視覚的に変化があることを示す（アニメーション等）</p>
-<hr />
-<h3 id="10">10. 🟡 スキルツリーボタンの存在に気づけない<a class="headerlink" href="#10" title="Permanent link">&para;</a></h3>
-<p><strong>深刻度: 低</strong></p>
-<p>スキルツリーは右サイドバーの小さなボタン（<code>data-testid="skill-tree-button"</code>）をクリックしないと開かない。ゲームの核心機能であるにも関わらず、発見困難。</p>
-<p><strong>離脱理由</strong>: 「このゲームの目標は何？ 進捗はどう確認する？」</p>
-<p><strong>改善案</strong>:
-- 初回プレイ時にスキルツリーを自動表示
-- スキル完了時にツリーがポップアップ
-- ボタンを目立たせる（パルスアニメーション、バッジ通知）</p>
-<hr />
-<h2 id="_3">総合評価<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h2 id="_4">修正ファイル一覧<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>段階</th>
-<th>離脱リスク</th>
-<th>主な原因</th>
+<th>ファイル</th>
+<th>変更内容</th>
 <th>状態</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>起動直後</td>
-<td><strong>高</strong></td>
-<td>Grid レイアウト混乱 + AI Fix 表示</td>
-<td>未対応</td>
-</tr>
-<tr>
-<td><code>bt.buy()</code> 実行後</td>
-<td>~~致命的~~ <strong>低</strong></td>
-<td>~~出力が <code>&lt;Order object&gt;</code> で意味不明~~ callout で改善済み</td>
+<td><code>frontend/src/utils/broadcastChannel.ts</code></td>
+<td>ラストバリューキャッシュ + <code>replayBufferedMessages</code> ヘルパー</td>
 <td>✅</td>
 </tr>
 <tr>
-<td><code>bt.step()</code> 実行後</td>
-<td>~~高~~ <strong>低</strong></td>
-<td>~~出力が <code>True</code>~~ サマリー callout で改善済み + チャート表示崩れ</td>
-<td>✅ (出力)</td>
+<td><code>frontend/src/hooks/useProgressSync.ts</code></td>
+<td>マウント時にキャッシュ再生</td>
+<td>✅</td>
 </tr>
 <tr>
-<td>スキルツリー確認時</td>
-<td><strong>致命的</strong></td>
-<td>進捗 0/59 のまま（スキル未発火）</td>
-<td>未対応</td>
+<td><code>frontend/src/components/skill-tree/skill-complete-handler.ts</code></td>
+<td>マウント時にキャッシュ再生</td>
+<td>✅</td>
 </tr>
 <tr>
-<td>次のアクション判断</td>
-<td><strong>高</strong></td>
-<td>ガイダンスなし、何をすべきか不明</td>
-<td>未対応</td>
+<td><code>frontend/src/utils/__tests__/broadcastChannel.test.ts</code></td>
+<td>新規テスト（13件全てパス）</td>
+<td>✅</td>
 </tr>
 </tbody>
 </table>
-<p><strong>残る最も深刻な離脱ポイント</strong>: 「操作したのにスキルが進まない」（#1）。出力の意味不明さ（#2, #3）は改善済み。</p>
-<hr />
-<h2 id="_4">改善履歴<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>日付</th>
-<th>対象</th>
-<th>変更内容</th>
-<th>検証</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>2026-02-20</td>
-<td>#2 <code>bt.buy()</code></td>
-<td><code>mo.callout</code> で「買い注文を出しました」表示</td>
-<td>sandbox 10/10</td>
-</tr>
-<tr>
-<td>2026-02-20</td>
-<td>#2 <code>bt.sell()</code></td>
-<td><code>mo.callout</code> で「売り注文を出しました」表示</td>
-<td>sandbox 10/10</td>
-</tr>
-<tr>
-<td>2026-02-20</td>
-<td>#3 <code>bt.step()</code></td>
-<td><code>_format_step_summary()</code> で日付・株価・資産・損益を表示</td>
-<td>sandbox 10/10</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="tips">知見・設計思想・Tips<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
-<h3 id="_5">出力改善のパターン<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
-<p><code>game_setup.py</code> のラッパー関数で <code>mo.output.append(mo.callout(...))</code> を使うのが標準パターン。BackcastPro ライブラリ側の <code>__repr__</code> は変更しない。</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># 標準パターン: ラッパー関数内で callout を追加</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">some_action</span><span class="p">():</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">some_method</span><span class="p">()</span>
-    <span class="n">mo</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mo</span><span class="o">.</span><span class="n">callout</span><span class="p">(</span>
-        <span class="n">mo</span><span class="o">.</span><span class="n">md</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**フレンドリーなメッセージ** — 詳細情報&quot;</span><span class="p">),</span>
-        <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;success&quot;</span><span class="p">,</span>  <span class="c1"># success=緑, info=青, warn=黄, danger=赤</span>
-    <span class="p">))</span>
-    <span class="k">return</span> <span class="n">result</span>
+<h2 id="2026-02-20">✅ 実装完了（2026-02-20）<a class="headerlink" href="#2026-02-20" title="Permanent link">&para;</a></h2>
+<h3 id="_5">テスト結果<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ユニットテスト - 全てパス</span>
+✓<span class="w"> </span>src/utils/__tests__/broadcastChannel.test.ts<span class="w"> </span><span class="o">(</span><span class="m">13</span><span class="w"> </span>tests<span class="o">)</span><span class="w"> </span>19ms
+<span class="w">  </span>Test<span class="w"> </span>Files<span class="w">  </span><span class="m">1</span><span class="w"> </span>passed<span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="o">)</span>
+<span class="w">  </span>Tests<span class="w">  </span><span class="m">13</span><span class="w"> </span>passed<span class="w"> </span><span class="o">(</span><span class="m">13</span><span class="o">)</span>
 </code></pre></div>
-<p><strong>callout の kind 使い分け</strong>:
-- <code>"success"</code> (緑): 注文実行など成功アクション（buy, sell）
-- <code>"info"</code> (青): 状態報告（step の日次サマリー）
-- <code>"danger"</code> (赤): 損失・破産などネガティブな結果
-- <code>"warn"</code> (黄): スキル未解放のゲーティングメッセージ</p>
-<h3 id="bt_broker_instancelast_pricecode"><code>bt._broker_instance.last_price(code)</code> について<a class="headerlink" href="#bt_broker_instancelast_pricecode" title="Permanent link">&para;</a></h3>
-<ul>
-<li>注文時の参考価格として使用。成行注文の実際の約定価格は次の <code>step()</code> で確定するため、あくまで「現在終値」</li>
-<li><code>bt._broker_instance</code> はプライベート属性だが、<code>game_setup.py</code> はバックテストエンジンの内部を知る立場（薄いラッパー）なので許容</li>
-</ul>
-<h3 id="_format_step_summary"><code>_format_step_summary()</code> の分岐<a class="headerlink" href="#_format_step_summary" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>result=True</code>: 次の営業日に進んだ → 日付・株価・資産・含み損益を表示</li>
-<li><code>result=False</code>: 最終日に到達 → 最終資産・トータルリターン%を表示</li>
-<li>ポジションなし（<code>bt.position.size == 0</code>）の場合は含み損益を非表示にして混乱を避ける</li>
-</ul>
-<h3 id="pypi">PyPI バージョン問題<a class="headerlink" href="#pypi" title="Permanent link">&para;</a></h3>
-<p><code>pyproject.toml</code> で <code>BackcastPro&gt;=0.6.4</code> と指定していたが、PyPI には 0.6.3 までしか公開されていなかった。<code>uv lock</code> がクロスプラットフォーム解決（Python 3.12 on Linux 等）で失敗するため <code>&gt;=0.6.3</code> に修正。ローカルには editable install で 0.6.4 が入っている。BackcastPro の新バージョンを PyPI に公開したら <code>&gt;=0.6.4</code> に戻すこと。</p>
+<h3 id="_6">実装の詳細<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<h4 id="1-broadcastchannelts-">1. ✅ <code>broadcastChannel.ts</code> - キャッシュ機構の追加<a class="headerlink" href="#1-broadcastchannelts-" title="Permanent link">&para;</a></h4>
+<p><strong>変更内容</strong>:
+- <code>CachedMessage</code> インターフェース追加（<code>{ type: string; data: unknown }</code>）
+- <code>BroadcastChannelManager.lastMessages</code> - <code>Map&lt;channelName, Map&lt;type, message&gt;&gt;</code> の2段階Map
+- <code>cacheMessage(channelName, type, data)</code> - 送信時に自動キャッシュ
+- <code>consumeMessages(channelName)</code> - 全タイプのメッセージを配列で返し、自動クリア
+- <code>replayBufferedMessages(channelName, handler)</code> - ヘルパー関数で共通化</p>
+<p><strong>設計判断</strong>:
+- 汎用バッファ（MAX_SIZE=200）ではなく、channel+type をキーとした<strong>最新値キャッシュ</strong>を採用
+  - <code>progress_init</code> は全進捗を含むため、最新1件のみで十分
+  - <code>skill_complete</code> も <code>completeSkillWithRewardAtom</code> が冪等（<code>progress.completedSkills.includes(sid)</code> で早期リターン）
+- <code>consumeMessages()</code> で自動クリア → 明示的なライフサイクル管理不要
+- <code>closeAll()</code> でチャネルとキャッシュを同時クリア</p>
+<h4 id="2-useprogresssyncts-">2. ✅ <code>useProgressSync.ts</code> - 進捗同期のリプレイ対応<a class="headerlink" href="#2-useprogresssyncts-" title="Permanent link">&para;</a></h4>
+<p><strong>変更内容</strong>:
+- <code>channel.onmessage</code> を <code>handleMessage</code> 関数として定義
+- <code>replayBufferedMessages(PROGRESS_CHANNEL, handleMessage)</code> でキャッシュ再生
+- <code>__testSuppressProgressSync</code> フラグは <code>handleMessage</code> 内で統一してチェック</p>
+<p><strong>動作</strong>:
+1. リスナー登録（ライブメッセージ受信用）
+2. キャッシュ再生（マウント前の見逃しメッセージ）
+3. 両方とも同じ <code>handleMessage</code> を使用 → フラグ・パース処理の統一</p>
+<h4 id="3-skill-complete-handlerts-">3. ✅ <code>skill-complete-handler.ts</code> - スキルイベントのリプレイ対応<a class="headerlink" href="#3-skill-complete-handlerts-" title="Permanent link">&para;</a></h4>
+<p><strong>変更内容</strong>:
+- <code>handleMessage</code> を既存コードから抽出（変更なし）
+- <code>replayBufferedMessages("skill_event_channel", handleMessage)</code> でキャッシュ再生
+- <code>suppressBroadcast</code> フラグは <code>handleMessage</code> 内で統一してチェック</p>
+<p><strong>動作</strong>:
+1. リスナー登録（ライブメッセージ受信用）
+2. キャッシュ再生（マウント前の見逃しメッセージ）
+3. 両方とも同じ <code>handleMessage</code> を使用 → フラグ・エラーハンドリングの統一</p>
+<h4 id="4-broadcastchanneltestts-">4. ✅ <code>broadcastChannel.test.ts</code> - 新規テストスイート<a class="headerlink" href="#4-broadcastchanneltestts-" title="Permanent link">&para;</a></h4>
+<p><strong>カバレッジ</strong>:
+- キャッシュの保存・取得・自動クリア（3件）
+- 同一チャネル+タイプでの上書き動作（1件）
+- 異なるタイプでの並存（1件）
+- <code>closeAll()</code> での全クリア（1件）
+- <code>replayBufferedMessages()</code> の再生・消費（4件）
+- エラーハンドリング（base64/JSON不正）（3件）</p>
+<h2 id="_7">検証方法<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<ol>
+<li>✅ <strong>ユニットテスト</strong>: <code>cd frontend &amp;&amp; pnpm test src/utils/__tests__/broadcastChannel.test.ts</code></li>
+<li><strong>E2E テスト</strong>: <code>/game-e2e</code> スキルで sandbox.spec.ts を実行（未実施）</li>
+<li><strong>手動検証</strong>: marimo edit でノートブック起動 → <code>bt.chart("7203")</code> 実行 → スキルツリーで SANDBOX_001 完了確認 → ブラウザタブ閉じて再接続 → スキルツリーが 0/59 でないことを確認（未実施）</li>
+</ol>
 <hr />
-<h2 id="_6">検証スクリーンショット<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h2 id="_8">設計背景と知見<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="_9">なぜラストバリューキャッシュを採用したか<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p><strong>検討した選択肢</strong>:</p>
+<ol>
+<li><strong>汎用バッファ（MAX_SIZE=200）</strong> - 全メッセージを保持</li>
+<li><strong>ラストバリューキャッシュ</strong> - channel+type ごとに最新1件のみ保持 ← <strong>採用</strong></li>
+</ol>
+<p><strong>採用理由</strong>:
+- <code>progress_init</code> は<strong>累積状態を含む</strong>（<code>completed_skills: ["SANDBOX_001", "SANDBOX_002", ...]</code>）
+  - 最新1件で全スキル進捗が復元可能
+  - 中間状態は不要
+- <code>skill_complete</code> も<strong>冪等</strong>（<code>completeSkillWithRewardAtom</code> が <code>includes(sid)</code> でチェック）
+  - 重複発火しても安全
+  - 全イベントを保持する必要なし
+- メモリ効率が高い（最大でもチャネル数 × タイプ数 = 数十件程度）</p>
+<h3 id="_10">自動クリアの設計判断<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p><code>consumeMessages()</code> が<strong>取得と同時にクリア</strong>する理由:</p>
 <ul>
-<li><code>game-initial-view.png</code> — 起動直後の画面</li>
-<li><code>game-after-buy.png</code> — <code>bt.buy()</code> 実行後（Output: <code>&lt;Order object&gt;</code>）→ 改善後は緑 callout 表示</li>
-<li><code>game-after-step.png</code> — <code>bt.step()</code> 実行後（Output: <code>True</code>、チャート崩壊）→ 改善後は青 callout でサマリー表示</li>
-<li><code>game-vite-dev-view.png</code> — Vite dev server 経由（Reconnected バナー表示）</li>
-<li><code>game-skill-tree-attempt.png</code> — スキルツリー（0/59 のまま）</li>
+<li>リスナーマウント時に1回だけ再生すればよい</li>
+<li>2回目以降の <code>replayBufferedMessages()</code> 呼出は空振りでOK</li>
+<li>明示的な <code>clearBuffer()</code> 不要 → API がシンプル</li>
+<li>テストコードでも「消費後は空」を検証（冪等性の保証）</li>
 </ul>
+<h3 id="_11">テストフラグとの互換性<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>既存のテスト用フラグ（<code>suppressBroadcast</code>, <code>__testSuppressProgressSync</code>）は、<code>handleMessage</code> 内で統一してチェックされるため、<strong>ライブメッセージとキャッシュ再生の両方に適用</strong>される。</p>
+<p>これにより、<code>resetGameProgress()</code> 後に BroadcastChannel 経由の遅延メッセージを抑制する既存のロジックが、キャッシュ再生にも適用される。</p>
+<h3 id="_12">タイミング問題の根本解決<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<p><strong>Before</strong>:
+<div class="highlight"><pre><span></span><code>WebSocket → extractAndSendBroadcastMessages → BroadcastChannel.postMessage
+                                                        ↓
+                                                  (消失: リスナー未マウント)
+</code></pre></div></p>
+<p><strong>After</strong>:
+<div class="highlight"><pre><span></span><code>WebSocket → extractAndSendBroadcastMessages → BroadcastChannel.postMessage + cacheMessage
+                                                        ↓                            ↓
+                                                  (消失でもOK)                    キャッシュ保持
+                                                                                      ↓
+                                                                              リスナーマウント
+                                                                                      ↓
+                                                                              replayBufferedMessages
+</code></pre></div></p>
+<h3 id="_13">副作用と影響範囲<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<p><strong>変更は完全に追加のみ</strong>:
+- 既存の BroadcastChannel 送信ロジックは無変更
+- <code>sendBroadcastMessage()</code> の戻り値も維持
+- キャッシュ機構はオプトイン（<code>replayBufferedMessages()</code> を呼ばなければ影響なし）</p>
+<p><strong>影響を受けるコンポーネント</strong>:
+- <code>useProgressSync</code> - 進捗初期化
+- <code>setupSkillEventListener</code> - スキルイベントハンドラ</p>
+<p>この2つだけが <code>replayBufferedMessages()</code> を呼ぶため、他のコンポーネントへの影響ゼロ。</p>
+<hr />
+<h2 id="tips-for-future-developers">Tips for Future Developers<a class="headerlink" href="#tips-for-future-developers" title="Permanent link">&para;</a></h2>
+<h3 id="_14">キャッシュのライフサイクル<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>保存</strong>: <code>sendBroadcastMessage()</code> 呼出時に自動</li>
+<li><strong>取得</strong>: <code>replayBufferedMessages()</code> で全タイプを一括取得</li>
+<li><strong>クリア</strong>: <code>consumeMessages()</code> 呼出時に自動（明示的な削除不要）</li>
+<li><strong>リセット</strong>: <code>closeAll()</code> で全チャネルとキャッシュをクリア</li>
+</ul>
+<h3 id="_15">新しいチャネルを追加する場合<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>sendBroadcastMessage(channelName, type, payload)</code> を呼ぶ箇所を追加</li>
+<li>リスナー側で <code>replayBufferedMessages(channelName, handler)</code> を呼ぶ</li>
+<li>自動的にキャッシュが機能する（追加コード不要）</li>
+</ol>
+<h3 id="_16">デバッグ時の確認ポイント<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Chrome DevTools Console で <code>broadcastChannelManager.consumeMessages("progress_channel")</code> を実行</li>
+<li>現在のキャッシュ内容を確認可能</li>
+<li>2回目の呼出は空配列（消費済み）</li>
+<li><code>replayBufferedMessages()</code> の呼出タイミングを <code>console.log</code> で確認</li>
+<li><code>useEffect</code> のマウント順序が重要</li>
+</ul>
+<h3 id="e2e">E2E テストへの影響<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h3>
+<p>既存の E2E テスト（sandbox.spec.ts）は、<code>__testCompleteSkill</code> で直接 atom を更新するため、BroadcastChannel をバイパスしている。キャッシュ機構の追加は既存テストに影響しない。</p>
+<p>新規テストを追加する場合は、<code>__testInjectBroadcastHTML()</code> を使って実際の HTML パイプラインをテスト可能。</p>
 
 
 
