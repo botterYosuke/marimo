@@ -35,6 +35,16 @@ def publish_state_headless(
     state["status_label"] = status_label
     state["status_variant"] = status_variant
 
+    # position がオブジェクトの場合は数値に変換
+    pos = state.get("position")
+    if isinstance(pos, dict):
+        state["position"] = sum(pos.values())
+    elif pos is not None and not isinstance(pos, (int, float)):
+        try:
+            state["position"] = float(pos)
+        except (TypeError, ValueError):
+            state["position"] = 0
+
     state_json = json.dumps(state)
     state_b64 = base64.b64encode(state_json.encode()).decode()
     unique_id = f"marimo-bc-{bt.step_index}-{int(time.time() * 1000)}"

@@ -127,7 +127,7 @@ export const BacktestHud: React.FC<BacktestHudProps> = ({ className }) => {
       <HudItem
         icon={<ActivityIcon size={12} />}
         label="Position"
-        value={`${state.position} shares`}
+        value={`${typeof state.position === "object" ? Object.values(state.position as Record<string, number>).reduce((a, b) => a + b, 0) : state.position} shares`}
       />
 
       <HudItem

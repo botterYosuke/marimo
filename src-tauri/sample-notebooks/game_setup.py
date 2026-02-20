@@ -66,13 +66,13 @@ def chart(code: str, **kwargs):
         code: 銘柄コード（例: "7203"）
         **kwargs: backtest_chart に渡す追加オプション
     """
-    df = get_stock_daily(code)
+    # _get_stock_daily を直接使用（get_stock_daily はBRIDGE_002を発火するため）
+    df = _get_stock_daily(code)
     set_data({code: df})
-    # step()  # 1日だけ進める
     s = get_triggered_skills()
 
     emit_skill("SANDBOX_001")
-    if "SANDBOX_003" in s and "SANDBOX_004" in s:
+    if "SANDBOX_003" in s and "SANDBOX_004" in s and "SANDBOX_005" not in s:
         emit_skill("SANDBOX_005")
 
     return backtest_chart(bt, code=code, **kwargs)
@@ -133,7 +133,9 @@ def reveal_data():
 def trades():
     """保有中の取引を確認"""
     s = get_triggered_skills()
-    if "SANDBOX_002" in s and len(bt.trades) > 0:
+    # SANDBOX_002（買い注文）実行済みなら trades() 呼び出しでスキル発火
+    # （bt.trades が空でも buy() 後に呼んだこと自体を評価）
+    if "SANDBOX_002" in s:
         emit_skill("SANDBOX_003")
     if "SANDBOX_002" in s:
         if any(hasattr(t, 'pl') and t.pl < 0 for t in bt.trades):

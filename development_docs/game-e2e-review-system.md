@@ -1042,6 +1042,44 @@ await openSkillTreePanel(page);
 - カーネル再起動: WebSocket 再接続が発生し、Reconnected バナー問題を誘発
 - `page.evaluate()` で内部 API を呼ぶ: Jotai ストアがグローバルに公開されていないため困難
 
+### 36. リセット後の BroadcastChannel イベント抑制（2026-02-20 追加）
+
+**問題**: `resetGameProgress()` で atom をリセットしても、カーネルが再送するセル出力由来の `<marimo-broadcast>` HTML が BroadcastChannel → `handleMessage` → `onSkillComplete` の経路でスキルを再完了してしまう。知見 35b の `beforeEach` リセットだけでは、リセット後にさらにカーネルメッセージが到着するタイミングレースに対処できない。
+
+**症状**: `sandbox.spec.ts` の「初期状態: SANDBOX_001 は unlocked」が断続的に失敗。リセット後 〜 アサーションの数百 ms の間にカーネル再送メッセージが到着し SANDBOX_001 が completed になる。
+
+**原因の連鎖**:
+1. `resetGameProgress()` → `__testResetProgress()` → `onReset()` → atom リセット
+2. 直後にカーネルが WebSocket でセル出力を再送信
+3. `extractAndSendBroadcastMessages` → BroadcastChannel → `handleMessage` → `onSkillComplete`
+4. atom が再汚染 → テスト失敗
+
+**解決策**: `skill-complete-handler.ts` の `setupSkillEventListener` 内に `suppressBroadcast` フラグを追加。`__testResetProgress` がリセット実行後 1 秒間 BroadcastChannel 経由のイベントを抑制する。`__testCompleteSkill`（テストから直接発火する経路）は抑制しない。
+
+```typescript
+let suppressBroadcast = false;
+let suppressTimer: ReturnType<typeof setTimeout> | null = null;
+
+// __testResetProgress
+(window as any).__testResetProgress = () => {
+  onReset();
+  suppressBroadcast = true;
+  if (suppressTimer) clearTimeout(suppressTimer);
+  suppressTimer = setTimeout(() => {
+    suppressBroadcast = false;
+    suppressTimer = null;
+  }, 1_000);
+};
+
+// handleMessage
+const handleMessage = (event: MessageEvent) => {
+  if (suppressBroadcast) return; // カーネル再送を無視
+  // ...
+};
+```
+
+**教訓**: atom リセットだけでは不十分。BroadcastChannel リスナーへの遅延配信も抑制する必要がある。テスト専用の `__testCompleteSkill` は影響を受けないため、テストからの明示的なスキル発火は正常に動作する。
+
 ---
 
 ## セレクター早見表

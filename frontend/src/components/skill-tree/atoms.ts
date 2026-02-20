@@ -9,7 +9,7 @@ import {
   checkMilestone,
 } from "./rewards/reward-system";
 import { showSkillRewardToast } from "./rewards/skill-reward-toast";
-import { rewardNotificationAtom } from "./ui-atoms";
+import { rewardNotificationAtom, type RewardNotificationData } from "./ui-atoms";
 import { localeAtom } from "@/core/config/config";
 import { normalizeLocale, getTranslationMap } from "./i18n";
 
@@ -168,78 +168,108 @@ export const currentTrackAtom = atom<SkillTrack>((get) => {
   return "sandbox";
 });
 
+// prerequisites 未達で保留中のスキルIDキュー
+const pendingSkillsAtom = atom<SkillId[]>([]);
+
 // 進捗リセット（デバッグ用）
 export const resetProgressAtom = atom(null, (_get, set) => {
   set(playerProgressAtom, initialProgress);
+  set(pendingSkillsAtom, []);
 });
 
 /**
  * スキル完了アクション（報酬通知付き）
  *
  * スキルを完了し、報酬を計算して通知を設定します。
+ * prerequisites 未達のスキルは保留キューに追加し、
+ * 他スキル完了時に自動リトライします。
  */
 export const completeSkillWithRewardAtom = atom(
   null,
   (get, set, skillId: SkillId) => {
-    const progress = get(playerProgressAtom);
-    const definitions = get(skillDefinitionsAtom);
-    const skill = definitions.find((s) => s.id === skillId);
+    const doComplete = (sid: SkillId): boolean => {
+      const progress = get(playerProgressAtom);
+      const definitions = get(skillDefinitionsAtom);
+      const skill = definitions.find((s) => s.id === sid);
 
-    // 既に完了済みまたはスキルが見つからない場合はスキップ
-    if (!skill || progress.completedSkills.includes(skillId)) {
-      return;
-    }
-
-    // prerequisites 未完了ならスキップ
-    const prereqsMet = skill.prerequisites.every(p => progress.completedSkills.includes(p));
-    if (!prereqsMet) {
-      return;
-    }
-
-    const previousCount = progress.completedSkills.length;
-
-    // 報酬を計算
-    const reward = calculateSkillReward(skillId);
-
-    // マイルストーンをチェック
-    const milestone = checkMilestone(previousCount + 1, previousCount);
-
-    // マイルストーンボーナスを追加
-    let totalCashReward = reward.cashEarned;
-    const newTitles = [...reward.titlesEarned];
-
-    if (milestone) {
-      totalCashReward += milestone.bonus;
-      if (milestone.title) {
-        newTitles.push(milestone.title);
+      if (!skill || progress.completedSkills.includes(sid)) {
+        return false;
       }
+
+      const prereqsMet = skill.prerequisites.every(p => progress.completedSkills.includes(p));
+      if (!prereqsMet) {
+        return false;
+      }
+
+      const previousCount = progress.completedSkills.length;
+      const reward = calculateSkillReward(sid);
+      const milestone = checkMilestone(previousCount + 1, previousCount);
+
+      let totalCashReward = reward.cashEarned;
+      const newTitles = [...reward.titlesEarned];
+      if (milestone) {
+        totalCashReward += milestone.bonus;
+        if (milestone.title) {
+          newTitles.push(milestone.title);
+        }
+      }
+
+      set(playerProgressAtom, {
+        ...progress,
+        completedSkills: [...progress.completedSkills, sid],
+        currentCash: progress.currentCash + totalCashReward,
+        earnedTitles: [...progress.earnedTitles, ...newTitles],
+        sandboxCompleted: sid === "SANDBOX_006" || progress.sandboxCompleted,
+        bridgeCompleted: sid === "BRIDGE_003" || progress.bridgeCompleted,
+      });
+
+      const rawLocale = get(localeAtom);
+      const tMap = getTranslationMap(normalizeLocale(rawLocale));
+      const translatedTitle = tMap?.skills[sid]?.title || skill.title;
+
+      const notificationData: RewardNotificationData = {
+        skillId: sid,
+        skillTitle: translatedTitle,
+        reward,
+        milestone,
+        timestamp: Date.now(),
+      };
+      set(rewardNotificationAtom, notificationData);
+      showSkillRewardToast(notificationData);
+
+      return true;
+    };
+
+    const progress = get(playerProgressAtom);
+    if (progress.completedSkills.includes(skillId)) {
+      return;
     }
 
-    // 進捗を更新
-    set(playerProgressAtom, {
-      ...progress,
-      completedSkills: [...progress.completedSkills, skillId],
-      currentCash: progress.currentCash + totalCashReward,
-      earnedTitles: [...progress.earnedTitles, ...newTitles],
-      sandboxCompleted: skillId === "SANDBOX_006" || progress.sandboxCompleted,
-      bridgeCompleted: skillId === "BRIDGE_003" || progress.bridgeCompleted,
-    });
+    const completed = doComplete(skillId);
 
-    // 報酬通知を設定（ロケールに応じてスキルタイトルを翻訳）
-    const rawLocale = get(localeAtom);
-    const tMap = getTranslationMap(normalizeLocale(rawLocale));
-    const translatedTitle = tMap?.skills[skillId]?.title || skill.title;
+    if (!completed) {
+      // prerequisites 未達 → 保留キューに追加（重複防止）
+      const pending = get(pendingSkillsAtom);
+      if (!pending.includes(skillId)) {
+        set(pendingSkillsAtom, [...pending, skillId]);
+      }
+      return;
+    }
 
-    const notificationData: RewardNotificationData = {
-      skillId,
-      skillTitle: translatedTitle,
-      reward,
-      milestone,
-      timestamp: Date.now(),
-    };
-    set(rewardNotificationAtom, notificationData);
-
-    // marimo 標準トーストで通知（パネル非表示でも見える）
-    showSkillRewardToast(notificationData);
+    // 完了後、保留キューから解除可能なスキルを処理
+    let changed = true;
+    while (changed) {
+      changed = false;
+      const pending = get(pendingSkillsAtom);
+      const remaining: SkillId[] = [];
+      for (const pid of pending) {
+        if (doComplete(pid)) {
+          changed = true;
+        } else {
+          remaining.push(pid);
+        }
+      }
+      set(pendingSkillsAtom, remaining);
+    }
   }
 );

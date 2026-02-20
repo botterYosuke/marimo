@@ -119,11 +119,26 @@ export function setupSkillEventListener(
   onSkillComplete: (skillId: string) => void,
   onReset?: () => void,
 ): () => void {
+  // リセット後に BroadcastChannel 経由の遅延カーネルメッセージを抑制するフラグ。
+  // __testCompleteSkill（テストから直接発火）は抑制しない。
+  let suppressBroadcast = false;
+  let suppressTimer: ReturnType<typeof setTimeout> | null = null;
+
   // e2e テスト用フック: page.evaluate() から直接スキル完了/リセットを発火できる
   (window as unknown as Record<string, unknown>).__testCompleteSkill =
     onSkillComplete;
   if (onReset) {
-    (window as unknown as Record<string, unknown>).__testResetProgress = onReset;
+    (window as unknown as Record<string, unknown>).__testResetProgress = () => {
+      onReset();
+      // リセット後、BroadcastChannel 経由のイベントを一時的に抑制
+      // カーネルが再送するセル出力由来のスキルイベントを無視するため
+      suppressBroadcast = true;
+      if (suppressTimer) clearTimeout(suppressTimer);
+      suppressTimer = setTimeout(() => {
+        suppressBroadcast = false;
+        suppressTimer = null;
+      }, 1_000);
+    };
   }
   // e2e 統合テスト用フック: emit_skill() 形式の HTML を本番パイプライン（③→⑦）経由で処理する
   // extractAndSendBroadcastMessages() → sendBroadcastMessage() → BroadcastChannel → listener → atom → UI
@@ -140,12 +155,16 @@ export function setupSkillEventListener(
       delete (window as unknown as Record<string, unknown>).__testCompleteSkill;
       delete (window as unknown as Record<string, unknown>).__testResetProgress;
       delete (window as unknown as Record<string, unknown>).__testInjectBroadcastHTML;
+      if (suppressTimer) clearTimeout(suppressTimer);
     };
   }
 
   const channel = new BroadcastChannel("skill_event_channel");
 
   const handleMessage = (event: MessageEvent) => {
+    if (suppressBroadcast) {
+      return;
+    }
     try {
       const msg = event.data;
       if (msg?.type === "skill_complete" && msg?.data?.skill_id) {
@@ -165,6 +184,7 @@ export function setupSkillEventListener(
     delete (window as unknown as Record<string, unknown>).__testCompleteSkill;
     delete (window as unknown as Record<string, unknown>).__testResetProgress;
     delete (window as unknown as Record<string, unknown>).__testInjectBroadcastHTML;
+    if (suppressTimer) clearTimeout(suppressTimer);
     channel.removeEventListener("message", handleMessage);
     channel.close();
   };
