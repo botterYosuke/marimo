@@ -50,7 +50,7 @@ const PLATFORMS = {
 
 function getPlatformKey() {
   const platform = os.platform();
-  const arch = os.arch();
+  const arch = process.env.UV_ARCH || os.arch();
   return `${platform}-${arch}`;
 }
 

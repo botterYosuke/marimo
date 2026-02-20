@@ -65,8 +65,11 @@ jobs:
         include:
           - platform: windows
             os: windows-latest
-          - platform: macos
+          - platform: macos-arm
             os: macos-latest
+          - platform: macos-intel
+            os: macos-latest
+            rust_target: x86_64-apple-darwin
           - platform: linux
             os: ubuntu-24.04
     runs-on: ${{ matrix.os }}
@@ -87,19 +90,6 @@ jobs:
             librsvg2-dev \
             patchelf
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: "**/pnpm-lock.yaml"
-
-      - name: Install Node.js dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
       - name: Build frontend
         uses: ./.github/actions/build-frontend
         with:
@@ -108,6 +98,8 @@ jobs:
 
       - name: Download uv binary for bundling
         run: node scripts/download-uv.js
+        env:
+          UV_ARCH: ${{ matrix.rust_target == 'x86_64-apple-darwin' && 'x64' || '' }}
 
       - name: Prepare Tauri resources
         run: |
@@ -138,6 +130,8 @@ jobs:
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
@@ -161,8 +155,9 @@ jobs:
             #### Windows
             - **NSIS Installer**: `.exe`
 
-            #### macOS (Apple Silicon)
-            - **DMG**: `.dmg`
+            #### macOS
+            - **DMG (Apple Silicon)**: `.dmg` (M1以降)
+            - **DMG (Intel)**: `.dmg` (x86_64)
 
             #### Linux
             - **AppImage**: `.AppImage`
@@ -171,11 +166,12 @@ jobs:
             ### Installation
 
             - **Windows**: Run the NSIS installer
-            - **macOS**: Open the DMG file and drag marimo to Applications
+            - **macOS**: Open the DMG file (Apple Silicon or Intel) and drag marimo to Applications
             - **Linux**: Make the AppImage executable (`chmod +x`) and run it, or install the .deb package
 
             ### Note
             On first launch, the app will automatically set up a Python environment using the bundled uv tool. This may take a minute on the first run.
+          args: ${{ matrix.rust_target && format('--target {0}', matrix.rust_target) || '' }}
           releaseDraft: false
           prerelease: false
 
@@ -192,5 +188,5 @@ jobs:
           RELEASE_VERSION: ${{ needs.check-release.outputs.marimo_version }}
         run: |
           curl -H "Content-Type: application/json" \
-            -d "{\"username\": \"GitHub\", \"avatar_url\": \"https://cdn.discordapp.com/icons/1059888774789730424/bc13378b871c363137358a531e1a2f82.png\", \"embeds\": [{\"title\": \"marimo Desktop App ${RELEASE_VERSION}\", \"url\": \"https://github.com/${{ github.repository }}/releases/tag/${RELEASE_TAG}\", \"color\": 2105893, \"description\": \"New Tauri desktop release is available!\n\n**Downloads:**\n- Windows: NSIS installer (.exe)\n- macOS: DMG (Apple Silicon)\n- Linux: AppImage / .deb\"}]}" \
+            -d "{\"username\": \"GitHub\", \"avatar_url\": \"https://cdn.discordapp.com/icons/1059888774789730424/bc13378b871c363137358a531e1a2f82.png\", \"embeds\": [{\"title\": \"marimo Desktop App ${RELEASE_VERSION}\", \"url\": \"https://github.com/${{ github.repository }}/releases/tag/${RELEASE_TAG}\", \"color\": 2105893, \"description\": \"New Tauri desktop release is available!\n\n**Downloads:**\n- Windows: NSIS installer (.exe)\n- macOS: DMG (Apple Silicon / Intel)\n- Linux: AppImage / .deb\"}]}" \
             "$DISCORD_WEBHOOK_URL"

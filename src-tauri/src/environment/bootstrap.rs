@@ -207,8 +207,9 @@ fn find_python(uv_bin: &Path, python_install_dir: &Path) -> Option<String> {
     info!("Finding Python: uv_bin={}, install_dir={}", uv_bin.display(), python_install_dir.display());
 
     let mut cmd = Command::new(uv_bin);
-    cmd.args(["python", "find"])
-        .env("UV_PYTHON_INSTALL_DIR", python_install_dir);
+    cmd.args(["python", "find", ">=3.10"])
+        .env("UV_PYTHON_INSTALL_DIR", python_install_dir)
+        .env("UV_PYTHON_PREFERENCE", "only-managed");
     no_window(&mut cmd);
 
     let output = cmd.output().ok()?;
