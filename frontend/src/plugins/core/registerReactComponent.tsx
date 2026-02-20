@@ -213,8 +213,10 @@ function PluginSlotInternal<T>(
           if (cellNotInitialized) {
             throw new CellNotInitializedError();
           }
-        } else {
-          Logger.warn(`Cell ID ${cellId} cannot be found`);
+        } else if (!cellId) {
+          // Grid layout: cell ID resolution via div[id^="cell-"] doesn't work
+          // with react-flow nodes. This is expected and not an error.
+          Logger.debug(`Cell ID could not be resolved (grid layout or static)`);
         }
 
         const response = await FUNCTIONS_REGISTRY.request({
