@@ -21,7 +21,6 @@ fn no_window(cmd: &mut Command) -> &mut Command {
     cmd
 }
 
-
 /// Check if the environment is ready (venv Python exists).
 pub fn is_environment_ready(env_dir: &Path) -> bool {
     paths::get_venv_python(env_dir).exists()
@@ -67,16 +66,37 @@ pub fn ensure_environment(
     };
     info!("Final Python path: {}", python_path);
 
-    // 2. Create venv if it doesn't exist or is broken
+    // 2. Create venv if it doesn't exist, is broken, or has an incompatible Python version
     let venv_python = paths::get_venv_python(env_dir);
-    let venv_exists = venv_python.exists();
 
-    if !venv_exists {
-        // Remove broken venv directory if it exists
+    let should_create_venv = if !venv_python.exists() {
+        true
+    } else {
+        match get_venv_python_version(&venv_python) {
+            Some((major, minor)) if (major, minor) >= (3, 10) => {
+                info!("Venv Python version: {}.{} - OK", major, minor);
+                false
+            }
+            Some((major, minor)) => {
+                info!(
+                    "⚠️ Venv Python {}.{} is too old (need >=3.10), will recreate",
+                    major, minor
+                );
+                true
+            }
+            None => {
+                info!("⚠️ Could not determine venv Python version, will recreate");
+                true
+            }
+        }
+    };
+
+    if should_create_venv {
+        // Remove existing venv directory (broken, outdated, or missing)
         if env_dir.exists() {
-            info!("⚠️ Venv directory exists but Python not found, removing broken venv...");
+            info!("Removing existing venv...");
             if let Err(e) = std::fs::remove_dir_all(env_dir) {
-                log::warn!("Failed to remove broken venv: {}", e);
+                log::warn!("Failed to remove venv: {}", e);
             }
         }
 
@@ -87,16 +107,21 @@ pub fn ensure_environment(
 
         let mut cmd = Command::new(uv_bin);
         cmd.args([
-                "venv",
-                "--seed",
-                "--python",
-                &python_path,
-                &env_dir.to_string_lossy(),
-            ]);
+            "venv",
+            "--seed",
+            "--python",
+            &python_path,
+            &env_dir.to_string_lossy(),
+        ]);
         no_window(&mut cmd);
 
-        info!("Running: uv venv --seed --python {} {}", python_path, env_dir.display());
-        let output = cmd.output()
+        info!(
+            "Running: uv venv --seed --python {} {}",
+            python_path,
+            env_dir.display()
+        );
+        let output = cmd
+            .output()
             .map_err(|e| anyhow!("Failed to execute venv command: {}", e))?;
 
         info!("Venv command exit status: {}", output.status);
@@ -108,7 +133,10 @@ pub fn ensure_environment(
         }
 
         if !output.status.success() {
-            return Err(anyhow!("venv creation failed with status: {}", output.status));
+            return Err(anyhow!(
+                "venv creation failed with status: {}",
+                output.status
+            ));
         }
         info!("Venv created successfully");
     } else {
@@ -132,19 +160,24 @@ pub fn ensure_environment(
 
     let mut cmd = Command::new(uv_bin);
     cmd.args([
-            "pip",
-            "install",
-            "--python",
-            &venv_python.to_string_lossy(),
-            &install_path,
-        ]);
+        "pip",
+        "install",
+        "--python",
+        &venv_python.to_string_lossy(),
+        &install_path,
+    ]);
     no_window(&mut cmd);
 
     cmd.stdout(Stdio::null());
     cmd.stderr(Stdio::piped());
 
-    info!("Running: uv pip install --python {} {}", venv_python.display(), install_path);
-    let mut child = cmd.spawn()
+    info!(
+        "Running: uv pip install --python {} {}",
+        venv_python.display(),
+        install_path
+    );
+    let mut child = cmd
+        .spawn()
         .map_err(|e| anyhow!("Failed to spawn pip install: {}", e))?;
 
     let stderr = child.stderr.take().expect("stderr is piped");
@@ -159,12 +192,16 @@ pub fn ensure_environment(
     }
 
     // stderr closed = process finished
-    let status = child.wait()
+    let status = child
+        .wait()
         .map_err(|e| anyhow!("pip install wait failed: {}", e))?;
     info!("Pip install exit status: {}", status);
 
     if !status.success() {
-        return Err(anyhow!("marimo installation failed with status: {}", status));
+        return Err(anyhow!(
+            "marimo installation failed with status: {}",
+            status
+        ));
     }
     info!("Marimo installed successfully");
 
@@ -174,14 +211,20 @@ pub fn ensure_environment(
     verify_cmd.args(&["-c", "import marimo; print(marimo.__file__)"]);
     no_window(&mut verify_cmd);
     if let Ok(output) = verify_cmd.output() {
-        info!("Marimo location: {}", String::from_utf8_lossy(&output.stdout).trim());
+        info!(
+            "Marimo location: {}",
+            String::from_utf8_lossy(&output.stdout).trim()
+        );
 
         // Verify _static directory exists in installed marimo
         let mut verify_static_cmd = Command::new(&venv_python);
         verify_static_cmd.args(&["-c", "import marimo, os; print(os.path.exists(os.path.join(os.path.dirname(marimo.__file__), '_static')))"]);
         no_window(&mut verify_static_cmd);
         if let Ok(static_output) = verify_static_cmd.output() {
-            info!("Installed marimo has _static directory: {}", String::from_utf8_lossy(&static_output.stdout).trim());
+            info!(
+                "Installed marimo has _static directory: {}",
+                String::from_utf8_lossy(&static_output.stdout).trim()
+            );
         }
     }
 
@@ -192,7 +235,12 @@ pub fn ensure_environment(
 /// Parse a line from `uv pip install` stderr and return a progress message if relevant.
 fn parse_pip_progress(line: &str) -> Option<String> {
     const KEYWORDS: &[&str] = &[
-        "Resolved", "Building", "Prepared", "Uninstalled", "Installed", "Downloading",
+        "Resolved",
+        "Building",
+        "Prepared",
+        "Uninstalled",
+        "Installed",
+        "Downloading",
     ];
     let line = line.trim();
     if KEYWORDS.iter().any(|k| line.starts_with(k)) {
@@ -202,9 +250,33 @@ fn parse_pip_progress(line: &str) -> Option<String> {
     }
 }
 
+/// Get the Python version from a venv by running `python --version`.
+/// Returns `(major, minor)` on success, or `None` if the version cannot be determined.
+fn get_venv_python_version(venv_python: &Path) -> Option<(u32, u32)> {
+    let mut cmd = Command::new(venv_python);
+    cmd.args(["--version"]);
+    no_window(&mut cmd);
+
+    let output = cmd.output().ok()?;
+    // `python --version` prints to stdout on Python 3, e.g. "Python 3.9.6"
+    let version_str = String::from_utf8_lossy(&output.stdout);
+    let version_str = version_str.trim();
+    info!("Venv python --version: {}", version_str);
+
+    let version = version_str.strip_prefix("Python ")?;
+    let mut parts = version.split('.');
+    let major: u32 = parts.next()?.parse().ok()?;
+    let minor: u32 = parts.next()?.parse().ok()?;
+    Some((major, minor))
+}
+
 /// Find Python via `uv python find`.
 fn find_python(uv_bin: &Path, python_install_dir: &Path) -> Option<String> {
-    info!("Finding Python: uv_bin={}, install_dir={}", uv_bin.display(), python_install_dir.display());
+    info!(
+        "Finding Python: uv_bin={}, install_dir={}",
+        uv_bin.display(),
+        python_install_dir.display()
+    );
 
     let mut cmd = Command::new(uv_bin);
     cmd.args(["python", "find"])
@@ -214,10 +286,16 @@ fn find_python(uv_bin: &Path, python_install_dir: &Path) -> Option<String> {
     let output = cmd.output().ok()?;
     info!("uv python find exit status: {}", output.status);
     if !output.stdout.is_empty() {
-        info!("uv python find stdout: {}", String::from_utf8_lossy(&output.stdout));
+        info!(
+            "uv python find stdout: {}",
+            String::from_utf8_lossy(&output.stdout)
+        );
     }
     if !output.stderr.is_empty() {
-        info!("uv python find stderr: {}", String::from_utf8_lossy(&output.stderr));
+        info!(
+            "uv python find stderr: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
     }
 
     if output.status.success() {
@@ -248,19 +326,29 @@ fn install_python(uv_bin: &Path, python_install_dir: &Path) -> Result<()> {
     no_window(&mut cmd);
 
     info!("Running: uv python install 3.13");
-    let output = cmd.output()
+    let output = cmd
+        .output()
         .map_err(|e| anyhow!("Failed to execute python install: {}", e))?;
 
     info!("Python install exit status: {}", output.status);
     if !output.stdout.is_empty() {
-        info!("Python install stdout: {}", String::from_utf8_lossy(&output.stdout));
+        info!(
+            "Python install stdout: {}",
+            String::from_utf8_lossy(&output.stdout)
+        );
     }
     if !output.stderr.is_empty() {
-        info!("Python install stderr: {}", String::from_utf8_lossy(&output.stderr));
+        info!(
+            "Python install stderr: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
     }
 
     if !output.status.success() {
-        return Err(anyhow!("Python installation failed with status: {}", output.status));
+        return Err(anyhow!(
+            "Python installation failed with status: {}",
+            output.status
+        ));
     }
     info!("Python 3.13 installed successfully");
     Ok(())
