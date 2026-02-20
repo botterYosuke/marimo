@@ -11,22 +11,22 @@ with app.setup:
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    ## Welcome to Backcast!
+## Welcome to Backcast!
 
-    What you see in front of you is a stock price chart of Toyota Motor (7203).
+What you see in front of you is a stock price chart of Toyota Motor (7203).
 
-    ### What you can do right now
+### What you can do right now
 
-    1. **Place a buy order**: Type `bt.buy()` in the black window and run it
-    2. **Advance time**: Use `bt.step()` to move to the next day
-    3. **Order gets filled**: Your buy order is filled — you're now a shareholder!
-    4. **Watch the chart**: Use `bt.step()` to advance days and see the price move
+1. **Advance time**: Use `bt.step()` to move to the next day
+2. **Place a buy order**: Type `bt.buy()` in the black window and run it
+3. **Order gets filled**: Use `bt.step()` to advance to the next day and your order is filled!
+4. **Watch the chart**: Use `bt.step()` to advance days and see the price move
 
-    ### First goal
+### First goal
 
-    "Buy a stock!!"
+"Buy a stock!!"
 
-    Once you do that, you're officially an investor!
+Once you do that, you're officially an investor!
     """)
 
     return

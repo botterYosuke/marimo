@@ -14,7 +14,7 @@ import functools
 
 import marimo as mo
 
-from BackcastPro import get_stock_daily as _get_stock_daily
+from BackcastPro import get_stock_daily as _get_stock_daily, BankruptError
 from backtest_wrapper import Backtest_Wrapper
 from chart import backtest_chart, update_all_backtest_charts
 from headless_broadcast import enable_headless_trade_events, publish_state_headless
@@ -103,7 +103,7 @@ def step():
     """次の日に進む"""
     try:
         result = bt.step()
-    except Exception:
+    except BankruptError:
         emit_skill("FAIL_003")
         update_all_backtest_charts(bt)
         publish_state_headless(bt, status_label="Bankrupt", status_variant="danger")
