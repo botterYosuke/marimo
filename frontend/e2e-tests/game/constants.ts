@@ -30,6 +30,26 @@ export const BRIDGE_SKILL_IDS = skillDefinitions
   .filter((s) => s.category === "bridge")
   .map((s) => s.id);
 
+/** セットアップトラックのスキル ID 一覧 */
+export const SETUP_SKILL_IDS = skillDefinitions
+  .filter((s) => s.category === "setup")
+  .map((s) => s.id);
+
+/** データ取得トラックのスキル ID 一覧 */
+export const DATA_SKILL_IDS = skillDefinitions
+  .filter((s) => s.category === "data")
+  .map((s) => s.id);
+
+/** データセットトラックのスキル ID 一覧 */
+export const SET_SKILL_IDS = skillDefinitions
+  .filter((s) => s.category === "set")
+  .map((s) => s.id);
+
+/** 基本取引トラックのスキル ID 一覧 */
+export const TRADE_SKILL_IDS = skillDefinitions
+  .filter((s) => s.category === "trade")
+  .map((s) => s.id);
+
 /**
  * 指定スキル群を完了した場合の合計現金（スキル報酬 + マイルストーン報酬）を返す。
  */
