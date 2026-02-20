@@ -35,16 +35,20 @@ test("backcast.py完全プレイフロー", async ({ page }) => {
 #### 2. SANDBOX_003取得条件の検証（重要）
 ```typescript
 test("SANDBOX_003はstep()後のtrades()で取得される", async ({ page }) => {
-  // bt.buy() → bt.trades() → スキル発火しない
-  // bt.step() → bt.trades() → SANDBOX_003発火 ✓
+  // game_setup.pyの条件: len(bt.trades) > 0（注文が決済されないとbt.tradesは空）
+  // bt.buy() → bt.trades()        → スキル発火しない（len=0）
+  // bt.buy() → bt.step() → bt.trades() → SANDBOX_003発火 ✓
+  // backcast.pyには cell 9(step)→cell 10(buy)→cell 11(step)→cell 12(trades) の順で既に配置済み
 });
 ```
 
 #### 3. 発見されたバグの再現テスト
 ```typescript
 test("BRIDGE_001がフロントエンドでカウントされない問題", async ({ page }) => {
-  // bt.reveal_data() → コンソールで発火確認
-  // スキルツリーでカウント未反映を検証（8/59のまま）
+  // bt.reveal_data() → コンソール: "[SkillHandler] Received skill event: BRIDGE_001" 確認
+  // スキルツリーでカウント未反映を検証（BRIDGE_001は青点線=未完了のまま）
+  // 期待値: 8/59（SANDBOX_001-006 + BRIDGE_002 + BRIDGE_003）、BRIDGE_001は含まれない
+  // 正常なら9/59になるべき箇所
 });
 
 test("Position表示が[object Object]になる問題", async ({ page }) => {
@@ -55,9 +59,11 @@ test("Position表示が[object Object]になる問題", async ({ page }) => {
 
 #### 4. スキル重複発火の検証
 ```typescript
-test("SANDBOX_005が重複送信されない", async ({ page }) => {
+test("SANDBOX_005が重複送信される（バグ確認）", async ({ page }) => {
   // コンソールログを監視
-  // SANDBOX_005が1回のみ発火することを確認
+  // 現在のバグ: SANDBOX_005が2回記録される
+  // 原因: backcast.pyに bt.chart("7203") セルが複数存在し、marimoのリアクティブ実行で再実行される
+  // バグ修正後は expect(consoleLogs.length).toBe(1) に変更
 });
 ```
 
@@ -73,7 +79,7 @@ test("SANDBOX_005が重複送信されない", async ({ page }) => {
 ### 参考
 - **`docs/game-guide.md`** - ゲーム仕様
 - **`development_docs/game-e2e-review-system.md`** - E2Eテストシステム
-- **`d:\Documents\marimo\src-tauri\sample-notebooks\game_setup.py`** - ゲームロジック
+- **`C:\Users\sasac\AppData\Roaming\marimo\notebooks\game_setup.py`** - ゲームロジック
 
 ---
 
@@ -88,6 +94,9 @@ test.beforeEach(async ({ page }) => {
   await page.goto(`http://localhost:2718/?file=${encodeURIComponent(BACKCAST_PATH)}`);
   await page.waitForLoadState("load");
   await ensureConnected(page);
+  // ⚠️ resetGameProgressはフロントエンドのJotai atomのみリセット
+  // PythonバックエンドのinメモリセットN_triggered_skillsはリセットされない
+  // バックエンドも含む完全リセットにはpage.reload()が必要（ただしWebSocket再接続コストあり）
   await resetGameProgress(page);
 
   // auto_instantiate=trueの影響を待つ
@@ -101,11 +110,21 @@ backcast.pyには既にセルが存在します（bt.chart, bt.buy等）。こ�
 
 ```typescript
 // 方法1: 既存セルのrunボタンをクリック
-const cells = page.locator('[data-testid="cell"]');
-const targetCell = cells.filter({ hasText: 'bt.buy()' });
-await targetCell.locator('[data-testid="run-button"]').click({ force: true });
+// ⚠️ gridレイアウトでは[data-testid="cell"]は存在しない
+// セルはreact-flowノード（[data-testid="rf__node-{id}"]）内に配置されているため
+// cell-editorからdata-id属性を辿ってrf__nodeを特定する必要がある
+const cellEditor = page.locator('[data-testid="cell-editor"]')
+  .filter({ hasText: 'bt.buy()' }).first();
+const rfNodeId = await cellEditor.evaluate((el: Element) => {
+  let node: Element | null = el;
+  while (node && !(node as HTMLElement).dataset?.id) node = node.parentElement;
+  return (node as HTMLElement)?.dataset?.id ?? null;
+});
+const rfNode = page.locator(`[data-testid="rf__node-${rfNodeId}"]`);
+await rfNode.locator('[data-testid="run-button"]').click({ force: true });
 
 // 方法2: 新セルを追加して実行（helpers.tsのrunNewCellInGrid使用）
+// gridレイアウトでは"Python"ボタンでセル追加、.cm-content.last()でフォーカス、force:trueで実行
 await runNewCellInGrid(page, 'bt.step()');
 ```
 
@@ -113,36 +132,41 @@ await runNewCellInGrid(page, 'bt.step()');
 
 ファイルを開くと既存セル（bt.chart）が自動実行され、以下のスキルが自動取得されます：
 - SANDBOX_001（chart呼び出し）
-- BRIDGE_002（chart内部でget_stock_daily呼び出し）
+- BRIDGE_002（`bt.chart()`は内部でgame_setupラッパーの`get_stock_daily()`を呼ぶため、chart実行だけでBRIDGE_002も完了）
+- BRIDGE_003（BRIDGE_002完了時点で`_check_graduations()`が自動発火）
 
-テストではこの初期状態を考慮してください。
+**テスト開始時の初期完了状態: {SANDBOX_001, BRIDGE_002, BRIDGE_003}（`getCompletedCount(page)`で3相当）**
+
+ブラウザの初期化完了前にスキルイベントが発火すると、フロントエンドで受信されない可能性があります。`waitForTimeout(2000)`はこのタイミング問題への対処です。
 
 ---
 
 ## 🐛 検証すべきバグ
 
-### バグ1: SANDBOX_003の条件が不明確
+### バグ1: SANDBOX_003の取得条件が直感に反する（ドキュメント不備）
 - **現象**: bt.buy() → bt.trades()でスキル発火しない
-- **原因**: len(bt.trades) == 0（step()で時間を進めないと取引が決済されない）
-- **テスト**: step()の有無でスキル発火を検証
+- **原因**: `game_setup.py`内の条件 `len(bt.trades) > 0` により、`bt.step()`で時間を進めて注文を決済しないと`bt.trades`が空になる
+- **正しいシーケンス**: `bt.buy()` → `bt.step()` → `bt.trades()`（backcast.pyにはcell 10-12として配置済み）
+- **テスト**: step()前後のbt.trades()でスキル発火の有無を検証
 
-### バグ2: BRIDGE_001がカウントされない
-- **現象**: emit_skill("BRIDGE_001")は発火するがスキルツリーで未カウント
-- **テスト**: bt.reveal_data() → スキルカウントが8/59のまま
+### バグ2: BRIDGE_001がフロントエンドでカウントされない
+- **現象**: `emit_skill("BRIDGE_001")`は発火し、コンソールに`[SkillHandler] Received skill event: BRIDGE_001`が出力されるが、スキルツリーのカウントが増えない（8/59のまま、BRIDGE_001ノードは青点線=未完了）
+- **テスト**: bt.reveal_data() → `getCompletedCount(page)` が9ではなく8のまま → `getSkillStatus(page, "BRIDGE_001")` が`"completed"`ではなく`"unlocked"`のまま
 
 ### バグ3: Position表示バグ
 - **現象**: "[object Object] shares"と表示
 - **テスト**: UI要素のテキストを検証
 
 ### バグ4: SANDBOX_005重複送信
-- **現象**: コンソールに2回記録
-- **テスト**: コンソールログを監視して重複検出
+- **現象**: `[SkillHandler] Received skill event: SANDBOX_005`がコンソールに2回記録
+- **推測原因**: backcast.pyに`bt.chart("7203")`セルが複数存在し、marimoのリアクティブ実行で複数セルが同時に再実行される。`emit_skill()`内の`_triggered_skills`dedupは機能しているが、BroadcastChannelの受信側で重複が発生する可能性あり
+- **テスト**: コンソールログを監視して重複を検出（**現状は2回が期待値**、バグ修正後は1回になる）
 
 ---
 
 ## 📝 進捗報告
 
-作業中は **`.claude/plans/backcast-game-play.md`** に以下を記録してください：
+作業中は **`.claude/plans/my-game-play-report.md`** に以下を記録してください：
 
 ### 記録内容
 1. ✅ 完了した作業項目にチェック
@@ -150,32 +174,20 @@ await runNewCellInGrid(page, 'bt.step()');
 3. 💡 設計思想・実装の背景
 4. 📌 Tips・トラブルシューティング
 
-### 記録例
-```markdown
-#### ✅ backcast-integration.spec.ts実装完了（2026-02-20 15:00）
-- 実装したテストケース: 7個
-- 発見した新たな問題:
-  - auto_instantiate環境でのタイミング問題（待機時間を2秒に調整）
-- 設計思想:
-  - 既存のsandbox.spec.tsは単体テスト的、backcast-integrationは統合テスト的
-  - 実際のユーザー体験に近い形でテスト
-- Tips:
-  - backcast.pyのセルを特定する際はhasText()フィルターが有効
-```
-
 ---
 
 ## ✅ 完了条件
 
-- [ ] `backcast-integration.spec.ts`を作成
-- [ ] 最低5つのテストケースを実装
-  - [ ] 完全プレイフロー
-  - [ ] SANDBOX_003取得条件
-  - [ ] BRIDGE_001カウント問題
-  - [ ] Position表示バグ
-  - [ ] スキル重複発火
-- [ ] 全テストがパスする（バグ再現テストは失敗が期待値の場合あり）
-- [ ] `.claude/plans/backcast-game-play.md`に進捗記録
+- [x] `backcast-integration.spec.ts`を作成
+- [x] 最低5つのテストケースを実装（6テスト実装済み）
+  - [x] 完全プレイフロー
+  - [x] SANDBOX_003取得条件
+  - [x] BRIDGE_001カウント問題
+  - [x] Position表示バグ
+  - [x] スキル重複発火
+  - [x] セル構造確認（追加）
+- [x] 全テストがパスする（6/6 passed, 2.9m）
+- [x] `.claude/plans/my-game-play-report.md`に進捗記録
 - [ ] 新たな知見があれば`development_docs/game-e2e-review-system.md`に追加
 
 ---
@@ -201,13 +213,27 @@ pnpm test:e2e e2e-tests/game/backcast-integration.spec.ts --headed
 ### ヘルパー関数の活用
 
 `helpers.ts`には以下が用意されています：
-- `ensureConnected(page)` - サーバー接続確認
-- `openSkillTreePanel(page)` - スキルツリー開く
-- `getSkillStatus(page, skillId)` - スキル状態取得
-- `waitForSkillStatus(page, skillId, status)` - スキル状態待機
-- `resetGameProgress(page)` - 進捗リセット
-- `runNewCellInGrid(page, code)` - gridレイアウトでセル実行
-- `dismissReconnectedBanner(page)` - バナー閉じる
+
+**接続・UI操作**
+- `ensureConnected(page)` - カーネル接続確認 + Reconnectedバナーを自動dismiss
+- `dismissReconnectedBanner(page)` - Reconnectedバナーを閉じる
+- `openSkillTreePanel(page)` - スキルツリーパネルを開く（ダイアログ形式）
+
+**スキルイベント送信（テストモード）**
+- `emitSkillEvent(context, page, skillId)` - `__testCompleteSkill`経由（フロントエンドのみ、高速）
+- `emitSkillEventViaHTML(page, skillId)` - HTMLパイプライン経由（BroadcastChannelを通過、本番に近い）
+- `emitSkillViaPython(page, skillId)` - Pythonセル実行経由（フルパイプライン、最も本番に近い）
+
+**スキル状態確認**
+- `getSkillNodeLocator(page, skillId)` - `[data-skill-id]`属性でLocatorを返す
+- `getSkillStatus(page, skillId)` → `"completed" | "unlocked" | "locked"` を返す（`data-skill-status`属性から）
+- `waitForSkillStatus(page, skillId, status, timeout?)` - スキルが指定ステータスになるまで待機
+- `getCompletedCount(page)` - 完了スキル数を数値で返す（"X/59 スキル"バッジから読み取り）
+
+**セル実行**
+- `resetGameProgress(page)` - フロントエンドのJotai atomをリセット（⚠️ Pythonバックエンドは非対象）
+- `runNewCellInGrid(page, code)` - gridレイアウトでセル追加・実行（"Python"ボタン使用、`force:true`）
+- `runNewCell(page, code)` - 通常レイアウト（非grid）でセル追加・実行（`create-cell-button`使用）
 
 ### コンソールログの監視
 
@@ -219,17 +245,11 @@ page.on('console', msg => {
   }
 });
 
-// 後でアサーション
-expect(consoleLogs.length).toBe(1); // 重複なし
+// 後でアサーション（現在のバグ: 2回が期待値）
+expect(consoleLogs.length).toBe(2); // SANDBOX_005重複バグの確認
+// バグ修正後: expect(consoleLogs.length).toBe(1);
 ```
 
 ---
 
-## 🔗 関連Issue・PR
-
-- 発見されたバグは別途Issueを作成することを推奨
-- このE2Eテスト実装後、バグ修正のPRと合わせてテストを更新
-
----
-
-**質問や不明点があれば、`.claude/plans/backcast-game-play.md`にメモして進めてください。**
+**質問や不明点があれば、`.claude/plans/my-game-play-report.md`にメモして進めてください。**

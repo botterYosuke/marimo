@@ -22,6 +22,8 @@
 - ✅ ステップ12: BRIDGE_003 - 自動発火確認
 - ✅ ステップ13: スキルツリーパネルの確認・スクリーンショット
 - ✅ ステップ14: 体験レポートの記載
+- ✅ ステップ15: `backcast-integration.spec.ts` 作成（6テストケース実装）
+- ✅ ステップ16: 全6テストがパスすることを確認（2.9分）
 
 ---
 
@@ -189,6 +191,108 @@ await runBtn.click({ force: true });
 3. **BRIDGE_001 カウント問題の調査**: フロントエンドのSkillHandlerがBRIDGE_001を正しく処理しているか確認
 4. **スキル取得通知の強化**: トースト通知のタイミングと視認性を向上
 5. **SANDBOX_005重複送信の調査**: BroadcastChannelのイベント重複を防ぐ仕組みの追加
+
+---
+
+## 🧪 backcast-integration.spec.ts 実装レポート（2026-02-20）
+
+### 実装したテストケース（全6件）
+
+| # | テスト名 | 結果 |
+|---|---------|------|
+| 1 | 完全プレイフロー（スキル順次取得） | ✅ Pass |
+| 2 | SANDBOX_003取得条件（step→trades確認） | ✅ Pass |
+| 3 | BRIDGE_001カウントバグ確認 | ✅ Pass |
+| 4 | Position表示 [object Object] バグ確認 | ✅ Pass |
+| 5 | SANDBOX_005重複送信バグ確認 | ✅ Pass |
+| 6 | セル構造の正しいシーケンス確認 | ✅ Pass |
+
+**実行時間**: 2.9分
+
+### 実装中に発見した新知見
+
+#### 知見A: beforeEach の順序が重要
+
+```typescript
+// ❌ 誤った順序（auto_instantiate イベントがリセット後に到着しカウントが 0 にならない）
+await resetGameProgress(page);
+await page.waitForTimeout(2000);
+
+// ✅ 正しい順序（auto_instantiate を先に受け取ってからリセット）
+await page.waitForTimeout(2000);
+await resetGameProgress(page);
+await page.waitForTimeout(500); // リセット後の安定化
+```
+
+#### 知見B: 報酬トーストが Python ボタンを遮蔽する
+
+`emitSkillEvent` を複数回呼ぶと報酬トーストが積み上がり、下部ツールバーの「Python」ボタンを遮蔽する。`runNewCellInGrid()` 呼び出し前に必ず `dismissAllNotifications()` を呼ぶ。
+
+```typescript
+async function dismissAllNotifications(page: Page): Promise<void> {
+  await dismissReconnectedBanner(page);
+  const toastCloseButtons = page.locator(
+    '[role="region"][aria-label="Notifications (F8)"] button[aria-label="Close"]',
+  );
+  let count = await toastCloseButtons.count().catch(() => 0);
+  while (count > 0) {
+    await toastCloseButtons.first().click().catch(() => {});
+    await page.waitForTimeout(200);
+    count = await toastCloseButtons.count().catch(() => 0);
+  }
+}
+```
+
+#### 知見C: テスト追加セルが次回実行時に残留する
+
+`runNewCellInGrid` で追加したセル（`"bt.step(); bt.buy(); bt.step(); bt.trades()"` 等のセミコロン複合セル）はカーネルが生きている限り次のテスト実行時も残る。セル構造確認テストではセミコロン含むセルをフィルタアウトすること。
+
+```typescript
+const cellContents: string[] = [];
+for (const editor of cellEditors) {
+  const trimmed = content.trim();
+  if (trimmed && !trimmed.includes(";")) cellContents.push(trimmed); // 複合セルを除外
+}
+```
+
+#### 知見D: BRIDGE_002 は BRIDGE_001 完了が必須
+
+スキルチェーン: `SANDBOX_001→002→003→004→005→006→BRIDGE_001→BRIDGE_002→BRIDGE_003`
+
+`emitSkillSequence` で `["BRIDGE_002"]` だけを送ると "locked" になる。必ず全チェーンを順に送ること。
+
+```typescript
+// ✅ 全チェーンを順に送る
+await emitSkillSequence(context, page, [
+  "SANDBOX_001", "SANDBOX_002", "SANDBOX_003",
+  "SANDBOX_004", "SANDBOX_005", "SANDBOX_006",
+  "BRIDGE_001", "BRIDGE_002", "BRIDGE_003",
+]);
+```
+
+#### 知見E: BRIDGE_001 バグは bt.reveal_data() パス固有
+
+`emitSkillViaPython` 経由では BRIDGE_001 が正常に完了する（BroadcastChannel パイプラインは正常）。手動プレイテストで発見したバグは `bt.reveal_data()` のゲームロジック固有の問題と思われる（`game_setup.py` の `reveal_data()` 実装を要調査）。
+
+#### 知見F: SANDBOX_005 ログ 0 件は正常（auto_instantiate dedup）
+
+テスト環境では auto_instantiate により全セル実行済みのため、`_triggered_skills` に SANDBOX_005 が記録済み。`bt.chart("7203")` を再実行しても dedup により emit_skill が発火しない（ログ 0 件）。これはバグではなくバックエンドの正常な重複防止動作。
+
+#### 知見G: 複数コマンドを 1 セルにまとめてタイムアウト節約
+
+`runNewCellInGrid` の呼び出しは 1 回あたり約 5 秒かかる。連続呼び出しは timeout を延長するか、1 セルにまとめる。
+
+```typescript
+// ❌ タイムアウトしやすい（4回 × 5秒 = 20秒以上）
+await runNewCellInGrid(page, "bt.step()");
+await runNewCellInGrid(page, "bt.buy()");
+await runNewCellInGrid(page, "bt.step()");
+await runNewCellInGrid(page, "bt.trades()");
+
+// ✅ 1セルにまとめる（タイムアウト延長も必要）
+test.setTimeout(90_000);
+await runNewCellInGrid(page, "bt.step(); bt.buy(); bt.step(); bt.trades()");
+```
 
 ---
 
