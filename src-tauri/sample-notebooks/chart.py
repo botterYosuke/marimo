@@ -79,7 +79,7 @@ CHART_THEMES: dict[str, dict[str, str]] = {
 # =========================================================================
 
 DEFAULT_VISIBLE_BARS = 60  # デフォルト表示バー数（約2か月）
-DEFAULT_CHART_HEIGHT = 500  # デフォルトチャート高さ（ピクセル）
+DEFAULT_CHART_HEIGHT = 600  # デフォルトチャート高さ（ピクセル）
 
 
 def get_theme_colors(theme: str = "dark") -> dict[str, str]:
@@ -392,7 +392,7 @@ class LightweightChartWidget(anywidget.AnyWidget):
 
     Example:
         widget = LightweightChartWidget()
-        widget.options = {"height": 500, "showVolume": True}
+        widget.options = {"height": 600, "showVolume": True}
         widget.data = df_to_lwc_data(df)
 
         # 差分更新
@@ -1174,7 +1174,7 @@ def chart_by_df(
     df: pd.DataFrame,
     *,
     trades: list = None,
-    height: int = 500,
+    height: int = 600,
     show_tags: bool = True,
     show_volume: bool = True,
     title: str = None,
@@ -1214,6 +1214,7 @@ def chart_by_df(
 
     # ウィジェット作成
     widget = LightweightChartWidget()
+    widget._grid_height = height  # グリッド自動配置用の高さヒント
     widget.options = {
         "height": height,
         "showVolume": show_volume,
@@ -1313,6 +1314,7 @@ def _ensure_backtest_widget(
         bt._chart_state.widgets[code] = LightweightChartWidget()
 
     widget = bt._chart_state.widgets[code]
+    widget._grid_height = height  # グリッド自動配置用の高さヒント
     opts = _build_backtest_chart_options(bt._chart_state.color_theme, height, visible_bars)
     widget.options = opts
 
@@ -1400,7 +1402,7 @@ def _perform_differential_chart_update(
 def backtest_chart(
     bt,  # Backtest インスタンス
     code: str = None,
-    height: int = 500,
+    height: int = 600,
     show_tags: bool = True,
     visible_bars: int = 60,
     indicators: list[str] = None,

@@ -104,8 +104,15 @@ export function calculateNewCellPlacement(
   cellId: CellId,
   existingCells: GridCellPosition[],
   config: PlacementConfig = DEFAULT_PLACEMENT_CONFIG,
+  heightPx?: number,
 ): GridCellPosition {
-  const { columns, defaultHeight } = config;
+  const { columns, defaultHeight, rowHeight } = config;
+
+  // Convert pixel height to grid rows, or fall back to default
+  const h =
+    heightPx != null && heightPx > 0
+      ? Math.ceil(heightPx / rowHeight)
+      : defaultHeight;
 
   // Find the maximum y + h (bottom edge) of existing cells
   let maxBottom = 0;
@@ -122,6 +129,6 @@ export function calculateNewCellPlacement(
     x: 0,
     y: maxBottom,
     w: columns,
-    h: defaultHeight,
+    h,
   };
 }

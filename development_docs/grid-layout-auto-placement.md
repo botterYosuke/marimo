@@ -121,16 +121,75 @@ export const VISUAL_MIMETYPES: Set<string>;
 
 ```typescript
 export function calculateAutoPlacement(visualCellIds: CellId[], config?: PlacementConfig): GridCellPosition[];
-export function calculateNewCellPlacement(cellId: CellId, existingCells: GridCellPosition[], config?: PlacementConfig): GridCellPosition;
+export function calculateNewCellPlacement(cellId: CellId, existingCells: GridCellPosition[], config?: PlacementConfig, heightPx?: number): GridCellPosition;
 export const DEFAULT_PLACEMENT_CONFIG: PlacementConfig;
 ```
 
 ### layout.ts
 
 ```typescript
-export function addCellToGridLayout(cellId: CellId): void;
+export function addCellToGridLayout(cellId: CellId, heightPx?: number): void;
 export function isCellInGrid(cellId: CellId): boolean;
 ```
+
+---
+
+## コンテンツ高さに基づく自動配置 (2026-02-20)
+
+### 背景
+
+従来の自動配置では、すべてのセルが固定高さ `defaultHeight: 20` rows (= 400px) で配置されていた。チャートウィジェットが `options.height` で 600px を指定しても、グリッドセルは 400px のままでチャートが切り詰められる問題があった。
+
+### 解決: `data-grid-height` HTML属性によるメタデータ伝搬
+
+anywidget が `_grid_height` プロパティを持つ場合、出力HTMLに `data-grid-height='600'` 属性を埋め込み、フロントエンドの自動配置で解析してグリッドセルの高さに反映する。
+
+### データフロー
+
+```
+Python: widget._grid_height = 600
+  → from_anywidget.py: args["grid-height"] = 600
+    → HTML出力: data-grid-height='600'
+      → handlers.ts: extractGridHeight() → 600
+        → layout.ts: addCellToGridLayout(cellId, 600)
+          → auto-placement.ts: h = ceil(600 / 20) = 30 rows
+```
+
+### 変更ファイル
+
+| ファイル | 変更内容 |
+|---------|---------|
+| `marimo/_plugins/ui/_impl/from_anywidget.py` | `_grid_height` 属性を `data-grid-height` HTML属性として `args` に追加 |
+| `src-tauri/sample-notebooks/chart.py` | `chart_by_df()` と `_ensure_backtest_widget()` で `widget._grid_height = height` を設定 |
+| `frontend/src/core/kernel/handlers.ts` | `extractGridHeight()` 関数追加、`autoPlaceVisualOutput` から高さを `addCellToGridLayout` に渡す |
+| `frontend/src/core/layout/layout.ts` | `addCellToGridLayout(cellId, heightPx?)` にオプション高さパラメータ追加 |
+| `frontend/src/core/layout/auto-placement.ts` | `calculateNewCellPlacement` に `heightPx` パラメータ追加、px→行数変換ロジック |
+
+### 高さ変換ロジック（auto-placement.ts）
+
+```typescript
+// heightPx が指定されていればグリッド行数に変換、なければデフォルト
+const h = heightPx != null && heightPx > 0
+  ? Math.ceil(heightPx / rowHeight)
+  : defaultHeight;
+```
+
+### ウィジェットへの _grid_height 設定方法
+
+任意の anywidget で `_grid_height` 属性を設定するだけで利用可能:
+
+```python
+widget = MyAnyWidget()
+widget._grid_height = 600  # グリッド自動配置で 600px の高さを使用
+```
+
+`_grid_height` が未設定の場合は従来通り `defaultHeight` (20 rows = 400px) で配置される。
+
+### 注意事項
+
+- `calculateAutoPlacement()`（初期一括配置）は今回未変更。こちらは固定 `defaultHeight` を使用
+- `calculateNewCellPlacement()`（1セルずつ追加時）のみ `heightPx` に対応
+- regex `data-grid-height='([\d.]+)'` で解析するため、`_grid_height` には整数値を設定すること
 
 ---
 

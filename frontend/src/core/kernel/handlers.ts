@@ -333,7 +333,30 @@ function autoPlaceVisualOutput(data: NotificationMessageData<"cell-op">) {
     return;
   }
 
+  // Extract grid height hint from output HTML (e.g. data-grid-height='500')
+  const heightPx = extractGridHeight(output);
+
   // Add cell to grid layout
-  Logger.log(`[autoPlace] Cell ${cellId}: adding to grid layout`);
-  addCellToGridLayout(cellId);
+  Logger.log(
+    `[autoPlace] Cell ${cellId}: adding to grid layout (heightPx=${heightPx})`,
+  );
+  addCellToGridLayout(cellId, heightPx ?? undefined);
+}
+
+/**
+ * Extract grid height hint from output HTML.
+ * Widgets can embed data-grid-height='<pixels>' to specify their preferred
+ * grid cell height during auto-placement.
+ */
+function extractGridHeight(
+  output: CellMessage["output"],
+): number | null {
+  if (output?.mimetype === "text/html" && typeof output.data === "string") {
+    const match = output.data.match(/data-grid-height='([\d.]+)'/);
+    if (match) {
+      const value = Number.parseInt(match[1], 10);
+      return Number.isFinite(value) && value > 0 ? value : null;
+    }
+  }
+  return null;
 }

@@ -177,14 +177,22 @@ class anywidget(UIElement[ModelIdRef, AnyWidgetState]):
 
         # Initial value is just the model_id reference
         # The frontend retrieves the actual state from the 'open' message
+        args: dict[str, Any] = {
+            "js-url": mo_data.js(js).url if js else "",  # type: ignore [unused-ignore]  # noqa: E501
+            "js-hash": js_hash,
+        }
+
+        # Grid height hint: if the widget declares _grid_height,
+        # embed it as data-grid-height for auto-placement sizing
+        grid_height = getattr(widget, "_grid_height", None)
+        if grid_height is not None:
+            args["grid-height"] = int(grid_height)
+
         super().__init__(
             component_name="marimo-anywidget",
             initial_value=ModelIdRef(model_id=model_id),
             label=None,
-            args={
-                "js-url": mo_data.js(js).url if js else "",  # type: ignore [unused-ignore]  # noqa: E501
-                "js-hash": js_hash,
-            },
+            args=args,
             on_change=None,
         )
 

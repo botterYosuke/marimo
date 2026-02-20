@@ -180,7 +180,7 @@ export function getSerializedLayout() {
  * Add a cell to the grid layout with auto-calculated position.
  * Used when a new visual output is detected.
  */
-export function addCellToGridLayout(cellId: CellId): void {
+export function addCellToGridLayout(cellId: CellId, heightPx?: number): void {
   let currentState = store.get(layoutStateAtom);
 
   // Only works for grid layout
@@ -213,6 +213,7 @@ export function addCellToGridLayout(cellId: CellId): void {
     cellId,
     gridLayout.cells,
     DEFAULT_PLACEMENT_CONFIG,
+    heightPx,
   );
 
   // Update layout with new cell
