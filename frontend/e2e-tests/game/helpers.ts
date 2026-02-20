@@ -400,6 +400,103 @@ export async function runNewCell(page: Page, code: string): Promise<void> {
     });
 }
 
+/**
+ * グリッドレイアウトで新しいセルにコードを入力して実行する。
+ *
+ * グリッドレイアウトでは create-cell-button が存在しないため、
+ * 下部ツールバーの「Python」ボタンを使ってセルを作成する。
+ */
+export async function runNewCellInGrid(
+  page: Page,
+  code: string,
+): Promise<void> {
+  // スキルツリーダイアログなどが開いていると Python ボタンが遮られるため閉じる
+  const dialog = page.locator('[role="dialog"]');
+  if (await dialog.isVisible().catch(() => false)) {
+    await page.keyboard.press("Escape");
+    await dialog
+      .waitFor({ state: "hidden", timeout: 3_000 })
+      .catch(() => {});
+  }
+
+  // ツールバーの「Python」ボタンでセルを追加
+  await page.getByRole("button", { name: "Python", exact: true }).click();
+
+  // 新セルのエディタが DOM に追加されるまで待機
+  await page.waitForTimeout(1_000);
+
+  // トースト通知（報酬トースト、Reconnected バナー等）を dismiss
+  // セルが多い場合、通知が cm-content やボタンを遮るため早めに処理する
+  await dismissReconnectedBanner(page);
+  // 報酬トーストなど Reconnected 以外の通知も閉じる
+  const toastCloseButtons = page.locator(
+    '[role="region"][aria-label="Notifications (F8)"] button[aria-label="Close"]',
+  );
+  const toastCount = await toastCloseButtons.count().catch(() => 0);
+  for (let i = 0; i < toastCount; i++) {
+    await toastCloseButtons.first().click().catch(() => {});
+    await page.waitForTimeout(200);
+  }
+
+  // グリッド内に新しく追加されたセルの CodeMirror エディタをクリックしてフォーカス
+  // force: true でトースト・ツールバーによるポインター遮蔽を回避
+  const cmContent = page.locator(".cm-content").last();
+  await cmContent.click({ force: true });
+  await cmContent.fill(code);
+
+  // run-button をクリック（force: true でトースト遮蔽を回避）
+  await page
+    .getByTestId("run-button")
+    .locator(":visible")
+    .last()
+    .click({ force: true });
+
+  // セル実行完了まで待機
+  await page
+    .locator("[data-cell-status='running']")
+    .waitFor({ state: "detached", timeout: 15_000 })
+    .catch(() => {
+      /* セルが即座に完了した場合は無視 */
+    });
+}
+
+// ---------------------------------------------------------------------------
+// スキルイベント送信（Python セル実行経由 — レイヤー①→⑦）
+// ---------------------------------------------------------------------------
+
+/**
+ * Python セルを実行して <marimo-broadcast> HTML を生成し、
+ * レイヤー①→⑦（Python → WebSocket → HTML パース → BroadcastChannel → リスナー → atom → UI）の
+ * 全経路を通してスキルを完了する。
+ *
+ * __testCompleteSkill（⑥→⑦）や __testInjectBroadcastHTML（③→⑦）とは異なり、
+ * 実際に Python カーネルでコードを実行し、セルのメイン出力として HTML をフロントエンドに届ける。
+ *
+ * progress_manager への依存を避けるため、emit_skill() のインライン版を使用する。
+ *
+ * 注意: mo.output.append() ではなくセルの最終式として Html を返す。
+ * extractAndSendBroadcastMessages() は data.output（メイン出力）のみを処理し、
+ * コンソール出力（mo.output.append 経由）は対象外であるため。
+ *
+ * @param page    - イベントを受信させたいページ
+ * @param skillId - 送信するスキル ID（例: "SANDBOX_001"）
+ */
+export async function emitSkillViaPython(
+  page: Page,
+  skillId: string,
+): Promise<void> {
+  // marimo はセル間で同じ変数名を禁止する（リアクティビティ制約）。
+  // すべての変数をアンダースコア接頭辞にして追跡対象外にする。
+  const code = `
+import base64 as _base64, json as _json, time as _time
+from marimo._output.hypertext import Html as _Html
+_ev = {"skill_id": "${skillId}", "context": {}, "timestamp": int(_time.time() * 1000)}
+_b = _base64.b64encode(_json.dumps(_ev).encode()).decode()
+_Html(f'<marimo-broadcast channel="skill_event_channel" type="skill_complete" payload="{_b}" style="display:none;"></marimo-broadcast>')
+`.trim();
+  await runNewCellInGrid(page, code);
+}
+
 // ---------------------------------------------------------------------------
 // ゲーム状態リセット
 // ---------------------------------------------------------------------------
