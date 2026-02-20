@@ -437,7 +437,7 @@ hatch run +py=3.12 test:test tests/_ai/tools/tools/test_your_tool.py -v
 
 ### 11. Update Documentation
 
-Add your tool to the user-facing documentation. Add a row to the appropriate category table:
+Add your tool to the user-facing documentation in `docs/guides/editor_features/tools.md`. Add a row to the appropriate category table:
 
 ---
 ```markdown
@@ -682,7 +682,7 @@ Before submitting your tool:
 - [ ] Tests mock `ToolContext` appropriately
 - [ ] All tests pass
 - [ ] Type hints are complete
-- [ ] Documentation updated
+- [ ] Documentation updated in `docs/guides/editor_features/tools.md`
 
 ## Additional Resources
 

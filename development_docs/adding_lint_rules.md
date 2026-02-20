@@ -94,8 +94,8 @@ class YourNewRule(LintRule):
 
     ## References
 
-    - [Understanding Errors](https://backcast-tan.vercel.app/guides/understanding_errors/)
-    - [Relevant Guide](https://backcast-tan.vercel.app/guides/...)
+    - [Understanding Errors](https://docs.marimo.io/guides/understanding_errors/)
+    - [Relevant Guide](https://docs.marimo.io/guides/...)
     """
 
     code = "MB005"  # Your assigned code
@@ -280,7 +280,7 @@ uv run hatch run test:test tests/_lint
 uv run hatch run test:test tests/_lint/test_your_rule.py
 
 # Update snapshots if needed
-uv run hatch run test:test tests/_lint/test_snapshot.py --snapshot-update
+uv run hatch run test:test tests/_lint/test_snapshots.py --snapshot-update
 ```
 
 ## Rule Implementation Guidelines
@@ -359,7 +359,7 @@ tests/_lint/
 ├── snapshots/            # Expected outputs
 │   └── your_rule_name_errors.txt
 ├── test_your_rule.py     # Unit tests
-└── test_snapshot.py   # Snapshot tests
+└── test_snapshots.py  # Snapshot tests
 ```
 
 ## Documentation Requirements
@@ -396,12 +396,12 @@ Before submitting your rule:
 
 ### Simple Rule Implementation
 
-Example of a simple rule that checks for syntax errors: https://github.com/botterYosuke/marimo/pull/6384
+Example of a simple rule that checks for syntax errors: https://github.com/marimo-team/marimo/pull/6384
 
 ### Rule Implementation with `--unsafe-fixes`
 
 Some rules may have "fixes" that mutate the notebook structure.
-An example of a rule that mutates the notebook structure (i.e. an unsafe fix) by removing empty cells: https://github.com/botterYosuke/marimo/pull/6398
+An example of a rule that mutates the notebook structure (i.e. an unsafe fix) by removing empty cells: https://github.com/marimo-team/marimo/pull/6398
 
 ### Rule Implementation with Log Context
 

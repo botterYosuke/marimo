@@ -8,19 +8,19 @@ Internal documentation for marimo developers.
 
 | Doc | 概要 |
 |-----|------|
-| [Testing](guides/testing.md) | テスト構造（スナップショット/フィクスチャ）、カーネルフィクスチャ、実行コマンド |
-| [Traces](guides/traces.md) | OpenTelemetry トレース、Jaeger/Zipkin 分析、snakeviz プロファイリング |
-| [Prompts](guides/prompts.md) | Prompter クラスによる AI システムプロンプト管理とスナップショットテスト |
-| [OpenAPI](guides/openapi.md) | OpenAPI スキーマ生成・バリデーション・クライアントコード生成 |
-| [Adding Lint Rules](guides/adding_lint_rules.md) | リントルール（MB/MR/MF コード）の追加手順 |
-| [Adding Backend & MCP Tools](guides/adding_backend_and_mcp_tools.md) | バックエンド + MCP サーバー両対応ツールの作成手順 |
-| [Frontend Build](guides/frontend_build.md) | Windows でのフロントエンドクリーンリビルド手順 |
+| [Testing](testing.md) | テスト構造（スナップショット/フィクスチャ）、カーネルフィクスチャ、実行コマンド |
+| [Traces](traces.md) | OpenTelemetry トレース、Jaeger/Zipkin 分析、snakeviz プロファイリング |
+| [Prompts](prompts.md) | Prompter クラスによる AI システムプロンプト管理とスナップショットテスト |
+| [OpenAPI](openapi.md) | OpenAPI スキーマ生成・バリデーション・クライアントコード生成 |
+| [Adding Lint Rules](adding_lint_rules.md) | リントルール（MB/MR/MF コード）の追加手順 |
+| [Adding Backend & MCP Tools](adding_backend_and_mcp_tools.md) | バックエンド + MCP サーバー両対応ツールの作成手順 |
+| [Frontend Build](frontend_build.md) | Windows でのフロントエンドクリーンリビルド手順 |
 
 ## Desktop — Tauri / Electron / Steam
 
 | Doc | 概要 |
 |-----|------|
-| [Tauri: Auto Open Recent File](desktop/tauri_auto_open_recent_file.md) | 起動時に最新ファイルを自動オープン（recent_files.toml） |
+| [Tauri: Auto Open Recent File](tauri_auto_open_recent_file.md) | 起動時に最新ファイルを自動オープン（recent_files.toml） |
 | [Tauri: Seed Notebooks](desktop/tauri_seed_notebooks.md) | サンプル Python ファイルの自動コピー |
 | [Steam Single Folder](desktop/steam-single-folder.md) | NSIS → ポータブルランチャーへの移行戦略 |
 
@@ -53,9 +53,9 @@ Internal documentation for marimo developers.
 
 | Doc | 概要 |
 |-----|------|
-| [Code URL Embedding](frontend/code_url_embedding.md) | lz-string 圧縮による URL フラグメントへのコード埋め込み |
-| [Code URL Fix (Handoff)](frontend/handoff_code_url_fix.md) | `#code/` URL フラグメント優先処理の修正 |
-| [Code URL Test (Handoff)](frontend/handoff_code_url_test.md) | コード URL 埋め込み機能の検証手順 |
+| [Code URL Embedding](code_url_embedding.md) | lz-string 圧縮による URL フラグメントへのコード埋め込み |
+| [Code URL Fix (Handoff)](handoff_code_url_fix.md) | `#code/` URL フラグメント優先処理の修正 |
+| [Code URL Test (Handoff)](handoff_code_url_test.md) | コード URL 埋め込み機能の検証手順 |
 | [Frontend Freeze Fix](frontend/frontend-freeze-fix.md) | Jotai サブスクリプションリークによるフリーズ調査 |
 | [UI Switch State Fix](frontend/ui-switch-state-fix.md) | mo.ui.switch 状態同期の解決済み問題（アーカイブ） |
 
@@ -63,7 +63,7 @@ Internal documentation for marimo developers.
 
 | Doc | 概要 |
 |-----|------|
-| [Pyodide](pyodide/pyodide.md) | Pyodide デプロイ版のフロントエンド開発手順 |
+| [Pyodide](pyodide.md) | Pyodide デプロイ版のフロントエンド開発手順 |
 | [Custom Wheel](pyodide/pyodide-custom-wheel.md) | ローカル Pyodide 開発用カスタムホイールのビルド |
 | [「X is not a function」エラー](pyodide/pyodide-a-is-not-function.md) | loro-crdt Top-Level Await 起因エラーの修正 |
 
@@ -81,13 +81,13 @@ Internal documentation for marimo developers.
 
 | Issue | 概要 |
 |-------|------|
-| [BRIDGE_001 スキル未カウント](issues/✅2026-02-20-bridge001-skill-not-counted.md) | chart() が get_stock_daily() を呼びBRIDGE_002 が先に発火 |
-| [Cell ID null 警告](issues/✅2026-02-20-cell-id-null-warning.md) | グリッドレイアウトの DOM 構造差異 |
-| [Position 表示バグ](issues/✅2026-02-20-position-display-bug.md) | float vs dict 型不整合で "[object Object] shares" 表示 |
-| [Progress JSON リセット不完全](issues/✅2026-02-20-progress-json-reset-incomplete.md) | .backcast.progress.json 残存によるスキル状態の不整合 |
-| [SANDBOX_003 トリガー条件](issues/✅2026-02-20-sandbox003-skill-trigger-condition.md) | bt.trades() に bt.step() 決済が必要 |
-| [SANDBOX_005 重複ブロードキャスト](issues/✅2026-02-20-sandbox005-duplicate-broadcast.md) | chart() 内のスキル発火済みチェック漏れ |
-| [bt.step() が buy 後に False 返却](issues/✅2026-02-20-step-returns-false-after-buy.md) | iloc[-2] IndexError → BankruptError 例外処理で修正 |
+| [BRIDGE_001 スキル未カウント](issues/bridge001-skill-not-counted.md) | chart() が get_stock_daily() を呼びBRIDGE_002 が先に発火 |
+| [Cell ID null 警告](issues/cell-id-null-warning.md) | グリッドレイアウトの DOM 構造差異 |
+| [Position 表示バグ](issues/position-display-bug.md) | float vs dict 型不整合で "[object Object] shares" 表示 |
+| [Progress JSON リセット不完全](issues/progress-json-reset-incomplete.md) | .backcast.progress.json 残存によるスキル状態の不整合 |
+| [SANDBOX_003 トリガー条件](issues/sandbox003-skill-trigger-condition.md) | bt.trades() に bt.step() 決済が必要 |
+| [SANDBOX_005 重複ブロードキャスト](issues/sandbox005-duplicate-broadcast.md) | chart() 内のスキル発火済みチェック漏れ |
+| [bt.step() が buy 後に False 返却](issues/step-returns-false-after-buy.md) | iloc[-2] IndexError → BankruptError 例外処理で修正 |
 
 ## Plans — 計画・レポート・ハンドオフ
 
