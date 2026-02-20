@@ -9,7 +9,8 @@
       "mcp__playwright__browser_take_screenshot",
       "Bash(pkill:*)",
       "mcp__playwright__browser_tabs",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(kill:*)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\marimo\\.claude\\skills"

@@ -2,7 +2,7 @@
 
 ## 概要
 
-本ドキュメントは、BackcastPro（marimoベースのElectronゲーム）をSteamで配布する際の、Steamセキュリティ要件に対する我々の見解をまとめたものです。
+本ドキュメントは、Backcast（marimoベースのElectronゲーム）をSteamで配布する際の、Steamセキュリティ要件に対する我々の見解をまとめたものです。
 
 ## Steamのセキュリティ要件
 
@@ -25,7 +25,7 @@
 
 ### 1. Python実行環境の提供について
 
-BackcastProはmarimoノートブック環境を内蔵しており、ユーザーがPythonコードを実行できます。
+Backcastはmarimoノートブック環境を内蔵しており、ユーザーがPythonコードを実行できます。
 
 **Steamルールとの関係:**
 

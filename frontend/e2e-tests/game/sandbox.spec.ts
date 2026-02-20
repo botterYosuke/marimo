@@ -37,7 +37,7 @@ test.describe("サンドボックストラック", () => {
 
     if (needsNavigation) {
       await page.goto(getAppUrl(APP));
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("load");
     }
 
     // 実際のユーザーと同じフローでサーバー接続の安定を待つ:
@@ -47,6 +47,10 @@ test.describe("サンドボックストラック", () => {
     // 4. 最終的にカーネル healthy を再確認
     // この安定化が完了してからゲーム操作を開始する。
     await ensureConnected(page);
+    // 接続安定後にリセット: 再接続時にカーネルがセル出力を再送し
+    // game_test.py のスキル発火セルが再実行されることで初期状態が
+    // 汚染されるのを防ぐ（知見 35）
+    await resetGameProgress(page);
     await openSkillTreePanel(page);
   });
 

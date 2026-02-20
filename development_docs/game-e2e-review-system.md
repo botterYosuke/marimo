@@ -97,6 +97,12 @@ E2E テスト（案 E）がバイパスしていたレイヤー①③⑤をユ�
 - [x] ✅ **カーネル永続セルの状態汚染対策**: ファイル名を `z-` 接頭辞にして最後に実行（知見 34）
 - [x] ✅ **全 7 スイート（53 テスト）パス確認**: 既存テストへのリグレッションなし
 
+### ✅ 完了（2026-02-20 sandbox.spec.ts 再接続汚染バグ修正セッション）
+
+- [x] ✅ **`waitForLoadState("networkidle")` タイムアウト修正**: marimo は WebSocket を常時接続するため `networkidle` には永遠に到達しない。`"load"` に変更（知見 35a）
+- [x] ✅ **再接続スキル再発火バグ修正**: `beforeEach` の `ensureConnected()` 後に `resetGameProgress()` を追加。再接続時にカーネルがセル出力を再送し game_test.py のスキル発火セルが再実行されて初期状態が汚染される問題を修正（知見 35b）
+- [x] ✅ **`sandbox.spec.ts` 全 10 件パス**: 3.1m
+
 ### ⬜ 未完了・今後の課題
 
 - [ ] フルトラックのテスト（`trade.spec.ts`, `risk.spec.ts` 等）
@@ -969,6 +975,52 @@ if (await dialog.isVisible().catch(() => false)) {
   await dialog.waitFor({ state: "hidden", timeout: 3_000 }).catch(() => {});
 }
 ```
+
+### 35. 再接続スキル再発火と `waitForLoadState("networkidle")` タイムアウト（2026-02-20 追加）
+
+**問題**: `sandbox.spec.ts` で 5 件が失敗。症状は以下の 2 種：
+
+1. **Test 1**: `page.waitForLoadState("networkidle")` が 10s タイムアウト
+2. **Test 2〜5**: 初期状態で SANDBOX_002 が "completed"、進捗が "3/59 スキル"（期待: "locked" / "0/59 スキル"）
+
+**原因 A — `networkidle` 到達不能（知見 35a）**:
+
+marimo はページロード後も WebSocket を常時接続する。Playwright の `networkidle` はアクティブな接続が 500ms 以上ゼロになることが条件のため、marimo アプリでは永遠に到達しない。
+
+```typescript
+// ❌ WebSocket 常時接続のため networkidle には到達しない
+await page.waitForLoadState("networkidle");
+
+// ✅ HTML/CSS/JS のロード完了で十分
+await page.waitForLoadState("load");
+```
+
+**原因 B — 再接続時のカーネルスキル再発火（知見 35b）**:
+
+`game_test.py` には integration.spec.ts / z-python-e2e.spec.ts のために多数のスキル発火セルが存在する。各テスト前の `ensureConnected()` が Reconnected バナーを処理する際、marimo カーネルが既存セルのキャッシュ出力を WebSocket で再送信する。この再送信により `extractAndSendBroadcastMessages` がスキル HTML をパース→発火し、`afterEach` でリセットした Jotai atom が汚染される。
+
+```
+テスト afterEach → resetGameProgress() → atom: 0/59 ✓
+  ↓
+次テスト beforeEach → ensureConnected() → Reconnected 処理
+  ↓ カーネルが出力を再送信
+  ↓ SANDBOX_001, SANDBOX_002, SANDBOX_003 が発火
+  ↓ atom: 3/59（汚染）
+  ↓
+テスト: SANDBOX_002 の状態確認 → "completed"（期待 "locked"） → FAIL
+```
+
+**解決策**:
+
+```typescript
+// sandbox.spec.ts beforeEach
+await ensureConnected(page);
+// ↓ 再接続による汚染をリセット（afterEach のリセットより後に再発火が起きるため）
+await resetGameProgress(page);
+await openSkillTreePanel(page);
+```
+
+**教訓**: `resetGameProgress()` を `afterEach` のみに置くと、次テストの接続安定化フェーズで再汚染される。`beforeEach` の接続安定化 (`ensureConnected`) の直後にもリセットを置くことで防御する。
 
 ### 34. カーネル永続セルの状態汚染と実行順序制御（2026-02-19 追加）
 

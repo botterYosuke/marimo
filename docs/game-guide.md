@@ -2,7 +2,7 @@
 
 ## The Interface
 
-**BackcastPro** uses a modified version of the **Marimo** notebook interface. If you've used Jupyter or Python notebooks before, you'll feel right at home. If not, don't panic—it's just text and code.
+**Backcast** uses a modified version of the **Marimo** notebook interface. If you've used Jupyter or Python notebooks before, you'll feel right at home. If not, don't panic—it's just text and code.
 
 ### The Cell
 The game is divided into "Cells".

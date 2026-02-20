@@ -1,22 +1,22 @@
-# BackcastPro
+# Backcast
 
 <div align="center">
-  <img src="_static/game_assets/header.png" alt="BackcastPro Header" width="100%">
+  <img src="_static/game_assets/header.png" alt="Backcast Header" width="100%">
 </div>
 
 !!! quote ""
     **"The only way forward is to rewrite the past."**
 
-**BackcastPro** is a puzzle-automation game where **Python code** is your only weapon. Use a fully integrated coding environment to control drones, hack security systems, and solve complex logic puzzles.
+**Backcast** is a puzzle-automation game where **Python code** is your only weapon. Use a fully integrated coding environment to control drones, hack security systems, and solve complex logic puzzles.
 
 <div align="center">
-  <img src="_static/game_assets/opener.gif" alt="BackcastPro Gameplay" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
+  <img src="_static/game_assets/opener.gif" alt="Backcast Gameplay" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
 </div>
 
 ## 🎮 Game Features
 
 ### 🐍 Real Code, Real Consequences
-Forget pseudo-code. In **BackcastPro**, you write actual **Python**. The game runs on a sandboxed `marimo` kernel, meaning your scripts have real power—and real risks.
+Forget pseudo-code. In **Backcast**, you write actual **Python**. The game runs on a sandboxed `marimo` kernel, meaning your scripts have real power—and real risks.
 
 ### 🤖 Automate & Dominate
 Program your **Drone Swarm** to navigate hazardous mazes. Write efficient algorithms to optimize pathfinding and resource gathering.

@@ -14,7 +14,7 @@ A: It's a game first. But yes, the skills you use (loops, conditionals, debuggin
 A: For security reasons, the game runs in a sandboxed environment. Only the standard library and the `backcast` game modules are available.
 
 **Q: Where are save files stored?**
-A: Saves are stored in your Steam Cloud folder. Local backups are in `Documents/BackcastPro/saves`.
+A: Saves are stored in your Steam Cloud folder. Local backups are in `Documents/Backcast/saves`.
 
 **Q: The game crashed when I wrote an infinite loop!**
 A: The `marimo` kernel attempts to interrupt long-running cells, but sometimes an infinite loop can hang the UI. Press `Ctrl + C` or restart the level if this happens.
