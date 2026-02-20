@@ -57,7 +57,7 @@ def publish_state_headless(
         f'payload="{state_b64}" '
         f'style="display:none;"></marimo-broadcast>'
     )
-    mo.output.replace(Html(html))
+    mo.output.append(Html(html))
 
 
 def publish_trade_event_headless(

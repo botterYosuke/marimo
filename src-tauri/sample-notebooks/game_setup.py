@@ -28,8 +28,8 @@ bt = Backtest_Wrapper(
     color_theme="light",
 )
 enable_headless_trade_events(bt)
-publish_state_headless(bt, status_label="Ready", status_variant="secondary")  # mo.output.replace()
-broadcast_progress()  # mo.output.append() — replace の後に append する順序が重要
+publish_state_headless(bt, status_label="Ready", status_variant="secondary")  # mo.output.append()
+broadcast_progress()  # mo.output.append()
 
 
 # ---------------------------------------------------------------------------
@@ -83,21 +83,29 @@ def set_data(dct):
 def buy():
     """トヨタ(7203)の株を買う"""
     order = bt.buy()
+    price = bt._broker_instance.last_price(order.code)
     emit_skill("SANDBOX_002")
     update_all_backtest_charts(bt)
     publish_state_headless(bt, status_label="Trading", status_variant="default")
-    return order
+    mo.output.append(mo.callout(
+        mo.md(f"**買い注文を出しました** — {order.code} @ ¥{price:,.0f}"),
+        kind="success",
+    ))
 
 def sell():
     """保有中の株を売る"""
     order = bt.sell()
+    price = bt._broker_instance.last_price(order.code)
     emit_skill("SANDBOX_004")
     # 損切りチェック
     if any(hasattr(t, 'pl') and t.pl < 0 for t in bt.closed_trades):
         emit_skill("FAIL_002")
     update_all_backtest_charts(bt)
     publish_state_headless(bt, status_label="Trading", status_variant="default")
-    return order
+    mo.output.append(mo.callout(
+        mo.md(f"**売り注文を出しました** — {order.code} @ ¥{price:,.0f}"),
+        kind="success",
+    ))
 
 def step():
     """次の日に進む"""
@@ -111,7 +119,7 @@ def step():
     _check_unrealized_loss()
     update_all_backtest_charts(bt)
     publish_state_headless(bt, status_label="Trading", status_variant="default")
-    return result
+    _format_step_summary(result)
 
 def reveal_data():
     """サンドボックスで使われていたデータの正体を確認"""
@@ -152,6 +160,44 @@ def _check_unrealized_loss():
     if "SANDBOX_002" in get_triggered_skills():
         if any(hasattr(t, 'pl') and t.pl < 0 for t in bt.trades):
             emit_skill("FAIL_001")
+
+
+def _format_step_summary(result: bool) -> None:
+    """step() の結果をユーザーフレンドリーなサマリーとして表示"""
+    if result:
+        date_str = bt.current_time.strftime("%Y-%m-%d") if bt.current_time else "?"
+        equity = bt.equity
+
+        price_str = ""
+        if bt._current_data:
+            code = list(bt._current_data.keys())[0]
+            current_price = bt._current_data[code]["Close"].iloc[-1]
+            price_str = f"株価: ¥{current_price:,.0f}  |  "
+
+        pl_str = ""
+        if bt.position.size != 0:
+            pl = bt.position.pl
+            sign = "+" if pl >= 0 else ""
+            pl_str = f"  |  含み損益: ¥{sign}{pl:,.0f}"
+
+        summary = (
+            f"**{date_str}** に進みました\n\n"
+            f"{price_str}資産: **¥{equity:,.0f}**{pl_str}"
+        )
+        mo.output.append(mo.callout(mo.md(summary), kind="info"))
+    else:
+        equity = bt.equity
+        initial_cash = bt._broker_factory.keywords.get("cash", 100_000)
+        total_return = (equity - initial_cash) / initial_cash * 100
+        sign = "+" if total_return >= 0 else ""
+
+        summary = (
+            f"**最終日に到達しました！**\n\n"
+            f"最終資産: **¥{equity:,.0f}**  |  "
+            f"リターン: **{sign}{total_return:.1f}%**"
+        )
+        kind = "success" if total_return >= 0 else "danger"
+        mo.output.append(mo.callout(mo.md(summary), kind=kind))
 
 
 # ---------------------------------------------------------------------------

@@ -38,11 +38,11 @@
 
 ---
 
-### 2. 🔴 `bt.buy()` の出力が意味不明
+### 2. ✅ `bt.buy()` の出力が意味不明
 
-**深刻度: 高**
+**深刻度: 高** → **対応済み (2026-02-20)**
 
-`bt.buy()` を実行すると、Outputs パネルに以下が表示される:
+`bt.buy()` を実行すると、Outputs パネルに以下が表示されていた:
 
 ```
 <BackcastPro.order.Order object at 0x000001D007657CB0>
@@ -52,17 +52,40 @@
 
 **離脱理由**: 「何が起きたかわからない」「エラーっぽい文字列が出た」
 
-**改善案**:
-- `Order.__repr__()` を人間に読みやすい形式にする: `"✅ 買い注文: トヨタ(7203) 1株 @ ¥3,138"`
-- `game_setup.py` の `buy()` 関数で `mo.output.append()` でフレンドリーなメッセージを表示
+**実施した改善**:
+
+`game_setup.py` の `buy()` / `sell()` 関数で `mo.output.append(mo.callout(...))` を使い、フレンドリーなメッセージを表示するようにした。
+
+```python
+# buy() — 緑の callout で即座にフィードバック
+price = bt._broker_instance.last_price(order.code)
+mo.output.append(mo.callout(
+    mo.md(f"**買い注文を出しました** — {order.code} @ ¥{price:,.0f}"),
+    kind="success",
+))
+```
+
+表示例: 緑の callout「**買い注文を出しました** — 7203 @ ¥3,138」
+
+**設計判断と背景**:
+- `Order.__repr__()` の変更ではなく `mo.output.append()` を採用した理由:
+  - `Order` クラスは BackcastPro ライブラリ（別リポジトリ）に属しており、ゲーム固有の日本語メッセージを埋め込むのは不適切
+  - `mo.callout` は marimo の UI コンポーネントとして色付き（success=緑）で表示され、視認性が高い
+  - `repr()` は依然として `<Order object>` だが、callout がその上に表示されるため実質的に目立たない
+- `bt._broker_instance.last_price(order.code)` で現在の終値を取得。注文は成行注文（size < 1 は資金比率）のため約定価格は次の step() まで確定しないが、参考価格としてユーザーに提示
+- `sell()` にも同様の改善を適用済み
+
+**変更ファイル**: `src-tauri/sample-notebooks/game_setup.py` (buy: L83-94, sell: L96-110)
+
+**検証**: sandbox.spec.ts 10/10 passed
 
 ---
 
-### 3. 🔴 `bt.step()` の出力が `True` のみ
+### 3. ✅ `bt.step()` の出力が `True` のみ
 
-**深刻度: 高**
+**深刻度: 高** → **対応済み (2026-02-20)**
 
-`bt.step()` を実行すると Outputs に `True` とだけ表示される。
+`bt.step()` を実行すると Outputs に `True` とだけ表示されていた。
 
 - 「何日に進んだの？」
 - 「株価は上がった？ 下がった？」
@@ -72,9 +95,27 @@
 
 **離脱理由**: 「True って何？」「ゲームが進んでるのかわからない」
 
-**改善案**:
-- `step()` の戻り値を `f"📅 {date} に進みました | 株価: ¥{price:,.0f} | 含み損益: ¥{pl:+,.0f}"` のような形式に
-- ステータスバーの更新と連動した視覚フィードバック
+**実施した改善**:
+
+`game_setup.py` に `_format_step_summary()` ヘルパーを追加し、`step()` 実行後に情報豊富な callout を表示するようにした。
+
+```python
+# step() が True を返す場合（次の日に進んだ）:
+#   青 callout「**2024-01-15** に進みました  株価: ¥3,200 | 資産: **¥102,500** | 含み損益: ¥+2,500」
+# step() が False を返す場合（最終日に到達）:
+#   緑/赤 callout「**最終日に到達しました！** 最終資産: **¥105,000** | リターン: **+5.0%**」
+```
+
+**設計判断と背景**:
+- `result=True`（進行中）と `result=False`（終了）で表示を分岐
+- 進行中: 日付・株価・資産額・含み損益を一覧表示（`kind="info"` 青）
+- 終了時: 最終資産とリターン%を表示（利益なら `kind="success"` 緑、損失なら `kind="danger"` 赤）
+- 株価は `bt._current_data` から取得。ポジションがない場合は含み損益を非表示
+- 戻り値は `True`/`False` のまま変更しない（後方互換性維持）
+
+**変更ファイル**: `src-tauri/sample-notebooks/game_setup.py` (step: L112-125, _format_step_summary: L168-203)
+
+**検証**: sandbox.spec.ts 10/10 passed
 
 ---
 
@@ -191,22 +232,72 @@
 
 ## 総合評価
 
-| 段階 | 離脱リスク | 主な原因 |
-|------|-----------|---------|
-| 起動直後 | **高** | Grid レイアウト混乱 + AI Fix 表示 |
-| `bt.buy()` 実行後 | **致命的** | 出力が `<Order object>` で意味不明 |
-| `bt.step()` 実行後 | **高** | 出力が `True` + チャート表示崩れ |
-| スキルツリー確認時 | **致命的** | 進捗 0/59 のまま（スキル未発火） |
-| 次のアクション判断 | **高** | ガイダンスなし、何をすべきか不明 |
+| 段階 | 離脱リスク | 主な原因 | 状態 |
+|------|-----------|---------|------|
+| 起動直後 | **高** | Grid レイアウト混乱 + AI Fix 表示 | 未対応 |
+| `bt.buy()` 実行後 | ~~致命的~~ **低** | ~~出力が `<Order object>` で意味不明~~ callout で改善済み | ✅ |
+| `bt.step()` 実行後 | ~~高~~ **低** | ~~出力が `True`~~ サマリー callout で改善済み + チャート表示崩れ | ✅ (出力) |
+| スキルツリー確認時 | **致命的** | 進捗 0/59 のまま（スキル未発火） | 未対応 |
+| 次のアクション判断 | **高** | ガイダンスなし、何をすべきか不明 | 未対応 |
 
-**最も深刻な離脱ポイント**: 「操作したのにスキルが進まない」と「出力が意味不明」の2つ。この2点が改善されれば、ゲームの継続率は大幅に向上すると予測。
+**残る最も深刻な離脱ポイント**: 「操作したのにスキルが進まない」（#1）。出力の意味不明さ（#2, #3）は改善済み。
+
+---
+
+## 改善履歴
+
+| 日付 | 対象 | 変更内容 | 検証 |
+|------|------|---------|------|
+| 2026-02-20 | #2 `bt.buy()` | `mo.callout` で「買い注文を出しました」表示 | sandbox 10/10 |
+| 2026-02-20 | #2 `bt.sell()` | `mo.callout` で「売り注文を出しました」表示 | sandbox 10/10 |
+| 2026-02-20 | #3 `bt.step()` | `_format_step_summary()` で日付・株価・資産・損益を表示 | sandbox 10/10 |
+
+---
+
+## 知見・設計思想・Tips
+
+### 出力改善のパターン
+
+`game_setup.py` のラッパー関数で `mo.output.append(mo.callout(...))` を使うのが標準パターン。BackcastPro ライブラリ側の `__repr__` は変更しない。
+
+```python
+# 標準パターン: ラッパー関数内で callout を追加
+def some_action():
+    result = bt.some_method()
+    mo.output.append(mo.callout(
+        mo.md(f"**フレンドリーなメッセージ** — 詳細情報"),
+        kind="success",  # success=緑, info=青, warn=黄, danger=赤
+    ))
+    return result
+```
+
+**callout の kind 使い分け**:
+- `"success"` (緑): 注文実行など成功アクション（buy, sell）
+- `"info"` (青): 状態報告（step の日次サマリー）
+- `"danger"` (赤): 損失・破産などネガティブな結果
+- `"warn"` (黄): スキル未解放のゲーティングメッセージ
+
+### `bt._broker_instance.last_price(code)` について
+
+- 注文時の参考価格として使用。成行注文の実際の約定価格は次の `step()` で確定するため、あくまで「現在終値」
+- `bt._broker_instance` はプライベート属性だが、`game_setup.py` はバックテストエンジンの内部を知る立場（薄いラッパー）なので許容
+
+### `_format_step_summary()` の分岐
+
+- `result=True`: 次の営業日に進んだ → 日付・株価・資産・含み損益を表示
+- `result=False`: 最終日に到達 → 最終資産・トータルリターン%を表示
+- ポジションなし（`bt.position.size == 0`）の場合は含み損益を非表示にして混乱を避ける
+
+### PyPI バージョン問題
+
+`pyproject.toml` で `BackcastPro>=0.6.4` と指定していたが、PyPI には 0.6.3 までしか公開されていなかった。`uv lock` がクロスプラットフォーム解決（Python 3.12 on Linux 等）で失敗するため `>=0.6.3` に修正。ローカルには editable install で 0.6.4 が入っている。BackcastPro の新バージョンを PyPI に公開したら `>=0.6.4` に戻すこと。
 
 ---
 
 ## 検証スクリーンショット
 
 - `game-initial-view.png` — 起動直後の画面
-- `game-after-buy.png` — `bt.buy()` 実行後（Output: `<Order object>`）
-- `game-after-step.png` — `bt.step()` 実行後（Output: `True`、チャート崩壊）
+- `game-after-buy.png` — `bt.buy()` 実行後（Output: `<Order object>`）→ 改善後は緑 callout 表示
+- `game-after-step.png` — `bt.step()` 実行後（Output: `True`、チャート崩壊）→ 改善後は青 callout でサマリー表示
 - `game-vite-dev-view.png` — Vite dev server 経由（Reconnected バナー表示）
 - `game-skill-tree-attempt.png` — スキルツリー（0/59 のまま）

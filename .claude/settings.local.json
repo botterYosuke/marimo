@@ -14,7 +14,12 @@
       "Read(//c/Users/sasai/.claude/plans/**)",
       "Bash(whereis:*)",
       "Bash(command -v:*)",
-      "Bash(/c/Users/sasac/anaconda3/python.exe -m venv:*)"
+      "Bash(/c/Users/sasac/anaconda3/python.exe -m venv:*)",
+      "Skill(game-e2e)",
+      "Skill(game-e2e:*)",
+      "Bash(uv lock:*)",
+      "Bash(uv build:*)",
+      "Bash(uv publish:*)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\marimo\\.claude\\skills",
