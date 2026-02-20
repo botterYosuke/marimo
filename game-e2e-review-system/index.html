@@ -1296,6 +1296,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#2026-02-20-sandboxspects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（2026-02-20 sandbox.spec.ts 再接続汚染バグ修正セッション）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1809,6 +1820,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#35-waitforloadstatenetworkidle-2026-02-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        35. 再接続スキル再発火と waitForLoadState("networkidle") タイムアウト（2026-02-20 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#34-2026-02-19" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2148,6 +2170,12 @@
 <li>[x] ✅ <strong><code>runNewCellInGrid()</code> ヘルパー追加</strong>: グリッドレイアウトモードでのセル作成・実行ヘルパー（知見 31）</li>
 <li>[x] ✅ <strong>カーネル永続セルの状態汚染対策</strong>: ファイル名を <code>z-</code> 接頭辞にして最後に実行（知見 34）</li>
 <li>[x] ✅ <strong>全 7 スイート（53 テスト）パス確認</strong>: 既存テストへのリグレッションなし</li>
+</ul>
+<h3 id="2026-02-20-sandboxspects">✅ 完了（2026-02-20 sandbox.spec.ts 再接続汚染バグ修正セッション）<a class="headerlink" href="#2026-02-20-sandboxspects" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[x] ✅ <strong><code>waitForLoadState("networkidle")</code> タイムアウト修正</strong>: marimo は WebSocket を常時接続するため <code>networkidle</code> には永遠に到達しない。<code>"load"</code> に変更（知見 35a）</li>
+<li>[x] ✅ <strong>再接続スキル再発火バグ修正</strong>: <code>beforeEach</code> の <code>ensureConnected()</code> 後に <code>resetGameProgress()</code> を追加。再接続時にカーネルがセル出力を再送し game_test.py のスキル発火セルが再実行されて初期状態が汚染される問題を修正（知見 35b）</li>
+<li>[x] ✅ <strong><code>sandbox.spec.ts</code> 全 10 件パス</strong>: 3.1m</li>
 </ul>
 <h3 id="_3">⬜ 未完了・今後の課題<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2923,6 +2951,39 @@ taskkill<span class="w"> </span>//F<span class="w"> </span>//IM<span class="w"> 
 <span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">dialog</span><span class="p">.</span><span class="nx">waitFor</span><span class="p">({</span><span class="w"> </span><span class="nx">state</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;hidden&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">3_000</span><span class="w"> </span><span class="p">}).</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{});</span>
 <span class="p">}</span>
 </code></pre></div>
+<h3 id="35-waitforloadstatenetworkidle-2026-02-20">35. 再接続スキル再発火と <code>waitForLoadState("networkidle")</code> タイムアウト（2026-02-20 追加）<a class="headerlink" href="#35-waitforloadstatenetworkidle-2026-02-20" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>sandbox.spec.ts</code> で 5 件が失敗。症状は以下の 2 種：</p>
+<ol>
+<li><strong>Test 1</strong>: <code>page.waitForLoadState("networkidle")</code> が 10s タイムアウト</li>
+<li><strong>Test 2〜5</strong>: 初期状態で SANDBOX_002 が "completed"、進捗が "3/59 スキル"（期待: "locked" / "0/59 スキル"）</li>
+</ol>
+<p><strong>原因 A — <code>networkidle</code> 到達不能（知見 35a）</strong>:</p>
+<p>marimo はページロード後も WebSocket を常時接続する。Playwright の <code>networkidle</code> はアクティブな接続が 500ms 以上ゼロになることが条件のため、marimo アプリでは永遠に到達しない。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ WebSocket 常時接続のため networkidle には到達しない</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForLoadState</span><span class="p">(</span><span class="s2">&quot;networkidle&quot;</span><span class="p">);</span>
+
+<span class="c1">// ✅ HTML/CSS/JS のロード完了で十分</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForLoadState</span><span class="p">(</span><span class="s2">&quot;load&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>原因 B — 再接続時のカーネルスキル再発火（知見 35b）</strong>:</p>
+<p><code>game_test.py</code> には integration.spec.ts / z-python-e2e.spec.ts のために多数のスキル発火セルが存在する。各テスト前の <code>ensureConnected()</code> が Reconnected バナーを処理する際、marimo カーネルが既存セルのキャッシュ出力を WebSocket で再送信する。この再送信により <code>extractAndSendBroadcastMessages</code> がスキル HTML をパース→発火し、<code>afterEach</code> でリセットした Jotai atom が汚染される。</p>
+<div class="highlight"><pre><span></span><code>テスト afterEach → resetGameProgress() → atom: 0/59 ✓
+  ↓
+次テスト beforeEach → ensureConnected() → Reconnected 処理
+  ↓ カーネルが出力を再送信
+  ↓ SANDBOX_001, SANDBOX_002, SANDBOX_003 が発火
+  ↓ atom: 3/59（汚染）
+  ↓
+テスト: SANDBOX_002 の状態確認 → &quot;completed&quot;（期待 &quot;locked&quot;） → FAIL
+</code></pre></div>
+<p><strong>解決策</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// sandbox.spec.ts beforeEach</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">ensureConnected</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="c1">// ↓ 再接続による汚染をリセット（afterEach のリセットより後に再発火が起きるため）</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">resetGameProgress</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">openSkillTreePanel</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>教訓</strong>: <code>resetGameProgress()</code> を <code>afterEach</code> のみに置くと、次テストの接続安定化フェーズで再汚染される。<code>beforeEach</code> の接続安定化 (<code>ensureConnected</code>) の直後にもリセットを置くことで防御する。</p>
 <h3 id="34-2026-02-19">34. カーネル永続セルの状態汚染と実行順序制御（2026-02-19 追加）<a class="headerlink" href="#34-2026-02-19" title="Permanent link">&para;</a></h3>
 <p><strong>問題</strong>: Python セル実行テストが作成するセルは marimo カーネルに永続する。セル出力の <code>&lt;marimo-broadcast&gt;</code> HTML が、後続テストファイル（sandbox.spec.ts, ui.spec.ts）のページロード時に WebSocket 経由で再送信され、<code>extractAndSendBroadcastMessages</code> で処理されてスキルが意図せず完了する。</p>
 <p><strong>具体的な症状</strong>: python-e2e → sandbox.spec.ts の順で実行されると、sandbox.spec.ts の「初期状態: SANDBOX_001 は unlocked」テストで SANDBOX_001 が既に "completed" になっている。</p>
