@@ -251,5 +251,126 @@ pub const LINK_INTERCEPT_JS: &str = r#"
         }
         return originalOpen.call(this, url, target, features);
     };
+
+    // === Redirect to home on server connection error ===
+    // Two scenarios: (1) Vite dev proxy returns a static error page when the
+    // marimo backend is unreachable; (2) the React app is running but the
+    // WebSocket closes fatally (file deleted, session lost, shutdown, etc.).
+    if (window.__TAURI_INTERNALS__) {
+        // --- Scenario 1: Vite dev proxy error page ---
+        // The error page is plain HTML with <h2>Server Connection Error</h2>
+        // and no React #App div (see frontend/vite.config.mts:105).
+        document.addEventListener('DOMContentLoaded', function() {
+            var appDiv = document.getElementById('App');
+            if (!appDiv) {
+                var h2s = document.querySelectorAll('h2');
+                for (var i = 0; i < h2s.length; i++) {
+                    if (h2s[i].textContent &&
+                        h2s[i].textContent.indexOf('Server Connection Error') !== -1) {
+                        console.log('[backcast] Server connection error detected, redirecting to home');
+                        window.location.href = '/';
+                        return;
+                    }
+                }
+            }
+        });
+
+        // --- Scenario 2: WebSocket fatal disconnection ---
+        // When the kernel session dies, the React app sets
+        // data-connection-state="CLOSED" on the #App div and renders
+        // a <div class="noise"> overlay. The .noise div is ONLY rendered
+        // when isClosed && !canTakeover (see frontend/src/components/
+        // editor/header/status.tsx:22, NoiseBackground component).
+        //
+        // This means:
+        //   - Takeover (MARIMO_ALREADY_CONNECTED): canTakeover=true → no .noise → no redirect
+        //   - Temporary disconnect: state="CONNECTING" (not "CLOSED") → no redirect
+        //   - onError handler: sets CLOSED then calls tryReconnecting() (1 retry,
+        //     resolves within 1.5s). If reconnect succeeds → OPEN, .noise removed.
+        //     If fails → kernel is truly dead, redirect is correct.
+        var _bc_observer = null;
+        var _bc_timer = null;
+
+        function _bcCheckFatalDisconnect() {
+            var appDiv = document.getElementById('App');
+            if (!appDiv) return;
+
+            var state = appDiv.getAttribute('data-connection-state');
+            if (state !== 'CLOSED') {
+                if (_bc_timer) {
+                    clearTimeout(_bc_timer);
+                    _bc_timer = null;
+                }
+                return;
+            }
+
+            // .noise is rendered by NoiseBackground (status.tsx) only when
+            // isClosed && !canTakeover — i.e., fatal disconnect, not takeover.
+            var noiseEl = document.querySelector('.noise');
+            if (!noiseEl) return;
+
+            // Don't redirect if already on home page
+            if (!window.location.search || !window.location.search.includes('file=')) {
+                return;
+            }
+
+            if (!_bc_timer) {
+                console.log('[backcast] Fatal disconnection detected, redirecting to home in 1.5s');
+                _bc_timer = setTimeout(function() {
+                    var recheck = document.getElementById('App');
+                    var recheckNoise = document.querySelector('.noise');
+                    if (recheck &&
+                        recheck.getAttribute('data-connection-state') === 'CLOSED' &&
+                        recheckNoise) {
+                        console.log('[backcast] Confirmed fatal disconnect, redirecting now');
+                        window.location.href = '/';
+                    } else {
+                        console.log('[backcast] State changed during debounce, cancelled redirect');
+                        _bc_timer = null;
+                    }
+                }, 1500);
+            }
+        }
+
+        function _bcStartObserving() {
+            var appDiv = document.getElementById('App');
+            if (!appDiv || _bc_observer) return !!_bc_observer;
+
+            _bc_observer = new MutationObserver(function() {
+                _bcCheckFatalDisconnect();
+            });
+
+            _bc_observer.observe(appDiv, {
+                attributes: true,
+                attributeFilter: ['data-connection-state']
+            });
+
+            // Also watch parent for .noise div additions
+            if (appDiv.parentElement) {
+                _bc_observer.observe(appDiv.parentElement, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+
+            _bcCheckFatalDisconnect();
+            return true;
+        }
+
+        // #App may not exist yet (React hasn't mounted). Poll until it appears.
+        if (!_bcStartObserving()) {
+            document.addEventListener('DOMContentLoaded', function() {
+                if (!_bcStartObserving()) {
+                    var attempts = 0;
+                    var poll = setInterval(function() {
+                        attempts++;
+                        if (_bcStartObserving() || attempts > 50) {
+                            clearInterval(poll);
+                        }
+                    }, 100);
+                }
+            });
+        }
+    }
 })();
 "#;
