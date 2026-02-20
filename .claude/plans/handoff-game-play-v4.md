@@ -1,23 +1,22 @@
-# 作業依頼: marimoゲーム（Backcast）を実際にプレイしてください
+# 作業依頼: ゲームE2Eテストを全トラックに拡張してください
 
-**作成日**: 2026-02-20（v4 — Session 2 の実プレイ結果で更新）
+**作成日**: 2026-02-20（v5 — sandbox.spec.ts 10/10 確認済み・次フェーズへ）
 
-> **v3 からの主な変更**
-> - サンプル版 backcast.py は `auto_instantiate` なし → セルは手動実行が必要
-> - backcast.py の既存セルは3つのみ → 新しいセルを追加して実行
-> - SANDBOX_003: `bt.step()` 不要、`bt.trades()` を呼ぶだけで即発火
-> - 全3バグ（BRIDGE_001未カウント・Position表示・SANDBOX_005重複）が修正済み
-> - 到達可能スキル数: **9/59**（従来の 8/59 から更新）
-> - ゲームリセット時は `.backcast.progress.json` の削除が必須
+> **v4 からの主な変更**
+> - sandbox.spec.ts（10件）の全テスト合格を確認済み（3.4分）
+> - 全7スイート（53 passed / 3 fixme）が知見ドキュメントに記録済み
+> - 次の目標: SETUP/DATA/SET/TRADE トラックのE2Eテストを新規作成
+> - SKILL.md も最新化済み（知見1〜35、テストスイート一覧追加）
 
 ---
 
 ## 🎯 目的
 
-backcast.py のゲームシステムを実際にプレイし、スキルツリーの動作を確認する。
-発見したバグ・知見はレポートとして記録する。
+現在 9/59 スキル（SANDBOX_001〜006 + BRIDGE_001〜003）まで動作確認済み。
+残り50スキル（SETUP, DATA, SET, TRADE, CHART, IND, RISK, FAIL トラック）について
+E2Eテストを新規作成し、スキル発火・前提条件チェーン・報酬を検証する。
 
-**ゲームファイル**: `C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py`
+**最初の目標**: 10スキルマイルストーン（SETUP_001 追加で +50,000円「見習い投資家」）
 
 ---
 
@@ -25,250 +24,283 @@ backcast.py のゲームシステムを実際にプレイし、スキルツリ�
 
 ### ステップ1: レポートファイルの作成
 
-最初に `D:\Documents\marimo\.claude\plans\my-game-play-report3.md` を作成してください。
-作業中に随時更新します。
-
-記録する内容：
-- ✅/⬜ 各作業項目の完了状態
-- 📝 各ステップの実行ログ（コード・結果・発火したスキル）
-- 💡 発見したバグ・知見
-- 🔧 Tips・トラブルシューティング
+`D:\Documents\marimo\.claude\plans\my-game-play-report4.md` を作成してください。
 
 ---
 
-### ステップ2: 環境準備
+### ステップ2: 既存テスト全スイートの確認
 
-#### 2.1 ゲームリセット（重要）
-
-前回のセッションの進捗が残っているとスキルが発火しません。**必ず以下を実行**してください。
+全7スイートを実行してベースラインを確認します。
 
 ```bash
-# 1. サンプルノートブックをコピー（ゲームファイルをリセット）
-cp /c/Users/sasac/AppData/Roaming/marimo/notebooks/  # 確認
-cp /d/Documents/marimo/src-tauri/sample-notebooks/*.py /c/Users/sasac/AppData/Roaming/marimo/notebooks/
-
-# 2. 進捗ファイルを削除（★最重要★ これを忘れるとスキルが発火しない）
-rm "/c/Users/sasac/AppData/Roaming/marimo/notebooks/.backcast.progress.json"
+cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/ --headed
 ```
 
-> **なぜ進捗ファイルの削除が必要か**
-> `skill_events.py` はモジュールロード時に `.backcast.progress.json` を読み込み、
-> `_triggered_skills` セットを初期化します。ファイルが残っていると前回のスキルが
-> 「発火済み」扱いになり、`emit_skill()` が dedup で弾かれます。
+**期待結果**: 53 passed / 3 fixme / 0 failed
 
-#### 2.2 marimoサーバーの起動
+失敗した場合は `development_docs/game-e2e-review-system.md` の知見1〜35を参照して修正してください。
+
+---
+
+### ステップ3: スキルツリーの全体構造の把握
+
+`frontend/src/components/skill-tree/skill-data.ts` を読んで前提条件グラフを確認してください（すでに本ドキュメント末尾にサマリーあり）。
+
+---
+
+### ステップ4: 新規テストスイートの作成
+
+#### 4.1 SETUP トラック（`setup.spec.ts`）
+
+**ファイル**: `frontend/e2e-tests/game/setup.spec.ts`
+
+| スキルID | タイトル | 前提条件 |
+|---------|---------|---------|
+| SETUP_001 | marimoを起動する | BRIDGE_003 |
+| SETUP_002 | BackcastProをインポート | SETUP_001 |
+| SETUP_003 | Backtestを初期化する | SETUP_002 |
+| SETUP_004 | 初期資金を設定する | SETUP_003 |
+| SETUP_005 | 手数料を設定する | SETUP_003 |
+
+**テストケース方針**:
+- `sandbox.spec.ts` と同じパターンを踏襲
+- `emitSkillEvent(page, "SETUP_001")` でスキルを発火（`__testCompleteSkill` フック経由）
+- SETUP_004・SETUP_005 は SETUP_003 から分岐（並列解放を確認）
+
+```typescript
+// setup.spec.ts の骨格（sandbox.spec.ts を参考に作成）
+import { test, expect } from "@playwright/test";
+import {
+  emitSkillEvent,
+  getSkillStatus,
+  waitForSkillStatus,
+  openSkillTreePanel,
+  resetGameProgress,
+  ensureConnected,
+  getAppUrl,
+} from "./helpers";
+import { SETUP_SKILL_IDS } from "./constants"; // 要追加
+
+const APP = "game_test.py";
+
+test.describe("セットアップトラック", () => {
+  test.beforeEach(async ({ page }, info) => {
+    const needsNavigation = !page.url().includes("game_test.py") || info.retry;
+    if (needsNavigation) {
+      await page.goto(getAppUrl(APP));
+      await page.waitForLoadState("load");  // "networkidle" は使わない（知見35a）
+    }
+    await ensureConnected(page);
+    await openSkillTreePanel(page);
+  });
+
+  test.afterEach(async ({ page }) => {
+    await resetGameProgress(page);
+  });
+
+  test("初期状態: SETUP_001 は locked（BRIDGE_003 未完了）", async ({ page }) => {
+    expect(await getSkillStatus(page, "SETUP_001")).toBe("locked");
+  });
+
+  test("BRIDGE_003 完了後、SETUP_001 が unlocked になる", async ({ page }) => {
+    await emitSkillEvent(page, "BRIDGE_003");
+    await waitForSkillStatus(page, "SETUP_001", "unlocked");
+    expect(await getSkillStatus(page, "SETUP_001")).toBe("unlocked");
+  });
+
+  test("SETUP_001〜003 チェーン完了", async ({ page }) => {
+    for (const id of ["BRIDGE_003", "SETUP_001", "SETUP_002", "SETUP_003"]) {
+      await emitSkillEvent(page, id);
+    }
+    await waitForSkillStatus(page, "SETUP_003", "completed");
+    // SETUP_004・SETUP_005 が並列解放される
+    await waitForSkillStatus(page, "SETUP_004", "unlocked");
+    await waitForSkillStatus(page, "SETUP_005", "unlocked");
+  });
+
+  // ... 他のテストケース
+});
+```
+
+#### 4.2 constants.ts への SETUP 定数追加
+
+`frontend/e2e-tests/game/constants.ts` に以下を追加:
+
+```typescript
+export const SETUP_SKILL_IDS = [
+  "SETUP_001", "SETUP_002", "SETUP_003", "SETUP_004", "SETUP_005",
+] as const;
+
+export const DATA_SKILL_IDS = [
+  "DATA_001", "DATA_002", "DATA_003", "DATA_004", "DATA_005", "DATA_006",
+] as const;
+
+export const SET_SKILL_IDS = ["SET_001", "SET_002", "SET_003"] as const;
+
+export const TRADE_SKILL_IDS = [
+  "TRADE_001", "TRADE_002", "TRADE_003", "TRADE_004", "TRADE_005",
+  "TRADE_006", "TRADE_007", "TRADE_008", "TRADE_009", "TRADE_010",
+] as const;
+```
+
+#### 4.3 DATA トラック（`data.spec.ts`）
+
+| スキルID | タイトル | 前提条件 |
+|---------|---------|---------|
+| DATA_001 | get_stock_dailyを使う | SETUP_002 |
+| DATA_002 | 株価データを確認する | DATA_001 |
+| DATA_003 | OHLCV列を理解する | DATA_002 |
+| DATA_004 | 別の銘柄を取得する | DATA_001 |
+| DATA_005 | 複数銘柄を取得する | DATA_004 |
+| DATA_006 | 日付範囲を指定する | DATA_001 |
+
+**注意**: DATA_002・DATA_004・DATA_006 は DATA_001 から分岐（3方向並列解放を確認）
+
+#### 4.4 10スキルマイルストーンの確認テスト
+
+`ui.spec.ts` 等に以下のテストを追加または新規ファイルとして作成:
+
+```typescript
+test("10スキルマイルストーンで「見習い投資家」称号とボーナス", async ({ page }) => {
+  // SANDBOX_001〜006 + BRIDGE_001〜003 + SETUP_001 の順で発火
+  const chain = [
+    "SANDBOX_001", "SANDBOX_002", "SANDBOX_003", "SANDBOX_004",
+    "SANDBOX_005", "SANDBOX_006",
+    "BRIDGE_001", "BRIDGE_002", "BRIDGE_003",
+    "SETUP_001",
+  ];
+  for (const id of chain) {
+    await emitSkillEvent(page, id);
+  }
+  // バッジが 10/59 になっていることを確認
+  const panel = page.locator('[data-testid="skill-tree-panel"]');
+  await expect(panel).toContainText("10/59 スキル");
+  // 現金が増えていることを確認（310,000 + 10,000 + 50,000マイルストーン = 370,000）
+  await expect(panel).toContainText(/¥[3-9][0-9,]{4,}/);
+});
+```
+
+---
+
+### ステップ5: ビルドと全スイート再実行
+
+ソースを変更した場合は必ずビルド:
 
 ```bash
-cd /d/Documents/marimo
-pnpm dev
-```
-
-バックグラウンド起動して次の操作に進んでも構いません。
-
-#### 2.3 backcast.pyを開く
-
-Playwright で以下の URL を開きます：
-
-```
-http://localhost:2718/?file=C%3A%5CUsers%5Csasac%5CAppData%5CRoaming%5Cmarimo%5Cnotebooks%5Cbackcast.py
-```
-
-> ⚠️ `http://localhost:2718/home` は 404 になります。上記 URL を直接使用してください。
-
-#### 2.4 接続確認とカーネル再起動
-
-```javascript
-// Playwright で実行する接続待機コード
-await page.waitForSelector('[data-testid="backend-status"]', { timeout: 30000 });
-
-// "Reconnected" バナーが出た場合は Restart でカーネルを再起動する
-// （カーネルがメモリ上に古い _triggered_skills を持っている可能性があるため）
-const reconnectBanner = page.locator('text=Reconnected');
-if (await reconnectBanner.isVisible().catch(() => false)) {
-  // "Restart" ボタンをクリック → "Confirm Restart" をクリック
-}
+cd d:/Documents/marimo/frontend && pnpm turbo build && cp -R dist/* ../marimo/_static/
+cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/ --headed
 ```
 
 ---
 
-### ステップ3: ゲームプレイ
+### ステップ6: 知見ドキュメントと SKILL.md の更新
 
-#### 3.1 重要な前提知識
-
-**サンプル版 backcast.py の構成**（3セルのみ）:
-
-| セル | 内容 |
-|------|------|
-| cell-1 | ウェルカムメッセージ（markdown） |
-| cell-2 | `bt.chart("7203")` |
-| cell-3 | コメントのみ（プレイスホルダー） |
-
-`auto_instantiate=True` は**ありません**。**cell-2 を手動で実行**するところから始まります。
-
-ゲームの操作はすべて **新しいセルを追加して実行** します（既存セルに書かれていない）。
-
-#### 3.2 セルの追加と実行方法
-
-**有効なパターン（実証済み）**:
-
-```javascript
-// Playwright での新規セル追加→コード入力→実行
-async function addAndRunCell(page, code) {
-  // 1. Python ボタンで新規セル追加
-  await page.getByRole('button', { name: 'Python', exact: true }).click();
-  await page.waitForTimeout(800);
-
-  // 2. 最後の textbox にコードを入力
-  const textboxes = page.locator('[role="textbox"]');
-  const count = await textboxes.count();
-  const lastTextbox = textboxes.nth(count - 1);
-  await lastTextbox.click();
-  await lastTextbox.fill(code);
-  await page.waitForTimeout(300);
-
-  // 3. Ctrl+Enter で実行（grid レイアウトでも有効）
-  await page.keyboard.press('Control+Enter');
-  await page.waitForTimeout(2000);  // スキルイベント処理待ち
-
-  // 4. トースト通知を閉じる（UI を遮らないよう）
-  const closeButtons = page.locator(
-    '[role="region"][aria-label="Notifications (F8)"] button'
-  );
-  const btnCount = await closeButtons.count();
-  for (let i = 0; i < btnCount; i++) {
-    await closeButtons.first().click().catch(() => {});
-    await page.waitForTimeout(300);
-  }
-
-  // 5. スキルツリーが自動で開いた場合は閉じる
-  const closeDialog = page.getByRole('button', { name: 'Close', exact: true });
-  if (await closeDialog.isVisible().catch(() => false)) {
-    await closeDialog.click();
-    await page.waitForTimeout(500);
-  }
-}
-```
-
-#### 3.3 スキル取得シーケンス（実証済み）
-
-**まず cell-2（bt.chart）を手動実行**してから、以下の順で新規セルを追加・実行します。
-
-| ステップ | コード | 期待されるスキル | コンソール確認 |
-|---------|--------|----------------|--------------|
-| cell-2 を実行 | `bt.chart("7203")` | **SANDBOX_001** ✓ | `[SkillHandler] Received skill event: SANDBOX_001` |
-| 新規セル追加 | `bt.buy()` | **SANDBOX_002** ✓ | `[SkillHandler] Received skill event: SANDBOX_002` |
-| 新規セル追加 | `bt.trades()` | **SANDBOX_003** ✓（空リストでも発火！） | `[SkillHandler] Received skill event: SANDBOX_003` |
-| 新規セル追加 | `bt.sell()` | **SANDBOX_004** ✓ | `[SkillHandler] Received skill event: SANDBOX_004` |
-| 新規セル追加 | `bt.chart("7203")` | **SANDBOX_005** ✓ + **SANDBOX_006** ✓（自動） | 3つの SANDBOX_ イベント |
-| 新規セル追加 | `bt.reveal_data()` | **BRIDGE_001** ✓ | `[SkillHandler] Received skill event: BRIDGE_001` |
-| 新規セル追加 | `bt.get_stock_daily("7203")` | **BRIDGE_002** ✓ + **BRIDGE_003** ✓（自動） | BRIDGE_ イベント×3 |
-
-**期待される最終スコア**: 9/59 スキル、Equity ¥310,000
-
-#### 3.4 スキル発火タイミングの詳細
-
-- **SANDBOX_001**: `bt.chart()` を呼ぶと発火（何度でも呼べるが dedup で1回のみ）
-- **SANDBOX_002**: `bt.buy()` を呼ぶと発火
-- **SANDBOX_003**: `bt.trades()` を呼ぶと発火（**`bt.step()` は不要**、空リストでもOK）
-- **SANDBOX_004**: `bt.sell()` を呼ぶと発火
-- **SANDBOX_005**: SANDBOX_003 と SANDBOX_004 が両方完了後に `bt.chart()` を呼ぶと発火
-- **SANDBOX_006**: SANDBOX_001〜005 の5個完了で**自動発火**
-- **BRIDGE_001**: SANDBOX_006 完了後に `bt.reveal_data()` を呼ぶと発火
-- **BRIDGE_002**: `bt.get_stock_daily()` を呼ぶと発火（`bt.chart()` 経由では発火しない）
-- **BRIDGE_003**: BRIDGE_002 完了時に**自動発火**
-
----
-
-### ステップ4: 確認・レポート作成
-
-#### 4.1 スキルツリーの確認
-
-```javascript
-// スキルツリーボタンをクリック
-await page.locator('[data-testid="skill-tree-button"]').click();
-await page.waitForTimeout(1000);
-
-// スキル数を取得
-const dialog = page.locator('[role="dialog"]');
-const text = await dialog.textContent();
-const count = text.match(/(\d+)\/59 スキル/)?.[1];
-console.log(`スキル数: ${count}/59`);
-```
-
-#### 4.2 スクリーンショット撮影
-
-```javascript
-// ゲーム画面
-await page.screenshot({ path: 'game-final-state.png' });
-
-// スキルツリー（ダイアログが開いた状態で撮影）
-await page.screenshot({ path: 'skill-tree-final.png' });
-```
-
-#### 4.3 体験レポートをレポートファイルに記載
-
-以下の観点でレポートを作成する：
-- 各スキルが期待通りのタイミングで発火したか
-- UIフィードバック（トースト通知、スキルツリー更新）は正常か
-- 新たに発見したバグ・改善提案
-- v3 時点の情報との差分
-
----
-
-## ⚠️ 重要な注意点
-
-### gridレイアウトでのセル操作
-
-backcast.py は `app = marimo.App(width="grid")` のため、セルは react-flow ノード内に配置されています。
-
-- `[data-testid="cell"]` は**存在しない**
-- **有効な操作**: textbox を `click()` → `fill()` → `Ctrl+Enter`
-- `[data-testid="rf__node-{id}"]` からの run-button クリックも可能だが、Ctrl+Enter の方がシンプル
-- トースト通知がセル上に重なることがある → 出たら閉じる
-
-### よくある落とし穴
-
-| 落とし穴 | 対処法 |
-|---------|--------|
-| スキルが一切発火しない | `.backcast.progress.json` を削除してカーネル再起動 |
-| run ボタンクリックで cell options ダイアログが開く | Escape で閉じて `Ctrl+Enter` を使う |
-| 新規セルの textbox が見つからない | `page.locator('[role="textbox"]').last()` で最後の textbox を取得 |
-| `Cell ID null cannot be found` 警告 | 無視して良い（既知の軽微な問題、スキル発火に影響なし） |
-| スキルツリーが自動で開く | `page.getByRole('button', { name: 'Close', exact: true }).click()` で閉じる |
-
----
-
-## ✅ 修正済みバグ（v3 に記載されていたが既に解消）
-
-| バグ名 | 修正内容 |
-|--------|---------|
-| ~~BRIDGE_001 未カウント~~ | `pendingSkillsAtom` による保留キュー機構で修正済み |
-| ~~Position表示バグ~~ | `headless_broadcast.py` + `backtest-hud.tsx` で型安全変換を追加 |
-| ~~SANDBOX_005 重複送信~~ | `chart()` に `"SANDBOX_005" not in s` ガードを追加 |
-
-詳細は `development_docs/issues/` を参照。
-
----
-
-## 📚 参考ドキュメント
-
-1. **`docs/game-guide.md`** - ゲームの概要
-2. **`development_docs/game-e2e-review-system.md`** - E2Eテストと知見
-3. **`C:\Users\sasac\AppData\Roaming\marimo\notebooks\game_setup.py`** - ゲームロジック（スキル発火条件）
-4. **`development_docs/issues/`** - 既知バグとその修正内容
-5. **`frontend/e2e-tests/game/helpers.ts`** - Playwright ヘルパー関数（`runNewCellInGrid` など）
+新たな知見があれば追記:
+- `development_docs/game-e2e-review-system.md`（知見36以降）
+- `D:\Documents\marimo\.claude\skills\game-e2e\SKILL.md`
 
 ---
 
 ## ✅ 期待される成果物
 
-1. **`D:\Documents\marimo\.claude\plans\my-game-play-report3.md`**
-   - 全ステップの実行ログ
-   - 発見したバグ・知見・改善提案
+1. **`D:\Documents\marimo\.claude\plans\my-game-play-report4.md`**
+   - 全スイート実行ログ（ベースライン確認）
+   - 新規作成したテストの結果
 
-2. **スクリーンショット**（ゲーム最終画面、スキルツリー最終状態）
+2. **新規テストファイル**
+   - `frontend/e2e-tests/game/setup.spec.ts`（SETUP_001〜005）
+   - `frontend/e2e-tests/game/data.spec.ts`（DATA_001〜006）※余力があれば
 
-3. **スキル獲得確認**
-   - 目標スキル数: **9/59**
-   - SANDBOX_001〜006（6個）+ BRIDGE_001〜003（3個）が完了状態
-   - Equity: **¥310,000**
+3. **`frontend/e2e-tests/game/constants.ts` の更新**
+   - SETUP_SKILL_IDS, DATA_SKILL_IDS, SET_SKILL_IDS, TRADE_SKILL_IDS 追加
+
+4. **スキル獲得確認**
+   - 目標: 10スキルマイルストーン突破（「見習い投資家」）
+   - 余力があれば 20スキル（「新進トレーダー」）まで
+
+---
+
+## 📚 スキルツリー 前提条件チェーン サマリー
+
+```
+SANDBOX_001 → SANDBOX_002 → SANDBOX_003 ─┐
+                           → SANDBOX_004 ─┤→ SANDBOX_005 → SANDBOX_006
+                                          └─ FAIL_001
+                                             FAIL_002（SANDBOX_004 + FAIL_001）
+
+SANDBOX_006 → BRIDGE_001 → BRIDGE_002 → BRIDGE_003
+                                            ↓
+BRIDGE_003 → SETUP_001 → SETUP_002 ─→ SETUP_003 → SETUP_004
+                       └→ DATA_001 ─┘              → SETUP_005
+                            ↓
+                  DATA_002 → DATA_003
+                  DATA_004 → DATA_005
+                  DATA_006
+
+SETUP_003 + DATA_001 → SET_001 → SET_002
+                SET_001 + DATA_005 → SET_003
+
+SET_001 → TRADE_001 → TRADE_002
+                    → TRADE_003 → TRADE_004
+                               → TRADE_007 → TRADE_008
+                                           → RISK_005 → RISK_006 → RISK_007 → RISK_008
+                                                                  → RISK_010
+                    → TRADE_006
+                    → RISK_001 → RISK_002 → RISK_003 → RISK_004
+                    → RISK_009
+SET_001 → TRADE_009 → TRADE_010
+SET_001 → CHART_001 → CHART_002（+ TRADE_003）
+                    → CHART_003（+ IND_001）→ CHART_004
+
+DATA_002 → IND_001 → IND_002 → IND_003 → IND_004
+                             → IND_003 + IND_005 → IND_008
+                    → IND_005 → IND_006
+                    → IND_007
+                    → IND_009
+
+TRADE_001 → FAIL_003（資金0で発火）
+```
+
+## マイルストーン一覧
+
+| スキル数 | ボーナス | 称号/アイテム |
+|---------|---------|-------------|
+| 10 | +50,000円 | 「見習い投資家」 |
+| 20 | +100,000円 | 「新進トレーダー」 |
+| 35 | +200,000円 | 米国株ETF |
+| 50 | +400,000円 | 「Backcastエキスパート」 |
+| 58 | +600,000円 | 「マスター投資家」 |
+
+## 現在の到達スコア
+
+- **取得済みスキル**: 9/59（SANDBOX_001〜006 + BRIDGE_001〜003）
+- **現在のEquity**: ¥310,000
+  - SANDBOX_001: +30,000 / SANDBOX_002: +20,000 / SANDBOX_003: +10,000
+  - SANDBOX_004: +20,000 / SANDBOX_005: +20,000 / SANDBOX_006: +50,000
+  - BRIDGE_001: +15,000 / BRIDGE_002: +20,000 / BRIDGE_003: +25,000
+
+---
+
+## ⚠️ 重要な制約・注意事項
+
+### テスト作成時の必須事項
+
+- `page.waitForLoadState("load")` を使う（`"networkidle"` は永遠に到達しない・知見35a）
+- `ensureConnected()` 後に `openSkillTreePanel()` を呼ぶ（順序重要）
+- `afterEach` で必ず `resetGameProgress()` を呼ぶ（知見20）
+- Reconnected バナーが毎テスト出るのは**正常**（知見21・ensureConnected が自動 dismiss）
+- `page.reload()` は使わない（WebSocket 切断が起きる）
+
+### スキル発火メカニズム
+
+- E2Eテストでは `window.__testCompleteSkill(skillId)` = `emitSkillEvent(page, skillId)` でスキルを発火
+- フルモードの Python 関数（`bt.buy()` 等）は `game_setup.py` にのみ存在し、SETUP/DATA/TRADE等のフルトラックは Python 関数がない → テストは全て `emitSkillEvent` で完結
+- 前提条件チェックは `completeSkillWithRewardAtom` が行う（未完了の前提があれば completed にならない）
+
+### 参照ドキュメント
+
+1. **`development_docs/game-e2e-review-system.md`** — 知見1〜35、テスト設計思想
+2. **`frontend/e2e-tests/game/helpers.ts`** — 共通ヘルパー（`emitSkillEvent`・`waitForSkillStatus`・`runNewCellInGrid` 等）
+3. **`frontend/e2e-tests/game/constants.ts`** — 定数（`TOTAL_SKILL_COUNT`, `SANDBOX_SKILL_IDS` 等）
+4. **`frontend/e2e-tests/game/sandbox.spec.ts`** — テスト構造のリファレンス（10件・全通過確認済み）
+5. **`frontend/src/components/skill-tree/skill-data.ts`** — 全59スキルの定義・前提条件

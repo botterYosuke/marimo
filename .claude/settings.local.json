@@ -11,7 +11,10 @@
       "mcp__playwright__browser_tabs",
       "Bash(tasklist:*)",
       "Bash(kill:*)",
-      "Read(//c/Users/sasai/.claude/plans/**)"
+      "Read(//c/Users/sasai/.claude/plans/**)",
+      "Bash(whereis:*)",
+      "Bash(command -v:*)",
+      "Bash(/c/Users/sasac/anaconda3/python.exe -m venv:*)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\marimo\\.claude\\skills",
