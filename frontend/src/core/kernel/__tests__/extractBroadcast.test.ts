@@ -115,7 +115,7 @@ describe("extractAndSendBroadcastMessages", () => {
 
   describe("エッジケース", () => {
     it("marimo-broadcast を含まない HTML では何もしない", () => {
-      const html = `<div>Hello World</div>`;
+      const html = "<div>Hello World</div>";
 
       extractAndSendBroadcastMessages(html);
 
@@ -139,7 +139,7 @@ describe("extractAndSendBroadcastMessages", () => {
       };
       const eventB64 = btoa(JSON.stringify(event));
       const html =
-        `<marimo-broadcast ` +
+        "<marimo-broadcast " +
         `id="skill-SANDBOX_001-1700000000000" ` +
         `channel="skill_event_channel" ` +
         `type="skill_complete" ` +
@@ -164,7 +164,7 @@ describe("extractAndSendBroadcastMessages", () => {
       };
       const eventB64 = btoa(JSON.stringify(event));
       const html =
-        `<marimo-broadcast ` +
+        "<marimo-broadcast " +
         `id="skill-FAIL_001-1700000000000" ` +
         `channel="skill_event_channel" ` +
         `type="skill_complete" ` +

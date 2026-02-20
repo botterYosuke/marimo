@@ -3,6 +3,7 @@
 import { getInjectionTemplate } from "./injection-templates";
 import type { GameProgress } from "./types";
 import { extractAndSendBroadcastMessages } from "@/core/kernel/handlers";
+import { replayBufferedMessages } from "@/utils/broadcastChannel";
 
 /**
  * Electron API の型定義
@@ -183,6 +184,11 @@ export function setupSkillEventListener(
   };
 
   channel.addEventListener("message", handleMessage);
+
+  // Replay cached messages from before this listener mounted.
+  // This handles reconnection scenarios where broadcasts were sent
+  // before React components finished mounting.
+  replayBufferedMessages("skill_event_channel", handleMessage);
 
   // クリーンアップ関数を返す
   return () => {

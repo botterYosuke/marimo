@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useSetAtom } from "jotai";
 import { initProgressFromFileAtom } from "@/components/skill-tree";
+import { replayBufferedMessages } from "@/utils/broadcastChannel";
 
 const PROGRESS_CHANNEL = "progress_channel";
 
@@ -24,7 +25,7 @@ export function useProgressSync(): void {
 
     const channel = new BroadcastChannel(PROGRESS_CHANNEL);
 
-    channel.onmessage = (event: MessageEvent) => {
+    const handleMessage = (event: MessageEvent) => {
       // テスト中の suppressProgressSync フラグが立っていれば progress_channel を無視（知見 39）
       // auto_instantiate の broadcast_progress() がテスト中に割り込まないようにする
       if (
@@ -43,6 +44,13 @@ export function useProgressSync(): void {
         // Silently ignore parse errors
       }
     };
+
+    channel.onmessage = handleMessage;
+
+    // Replay cached messages from before this listener mounted.
+    // This handles reconnection scenarios where broadcast_progress()
+    // was sent before this hook finished mounting.
+    replayBufferedMessages(PROGRESS_CHANNEL, handleMessage);
 
     return () => {
       channel.close();

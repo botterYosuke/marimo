@@ -19,7 +19,8 @@
       "Skill(game-e2e:*)",
       "Bash(uv lock:*)",
       "Bash(uv build:*)",
-      "Bash(uv publish:*)"
+      "Bash(uv publish:*)",
+      "Bash(pnpm lint:*)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\marimo\\.claude\\skills",
