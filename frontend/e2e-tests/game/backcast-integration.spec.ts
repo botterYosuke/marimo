@@ -23,6 +23,15 @@
  * emitSkillEvent を複数回呼ぶと報酬トーストが積み上がり、
  * 下部ツールバーの「Python」ボタンを遮蔽する。
  * dismissAllNotifications() を呼んでから runNewCellInGrid() を使う。
+ *
+ * ## バグ修正履歴
+ *
+ * my-game-play-report2.md (2026-02-20) で以下のバグ修正を確認:
+ * - BRIDGE_001: フロントエンドカウント問題が修正済み（正常動作）
+ * - Position表示: "[object Object]"バグが修正済み（正常表示）
+ * - SANDBOX_003: 発火条件が簡略化（step()不要、UX向上）
+ *
+ * handoff-backcast-e2e-implementation.md の既知バグ記載は古い情報です。
  */
 
 import { test, expect, type BrowserContext } from "@playwright/test";
@@ -157,20 +166,17 @@ test.describe("backcast.py 統合テスト", () => {
   // テスト 2: SANDBOX_003 取得条件の検証（重要）
   // -------------------------------------------------------------------------
 
-  test("SANDBOX_003 は step() 後の trades() で取得される（cell 構造の確認）", async ({
+  test("SANDBOX_003 は buy() 後の trades() で即座に取得される", async ({
     page,
   }) => {
     // Python セル実行を複数回行うため、タイムアウトを延長する
     test.setTimeout(90_000);
-    // game_setup.py の条件:
-    //   if "SANDBOX_002" in s and len(bt.trades) > 0:
+    // game_setup.py の条件 (L136-139):
+    //   if "SANDBOX_002" in s:
     //       emit_skill("SANDBOX_003")
     //
-    // bt.buy() だけでは bt.trades は空（注文未決済）
-    // bt.step() で時間を進めて注文を決済すると bt.trades が埋まる
-    //
-    // backcast.py には cell 9(step) → cell 10(buy) → cell 11(step) → cell 12(trades) の
-    // 正しいシーケンスが配置済みであることを確認する
+    // bt.trades が空でも buy() 後に呼んだこと自体を評価する（仕様変更）
+    // 従来は len(bt.trades) > 0 が条件だったが、UX向上のため簡略化された
 
     // ---- Part A: セル構造確認 (ダイアログ不要) ----
     // ⚠️ 前回テスト実行で追加されたセル（セミコロン区切りの複合セル等）は除外する
@@ -220,32 +226,22 @@ test.describe("backcast.py 統合テスト", () => {
     // 報酬トースト（SANDBOX_001, 002 の報酬）が Python ボタンを遮蔽しないよう除去
     await dismissAllNotifications(page);
 
-    // ---- Part D: bt.trades() 単独実行 → SANDBOX_003 は発火しないはず ----
-    // 1 セルで実行してタイムアウトを節約する
-
-    await runNewCellInGrid(page, "bt.trades()");
-    await page.waitForTimeout(1000);
-
-    // ---- Part E: 正しいシーケンス: step → buy → step → trades ----
+    // ---- 正しいシーケンス: buy → trades（step 不要） ----
     // ⚠️ バックエンドが auto_instantiate で既に実行済みの場合、dedup により再発火しない
-    // 4 つのコマンドを 1 セルにまとめてタイムアウトを節約する
 
-    await runNewCellInGrid(
-      page,
-      "bt.step(); bt.buy(); bt.step(); bt.trades()",
-    );
+    await runNewCellInGrid(page, "bt.buy(); bt.trades()");
     await page.waitForTimeout(2000);
 
-    // ---- Part F: 状態確認 ----
+    // ---- 状態確認 ----
 
     await openSkillTreePanel(page);
     const sandbox003Status = await getSkillStatus(page, "SANDBOX_003");
+
     console.log(
-      `[SANDBOX_003テスト] シーケンス完了後 SANDBOX_003: ${sandbox003Status}`,
+      `[SANDBOX_003テスト] ✅ 仕様変更確認: buy()後にtrades()で即発火 (ステータス: ${sandbox003Status})`,
     );
 
-    // バックエンド未実行の場合: completed
-    // バックエンド実行済みの場合: unlocked のまま（dedup）
+    // バックエンド未実行なら completed、実行済みなら dedup により unlocked
     expect(["completed", "unlocked"]).toContain(sandbox003Status);
   });
 
@@ -253,16 +249,16 @@ test.describe("backcast.py 統合テスト", () => {
   // テスト 3: BRIDGE_001 がフロントエンドでカウントされない問題
   // -------------------------------------------------------------------------
 
-  test("BRIDGE_001 がフロントエンドでカウントされない（バグ確認）", async ({
+  test("BRIDGE_001 がフロントエンドで正常にカウントされる（バグ修正済み）", async ({
     page,
   }) => {
-    // 現象（手動プレイテストで確認済み）:
-    //   bt.reveal_data() 実行 → コンソール: "[SkillHandler] Received skill event: BRIDGE_001"
-    //   しかしスキルツリーのカウントが増えない（8/59 のまま）
-    //   BRIDGE_001 ノードは青点線（未完了）のまま
+    // 現象（my-game-play-report2.md で確認）:
+    //   バグは修正済み。BRIDGE_001 が正常にカウントされ、9/59 達成を確認。
+    //   emit_skill("BRIDGE_001") が game_setup.py L130 で明示的に呼ばれ、
+    //   フロントエンドも正常に処理している。
     //
     // このテストでは Python パイプライン全体経由で BRIDGE_001 を送信し、
-    // フロントエンドが正しく処理するか（またはバグを再現するか）を検証する
+    // フロントエンドが正しく処理することを検証する
 
     await openSkillTreePanel(page);
 
@@ -309,40 +305,23 @@ test.describe("backcast.py 統合テスト", () => {
     const bridge001Status = await getSkillStatus(page, "BRIDGE_001");
 
     console.log(
-      `[BRIDGE_001テスト] BRIDGE_001 送信後カウント: ${countAfterBridge001}, ステータス: ${bridge001Status}`,
+      `[BRIDGE_001テスト] ✅ バグ修正確認: BRIDGE_001 が正常に完了 (カウント: ${countAfterBridge001}, ステータス: ${bridge001Status})`,
     );
 
-    if (bridge001Status === "completed") {
-      // emitSkillViaPython 経由では完了 → バグは Python→WebSocket 側の固有挙動の可能性
-      console.log(
-        "[BRIDGE_001テスト] emitSkillViaPython 経由では BRIDGE_001 が完了。",
-        "バグは bt.reveal_data() のゲームロジック固有の問題の可能性あり。",
-      );
-      expect(countAfterBridge001).toBeGreaterThan(countBeforeBridge001);
-    } else {
-      // バグ再現: BRIDGE_001 が completed にならない
-      console.log(
-        "⚠️ [BRIDGE_001テスト] バグ確認: BRIDGE_001 は completed にならない",
-      );
-      // バグの存在を明示的にアサート（バグ修正後はここが失敗するのでその時に修正する）
-      expect(bridge001Status).toBe("unlocked");
-      expect(countAfterBridge001).toBe(countBeforeBridge001);
-    }
+    expect(bridge001Status).toBe("completed");
+    expect(countAfterBridge001).toBeGreaterThan(countBeforeBridge001);
   });
 
   // -------------------------------------------------------------------------
   // テスト 4: Position 表示が [object Object] になる問題
   // -------------------------------------------------------------------------
 
-  test("Position 表示が [object Object] になる問題（バグ確認）", async ({
+  test("Position が正常に表示される（バグ修正済み）", async ({
     page,
   }) => {
-    // 現象（手動プレイテストで確認済み）:
-    //   bt.buy() 実行後、HUD の Position フィールドが
-    //   "[object Object] shares" と表示される（数値ではなくオブジェクト）
-    //
-    // 原因: backtest-hud.tsx: value={`${state.position} shares`}
-    //       state.position が number 型を期待しているが Python バックエンドがオブジェクトを送信
+    // 現象（my-game-play-report2.md で確認）:
+    //   バグは修正済み。"0 shares" と正常表示される。
+    //   publish_state_headless() で状態更新時に正しくレンダリング。
 
     await runNewCellInGrid(page, "bt.buy()");
     await page.waitForTimeout(2000);
@@ -350,24 +329,11 @@ test.describe("backcast.py 統合テスト", () => {
     const sharesLocator = page.locator("text=/.*shares/").first();
     const positionText = await sharesLocator.textContent().catch(() => null);
 
-    console.log(`[Position表示テスト] Position テキスト: "${positionText}"`);
-
     if (positionText !== null) {
-      const hasObjectObjectBug = positionText.includes("[object Object]");
-
-      if (hasObjectObjectBug) {
-        console.log(
-          '⚠️ [Position表示テスト] バグ確認: "[object Object] shares" が表示されています',
-        );
-        // バグの存在を明示的にアサート（修正後は以下を変更する）
-        expect(positionText).toMatch(/\[object Object\] shares/);
-      } else {
-        console.log(
-          `[Position表示テスト] Position が正常表示: "${positionText}"`,
-        );
-        // 数値 + " shares" の形式
-        expect(positionText).toMatch(/^\d+(\.\d+)?\s*shares/);
-      }
+      console.log(
+        `[Position表示テスト] ✅ バグ修正確認: Position が正常表示 "${positionText}"`,
+      );
+      expect(positionText).toMatch(/^\d+(\.\d+)?\s*shares/);
     } else {
       console.log(
         "[Position表示テスト] Position テキストが見つかりませんでした",
@@ -451,7 +417,8 @@ test.describe("backcast.py 統合テスト", () => {
   test("backcast.py のセル構造が SANDBOX_003 取得の正しいシーケンスになっている", async ({
     page,
   }) => {
-    // SANDBOX_003 取得には bt.step() → bt.buy() → bt.step() → bt.trades() の順序が必要。
+    // SANDBOX_003 取得には bt.buy() → bt.trades() の順序があれば十分。
+    // （step() による時間進行は必須ではない）
     // backcast.py にこのシーケンスが正しく配置されていることを確認する構造テスト。
 
     // ⚠️ 前回テスト実行で追加されたセル（セミコロン区切りの複合セル等）は除外する
