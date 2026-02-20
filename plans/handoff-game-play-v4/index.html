@@ -1,0 +1,1872 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>作業依頼: ゲームE2Eテストを全トラックに拡張してください - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#e2e" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              作業依頼: ゲームE2Eテストを全トラックに拡張してください
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_backend_and_mcp_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide-custom-wheel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-widget-caching-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ui-switch-state-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-backend-sync.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-performance.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend-freeze-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grid-layout-auto-placement.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../broadcast-channel-hud.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-theme.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skill-tree-panel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../electron-startup-config.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-deploy.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-integration-fixes.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 目的
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 作業手順
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 作業手順">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ1: レポートファイルの作成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ2: 既存テスト全スイートの確認
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ3: スキルツリーの全体構造の把握
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ4: 新規テストスイートの作成
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ステップ4: 新規テストスイートの作成">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-setup-setupspects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 SETUP トラック（setup.spec.ts）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-constantsts-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 constants.ts への SETUP 定数追加
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-data-dataspects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 DATA トラック（data.spec.ts）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 10スキルマイルストーンの確認テスト
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ5: ビルドと全スイート再実行
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-skillmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ6: 知見ドキュメントと SKILL.md の更新
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 期待される成果物
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 スキルツリー 前提条件チェーン サマリー
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        マイルストーン一覧
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        現在の到達スコア
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ 重要な制約・注意事項
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚠️ 重要な制約・注意事項">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テスト作成時の必須事項
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキル発火メカニズム
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        参照ドキュメント
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="e2e">作業依頼: ゲームE2Eテストを全トラックに拡張してください<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-20（v5 — sandbox.spec.ts 10/10 確認済み・次フェーズへ）</p>
+<blockquote>
+<p><strong>v4 からの主な変更</strong>
+- sandbox.spec.ts（10件）の全テスト合格を確認済み（3.4分）
+- 全7スイート（53 passed / 3 fixme）が知見ドキュメントに記録済み
+- 次の目標: SETUP/DATA/SET/TRADE トラックのE2Eテストを新規作成
+- SKILL.md も最新化済み（知見1〜35、テストスイート一覧追加）</p>
+</blockquote>
+<hr />
+<h2 id="_1">🎯 目的<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>現在 9/59 スキル（SANDBOX_001〜006 + BRIDGE_001〜003）まで動作確認済み。
+残り50スキル（SETUP, DATA, SET, TRADE, CHART, IND, RISK, FAIL トラック）について
+E2Eテストを新規作成し、スキル発火・前提条件チェーン・報酬を検証する。</p>
+<p><strong>最初の目標</strong>: 10スキルマイルストーン（SETUP_001 追加で +50,000円「見習い投資家」）</p>
+<hr />
+<h2 id="_2">📋 作業手順<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="1">ステップ1: レポートファイルの作成<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
+<p><code>D:\Documents\marimo\.claude\plans\my-game-play-report4.md</code> を作成してください。</p>
+<hr />
+<h3 id="2">ステップ2: 既存テスト全スイートの確認<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<p>全7スイートを実行してベースラインを確認します。</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>d:/Documents/marimo/frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/<span class="w"> </span>--headed
+</code></pre></div>
+<p><strong>期待結果</strong>: 53 passed / 3 fixme / 0 failed</p>
+<p>失敗した場合は <code>development_docs/game-e2e-review-system.md</code> の知見1〜35を参照して修正してください。</p>
+<hr />
+<h3 id="3">ステップ3: スキルツリーの全体構造の把握<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
+<p><code>frontend/src/components/skill-tree/skill-data.ts</code> を読んで前提条件グラフを確認してください（すでに本ドキュメント末尾にサマリーあり）。</p>
+<hr />
+<h3 id="4">ステップ4: 新規テストスイートの作成<a class="headerlink" href="#4" title="Permanent link">&para;</a></h3>
+<h4 id="41-setup-setupspects">4.1 SETUP トラック（<code>setup.spec.ts</code>）<a class="headerlink" href="#41-setup-setupspects" title="Permanent link">&para;</a></h4>
+<p><strong>ファイル</strong>: <code>frontend/e2e-tests/game/setup.spec.ts</code></p>
+<table>
+<thead>
+<tr>
+<th>スキルID</th>
+<th>タイトル</th>
+<th>前提条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SETUP_001</td>
+<td>marimoを起動する</td>
+<td>BRIDGE_003</td>
+</tr>
+<tr>
+<td>SETUP_002</td>
+<td>BackcastProをインポート</td>
+<td>SETUP_001</td>
+</tr>
+<tr>
+<td>SETUP_003</td>
+<td>Backtestを初期化する</td>
+<td>SETUP_002</td>
+</tr>
+<tr>
+<td>SETUP_004</td>
+<td>初期資金を設定する</td>
+<td>SETUP_003</td>
+</tr>
+<tr>
+<td>SETUP_005</td>
+<td>手数料を設定する</td>
+<td>SETUP_003</td>
+</tr>
+</tbody>
+</table>
+<p><strong>テストケース方針</strong>:
+- <code>sandbox.spec.ts</code> と同じパターンを踏襲
+- <code>emitSkillEvent(page, "SETUP_001")</code> でスキルを発火（<code>__testCompleteSkill</code> フック経由）
+- SETUP_004・SETUP_005 は SETUP_003 から分岐（並列解放を確認）</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// setup.spec.ts の骨格（sandbox.spec.ts を参考に作成）</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">test</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@playwright/test&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">emitSkillEvent</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">getSkillStatus</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">waitForSkillStatus</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">openSkillTreePanel</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">resetGameProgress</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">ensureConnected</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">getAppUrl</span><span class="p">,</span>
+<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./helpers&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">SETUP_SKILL_IDS</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./constants&quot;</span><span class="p">;</span><span class="w"> </span><span class="c1">// 要追加</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">APP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;game_test.py&quot;</span><span class="p">;</span>
+
+<span class="nx">test</span><span class="p">.</span><span class="nx">describe</span><span class="p">(</span><span class="s2">&quot;セットアップトラック&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">.</span><span class="nx">beforeEach</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">info</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">needsNavigation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="nx">page</span><span class="p">.</span><span class="nx">url</span><span class="p">().</span><span class="nx">includes</span><span class="p">(</span><span class="s2">&quot;game_test.py&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">info</span><span class="p">.</span><span class="nx">retry</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">needsNavigation</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="nx">getAppUrl</span><span class="p">(</span><span class="nx">APP</span><span class="p">));</span>
+<span class="w">      </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForLoadState</span><span class="p">(</span><span class="s2">&quot;load&quot;</span><span class="p">);</span><span class="w">  </span><span class="c1">// &quot;networkidle&quot; は使わない（知見35a）</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">ensureConnected</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">openSkillTreePanel</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="nx">test</span><span class="p">.</span><span class="nx">afterEach</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">resetGameProgress</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="nx">test</span><span class="p">(</span><span class="s2">&quot;初期状態: SETUP_001 は locked（BRIDGE_003 未完了）&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">getSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_001&quot;</span><span class="p">)).</span><span class="nx">toBe</span><span class="p">(</span><span class="s2">&quot;locked&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="nx">test</span><span class="p">(</span><span class="s2">&quot;BRIDGE_003 完了後、SETUP_001 が unlocked になる&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">emitSkillEvent</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;BRIDGE_003&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unlocked&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">getSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_001&quot;</span><span class="p">)).</span><span class="nx">toBe</span><span class="p">(</span><span class="s2">&quot;unlocked&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="nx">test</span><span class="p">(</span><span class="s2">&quot;SETUP_001〜003 チェーン完了&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;BRIDGE_003&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_003&quot;</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">await</span><span class="w"> </span><span class="nx">emitSkillEvent</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_003&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// SETUP_004・SETUP_005 が並列解放される</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_004&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unlocked&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_005&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unlocked&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="c1">// ... 他のテストケース</span>
+<span class="p">});</span>
+</code></pre></div>
+<h4 id="42-constantsts-setup">4.2 constants.ts への SETUP 定数追加<a class="headerlink" href="#42-constantsts-setup" title="Permanent link">&para;</a></h4>
+<p><code>frontend/e2e-tests/game/constants.ts</code> に以下を追加:</p>
+<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">SETUP_SKILL_IDS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;SETUP_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_003&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_004&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SETUP_005&quot;</span><span class="p">,</span>
+<span class="p">]</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">DATA_SKILL_IDS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;DATA_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;DATA_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;DATA_003&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;DATA_004&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;DATA_005&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;DATA_006&quot;</span><span class="p">,</span>
+<span class="p">]</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">SET_SKILL_IDS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;SET_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SET_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SET_003&quot;</span><span class="p">]</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">TRADE_SKILL_IDS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;TRADE_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TRADE_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TRADE_003&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TRADE_004&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TRADE_005&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;TRADE_006&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TRADE_007&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TRADE_008&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TRADE_009&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TRADE_010&quot;</span><span class="p">,</span>
+<span class="p">]</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
+</code></pre></div>
+<h4 id="43-data-dataspects">4.3 DATA トラック（<code>data.spec.ts</code>）<a class="headerlink" href="#43-data-dataspects" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>スキルID</th>
+<th>タイトル</th>
+<th>前提条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DATA_001</td>
+<td>get_stock_dailyを使う</td>
+<td>SETUP_002</td>
+</tr>
+<tr>
+<td>DATA_002</td>
+<td>株価データを確認する</td>
+<td>DATA_001</td>
+</tr>
+<tr>
+<td>DATA_003</td>
+<td>OHLCV列を理解する</td>
+<td>DATA_002</td>
+</tr>
+<tr>
+<td>DATA_004</td>
+<td>別の銘柄を取得する</td>
+<td>DATA_001</td>
+</tr>
+<tr>
+<td>DATA_005</td>
+<td>複数銘柄を取得する</td>
+<td>DATA_004</td>
+</tr>
+<tr>
+<td>DATA_006</td>
+<td>日付範囲を指定する</td>
+<td>DATA_001</td>
+</tr>
+</tbody>
+</table>
+<p><strong>注意</strong>: DATA_002・DATA_004・DATA_006 は DATA_001 から分岐（3方向並列解放を確認）</p>
+<h4 id="44-10">4.4 10スキルマイルストーンの確認テスト<a class="headerlink" href="#44-10" title="Permanent link">&para;</a></h4>
+<p><code>ui.spec.ts</code> 等に以下のテストを追加または新規ファイルとして作成:</p>
+<div class="highlight"><pre><span></span><code><span class="nx">test</span><span class="p">(</span><span class="s2">&quot;10スキルマイルストーンで「見習い投資家」称号とボーナス&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// SANDBOX_001〜006 + BRIDGE_001〜003 + SETUP_001 の順で発火</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">chain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;SANDBOX_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_003&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_004&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;SANDBOX_005&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_006&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;BRIDGE_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;BRIDGE_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;BRIDGE_003&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;SETUP_001&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">];</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">chain</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">emitSkillEvent</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="c1">// バッジが 10/59 になっていることを確認</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">panel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;skill-tree-panel&quot;]&#39;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">panel</span><span class="p">).</span><span class="nx">toContainText</span><span class="p">(</span><span class="s2">&quot;10/59 スキル&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// 現金が増えていることを確認（310,000 + 10,000 + 50,000マイルストーン = 370,000）</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">panel</span><span class="p">).</span><span class="nx">toContainText</span><span class="p">(</span><span class="sr">/¥[3-9][0-9,]{4,}/</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>
+<hr />
+<h3 id="5">ステップ5: ビルドと全スイート再実行<a class="headerlink" href="#5" title="Permanent link">&para;</a></h3>
+<p>ソースを変更した場合は必ずビルド:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>d:/Documents/marimo/frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span>turbo<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cp<span class="w"> </span>-R<span class="w"> </span>dist/*<span class="w"> </span>../marimo/_static/
+<span class="nb">cd</span><span class="w"> </span>d:/Documents/marimo/frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/<span class="w"> </span>--headed
+</code></pre></div>
+<hr />
+<h3 id="6-skillmd">ステップ6: 知見ドキュメントと SKILL.md の更新<a class="headerlink" href="#6-skillmd" title="Permanent link">&para;</a></h3>
+<p>新たな知見があれば追記:
+- <code>development_docs/game-e2e-review-system.md</code>（知見36以降）
+- <code>D:\Documents\marimo\.claude\skills\game-e2e\SKILL.md</code></p>
+<hr />
+<h2 id="_3">✅ 期待される成果物<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong><code>D:\Documents\marimo\.claude\plans\my-game-play-report4.md</code></strong></li>
+<li>全スイート実行ログ（ベースライン確認）</li>
+<li>
+<p>新規作成したテストの結果</p>
+</li>
+<li>
+<p><strong>新規テストファイル</strong></p>
+</li>
+<li><code>frontend/e2e-tests/game/setup.spec.ts</code>（SETUP_001〜005）</li>
+<li>
+<p><code>frontend/e2e-tests/game/data.spec.ts</code>（DATA_001〜006）※余力があれば</p>
+</li>
+<li>
+<p><strong><code>frontend/e2e-tests/game/constants.ts</code> の更新</strong></p>
+</li>
+<li>
+<p>SETUP_SKILL_IDS, DATA_SKILL_IDS, SET_SKILL_IDS, TRADE_SKILL_IDS 追加</p>
+</li>
+<li>
+<p><strong>スキル獲得確認</strong></p>
+</li>
+<li>目標: 10スキルマイルストーン突破（「見習い投資家」）</li>
+<li>余力があれば 20スキル（「新進トレーダー」）まで</li>
+</ol>
+<hr />
+<h2 id="_4">📚 スキルツリー 前提条件チェーン サマリー<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>SANDBOX_001 → SANDBOX_002 → SANDBOX_003 ─┐
+                           → SANDBOX_004 ─┤→ SANDBOX_005 → SANDBOX_006
+                                          └─ FAIL_001
+                                             FAIL_002（SANDBOX_004 + FAIL_001）
+
+SANDBOX_006 → BRIDGE_001 → BRIDGE_002 → BRIDGE_003
+                                            ↓
+BRIDGE_003 → SETUP_001 → SETUP_002 ─→ SETUP_003 → SETUP_004
+                       └→ DATA_001 ─┘              → SETUP_005
+                            ↓
+                  DATA_002 → DATA_003
+                  DATA_004 → DATA_005
+                  DATA_006
+
+SETUP_003 + DATA_001 → SET_001 → SET_002
+                SET_001 + DATA_005 → SET_003
+
+SET_001 → TRADE_001 → TRADE_002
+                    → TRADE_003 → TRADE_004
+                               → TRADE_007 → TRADE_008
+                                           → RISK_005 → RISK_006 → RISK_007 → RISK_008
+                                                                  → RISK_010
+                    → TRADE_006
+                    → RISK_001 → RISK_002 → RISK_003 → RISK_004
+                    → RISK_009
+SET_001 → TRADE_009 → TRADE_010
+SET_001 → CHART_001 → CHART_002（+ TRADE_003）
+                    → CHART_003（+ IND_001）→ CHART_004
+
+DATA_002 → IND_001 → IND_002 → IND_003 → IND_004
+                             → IND_003 + IND_005 → IND_008
+                    → IND_005 → IND_006
+                    → IND_007
+                    → IND_009
+
+TRADE_001 → FAIL_003（資金0で発火）
+</code></pre></div>
+<h2 id="_5">マイルストーン一覧<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>スキル数</th>
+<th>ボーナス</th>
+<th>称号/アイテム</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>+50,000円</td>
+<td>「見習い投資家」</td>
+</tr>
+<tr>
+<td>20</td>
+<td>+100,000円</td>
+<td>「新進トレーダー」</td>
+</tr>
+<tr>
+<td>35</td>
+<td>+200,000円</td>
+<td>米国株ETF</td>
+</tr>
+<tr>
+<td>50</td>
+<td>+400,000円</td>
+<td>「Backcastエキスパート」</td>
+</tr>
+<tr>
+<td>58</td>
+<td>+600,000円</td>
+<td>「マスター投資家」</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_6">現在の到達スコア<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>取得済みスキル</strong>: 9/59（SANDBOX_001〜006 + BRIDGE_001〜003）</li>
+<li><strong>現在のEquity</strong>: ¥310,000</li>
+<li>SANDBOX_001: +30,000 / SANDBOX_002: +20,000 / SANDBOX_003: +10,000</li>
+<li>SANDBOX_004: +20,000 / SANDBOX_005: +20,000 / SANDBOX_006: +50,000</li>
+<li>BRIDGE_001: +15,000 / BRIDGE_002: +20,000 / BRIDGE_003: +25,000</li>
+</ul>
+<hr />
+<h2 id="_7">⚠️ 重要な制約・注意事項<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h3 id="_8">テスト作成時の必須事項<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>page.waitForLoadState("load")</code> を使う（<code>"networkidle"</code> は永遠に到達しない・知見35a）</li>
+<li><code>ensureConnected()</code> 後に <code>openSkillTreePanel()</code> を呼ぶ（順序重要）</li>
+<li><code>afterEach</code> で必ず <code>resetGameProgress()</code> を呼ぶ（知見20）</li>
+<li>Reconnected バナーが毎テスト出るのは<strong>正常</strong>（知見21・ensureConnected が自動 dismiss）</li>
+<li><code>page.reload()</code> は使わない（WebSocket 切断が起きる）</li>
+</ul>
+<h3 id="_9">スキル発火メカニズム<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>E2Eテストでは <code>window.__testCompleteSkill(skillId)</code> = <code>emitSkillEvent(page, skillId)</code> でスキルを発火</li>
+<li>フルモードの Python 関数（<code>bt.buy()</code> 等）は <code>game_setup.py</code> にのみ存在し、SETUP/DATA/TRADE等のフルトラックは Python 関数がない → テストは全て <code>emitSkillEvent</code> で完結</li>
+<li>前提条件チェックは <code>completeSkillWithRewardAtom</code> が行う（未完了の前提があれば completed にならない）</li>
+</ul>
+<h3 id="_10">参照ドキュメント<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong><code>development_docs/game-e2e-review-system.md</code></strong> — 知見1〜35、テスト設計思想</li>
+<li><strong><code>frontend/e2e-tests/game/helpers.ts</code></strong> — 共通ヘルパー（<code>emitSkillEvent</code>・<code>waitForSkillStatus</code>・<code>runNewCellInGrid</code> 等）</li>
+<li><strong><code>frontend/e2e-tests/game/constants.ts</code></strong> — 定数（<code>TOTAL_SKILL_COUNT</code>, <code>SANDBOX_SKILL_IDS</code> 等）</li>
+<li><strong><code>frontend/e2e-tests/game/sandbox.spec.ts</code></strong> — テスト構造のリファレンス（10件・全通過確認済み）</li>
+<li><strong><code>frontend/src/components/skill-tree/skill-data.ts</code></strong> — 全59スキルの定義・前提条件</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

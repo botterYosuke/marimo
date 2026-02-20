@@ -1,0 +1,2206 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Plan: marimoゲーム（Backcast）実プレイ - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#plan-marimobackcast" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Plan: marimoゲーム（Backcast）実プレイ
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_backend_and_mcp_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide-custom-wheel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-widget-caching-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ui-switch-state-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-backend-sync.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-performance.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend-freeze-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grid-layout-auto-placement.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../broadcast-channel-hud.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-theme.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skill-tree-panel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../electron-startup-config.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-deploy.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-integration-fixes.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 作業項目
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 作業項目">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 環境準備
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 環境準備">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        初回セットアップ（まだ実行していない場合）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#marimo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        marimoサーバー起動
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. ゲームプレイ（サンドボックスモード）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. ゲームプレイ（ブリッジモード）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 進捗確認・レポート作成
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎮 ゲーム概要
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎮 ゲーム概要">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ゲームファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキルツリー構造
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        操作方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏗️ 技術的背景
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏗️ 技術的背景">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキル発火の仕組み
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e2e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E2Eテスト参考
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💡 重要な設計思想
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📝 進捗ログ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📝 進捗ログ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        開始時刻
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実行ログ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実行ログ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ サーバー起動の試行（失敗）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ プロセスクリーンアップ完了
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#game-e2e2026-02-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ game-e2eスキル実行完了（2026-02-20）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#playwright" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Playwright操作の実装例
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Playwright操作の実装例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ1: ブラウザ起動とファイルオープン
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ2: gridレイアウトでセルを実行
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ステップ3: スキルツリー確認
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🐛 既知の問題・Tips
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🐛 既知の問題・Tips">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auto_instantiate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        重要: auto_instantiate設定の影響
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#playwright_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Playwrightでの注意点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキル発火タイミング
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#marimo_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 marimoサーバー起動のトラブルシューティング
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 marimoサーバー起動のトラブルシューティング">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-pixipath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題1: pixiコマンドがPATHに存在しない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-port-2718-is-already-in-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題2: Port 2718 is already in use
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-backcastpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題3: backcast.pyが見つからない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-game_setuppy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題4: game_setup.pyモジュールが見つからない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題5: 依存関係が未インストール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        推奨される起動手順（最短ルート）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 実行方法の選択肢
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 実行方法の選択肢">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-playwright" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        オプションA: 手動でサーバー起動 + Playwright操作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-e2egame-e2e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        オプションB: 既存のE2Eテスト（game-e2eスキル）を使用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-playwright" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        オプションC: 手動プレイ（Playwrightなし）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 期待される成果物
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="plan-marimobackcast">Plan: marimoゲーム（Backcast）実プレイ<a class="headerlink" href="#plan-marimobackcast" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-20
+<strong>目的</strong>: Playwrightを使ってbackcast.pyゲームを実際にプレイし、スキルツリーシステムの動作を確認する</p>
+<hr />
+<h2 id="_1">📋 作業項目<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h3 id="1">1. 環境準備<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
+<h4 id="_2">初回セットアップ（まだ実行していない場合）<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/d/Documents/marimo
+
+<span class="c1"># Windows環境でのセットアップ</span>
+pnpm<span class="w"> </span>run<span class="w"> </span>setup:win
+<span class="c1"># または</span>
+<span class="c1"># pnpm install &amp;&amp; pnpm build:fe &amp;&amp; pnpm build:lsp &amp;&amp; pnpm download:uv</span>
+</code></pre></div>
+<h4 id="marimo">marimoサーバー起動<a class="headerlink" href="#marimo" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p>[x] <strong>方法1: pnpmコマンド（推奨）</strong>
+  <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/d/Documents/marimo
+pnpm<span class="w"> </span>dev
+<span class="c1"># ↑ バックエンド（port 2718）とフロントエンド（port 3000）が起動</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>[ ] <strong>方法2: makeコマンド（pixiが利用可能な場合）</strong>
+  <div class="highlight"><pre><span></span><code>pixi<span class="w"> </span>shell
+make<span class="w"> </span>dev
+</code></pre></div></p>
+</li>
+<li>
+<p>[ ] <strong>方法3: 直接Pythonで起動</strong>
+  <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/d/Documents/marimo
+python<span class="w"> </span>-m<span class="w"> </span>marimo<span class="w"> </span>edit<span class="w"> </span>--no-token<span class="w"> </span>--port<span class="w"> </span><span class="m">2718</span><span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py&quot;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>[ ] <strong>確認: サーバーが起動していることを確認</strong></p>
+</li>
+<li>http://localhost:2718 (backend) にアクセス可能</li>
+<li>http://localhost:3000 (frontend, pnpm devの場合) にアクセス可能</li>
+<li>[ ] <strong>backcast.pyファイルの配置確認</strong></li>
+<li>パス: <code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></li>
+<li>存在確認: <code>ls "C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py"</code></li>
+<li>[ ] <strong>Playwrightでbackcast.py開く</strong></li>
+<li>URL: <code>http://localhost:2718/?file=C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></li>
+<li>または: <code>http://localhost:2718/home</code> から手動でbackcast.pyを開く</li>
+<li>[ ] <strong>サーバー接続確認（kernel healthy）</strong></li>
+<li>backend-statusボタンが緑色（healthy）になることを確認</li>
+<li>"Reconnected"バナーが出たら閉じる</li>
+</ul>
+<h3 id="2">2. ゲームプレイ（サンドボックスモード）<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] SANDBOX_001: <code>bt.chart("7203")</code> - チャート表示</li>
+<li>[ ] SANDBOX_002: <code>bt.buy()</code> - 株購入</li>
+<li>[ ] SANDBOX_003: <code>bt.trades()</code> - 保有株確認</li>
+<li>[ ] SANDBOX_004: <code>bt.sell()</code> - 株売却</li>
+<li>[ ] SANDBOX_005: <code>bt.chart("7203")</code> (2回目) - チャート再表示</li>
+<li>[ ] SANDBOX_006: (自動発火) - サンドボックス完了</li>
+</ul>
+<h3 id="3">3. ゲームプレイ（ブリッジモード）<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] BRIDGE_001: <code>bt.reveal_data()</code> - データ詳細確認</li>
+<li>[ ] BRIDGE_002: <code>bt.get_stock_daily("7203")</code> - データ取得</li>
+<li>[ ] BRIDGE_003: (自動発火) - ブリッジ完了</li>
+</ul>
+<h3 id="4">4. 進捗確認・レポート作成<a class="headerlink" href="#4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] スキルツリーパネル開く</li>
+<li>[ ] 完了スキル数確認（9個以上）</li>
+<li>[ ] スクリーンショット撮影</li>
+<li>[ ] 体験レポート作成</li>
+</ul>
+<hr />
+<h2 id="_3">🎮 ゲーム概要<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p><strong>Backcast</strong> = トヨタ自動車（7203）の株価を使った投資シミュレーション</p>
+<h3 id="_4">ゲームファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>プレイファイル</strong>: <code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></li>
+<li><strong>ゲームロジック</strong>: <code>d:\Documents\marimo\src-tauri\sample-notebooks\game_setup.py</code></li>
+<li><strong>スキル発火</strong>: <code>d:\Documents\marimo\src-tauri\sample-notebooks\skill_events.py</code></li>
+</ul>
+<h3 id="_5">スキルツリー構造<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Sandbox Mode</strong>: 基本操作（6スキル: SANDBOX_001〜006）</li>
+<li><strong>Bridge Mode</strong>: 内部仕組み理解（3スキル: BRIDGE_001〜003）</li>
+<li><strong>Full Mode</strong>: 全機能解禁</li>
+</ul>
+<h3 id="_6">操作方法<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bt.chart(code)</code></td>
+<td>銘柄チャート表示</td>
+</tr>
+<tr>
+<td><code>bt.buy()</code></td>
+<td>株購入</td>
+</tr>
+<tr>
+<td><code>bt.sell()</code></td>
+<td>株売却</td>
+</tr>
+<tr>
+<td><code>bt.step()</code></td>
+<td>次の日に進む</td>
+</tr>
+<tr>
+<td><code>bt.trades()</code></td>
+<td>保有株確認</td>
+</tr>
+<tr>
+<td><code>bt.reveal_data()</code></td>
+<td>データの正体確認</td>
+</tr>
+<tr>
+<td><code>bt.get_stock_daily(code)</code></td>
+<td>株価データ取得</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_7">🏗️ 技術的背景<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h3 id="_8">スキル発火の仕組み<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>① Python: emit_skill(&quot;SANDBOX_001&quot;)
+   ↓
+② HTML生成: &lt;marimo-broadcast channel=&quot;skill_event_channel&quot;
+              type=&quot;skill_complete&quot;
+              payload=&quot;base64_encoded_json&quot; /&gt;
+   ↓
+③ HTML パース: extractAndSendBroadcastMessages()
+   ↓
+④ BroadcastChannel: sendBroadcastMessage()
+   ↓
+⑤ Listener: setupSkillEventListener()
+   ↓
+⑥ Atom更新: completeSkillWithRewardAtom
+   ↓
+⑦ UI反映: スキルノード更新、報酬トースト表示
+</code></pre></div>
+<h3 id="e2e">E2Eテスト参考<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>frontend/e2e-tests/game/helpers.ts</code>: ヘルパー関数</li>
+<li><code>ensureConnected()</code>: サーバー接続確認</li>
+<li><code>runNewCellInGrid()</code>: gridレイアウトでセル実行</li>
+<li><code>openSkillTreePanel()</code>: スキルツリー開く</li>
+<li><code>getSkillStatus()</code>: スキル状態確認</li>
+<li><code>dismissReconnectedBanner()</code>: バナー閉じる</li>
+<li><code>frontend/e2e-tests/game/sandbox.spec.ts</code>: サンドボックステスト例</li>
+</ul>
+<hr />
+<h2 id="_9">💡 重要な設計思想<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>BroadcastChannel</strong>: Pythonからのイベントをフロントエンドに伝える</li>
+<li><strong>Jotai Atoms</strong>: スキル進捗を状態管理（<code>playerProgressAtom</code>）</li>
+<li><strong>Grid Layout</strong>: backcast.pyは<code>app = marimo.App(width="grid")</code>で定義</li>
+<li><strong>スキルゲーティング</strong>: 特定スキル完了まで一部機能をロック</li>
+</ol>
+<hr />
+<h2 id="_10">📝 進捗ログ<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<h3 id="_11">開始時刻<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>2026-02-20 (実行中)</p>
+<h3 id="_12">実行ログ<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<h4 id="_13">❌ サーバー起動の試行（失敗）<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>問題</strong>: bashサブシェル環境で<code>pixi</code>コマンドがPATHに存在しない</li>
+<li><strong>試行したコマンド</strong>:</li>
+<li><code>pixi run marimo edit ...</code> (バックグラウンド) → <code>nohup: failed to run command 'pixi': No such file or directory</code></li>
+<li><code>timeout ... pixi run marimo edit ...</code> → 同様のエラー</li>
+<li><strong>原因</strong>: nohup/timeout環境ではPATH環境変数が引き継がれない</li>
+<li><strong>対策</strong>: ユーザーが別ターミナルで手動起動するか、既存のE2Eテスト環境を使用</li>
+</ul>
+<h4 id="_14">✅ プロセスクリーンアップ完了<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h4>
+<ul>
+<li>起動を試みたすべてのプロセスを停止</li>
+<li><code>pkill -f "marimo edit"</code> で確認済み（プロセスなし）</li>
+</ul>
+<h4 id="game-e2e2026-02-20">✅ game-e2eスキル実行完了（2026-02-20）<a class="headerlink" href="#game-e2e2026-02-20" title="Permanent link">&para;</a></h4>
+<ul>
+<li>実行時刻: 2026-02-20</li>
+<li>結果: 全10テスト成功（3.1m）</li>
+<li>発見したバグ:</li>
+<li><code>waitForLoadState("networkidle")</code> タイムアウト — marimo は WebSocket 常時接続のため networkidle 到達不能 → <code>"load"</code> に変更</li>
+<li>再接続スキル再発火 — ensureConnected() 後にカーネルがセル出力を再送し初期状態が汚染 → beforeEach で ensureConnected() 後に resetGameProgress() を追加</li>
+<li>修正ファイル: <code>frontend/e2e-tests/game/sandbox.spec.ts</code></li>
+<li>知見更新: <code>development_docs/game-e2e-review-system.md</code> 知見 35 追加</li>
+</ul>
+<hr />
+<h2 id="playwright">🔧 Playwright操作の実装例<a class="headerlink" href="#playwright" title="Permanent link">&para;</a></h2>
+<h3 id="1_1">ステップ1: ブラウザ起動とファイルオープン<a class="headerlink" href="#1_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Playwrightでbackcast.pyを開く</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">browser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">chromium</span><span class="p">.</span><span class="nx">launch</span><span class="p">({</span><span class="w"> </span><span class="nx">headless</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">browser</span><span class="p">.</span><span class="nx">newPage</span><span class="p">();</span>
+
+<span class="c1">// backcast.pyを開く（URLエンコード必要）</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">filePath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;C:\\Users\\sasac\\AppData\\Roaming\\marimo\\notebooks\\backcast.py&quot;</span><span class="p">;</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="sb">`http://localhost:2718/?file=</span><span class="si">${</span><span class="nb">encodeURIComponent</span><span class="p">(</span><span class="nx">filePath</span><span class="p">)</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+
+<span class="c1">// カーネルがhealthyになるまで待機</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;backend-status&quot;]&#39;</span><span class="p">).</span><span class="nx">waitFor</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">20000</span><span class="w"> </span><span class="p">});</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">2000</span><span class="p">);</span><span class="w"> </span><span class="c1">// 安定化待機</span>
+
+<span class="c1">// Reconnectedバナーを閉じる（出た場合）</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">reconnectedBanner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s2">&quot;text=Reconnected&quot;</span><span class="p">).</span><span class="nx">first</span><span class="p">();</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">reconnectedBanner</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">().</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kc">false</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;remove-banner-button&quot;]&#39;</span><span class="p">).</span><span class="nx">first</span><span class="p">().</span><span class="nx">click</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="2-grid">ステップ2: gridレイアウトでセルを実行<a class="headerlink" href="#2-grid" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">runCode</span><span class="p">(</span><span class="nx">page</span><span class="o">:</span><span class="w"> </span><span class="kt">Page</span><span class="p">,</span><span class="w"> </span><span class="nx">code</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// ツールバーの「Python」ボタンでセル追加</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">getByRole</span><span class="p">(</span><span class="s1">&#39;button&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Python&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">exact</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">}).</span><span class="nx">click</span><span class="p">();</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">1000</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// 新セルのエディタにコードを入力（force: trueでトースト回避）</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">cmContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;.cm-content&#39;</span><span class="p">).</span><span class="nx">last</span><span class="p">();</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">cmContent</span><span class="p">.</span><span class="nx">click</span><span class="p">({</span><span class="w"> </span><span class="nx">force</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">cmContent</span><span class="p">.</span><span class="nx">fill</span><span class="p">(</span><span class="nx">code</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// 実行ボタンをクリック</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">getByTestId</span><span class="p">(</span><span class="s1">&#39;run-button&#39;</span><span class="p">).</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;:visible&#39;</span><span class="p">).</span><span class="nx">last</span><span class="p">().</span><span class="nx">click</span><span class="p">({</span><span class="w"> </span><span class="nx">force</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">});</span>
+
+<span class="w">  </span><span class="c1">// 実行完了を待つ</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">2000</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// 使用例</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">runCode</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;bt.chart(&quot;7203&quot;)&#39;</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">runCode</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;bt.buy()&#39;</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="3_1">ステップ3: スキルツリー確認<a class="headerlink" href="#3_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// スキルツリーパネルを開く</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;skill-tree-button&quot;]&#39;</span><span class="p">)</span><span class="o">?</span><span class="p">.</span><span class="nx">click</span><span class="p">();</span>
+<span class="p">});</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;skill-tree-panel&quot;]&#39;</span><span class="p">).</span><span class="nx">waitFor</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">5000</span><span class="w"> </span><span class="p">});</span>
+
+<span class="c1">// 進捗確認</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">progressText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;text=/\\d+\\/\\d+ スキル/&#39;</span><span class="p">).</span><span class="nx">first</span><span class="p">().</span><span class="nx">textContent</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;進捗:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">progressText</span><span class="p">);</span>
+
+<span class="c1">// スクリーンショット</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">screenshot</span><span class="p">({</span><span class="w"> </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;skill-tree-progress.png&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">fullPage</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<hr />
+<h2 id="tips">🐛 既知の問題・Tips<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
+<h3 id="auto_instantiate">重要: auto_instantiate設定の影響<a class="headerlink" href="#auto_instantiate" title="Permanent link">&para;</a></h3>
+<p><strong>pyproject.tomlの設定</strong>: <code>auto_instantiate = true</code></p>
+<p>この設定により、backcast.pyを開いた瞬間に既存のセルが自動実行されます。</p>
+<p><strong>影響:</strong>
+- ファイルを開いた直後に<code>bt.chart("7203")</code>セルが自動実行される可能性
+- SANDBOX_001スキルが意図せず発火する可能性</p>
+<p><strong>対策:</strong>
+1. <strong>推奨</strong>: backcast.pyの既存セルをすべて削除してから開始
+2. または: 自動実行されたセルは無視して、新しいセルで順番に実行
+3. または: <code>auto_instantiate = false</code>に一時的に変更</p>
+<h3 id="playwright_1">Playwrightでの注意点<a class="headerlink" href="#playwright_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>トースト通知</strong>: 報酬トーストやReconnectedバナーがUIを遮る可能性</li>
+<li>対策: <code>dismissReconnectedBanner()</code>, <code>{ force: true }</code>オプション</li>
+<li><strong>Grid Layout</strong>: <code>create-cell-button</code>が存在しない</li>
+<li>対策: ツールバーの「Python」ボタンでセル作成</li>
+<li><strong>セル実行待機</strong>: <code>[data-cell-status='running']</code>が消えるまで待つ</li>
+</ol>
+<h3 id="_15">スキル発火タイミング<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>chart()</code> 2回目実行時に<code>SANDBOX_003</code>と<code>SANDBOX_004</code>が完了していれば<code>SANDBOX_005</code>発火</li>
+<li>サンドボックス5個完了で自動的に<code>SANDBOX_006</code>発火</li>
+<li><code>BRIDGE_002</code>完了で自動的に<code>BRIDGE_003</code>発火</li>
+</ul>
+<hr />
+<h2 id="marimo_1">🔧 marimoサーバー起動のトラブルシューティング<a class="headerlink" href="#marimo_1" title="Permanent link">&para;</a></h2>
+<h3 id="1-pixipath">問題1: <code>pixi</code>コマンドがPATHに存在しない<a class="headerlink" href="#1-pixipath" title="Permanent link">&para;</a></h3>
+<p><strong>症状:</strong>
+<div class="highlight"><pre><span></span><code>nohup: failed to run command &#39;pixi&#39;: No such file or directory
+</code></pre></div></p>
+<p><strong>解決策A: pnpmを使う（推奨）</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># marimoプロジェクトのルートディレクトリで実行</span>
+<span class="nb">cd</span><span class="w"> </span>/d/Documents/marimo
+pnpm<span class="w"> </span>dev
+</code></pre></div></p>
+<p>このコマンドは以下を実行します：
+- バックエンド: port 2718
+- フロントエンド: port 3000</p>
+<p><strong>解決策B: 直接Pythonでmarimoを起動</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># 仮想環境を有効化（既にビルド済みの場合）</span>
+<span class="nb">cd</span><span class="w"> </span>/d/Documents/marimo
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w">  </span><span class="c1"># Windowsの場合: .venv\Scripts\activate</span>
+
+<span class="c1"># marimoを起動</span>
+python<span class="w"> </span>-m<span class="w"> </span>marimo<span class="w"> </span>edit<span class="w"> </span>--no-token<span class="w"> </span>--port<span class="w"> </span><span class="m">2718</span><span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py&quot;</span>
+</code></pre></div></p>
+<p><strong>解決策C: hatchを使う</strong>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/d/Documents/marimo
+hatch<span class="w"> </span>shell
+make<span class="w"> </span>dev
+</code></pre></div></p>
+<h3 id="2-port-2718-is-already-in-use">問題2: <code>Port 2718 is already in use</code><a class="headerlink" href="#2-port-2718-is-already-in-use" title="Permanent link">&para;</a></h3>
+<p><strong>確認方法:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># ポート2718を使用しているプロセスを確認</span>
+lsof<span class="w"> </span>-i<span class="w"> </span>:2718<span class="w">  </span><span class="c1"># macOS/Linux</span>
+netstat<span class="w"> </span>-ano<span class="w"> </span><span class="p">|</span><span class="w"> </span>findstr<span class="w"> </span>:2718<span class="w">  </span><span class="c1"># Windows</span>
+</code></pre></div></p>
+<p><strong>解決策:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># プロセスをkill</span>
+<span class="nb">kill</span><span class="w"> </span>-9<span class="w"> </span>&lt;PID&gt;<span class="w">  </span><span class="c1"># macOS/Linux</span>
+taskkill<span class="w"> </span>/PID<span class="w"> </span>&lt;PID&gt;<span class="w"> </span>/F<span class="w">  </span><span class="c1"># Windows</span>
+
+<span class="c1"># または、別のポートを使う</span>
+python<span class="w"> </span>-m<span class="w"> </span>marimo<span class="w"> </span>edit<span class="w"> </span>--port<span class="w"> </span><span class="m">2719</span><span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py&quot;</span>
+</code></pre></div></p>
+<h3 id="3-backcastpy">問題3: backcast.pyが見つからない<a class="headerlink" href="#3-backcastpy" title="Permanent link">&para;</a></h3>
+<p><strong>確認:</strong>
+<div class="highlight"><pre><span></span><code>ls<span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py&quot;</span>
+</code></pre></div></p>
+<p><strong>見つからない場合:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># サンプルからコピー</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks&quot;</span>
+cp<span class="w"> </span>/d/Documents/marimo/src-tauri/sample-notebooks/backcast.py<span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks/&quot;</span>
+</code></pre></div></p>
+<h3 id="4-game_setuppy">問題4: <code>game_setup.py</code>モジュールが見つからない<a class="headerlink" href="#4-game_setuppy" title="Permanent link">&para;</a></h3>
+<p>backcast.pyは<code>import game_setup as bt</code>を使用しています。</p>
+<p><strong>解決策A: 同じディレクトリにコピー（推奨）</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># 必要なモジュールをすべてコピー</span>
+cp<span class="w"> </span>/d/Documents/marimo/src-tauri/sample-notebooks/game_setup.py<span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks/&quot;</span>
+cp<span class="w"> </span>/d/Documents/marimo/src-tauri/sample-notebooks/skill_events.py<span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks/&quot;</span>
+cp<span class="w"> </span>/d/Documents/marimo/src-tauri/sample-notebooks/backtest_wrapper.py<span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks/&quot;</span>
+cp<span class="w"> </span>/d/Documents/marimo/src-tauri/sample-notebooks/chart.py<span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks/&quot;</span>
+cp<span class="w"> </span>/d/Documents/marimo/src-tauri/sample-notebooks/headless_broadcast.py<span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks/&quot;</span>
+cp<span class="w"> </span>/d/Documents/marimo/src-tauri/sample-notebooks/progress_manager.py<span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks/&quot;</span>
+</code></pre></div></p>
+<p><strong>解決策B: PYTHONPATHを設定</strong>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;/d/Documents/marimo/src-tauri/sample-notebooks:</span><span class="nv">$PYTHONPATH</span><span class="s2">&quot;</span>
+python<span class="w"> </span>-m<span class="w"> </span>marimo<span class="w"> </span>edit<span class="w"> </span><span class="s2">&quot;C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py&quot;</span>
+</code></pre></div></p>
+<h3 id="5">問題5: 依存関係が未インストール<a class="headerlink" href="#5" title="Permanent link">&para;</a></h3>
+<p><strong>症状:</strong>
+<div class="highlight"><pre><span></span><code>ModuleNotFoundError: No module named &#39;BackcastPro&#39;
+</code></pre></div></p>
+<p><strong>解決策:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># BackcastProプロジェクトのパスを確認</span>
+ls<span class="w"> </span>/d/Documents/BackcastPro
+
+<span class="c1"># PYTHONPATHに追加</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;/d/Documents/BackcastPro:</span><span class="nv">$PYTHONPATH</span><span class="s2">&quot;</span>
+
+<span class="c1"># または、BackcastProをインストール</span>
+<span class="nb">cd</span><span class="w"> </span>/d/Documents/BackcastPro
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div></p>
+<h3 id="_16">推奨される起動手順（最短ルート）<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. marimoプロジェクトに移動</span>
+<span class="nb">cd</span><span class="w"> </span>/d/Documents/marimo
+
+<span class="c1"># 2. pnpmでサーバー起動（バックグラウンド）</span>
+pnpm<span class="w"> </span>dev<span class="w"> </span><span class="p">&amp;</span>
+
+<span class="c1"># 3. サーバー起動を待つ（5-10秒）</span>
+sleep<span class="w"> </span><span class="m">10</span>
+
+<span class="c1"># 4. ブラウザで確認</span>
+<span class="c1"># http://localhost:2718</span>
+<span class="c1"># http://localhost:3000</span>
+
+<span class="c1"># 5. backcast.pyを開く</span>
+<span class="c1"># http://localhost:2718/?file=C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</span>
+</code></pre></div>
+<hr />
+<hr />
+<h2 id="_17">🎯 実行方法の選択肢<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h2>
+<h3 id="a-playwright">オプションA: 手動でサーバー起動 + Playwright操作<a class="headerlink" href="#a-playwright" title="Permanent link">&para;</a></h3>
+<p><strong>メリット</strong>: 実際のユーザー体験に最も近い
+<strong>デメリット</strong>: サーバー起動の手間がかかる</p>
+<p><strong>手順:</strong>
+1. 別ターミナルで<code>pnpm dev</code>を実行してサーバー起動
+2. Playwright MCPツールを使ってブラウザ操作
+3. 上記の「Playwright操作の実装例」に従って実行</p>
+<h3 id="b-e2egame-e2e">オプションB: 既存のE2Eテスト（game-e2eスキル）を使用<a class="headerlink" href="#b-e2egame-e2e" title="Permanent link">&para;</a></h3>
+<p><strong>メリット</strong>: サーバー自動起動、実装済みのテストを活用
+<strong>デメリット</strong>: E2Eテストの仕様に従う必要がある</p>
+<p><strong>手順:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># game-e2eスキルを実行</span>
+/game-e2e
+
+<span class="c1"># または直接Playwrightテストを実行</span>
+<span class="nb">cd</span><span class="w"> </span>/d/Documents/marimo/frontend
+pnpm<span class="w"> </span>test:e2e<span class="w"> </span>e2e-tests/game/sandbox.spec.ts
+</code></pre></div></p>
+<p><strong>game-e2eスキルの内容:</strong>
+- <code>frontend/e2e-tests/game/sandbox.spec.ts</code>を実行
+- 失敗時は知見ドキュメントを参照して自動修正を試みる
+- サーバー自動起動機能付き</p>
+<h3 id="c-playwright">オプションC: 手動プレイ（Playwrightなし）<a class="headerlink" href="#c-playwright" title="Permanent link">&para;</a></h3>
+<p><strong>メリット</strong>: 最もシンプル、実装不要
+<strong>デメリット</strong>: 自動化されない</p>
+<p><strong>手順:</strong>
+1. <code>pnpm dev</code>でサーバー起動
+2. ブラウザで <code>http://localhost:2718</code> を開く
+3. backcast.pyを手動で開く
+4. 手動でコードを入力・実行
+5. スキルツリーを手動で確認</p>
+<hr />
+<h2 id="_18">📊 期待される成果物<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>実行ログ</strong>: 各コマンド実行とスキル発火の記録</li>
+<li><strong>スクリーンショット</strong>: スキルツリー完了状態、チャート画面</li>
+<li><strong>体験レポート</strong>: ゲームの流れ、UI/UX改善提案</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

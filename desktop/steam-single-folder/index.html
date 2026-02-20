@@ -1,0 +1,2483 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Steam 対応: インストーラー廃止・ポータブルランチャー化 実装 - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#steam" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Steam 対応: インストーラー廃止・ポータブルランチャー化 実装
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_backend_and_mcp_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide-custom-wheel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-widget-caching-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ui-switch-state-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-backend-sync.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-performance.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend-freeze-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grid-layout-auto-placement.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../broadcast-channel-hud.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-theme.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skill-tree-panel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../electron-startup-config.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-deploy.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-integration-fixes.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        現状整理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="現状整理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nsis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        インストーラー（NSIS）が現在行っていること
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#librs-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        アプリ起動時（lib.rs setup フェーズ）がすでに行っていること
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        結論
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        技術的実現可能性
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="技術的実現可能性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 可能
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nsis-program-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ 通常配布（NSIS + Program Files）との同居は不可
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webview2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ 注意点: WebView2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tauri-v2-bundle-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ 注意点: Tauri v2 の bundle targets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更方針
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="変更方針">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        データ保存先の決定ロジック（優先順）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目標フォルダ構成
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-02-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装状況（2026-02-18 完了）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装状況（2026-02-18 完了）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装済みタスク
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装の知見・Tips
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装の知見・Tips">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cargo-check-vs-cargo-check-features-steam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cargo check vs cargo check --features steam
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bundlensis_" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bundle/nsis/_/ パスの要事前確認
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-notarization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS の公証（Notarization）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#marimo_state_dir" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MARIMO_STATE_DIR の設計理由
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ポータブルモードのトリガー条件（優先順）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装手順と変更ファイル
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装手順と変更ファイル">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-src-taurisrcpathsrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: src-tauri/src/paths.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-src-taurisrclibrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: src-tauri/src/lib.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-src-taurisrcserverlifecyclers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: src-tauri/src/server/lifecycle.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-src-taurisrcenvironmentbootstraprs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: src-tauri/src/environment/bootstrap.rs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-marimo_utilsxdgpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: marimo/_utils/xdg.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-src-tauricargotoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: src-tauri/Cargo.toml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-src-tauritauri-steam-platformconfjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: src-tauri/tauri-steam-{platform}.conf.json（新規作成）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-githubworkflowsrelease-steamyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: .github/workflows/release-steam.yml
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: .github/workflows/release-steam.yml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workflow-nsis-steam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題: 現在の workflow は NSIS インストーラーを Steam に上げている
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-depot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更: Windows depot をゲームファイルで組み立てる
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更: macOS のアップロードパスを .app に変更
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux は変更不要
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-9-src-tauriprepare-resourcesjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: src-tauri/prepare-resources.js（修正）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: src-tauri/prepare-resources.js（修正）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題: uv バイナリのバンドル漏れ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resourcesbinaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更: resources/binaries/ への明示的コピー
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更ファイル一覧
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        動作フロー
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="動作フロー">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        初回起動
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2 回目以降
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        懸念事項・リスク
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="steam">Steam 対応: インストーラー廃止・ポータブルランチャー化 実装<a class="headerlink" href="#steam" title="Permanent link">&para;</a></h1>
+<p>作成日: 2026-02-18</p>
+<hr />
+<h2 id="_1">現状整理<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h3 id="nsis">インストーラー（NSIS）が現在行っていること<a class="headerlink" href="#nsis" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>処理</th>
+<th>担当</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ファイルを <code>Program Files\backcast\</code> に展開</td>
+<td>NSIS</td>
+</tr>
+<tr>
+<td>WebView2 BootStrapper をダウンロード・実行</td>
+<td>NSIS + Tauri</td>
+</tr>
+<tr>
+<td><code>HKLM\...\Uninstall\backcast</code> レジストリ書き込み</td>
+<td>NSIS</td>
+</tr>
+<tr>
+<td>既インストール検出 → 既存 exe 起動して終了</td>
+<td><code>hooks.nsh</code> PREINSTALL</td>
+</tr>
+<tr>
+<td>インストール後に exe を自動起動</td>
+<td><code>hooks.nsh</code> POSTINSTALL</td>
+</tr>
+</tbody>
+</table>
+<h3 id="librs-setup">アプリ起動時（<code>lib.rs</code> setup フェーズ）がすでに行っていること<a class="headerlink" href="#librs-setup" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>処理</th>
+<th>担当</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>データディレクトリ作成</td>
+<td><code>setup()</code></td>
+</tr>
+<tr>
+<td>サンプルノートブックをコピー</td>
+<td><code>copy_sample_files_to_notebooks()</code></td>
+</tr>
+<tr>
+<td><code>recent_files.toml</code> 初期作成</td>
+<td><code>seed_recent_files()</code></td>
+</tr>
+<tr>
+<td>Python 探索 → なければ <code>uv python install 3.13</code></td>
+<td><code>ensure_environment()</code></td>
+</tr>
+<tr>
+<td>venv 作成 (<code>uv venv --seed</code>)</td>
+<td><code>ensure_environment()</code></td>
+</tr>
+<tr>
+<td>marimo ソースから <code>uv pip install</code></td>
+<td><code>ensure_environment()</code></td>
+</tr>
+<tr>
+<td>スプラッシュ画面でプログレス表示</td>
+<td><code>window/splash.rs</code></td>
+</tr>
+<tr>
+<td>marimo サーバー起動 → ヘルスチェック</td>
+<td><code>server/lifecycle.rs</code></td>
+</tr>
+<tr>
+<td>メインウィンドウを開く</td>
+<td><code>window/manager.rs</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="_2">結論<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p><strong>Python 環境の初期化はすでにアプリ起動時に完結している。</strong>
+インストーラーで「しか」行われていない処理は次の 3 つだけ:</p>
+<ol>
+<li><strong>ファイル展開</strong> → Steam がゲームファイルを配信するため不要</li>
+<li><strong>WebView2 インストール</strong> → 要対処（下記参照）</li>
+<li><strong>レジストリ書き込み</strong> → Steam 管理のため不要</li>
+</ol>
+<hr />
+<h2 id="_3">技術的実現可能性<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_4">✅ 可能<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Python / venv / marimo の初回セットアップはすでにアプリ内で完結している</li>
+<li>Steam は <code>steamapps/common/backcast/</code> にファイルを展開するだけで動く</li>
+<li><code>uv.exe</code> は <code>resources/binaries/uv.exe</code> としてすでにバンドル済み</li>
+<li>スプラッシュ画面でセットアップ進捗を表示する仕組みも実装済み</li>
+<li>ポータブル動作（単一フォルダ）は <code>&lt;exe_dir&gt;/data</code> をデフォルトにすることで実現可能</li>
+<li>別の「ランチャー exe」は不要。既存の <code>backcast.exe</code> がそのままランチャーを兼ねる</li>
+</ul>
+<h3 id="nsis-program-files">❌ 通常配布（NSIS + Program Files）との同居は不可<a class="headerlink" href="#nsis-program-files" title="Permanent link">&para;</a></h3>
+<p><strong><code>&lt;exe_dir&gt;/data</code> をデフォルトにすると NSIS インストール時に UAC 問題が発生する。</strong></p>
+<p>NSIS の <code>perMachine</code> モードは <code>C:\Program Files\backcast\</code> に展開する。
+<code>Program Files</code> 配下への一般ユーザー書き込みは UAC で拒否されるため、
+<code>data/</code> フォルダの自動生成・書き込みが初回起動時に失敗する。</p>
+<p>Steam の <code>steamapps/</code> は書き込み権限が付与されているため問題ないが、
+通常配布と同じデフォルトロジックにはできない。</p>
+<p><strong>採用する方針: Steam 版と通常配布版でビルドを完全に分離する</strong></p>
+<table>
+<thead>
+<tr>
+<th>配布形態</th>
+<th><code>get_data_root()</code> のデフォルト動作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Steam 版</strong></td>
+<td><code>BACKCAST_DATA_DIR</code> 未設定 → <code>&lt;exe_dir&gt;/data</code></td>
+</tr>
+<tr>
+<td><strong>通常配布版（NSIS）</strong></td>
+<td><code>BACKCAST_DATA_DIR</code> 未設定 → AppData ベース（現行動作）</td>
+</tr>
+</tbody>
+</table>
+<p>これを <code>get_data_root()</code> 内でコンパイル時フラグ（<code>#[cfg(feature = "steam")]</code> 等）か、
+実行時の <code>BACKCAST_PORTABLE</code> 環境変数で切り替える。
+NSIS インストーラーは <code>BACKCAST_DATA_DIR</code> を設定しない（= AppData に書き込み続ける）。</p>
+<h3 id="webview2">⚠️ 注意点: WebView2<a class="headerlink" href="#webview2" title="Permanent link">&para;</a></h3>
+<p>現在は NSIS 内の <code>downloadBootstrapper</code> が WebView2 を自動インストールする。
+インストーラーを廃止するとこの仕組みが消える。</p>
+<table>
+<thead>
+<tr>
+<th>対処案</th>
+<th>特徴</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>skip</code> モード（採用）</strong></td>
+<td>システム WebView2 を使う。Windows 11 は標準搭載。Windows 10 も 2021 年以降の更新で搭載済み。Steam ユーザーの大多数に該当</td>
+</tr>
+<tr>
+<td><code>fixedRuntime</code></td>
+<td>~130 MB の WebView2 ランタイムをバンドル。確実だがサイズ大</td>
+</tr>
+<tr>
+<td>起動時チェック + エラーダイアログ</td>
+<td>WebView2 なしでは Tauri 自体が起動しないため実装困難</td>
+</tr>
+</tbody>
+</table>
+<p><strong>→ <code>skip</code> モードを採用。WebView2 が存在しない場合は Tauri 標準のエラーダイアログに委ねる。</strong></p>
+<h3 id="tauri-v2-bundle-targets">⚠️ 注意点: Tauri v2 の bundle targets<a class="headerlink" href="#tauri-v2-bundle-targets" title="Permanent link">&para;</a></h3>
+<p>Tauri v2 で有効な bundle targets は次のとおり。</p>
+<table>
+<thead>
+<tr>
+<th>プラットフォーム</th>
+<th>有効な targets</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows</td>
+<td><code>nsis</code>、<code>msi</code></td>
+</tr>
+<tr>
+<td>macOS</td>
+<td><code>app</code>（.app バンドル）、<code>dmg</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>"app"</code> というターゲットは Tauri v2 には存在しない（v1 の名称）。
+macOS の .app バンドルは <code>"app"</code> が正しいターゲット名。</p>
+<hr />
+<h2 id="_5">変更方針<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="_6">データ保存先の決定ロジック（優先順）<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>1. 環境変数 BACKCAST_DATA_DIR が設定されている → その値を使用
+2. （上記なし） → &lt;exe のあるディレクトリ&gt;/data を使用（ポータブルモード）
+</code></pre></div>
+<p>Steam では起動オプションに環境変数を渡す必要はない。
+<code>&lt;installdir&gt;/data</code> がデフォルトになるためそのまま動く。</p>
+<p><code>std::env::current_exe()</code> で exe パスを取得し、その親ディレクトリ + <code>/data</code> を
+デフォルトのルートとする。これにより <code>AppHandle</code> 初期化前（ログ設定時）でも
+同じロジックを使える。</p>
+<h3 id="_7">目標フォルダ構成<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>steamapps/common/backcast/
+├── backcast.exe
+├── resources/
+│   ├── resources/
+│   │   ├── binaries/
+│   │   │   └── uv.exe
+│   │   ├── marimo/          ← Python ソース（バンドル済み）
+│   │   ├── files/           ← サンプルノートブック
+│   │   └── pyproject.toml など
+│   └── ...
+└── data/                    ← 初回起動時に自動生成
+    ├── marimo-env/          ← Python venv
+    ├── python/              ← Python インタープリター
+    ├── logs/
+    │   └── marimo-desktop.log   ← Rust ログ（get_log_dir()）
+    ├── cache/
+    │   └── marimo/
+    │       └── logs/            ← Python ログ（marimo_log_dir()）
+    ├── notebooks/           ← ユーザーノートブック
+    ├── state/
+    │   └── recent_files.toml
+    └── config/
+        └── marimo/
+            └── marimo.toml      ← XDG_CONFIG_HOME=data/config → data/config/marimo/marimo.toml
+</code></pre></div>
+<blockquote>
+<p><strong>ログが 2 か所に分かれる理由:</strong>
+Rust 側のログ (<code>get_log_dir()</code>) は <code>data/logs/</code> に書き込む。
+Python 側のログ (<code>marimo_log_dir()</code>) は <code>XDG_CACHE_HOME/marimo/logs/</code> = <code>data/cache/marimo/logs/</code> に書き込む。
+同一の <code>data/logs/</code> にまとめることは現在の xdg.py の構造上困難なため、2 か所のままとする。</p>
+</blockquote>
+<hr />
+<hr />
+<h2 id="2026-02-18">実装状況（2026-02-18 完了）<a class="headerlink" href="#2026-02-18" title="Permanent link">&para;</a></h2>
+<p>すべての実装が完了し、<code>cargo check</code> / <code>cargo check --features steam</code> 両方でコンパイル成功を確認済み。</p>
+<h3 id="_8">実装済みタスク<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>ファイル</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Step 1</td>
+<td><code>src-tauri/src/paths.rs</code></td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>Step 2</td>
+<td><code>src-tauri/src/lib.rs</code></td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>Step 3</td>
+<td><code>src-tauri/src/server/lifecycle.rs</code></td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>Step 4</td>
+<td><code>src-tauri/src/environment/bootstrap.rs</code></td>
+<td>✅ 変更不要（引数渡しで自動追従）</td>
+</tr>
+<tr>
+<td>Step 5</td>
+<td><code>marimo/_utils/xdg.py</code></td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>Step 6</td>
+<td><code>src-tauri/Cargo.toml</code></td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>Step 7</td>
+<td><code>src-tauri/tauri-steam-{windows,mac,linux}.conf.json</code></td>
+<td>✅ 新規作成済み（プラットフォーム別）</td>
+</tr>
+<tr>
+<td>Step 8</td>
+<td><code>.github/workflows/release-steam.yml</code></td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>Step 9</td>
+<td><code>src-tauri/prepare-resources.js</code></td>
+<td>✅ 完了（UV バンドル修正）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tips">実装の知見・Tips<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h3>
+<h4 id="cargo-check-vs-cargo-check-features-steam"><code>cargo check</code> vs <code>cargo check --features steam</code><a class="headerlink" href="#cargo-check-vs-cargo-check-features-steam" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>cfg!(feature = "steam")</code> はコンパイル時フラグのため、両方でチェックが必要。</li>
+<li>通常の <code>cargo check</code> では <code>is_portable = false</code> パスのみが評価される。</li>
+</ul>
+<h4 id="bundlensis_"><code>bundle/nsis/_/</code> パスの要事前確認<a class="headerlink" href="#bundlensis_" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Windows CI で <code>--features steam</code> + <code>--config src-tauri/tauri-steam.conf.json</code> でビルド後、
+  <code>target/release/bundle/nsis/</code> 以下のディレクトリ構造を実際に確認すること。</li>
+<li>ステージングディレクトリ名はTauriバージョンによって異なる可能性がある（<code>_/</code> が正しいかを確認）。</li>
+<li><code>if-no-files-found: error</code> を付けているので CI でパスが違えばすぐに検知できる。</li>
+</ul>
+<h4 id="macos-notarization">macOS の公証（Notarization）<a class="headerlink" href="#macos-notarization" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Steam に上げる <code>.app</code> バンドルが Apple 公証を通っているか確認が必要。</li>
+<li>現行 CI の macOS 署名ステップが <code>bundle/macos/</code> を対象にしていること（<code>bundle/dmg/</code> でない）を確認する。</li>
+</ul>
+<h4 id="marimo_state_dir">MARIMO_STATE_DIR の設計理由<a class="headerlink" href="#marimo_state_dir" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Windows では <code>XDG_STATE_HOME</code> が marimo の Python 側コードで無視される（<code>os.name == "posix"</code> の分岐）。</li>
+<li>そのため <code>MARIMO_STATE_DIR</code> という専用環境変数でオーバーライドする方式を採用。</li>
+<li><code>XDG_CONFIG_HOME</code> と <code>XDG_CACHE_HOME</code> は既存の xdg.py ロジックがそのまま追従するので変更不要。</li>
+</ul>
+<h4 id="_9">ポータブルモードのトリガー条件（優先順）<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h4>
+<ol>
+<li><code>BACKCAST_DATA_DIR</code> 環境変数（任意のパスを指定可能）</li>
+<li><code>--features steam</code> でコンパイル（CI 専用）</li>
+<li><code>BACKCAST_PORTABLE=1</code> 環境変数（デバッグ・テスト用）</li>
+</ol>
+<hr />
+<h2 id="_10">実装手順と変更ファイル<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<h3 id="step-1-src-taurisrcpathsrs">Step 1: <code>src-tauri/src/paths.rs</code><a class="headerlink" href="#step-1-src-taurisrcpathsrs" title="Permanent link">&para;</a></h3>
+<p><code>get_data_root()</code> を新設し、全パス関数がこれを経由するよう変更する。
+<code>AppHandle</code> が不要な時点（ログ初期化）でも使えるよう
+<code>std::env::current_exe()</code> ベースのフォールバックを持たせる。</p>
+<p><strong>追加: <code>get_data_root()</code></strong></p>
+<div class="highlight"><pre><span></span><code><span class="sd">/// データルートディレクトリを返す。</span>
+<span class="sd">/// 優先順:</span>
+<span class="sd">///   1. BACKCAST_DATA_DIR 環境変数</span>
+<span class="sd">///   2. Steam 版ビルド (feature = &quot;steam&quot;) または BACKCAST_PORTABLE=1 →</span>
+<span class="sd">///      &lt;exe のディレクトリ&gt;/data（ポータブルモード）</span>
+<span class="sd">///   3. 通常配布版 → None を返し、呼び出し側が AppData ベースのパスを使う</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">get_data_root</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Option</span><span class="o">&lt;</span><span class="n">PathBuf</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 明示的な env var が最優先</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">dir</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">env</span><span class="p">::</span><span class="n">var</span><span class="p">(</span><span class="s">&quot;BACKCAST_DATA_DIR&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">dir</span><span class="p">.</span><span class="n">trim</span><span class="p">().</span><span class="n">is_empty</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">PathBuf</span><span class="p">::</span><span class="n">from</span><span class="p">(</span><span class="n">dir</span><span class="p">));</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Steam 版ビルド または BACKCAST_PORTABLE=1 の場合はポータブルモード</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">is_portable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">cfg!</span><span class="p">(</span><span class="n">feature</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;steam&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="o">||</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">env</span><span class="p">::</span><span class="n">var</span><span class="p">(</span><span class="s">&quot;BACKCAST_PORTABLE&quot;</span><span class="p">).</span><span class="n">as_deref</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="s">&quot;1&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">is_portable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">exe</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">env</span><span class="p">::</span><span class="n">current_exe</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">exe_dir</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">exe</span><span class="p">.</span><span class="n">parent</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">exe_dir</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;data&quot;</span><span class="p">));</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nb">None</span><span class="w"> </span><span class="c1">// 通常配布版: 呼び出し側が AppData を使う</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p><code>get_data_root()</code> が <code>None</code> を返す場合は各パス関数が従来の AppData ベースのパスにフォールバックする。
+<code>AppHandle</code> 引数は「フォールバック時にのみ」必要なため、引数は残す。</p>
+</blockquote>
+<p><strong>変更: 各パス関数を <code>get_data_root()</code> 経由にしつつ <code>AppHandle</code> は維持</strong></p>
+<p><code>get_data_root()</code> が <code>Some(root)</code> を返す場合はそこから派生し、
+<code>None</code> の場合は従来の AppData ベースのパスを返す。
+<code>&amp;tauri::AppHandle</code> 引数はフォールバック用に残す。</p>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>Steam 版 (<code>Some(root)</code>)</th>
+<th>通常配布版 (<code>None</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get_env_dir(app)</code></td>
+<td><code>root.join("marimo-env")</code></td>
+<td><code>app_data_dir.join("marimo-env")</code></td>
+</tr>
+<tr>
+<td><code>get_python_install_dir(app)</code></td>
+<td><code>root.join("python")</code></td>
+<td><code>app_data_dir.join("python")</code></td>
+</tr>
+<tr>
+<td><code>get_log_dir(app)</code></td>
+<td><code>root.join("logs")</code></td>
+<td><code>app_data_dir.join("logs")</code></td>
+</tr>
+<tr>
+<td><code>get_notebooks_dir(app)</code></td>
+<td><code>root.join("notebooks")</code></td>
+<td><code>config_dir/marimo/notebooks</code></td>
+</tr>
+<tr>
+<td><code>get_recent_files_path()</code></td>
+<td><code>root/state/recent_files.toml</code></td>
+<td>従来の <code>~/.marimo/...</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong><code>get_uv_bin()</code> と <code>get_marimo_source()</code></strong> はリソースバンドル参照のため変更不要。</p>
+<p><strong><code>copy_sample_files_to_notebooks()</code></strong> は <code>app.path().resource_dir()</code> でバンドルリソースを
+参照しているため、この関数への <code>&amp;AppHandle</code> 引数は削除しない。</p>
+</blockquote>
+<hr />
+<h3 id="step-2-src-taurisrclibrs">Step 2: <code>src-tauri/src/lib.rs</code><a class="headerlink" href="#step-2-src-taurisrclibrs" title="Permanent link">&para;</a></h3>
+<p><strong>変更: <code>get_log_file_path()</code></strong></p>
+<p><code>get_data_root()</code> が <code>Some</code> を返す場合はそこから派生し、<code>None</code>（通常配布版）の場合は
+既存のプラットフォーム別ロジックにフォールバックする。</p>
+<div class="highlight"><pre><span></span><code><span class="k">fn</span><span class="w"> </span><span class="nf">get_log_file_path</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">PathBuf</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">paths</span><span class="p">::</span><span class="n">get_data_root</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">root</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;logs&quot;</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;marimo-desktop.log&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// 通常配布版フォールバック: 既存のプラットフォーム別ロジックを維持</span>
+<span class="w">    </span><span class="cp">#[cfg(target_os = </span><span class="s">&quot;windows&quot;</span><span class="cp">)]</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 既存の APPDATA ベースのロジック */</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="cp">#[cfg(not(target_os = </span><span class="s">&quot;windows&quot;</span><span class="cp">))]</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 既存の HOME ベースのロジック */</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>変更: <code>setup()</code> 内の呼び出しは引き続き <code>app</code> を渡す</strong></p>
+<p>各パス関数は <code>AppHandle</code> 引数を維持するため、呼び出し側の変更は不要。
+<code>get_log_file_path()</code> のみ <code>get_data_root()</code> を直接使うよう修正する（AppHandle 未初期化のため）。</p>
+<hr />
+<h3 id="step-3-src-taurisrcserverlifecyclers">Step 3: <code>src-tauri/src/server/lifecycle.rs</code><a class="headerlink" href="#step-3-src-taurisrcserverlifecyclers" title="Permanent link">&para;</a></h3>
+<p><strong>変更: <code>start_server()</code> に XDG 環境変数を追加</strong></p>
+<p>Python サブプロセスを起動する <code>env</code> HashMap を構築している箇所に追記:</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">data_root</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">paths</span><span class="p">::</span><span class="n">get_data_root</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">env</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="s">&quot;XDG_CONFIG_HOME&quot;</span><span class="p">.</span><span class="n">into</span><span class="p">(),</span><span class="w"> </span><span class="n">data_root</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;config&quot;</span><span class="p">).</span><span class="n">to_string_lossy</span><span class="p">().</span><span class="n">into_owned</span><span class="p">());</span>
+<span class="w">    </span><span class="n">env</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="s">&quot;XDG_CACHE_HOME&quot;</span><span class="p">.</span><span class="n">into</span><span class="p">(),</span><span class="w">  </span><span class="n">data_root</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;cache&quot;</span><span class="p">).</span><span class="n">to_string_lossy</span><span class="p">().</span><span class="n">into_owned</span><span class="p">());</span>
+<span class="w">    </span><span class="n">env</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="s">&quot;MARIMO_STATE_DIR&quot;</span><span class="p">.</span><span class="n">into</span><span class="p">(),</span><span class="w"> </span><span class="n">data_root</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;state&quot;</span><span class="p">).</span><span class="n">to_string_lossy</span><span class="p">().</span><span class="n">into_owned</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p><code>get_data_root()</code> が <code>None</code>（通常配布版）の場合は env var を注入しない。
+Python は従来どおり <code>AppData</code> / <code>~/.marimo</code> ベースのパスを使う。</p>
+</blockquote>
+<p>これにより Python 側の <code>marimo_config_path()</code>, <code>marimo_cache_dir()</code>,
+<code>marimo_log_dir()</code>, <code>marimo_state_dir()</code> がすべて <code>data/</code> 配下を指す。</p>
+<hr />
+<h3 id="step-4-src-taurisrcenvironmentbootstraprs">Step 4: <code>src-tauri/src/environment/bootstrap.rs</code><a class="headerlink" href="#step-4-src-taurisrcenvironmentbootstraprs" title="Permanent link">&para;</a></h3>
+<p><strong>原則変更不要</strong></p>
+<p><code>ensure_environment()</code> は <code>env_dir</code>, <code>python_install_dir</code> などを引数として受け取るため、
+<code>paths::*</code> 関数のシグネチャに依存しない。<code>lib.rs</code> の呼び出し側（Step 2）が
+<code>get_data_root()</code> を通じた正しいパスを渡すため、このファイルの変更は原則不要。</p>
+<p><strong>確認済み: <code>UV_PYTHON_INSTALL_DIR</code> の受け渡し</strong></p>
+<p><code>bootstrap.rs</code> の <code>find_python()</code> と <code>install_python()</code> 両方で:</p>
+<div class="highlight"><pre><span></span><code><span class="p">.</span><span class="n">env</span><span class="p">(</span><span class="s">&quot;UV_PYTHON_INSTALL_DIR&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">python_install_dir</span><span class="p">)</span>
+</code></pre></div>
+<p>が正しく設定されている。<code>python_install_dir</code> は <code>lib.rs</code> から引数として渡されるため、
+<code>get_data_root()</code> ベースのパスが自動的に使われる。追加変更不要。</p>
+<hr />
+<h3 id="step-5-marimo_utilsxdgpy">Step 5: <code>marimo/_utils/xdg.py</code><a class="headerlink" href="#step-5-marimo_utilsxdgpy" title="Permanent link">&para;</a></h3>
+<p><strong>変更: <code>MARIMO_STATE_DIR</code> オーバーライドを追加</strong></p>
+<p>Windows では <code>XDG_STATE_HOME</code> が無視されるため専用の env var で対処:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">marimo_state_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">override</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;MARIMO_STATE_DIR&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">override</span> <span class="ow">and</span> <span class="n">override</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">override</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;posix&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">xdg_state_home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;marimo&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">home_path</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.marimo&quot;</span>
+</code></pre></div>
+<p><code>XDG_CONFIG_HOME</code> と <code>XDG_CACHE_HOME</code> はすでに <code>xdg.py</code> で参照されているため、
+Rust 側から env を設定するだけで追従する。変更不要。</p>
+<hr />
+<h3 id="step-6-src-tauricargotoml">Step 6: <code>src-tauri/Cargo.toml</code><a class="headerlink" href="#step-6-src-tauricargotoml" title="Permanent link">&para;</a></h3>
+<p><strong>変更: <code>steam</code> feature を追加</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">[features]</span>
+<span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[]</span>
+<span class="n">steam</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[]</span>
+</code></pre></div>
+<p>Steam 向け CI ビルド時は <code>cargo tauri build --features steam</code> を使う。
+通常配布ビルドは <code>cargo tauri build</code>（features なし）で従来動作を維持。</p>
+<hr />
+<h3 id="step-7-src-tauritauri-steam-platformconfjson">Step 7: <code>src-tauri/tauri-steam-{platform}.conf.json</code>（新規作成）<a class="headerlink" href="#step-7-src-tauritauri-steam-platformconfjson" title="Permanent link">&para;</a></h3>
+<p>Steam 版の設定は <strong>既存の <code>tauri.conf.json</code> を変更せず</strong>、プラットフォーム別の専用設定ファイルを新規作成する。
+これにより通常配布 CI に影響を与えない。</p>
+<p>各ファイルは差分のみ記述し、Tauri が <code>tauri.conf.json</code> とマージする:</p>
+<ul>
+<li><code>tauri-steam-windows.conf.json</code> — Windows 用（<code>nsis</code> ターゲット、<code>webviewInstallMode: skip</code>）</li>
+<li><code>tauri-steam-mac.conf.json</code> — macOS 用（<code>app</code> ターゲット）</li>
+<li><code>tauri-steam-linux.conf.json</code> — Linux 用（<code>appimage</code> ターゲット）</li>
+</ul>
+<blockquote>
+<p><strong>プラットフォーム別に分割した理由:</strong>
+- <strong>Windows <code>nsis</code></strong>: インストーラーの生成は副産物として許容し、Steam depot には
+  ステージングディレクトリ（<code>bundle/nsis/_/</code>）の内容をアップロードする。
+  <code>webviewInstallMode: skip</code> により WebView2 BootStrapper のダウンロードは行われない。
+- <strong>macOS <code>app</code></strong>: <code>.app</code> バンドル（<code>bundle/macos/*.app</code>）を生成。
+  Steam には <code>.app</code> バンドルが必要なため <code>dmg</code> でなくこちらを使う。
+- <strong>Linux <code>appimage</code></strong>: 従来通り（変更なし）。</p>
+</blockquote>
+<p>Steam ビルド時は <code>--config src-tauri/tauri-steam-{platform}.conf.json</code> で指定する（Step 8 参照）。
+通常配布 CI は既存の <code>tauri.conf.json</code> をそのまま使い続ける。</p>
+<hr />
+<h3 id="step-8-githubworkflowsrelease-steamyml">Step 8: <code>.github/workflows/release-steam.yml</code><a class="headerlink" href="#step-8-githubworkflowsrelease-steamyml" title="Permanent link">&para;</a></h3>
+<h4 id="workflow-nsis-steam">問題: 現在の workflow は NSIS インストーラーを Steam に上げている<a class="headerlink" href="#workflow-nsis-steam" title="Permanent link">&para;</a></h4>
+<p>現在の Windows アップロードパス:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src-tauri/target/release/bundle/nsis/</span>
+</code></pre></div>
+<p>このディレクトリには <code>backcast_x64-setup.exe</code>（インストーラー）が入っており、
+Steam がユーザーに配信するゲーム本体のファイル群ではない。</p>
+<h4 id="windows-depot">変更: Windows depot をゲームファイルで組み立てる<a class="headerlink" href="#windows-depot" title="Permanent link">&para;</a></h4>
+<p>Tauri が NSIS ビルド時に生成するステージングディレクトリ（<code>bundle/nsis/_/</code>）には
+インストーラー生成前のファイル群（<code>backcast.exe</code> + <code>resources/</code>）が展開される。
+Steam depot には <strong>このステージングディレクトリの内容</strong>をアップロードする。</p>
+<blockquote>
+<p><strong>⚠️ 要事前確認:</strong> <code>bundle/nsis/_/</code> の正確なパスは Tauri バージョンに依存する。
+ローカルビルドで <code>target/release/bundle/nsis/</code> 以下を確認し、<code>backcast.exe</code> が置かれる
+サブディレクトリのパスを特定してから CI に反映すること。</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><span class="c1"># 変更前</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">📤 Upload Windows artifacts (Steam)</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v4</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">steam-windows-${{ env.MARIMO_VERSION }}</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src-tauri/target/release/bundle/nsis/</span><span class="w">    </span><span class="c1"># ← インストーラー本体</span>
+
+<span class="c1"># 変更後</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">📤 Upload Windows artifacts (Steam)</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v4</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">steam-windows-${{ env.MARIMO_VERSION }}</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src-tauri/target/release/bundle/nsis/_/</span><span class="w">  </span><span class="c1"># ← ゲームファイル群（パス要確認）</span>
+<span class="w">    </span><span class="nt">if-no-files-found</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error</span>
+</code></pre></div>
+<p>ビルドコマンドに <code>--features steam</code> と <code>--config</code> を追加する:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 変更前</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">🔨 Build Tauri app (Steam)</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cargo tauri build</span>
+
+<span class="c1"># 変更後</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">🔨 Build Tauri app (Steam)</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cargo tauri build --features steam --config src-tauri/tauri-steam-windows.conf.json</span>
+</code></pre></div>
+<h4 id="macos-app">変更: macOS のアップロードパスを .app に変更<a class="headerlink" href="#macos-app" title="Permanent link">&para;</a></h4>
+<p>現在は <code>.dmg</code> をアップロードしているが、Steam には <code>.app</code> バンドルが必要:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 変更前</span>
+<span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src-tauri/target/release/bundle/dmg/</span>
+
+<span class="c1"># 変更後</span>
+<span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src-tauri/target/release/bundle/macos/</span>
+</code></pre></div>
+<h4 id="linux">Linux は変更不要<a class="headerlink" href="#linux" title="Permanent link">&para;</a></h4>
+<p><code>bundle/appimage/</code> に生成される <code>.AppImage</code> は Steam Linux Runtime で動作する。
+パスはそのまま維持。</p>
+<h3 id="step-9-src-tauriprepare-resourcesjs">Step 9: <code>src-tauri/prepare-resources.js</code>（修正）<a class="headerlink" href="#step-9-src-tauriprepare-resourcesjs" title="Permanent link">&para;</a></h3>
+<h4 id="uv">問題: <code>uv</code> バイナリのバンドル漏れ<a class="headerlink" href="#uv" title="Permanent link">&para;</a></h4>
+<p><code>binaries/uv*</code> という設定では、特定条件下で <code>uv.exe</code> がバンドルされない問題（Environment construction error）が発生。</p>
+<h4 id="resourcesbinaries">変更: <code>resources/binaries/</code> への明示的コピー<a class="headerlink" href="#resourcesbinaries" title="Permanent link">&para;</a></h4>
+<ol>
+<li><code>prepare-resources.js</code> で <code>src-tauri/binaries/uv.exe</code> を <code>src-tauri/resources/binaries/uv.exe</code> にコピーする処理を追加。</li>
+<li><code>tauri.conf.json</code> の <code>bundle.resources</code> を <code>binaries/uv*</code> から <code>resources/binaries/uv*</code> に変更。</li>
+<li><code>paths.rs</code> の <code>get_uv_bin</code> を <code>resource_dir/resources/binaries/uv.exe</code> を指すように更新。</li>
+</ol>
+<p>これにより、<code>uv</code> バイナリが確実にリソースとしてバンドルされる。</p>
+<hr />
+<h2 id="_11">変更ファイル一覧<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>変更内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src-tauri/src/paths.rs</code></td>
+<td><code>get_data_root() -&gt; Option&lt;PathBuf&gt;</code> 追加。各パス関数に Steam/通常配布の分岐を追加（<code>AppHandle</code> 引数は維持）</td>
+</tr>
+<tr>
+<td><code>src-tauri/src/lib.rs</code></td>
+<td><code>get_log_file_path()</code> を <code>get_data_root()</code> ベースに変更（<code>None</code> 時は既存ロジックにフォールバック）</td>
+</tr>
+<tr>
+<td><code>src-tauri/src/server/lifecycle.rs</code></td>
+<td><code>start_server()</code> で <code>get_data_root()</code> が <code>Some</code> の場合のみ XDG env 変数を Python プロセスに注入</td>
+</tr>
+<tr>
+<td><code>marimo/_utils/xdg.py</code></td>
+<td><code>marimo_state_dir()</code> に <code>MARIMO_STATE_DIR</code> オーバーライドを追加</td>
+</tr>
+<tr>
+<td><code>src-tauri/tauri-steam-{windows,mac,linux}.conf.json</code></td>
+<td>プラットフォーム別に新規作成。Windows: <code>webviewInstallMode: skip</code> + <code>nsis</code>、macOS: <code>app</code>、Linux: <code>appimage</code></td>
+</tr>
+<tr>
+<td><code>src-tauri/Cargo.toml</code></td>
+<td><code>[features]</code> に <code>steam = []</code> を追加</td>
+</tr>
+<tr>
+<td><code>.github/workflows/release-steam.yml</code></td>
+<td>Windows: depot パスを <code>bundle/nsis/_/</code> に変更、<code>--features steam</code> を追加。macOS: depot パスを <code>bundle/macos/</code> に変更</td>
+</tr>
+<tr>
+<td><code>src-tauri/prepare-resources.js</code></td>
+<td><code>uv.exe</code> を <code>resources/binaries/</code> にコピーする処理を追加</td>
+</tr>
+<tr>
+<td><code>src-tauri/tauri.conf.json</code></td>
+<td><code>binaries/uv*</code> を <code>resources/binaries/uv*</code> に変更</td>
+</tr>
+</tbody>
+</table>
+<p><strong>変更しないファイル:</strong></p>
+<ul>
+<li><code>src-tauri/nsis/hooks.nsh</code> — 通常配布（NSIS ビルド）のために残す</li>
+<li><code>src-tauri/src/window/splash.rs</code> — 変更不要</li>
+<li><code>src-tauri/src/state.rs</code> — 変更不要</li>
+<li><code>src-tauri/src/environment/bootstrap.rs</code> — <code>ensure_environment()</code> は引数でパスを受け取るため変更不要</li>
+</ul>
+<hr />
+<h2 id="_12">動作フロー<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<h3 id="_13">初回起動<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>Steam が steamapps/common/backcast/ にファイルを配信
+        ↓
+backcast.exe を起動
+        ↓
+paths::get_data_root() → &lt;exe_dir&gt;/data（BACKCAST_DATA_DIR 未設定時）
+        ↓
+get_log_file_path() → data/logs/marimo-desktop.log
+ログディレクトリを作成して初期化
+        ↓
+スプラッシュ画面を表示
+        ↓
+ensure_environment(uv_bin, data/marimo-env/, data/python/, resources/marimo/)
+  ├─ data/python/ にインストール済み Python がない
+  │   → uv python install 3.13 (UV_PYTHON_INSTALL_DIR=data/python/)
+  ├─ data/marimo-env/ に venv がない
+  │   → uv venv --seed --python ... data/marimo-env/
+  └─ marimo を pip install (uv pip install resources/marimo[game])
+        ↓
+copy_sample_files_to_notebooks() → data/notebooks/
+seed_recent_files()              → data/state/recent_files.toml
+        ↓
+Python サーバー起動時に env を設定:
+  XDG_CONFIG_HOME = data/config
+  XDG_CACHE_HOME  = data/cache
+  MARIMO_STATE_DIR = data/state
+        ↓
+marimo サーバー起動 → ヘルスチェック → メインウィンドウを開く
+</code></pre></div>
+<h3 id="2">2 回目以降<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>backcast.exe を起動
+        ↓
+get_data_root() → data/ (既存)
+        ↓
+ensure_environment() → venv Python の存在確認のみ（即完了）
+        ↓
+marimo サーバー起動 → メインウィンドウ
+</code></pre></div>
+<hr />
+<h2 id="_14">懸念事項・リスク<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+<th>対処</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WebView2 未インストール</td>
+<td><code>skip</code> モードでは Tauri 自体が起動しない</td>
+<td>Windows 11 + Windows 10 (2021/10 以降) では搭載済みのため許容。エラー時は OS 標準ダイアログが表示される</td>
+</tr>
+<tr>
+<td><code>paths.rs</code> の変更影響範囲</td>
+<td>各パス関数は <code>AppHandle</code> 引数を維持するため呼び出し側の変更は最小限。<code>get_log_file_path()</code> と XDG env 注入の 2 箇所のみ変更が必要</td>
+<td>変更量は少ない</td>
+</tr>
+<tr>
+<td>Python venv の再構築</td>
+<td>データルートが変わると既存 venv は使えない（絶対パスが埋め込まれる）</td>
+<td>初回は自動で再構築される。既存ユーザーのデータ移行は別タスクで対応</td>
+</tr>
+<tr>
+<td>NSIS + Program Files での書き込み失敗</td>
+<td><code>&lt;exe_dir&gt;/data</code> をデフォルトにすると UAC で書き込み拒否される</td>
+<td>Steam 版と通常配布版をビルド時に分離（<code>feature = "steam"</code> または <code>BACKCAST_PORTABLE=1</code>）。NSIS 版は従来の AppData ベースのまま</td>
+</tr>
+<tr>
+<td>Steam Cloud 同期</td>
+<td><code>data/marimo-env/</code> や <code>data/python/</code> まで同期すると巨大になる</td>
+<td>Steam デポ設定で <code>data/state/</code> と <code>data/notebooks/</code> のみを同期対象にする</td>
+</tr>
+<tr>
+<td>初回起動時のネットワーク依存</td>
+<td><code>uv python install 3.13</code> はインターネット接続が必要。Steam オフラインモードでは失敗する</td>
+<td>スプラッシュ画面のエラーメッセージに「インターネット接続が必要です（初回のみ）」を追記する。別タスクで対応</td>
+</tr>
+<tr>
+<td><code>bundle/nsis/_/</code> パスの不確実性</td>
+<td>ステージングディレクトリのパスは Tauri バージョンに依存する</td>
+<td>ローカルビルドで <code>target/release/bundle/nsis/</code> 以下を確認してから CI に反映する（Step 8 参照）</td>
+</tr>
+<tr>
+<td>macOS の公証（Notarization）</td>
+<td>Steam に上げる <code>.app</code> は Apple の公証が要求される場合がある</td>
+<td>現行 CI の macOS 署名・公証ステップが <code>bundle/macos/</code> を対象にしていることを確認する</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

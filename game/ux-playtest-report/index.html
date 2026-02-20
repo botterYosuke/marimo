@@ -1,0 +1,1767 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>UX プレイテストレポート — 離脱ポイント分析 - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ux" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              UX プレイテストレポート — 離脱ポイント分析
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_backend_and_mcp_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide-custom-wheel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-widget-caching-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ui-switch-state-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-backend-sync.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-performance.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend-freeze-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grid-layout-auto-placement.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../broadcast-channel-hud.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-theme.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skill-tree-panel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../electron-startup-config.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-deploy.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-integration-fixes.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景・目的
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実施手順
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実施手順">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        起動時の注意点（知見）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        離脱ポイント一覧
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="離脱ポイント一覧">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P1 🔴 致命的: スキル進捗が反映されない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p2-btbuy-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P2 🔴 高: bt.buy() の出力が生のPythonオブジェクト
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p3-btstep-true" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P3 🔴 高: bt.step() の出力が True のみ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p4-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P4 🟠 中: Grid レイアウトでセルが重なる
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p5-ai-fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P5 🟠 中: AI Fix 提案バナーが全セルに表示
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P6 🟠 中: 入力セルがどれかわからない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p7-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P7 🟡 低〜中: チャートが step() 後に表示崩れ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p8-reconnected" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P8 🟡 低〜中: 「Reconnected」バナー
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p9-progress-00" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P9 🟡 低: ステータスバーが Progress: 0.0% のまま
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P10 🟡 低: スキルツリーボタンが発見困難
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計思想と背景
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="設計思想と背景">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#e2e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        なぜ E2E テストだけでは不十分か
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e2e_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        プレイテストと E2E テストの使い分け
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips: プレイテストの実施手順
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tips: プレイテストの実施手順">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前提条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        推奨手順（ビルド済みフロントエンド使用）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vite-dev-server-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        推奨手順（Vite dev server 使用 — スキルツリー等の最新UIを確認する場合）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        チェックリスト
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        関連ドキュメント
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="ux">UX プレイテストレポート — 離脱ポイント分析<a class="headerlink" href="#ux" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-20
+<strong>対象</strong>: <code>src-tauri/sample-notebooks/backcast.py</code>（サンドボックスモード）
+<strong>環境</strong>: marimo edit (port 2718) + Vite dev server (port 3000)、Playwright MCP によるブラウザ自動操作
+<strong>ステータス</strong>: 未対応（提案段階）</p>
+<hr />
+<h2 id="_1">背景・目的<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>スキルツリーのE2Eテスト（<code>game-e2e-review-system.md</code> の53テスト）は <strong>技術的な正しさ</strong> を検証している。
+一方で「初めてのユーザーがゲームを起動して、最初の10分で離脱しないか」という <strong>UX 観点の検証</strong> は未実施だった。</p>
+<p>本レポートは、Playwright MCP で実際に backcast.py を起動し、チュートリアルの手順（<code>bt.buy()</code> → <code>bt.step()</code> → スキルツリー確認）を初心者視点で追体験した結果である。</p>
+<hr />
+<h2 id="_2">実施手順<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>1. taskkill //F //IM marimo.exe  （既存プロセス終了）
+2. cd src-tauri/sample-notebooks
+3. uv run --project ... marimo edit --no-token --headless backcast.py --port 2718
+4. cd frontend &amp;&amp; pnpm dev  （Vite dev server port 3000）
+5. Playwright で http://localhost:3000/ を開く
+6. bt.buy() → bt.step() → スキルツリー確認
+</code></pre></div>
+<h3 id="_3">起動時の注意点（知見）<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>pyproject.toml</code> の <code>BackcastPro&gt;=0.6.4</code> が PyPI に存在しない場合、<code>uv run</code> が全 extras を解決しようとして失敗する。一時的に <code>&gt;=0.6.3</code> に変更するか、marimo.exe が既にインストール済みならそのまま使う</li>
+<li><code>marimo.exe</code> が既に起動中だとロックエラーが出る。<code>taskkill //F //IM marimo.exe</code> で全プロセス終了が必要</li>
+<li>Vite dev server → marimo backend の接続は <strong>同一カーネルへの再接続</strong> になるため「Reconnected」バナーが表示される</li>
+</ul>
+<hr />
+<h2 id="_4">離脱ポイント一覧<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="p1">P1 🔴 致命的: スキル進捗が反映されない<a class="headerlink" href="#p1" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: <code>bt.chart("7203")</code> → <code>bt.buy()</code> → <code>bt.step()</code> を実行後にスキルツリーを開くと <strong>0/59 スキル</strong> のまま。SANDBOX_001 すら完了していない。</p>
+<p><strong>根本原因</strong>:
+- <code>game_setup.py</code> の各関数（<code>chart()</code>, <code>buy()</code> 等）は <code>emit_skill()</code> を呼び出す
+- <code>emit_skill()</code> は Python 側で BroadcastChannel 用の HTML を生成し <code>mo.output.append()</code> でフロントエンドに送信
+- しかし <strong>セッション再接続時</strong> には、既に実行済みセルの出力が再送されるタイミングとフロントエンドのスキルリスナー起動タイミングにずれが生じる
+- BroadcastChannel はリアルタイム送信のみで <strong>過去のイベントを再生する仕組みがない</strong></p>
+<p><strong>影響</strong>: ユーザーが操作しても何も起きない → 「ゲームが壊れている」と判断して離脱</p>
+<p><strong>改善方向</strong>:
+1. ページロード時に Python カーネルから <code>get_triggered_skills()</code> の現在状態を取得し、フロントエンドのスキルツリーと同期する API を追加
+2. <code>progress-persistence.md</code> の <code>.backcast.progress.json</code> を読み込んでフロントエンド初期状態に反映
+3. セル再実行時にスキルイベントを再発火する仕組み</p>
+<hr />
+<h3 id="p2-btbuy-python">P2 🔴 高: <code>bt.buy()</code> の出力が生のPythonオブジェクト<a class="headerlink" href="#p2-btbuy-python" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: Outputs パネルに以下が表示される:
+<div class="highlight"><pre><span></span><code>&lt;BackcastPro.order.Order object at 0x000001D007657CB0&gt;
+</code></pre></div></p>
+<p><strong>問題</strong>: 初心者には完全に意味不明。「買えたの？ エラー？」と混乱する。</p>
+<p><strong>改善方向</strong>:
+- <code>BackcastPro.order.Order.__repr__()</code> をオーバーライドして人間向けメッセージにする
+- <code>game_setup.py</code> の <code>buy()</code> で <code>mo.callout()</code> によるフィードバックを追加:
+  <div class="highlight"><pre><span></span><code><span class="n">mo</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mo</span><span class="o">.</span><span class="n">callout</span><span class="p">(</span>
+    <span class="n">mo</span><span class="o">.</span><span class="n">md</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**買い注文** トヨタ(7203) @ ¥</span><span class="si">{</span><span class="n">price</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;success&quot;</span><span class="p">,</span>
+<span class="p">))</span>
+</code></pre></div></p>
+<hr />
+<h3 id="p3-btstep-true">P3 🔴 高: <code>bt.step()</code> の出力が <code>True</code> のみ<a class="headerlink" href="#p3-btstep-true" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: Outputs に <code>True</code> とだけ表示。何日に進んだか、株価はいくらか、注文は約定したか — 一切不明。</p>
+<p><strong>改善方向</strong>:
+- <code>step()</code> の戻り値を情報豊富なオブジェクトにする（または <code>mo.output.append()</code> で状況報告）
+- 例: <code>📅 2025-06-15 | 株価: ¥3,720 (+1.2%) | 買い注文が約定しました！</code></p>
+<hr />
+<h3 id="p4-grid">P4 🟠 中: Grid レイアウトでセルが重なる<a class="headerlink" href="#p4-grid" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: 起動直後の画面で cell-1（説明）、cell-2（チャートコード）、cell-3（入力）、cell-4（AI生成の空セル）が重なり合い、どれがどれか判別困難。</p>
+<p><strong>関連</strong>: <code>game/grid-layout-auto-placement.md</code> の auto-placement ロジック</p>
+<p><strong>改善方向</strong>:
+- <code>backcast.py</code> の <code>grid.json</code> レイアウトファイルで初期配置を明確に定義
+- チャート = 上部全幅、説明 = 左下、入力 = 右下 のような固定レイアウト</p>
+<hr />
+<h3 id="p5-ai-fix">P5 🟠 中: AI Fix 提案バナーが全セルに表示<a class="headerlink" href="#p5-ai-fix" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: 全てのコードセルに「Fix generated / Showing fix / Accept / Reject」が表示される。ゲームと無関係。</p>
+<p><strong>原因推定</strong>: AI code fix 機能がデフォルトで有効になっている。</p>
+<p><strong>改善方向</strong>:
+- ゲームテンプレート（<code>backcast.py</code>）では AI Fix を自動無効化
+- <code>app = marimo.App(width="grid", ai_fix=False)</code> のような設定、または backcast モード判定で非表示</p>
+<hr />
+<h3 id="p6">P6 🟠 中: 入力セルがどれかわからない<a class="headerlink" href="#p6" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: 説明に「黒いウィンドウに <code>bt.buy()</code> と入力して実行」とあるが、ダークテーマのコードセルが複数あり（cell-3, cell-4）、どれが「正しい入力場所」か判断できない。</p>
+<p><strong>改善方向</strong>:
+- cell-3 のプレースホルダーを <code># ここにコードを入力 → bt.buy()</code> のように具体的に
+- AI が自動生成する空セル（cell-4）を抑制
+- 入力セルにフォーカスハイライトやパルスアニメーション</p>
+<hr />
+<h3 id="p7-step">P7 🟡 低〜中: チャートが step() 後に表示崩れ<a class="headerlink" href="#p7-step" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: <code>bt.step()</code> 実行後、TradingView チャートがローソク足1本だけの極端にズームされた状態になり、全体像が見えない。</p>
+<p><strong>関連</strong>: <code>charts/chart-loop-freeze-fix.md</code> の更新ロジック</p>
+<p><strong>改善方向</strong>:
+- チャート更新時に直近N日分のビューポートを維持するロジック</p>
+<hr />
+<h3 id="p8-reconnected">P8 🟡 低〜中: 「Reconnected」バナー<a class="headerlink" href="#p8-reconnected" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: Vite dev server 経由で接続すると「Reconnected: You have reconnected to an existing session.」バナーが表示される。</p>
+<p><strong>関連</strong>: <code>game-e2e-review-system.md</code> 知見 16, 19, 20</p>
+<p><strong>補足</strong>: ビルド済みフロントエンド（port 2718 直接）では発生しない。開発環境固有の問題。ただしデスクトップアプリ版でも類似の再接続シナリオが発生しうる。</p>
+<hr />
+<h3 id="p9-progress-00">P9 🟡 低: ステータスバーが Progress: 0.0% のまま<a class="headerlink" href="#p9-progress-00" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: <code>bt.buy()</code> / <code>bt.step()</code> 実行後もステータスバーの <code>Progress: 0.0%</code> と <code>Time: -</code> が変わらない。</p>
+<p><strong>原因推定</strong>: ステータスバーは <code>publish_state_headless()</code> で更新されるが、再接続後の初回表示では最新値が反映されていない可能性。</p>
+<hr />
+<h3 id="p10">P10 🟡 低: スキルツリーボタンが発見困難<a class="headerlink" href="#p10" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: スキルツリーボタン（<code>data-testid="skill-tree-button"</code>）は右サイドバーの小さなアイコンボタンで、ラベルなし。ゲームの核心機能なのに見つけにくい。</p>
+<p><strong>関連</strong>: <code>game/skill-tree-panel.md</code></p>
+<p><strong>改善方向</strong>:
+- 初回プレイ時にツールチップ or チュートリアルオーバーレイで案内
+- スキル完了時にボタンのパルスアニメーション
+- または初回起動時に自動でスキルツリーダイアログを表示</p>
+<hr />
+<h2 id="_5">設計思想と背景<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="e2e">なぜ E2E テストだけでは不十分か<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h3>
+<p>E2E テスト（<code>game-e2e-review-system.md</code> の 53 テスト）は <code>window.__testCompleteSkill</code> テストフックで直接 Jotai atom を操作するため、<strong>BroadcastChannel 経路の問題を検出できない</strong>。特に:</p>
+<ul>
+<li>セッション再接続時のイベント消失（P1）</li>
+<li><code>emit_skill()</code> → HTML 生成 → BroadcastChannel → リスナー の全経路での遅延やタイミング問題</li>
+<li>ユーザーの実際の操作フロー（どのセルに入力するか、出力をどう解釈するか）</li>
+</ul>
+<p><code>z-python-e2e.spec.ts</code>（案G）は①→⑦全経路をカバーするが、再接続シナリオはテストしていない。</p>
+<h3 id="e2e_1">プレイテストと E2E テストの使い分け<a class="headerlink" href="#e2e_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>検証項目</th>
+<th>E2E テスト</th>
+<th>プレイテスト</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>スキル前提条件チェーン</td>
+<td>✅</td>
+<td>-</td>
+</tr>
+<tr>
+<td>報酬計算</td>
+<td>✅</td>
+<td>-</td>
+</tr>
+<tr>
+<td>UI 状態遷移</td>
+<td>✅</td>
+<td>-</td>
+</tr>
+<tr>
+<td>再接続時のスキル同期</td>
+<td>❌</td>
+<td>✅ P1</td>
+</tr>
+<tr>
+<td>出力メッセージの可読性</td>
+<td>❌</td>
+<td>✅ P2, P3</td>
+</tr>
+<tr>
+<td>レイアウトの視認性</td>
+<td>❌</td>
+<td>✅ P4, P6</td>
+</tr>
+<tr>
+<td>全体的なユーザーフロー</td>
+<td>❌</td>
+<td>✅ 全体</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="tips">Tips: プレイテストの実施手順<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
+<h3 id="_6">前提条件<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>BackcastPro がインストール済み</strong>であること（<code>uv pip install BackcastPro</code>）</li>
+<li><strong>marimo がビルド済み</strong>であること（<code>cd frontend &amp;&amp; pnpm turbo build &amp;&amp; cp -R dist/* ../marimo/_static/</code>）</li>
+<li>または <strong>Vite dev server</strong> を使う場合はビルド不要だが Reconnected 問題が発生する</li>
+</ol>
+<h3 id="_7">推奨手順（ビルド済みフロントエンド使用）<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. 既存プロセス終了</span>
+taskkill<span class="w"> </span>//F<span class="w"> </span>//IM<span class="w"> </span>marimo.exe
+
+<span class="c1"># 2. サーバー起動（sample-notebooks ディレクトリから）</span>
+<span class="nb">cd</span><span class="w"> </span>src-tauri/sample-notebooks
+uv<span class="w"> </span>run<span class="w"> </span>--project<span class="w"> </span>../../<span class="w"> </span>marimo<span class="w"> </span>edit<span class="w"> </span>--no-token<span class="w"> </span>--headless<span class="w"> </span>backcast.py<span class="w"> </span>--port<span class="w"> </span><span class="m">2718</span>
+
+<span class="c1"># 3. ブラウザで開く</span>
+<span class="c1"># http://localhost:2718/</span>
+</code></pre></div>
+<h3 id="vite-dev-server-ui">推奨手順（Vite dev server 使用 — スキルツリー等の最新UIを確認する場合）<a class="headerlink" href="#vite-dev-server-ui" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. バックエンド起動（上記と同じ）</span>
+
+<span class="c1"># 2. フロントエンド dev server 起動</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span>dev
+
+<span class="c1"># 3. ブラウザで開く（Reconnected バナーが出るので dismiss する）</span>
+<span class="c1"># http://localhost:3000/</span>
+</code></pre></div>
+<h3 id="_8">チェックリスト<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>□ チャートが正常に表示されるか
+□ bt.buy() の出力が理解可能か
+□ bt.step() 後にチャートが更新されるか
+□ bt.step() 後にステータスバーが更新されるか
+□ スキルツリーにスキル完了が反映されるか
+□ 次に何をすべきかがわかるか
+□ セルのレイアウトが見やすいか
+□ AI Fix バナーが邪魔していないか
+</code></pre></div>
+<hr />
+<h2 id="_9">関連ドキュメント<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../game-e2e-review-system/">Game E2E Review System</a> — E2E テストの設計・知見・全テスト一覧</li>
+<li><a href="../skill-tree-implementation/">Skill Tree Implementation</a> — スキルツリーシステム v4 アーキテクチャ</li>
+<li><a href="../skill-event-wiring/">Skill Event Wiring</a> — Python → フロントエンド BroadcastChannel 接続</li>
+<li><a href="../progress-persistence/">Progress Persistence</a> — <code>.backcast.progress.json</code> によるスキル状態永続化</li>
+<li><a href="../grid-layout-auto-placement/">Grid Layout Auto Placement</a> — グリッドレイアウトの自動配置ロジック</li>
+<li><a href="../../charts/chart-loop-freeze-fix/">Chart Loop Freeze Fix</a> — チャート更新ロジックの修正</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

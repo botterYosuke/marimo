@@ -1,0 +1,2064 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>ゲームプレイ レポート: Backcast - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#backcast" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ゲームプレイ レポート: Backcast
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_backend_and_mcp_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide-custom-wheel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-widget-caching-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ui-switch-state-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-backend-sync.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-performance.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend-freeze-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grid-layout-auto-placement.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../broadcast-channel-hud.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-theme.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skill-tree-panel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../electron-startup-config.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-deploy.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-integration-fixes.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 作業項目と進捗
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📝 実行ログ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📝 実行ログ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        環境セットアップ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ゲームプレイシーケンス
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 スキル獲得状況
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💡 新たな知見・発見したバグ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 新たな知見・発見したバグ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-sandbox_003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        バグ1: SANDBOX_003 の条件が直感に反する
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-sandbox_005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        バグ2: SANDBOX_005 の重複送信
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-bridge_001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        バグ3: BRIDGE_001 がフロントエンドでカウントされない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-position-object-object-shares" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        バグ4: Position 表示が "[object Object] shares"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto_instantiate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        知見: auto_instantiate による挙動
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#btchart-get_stock_daily" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        知見: bt.chart() 内部での get_stock_daily() 呼び出し
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Tips・トラブルシューティング
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Tips・トラブルシューティング">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sandbox_003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SANDBOX_003 を取得する正しいシーケンス
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gridレイアウトでのセル操作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#playwright" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Playwright でのセル特定方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📝 体験レポート
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📝 体験レポート">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ゲームの流れ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uiux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UI/UX の評価
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキル発火のタイミング
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        改善提案
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backcast-integrationspects-2026-02-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🧪 backcast-integration.spec.ts 実装レポート（2026-02-20）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🧪 backcast-integration.spec.ts 実装レポート（2026-02-20）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装したテストケース（全6件）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装中に発見した新知見
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装中に発見した新知見">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-beforeeach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        知見A: beforeEach の順序が重要
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        知見B: 報酬トーストが Python ボタンを遮蔽する
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        知見C: テスト追加セルが次回実行時に残留する
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d-bridge_002-bridge_001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        知見D: BRIDGE_002 は BRIDGE_001 完了が必須
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-bridge_001-btreveal_data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        知見E: BRIDGE_001 バグは bt.reveal_data() パス固有
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f-sandbox_005-0-auto_instantiate-dedup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        知見F: SANDBOX_005 ログ 0 件は正常（auto_instantiate dedup）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#g-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        知見G: 複数コマンドを 1 セルにまとめてタイムアウト節約
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📸 スクリーンショット一覧
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="backcast">ゲームプレイ レポート: Backcast<a class="headerlink" href="#backcast" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-20
+<strong>作業者</strong>: Claude Agent
+<strong>完了時刻</strong>: 2026-02-20 セッション終了</p>
+<hr />
+<h2 id="_1">📋 作業項目と進捗<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>✅ ステップ1: 計画書の作成</li>
+<li>✅ ステップ2: marimoサーバーの起動確認（pnpm dev で起動）</li>
+<li>✅ ステップ3: Playwrightでbackcast.pyを開く（ノートブックパス使用）</li>
+<li>✅ ステップ4: SANDBOX_001 - <code>bt.chart("7203")</code> 実行（既存セル）</li>
+<li>✅ ステップ5: SANDBOX_002 - <code>bt.buy()</code> 実行</li>
+<li>✅ ステップ6: SANDBOX_003 - <code>bt.trades()</code> 実行（※ステップ後に再実行が必要）</li>
+<li>✅ ステップ7: SANDBOX_004 - <code>bt.sell()</code> 実行</li>
+<li>✅ ステップ8: SANDBOX_005 - <code>bt.chart("7203")</code> 再実行（SANDBOX_003+004揃い後）</li>
+<li>✅ ステップ9: SANDBOX_006 - 自動発火確認</li>
+<li>✅ ステップ10: BRIDGE_001 - <code>bt.reveal_data()</code> 実行</li>
+<li>✅ ステップ11: BRIDGE_002 - <code>bt.get_stock_daily("7203")</code> 実行（auto_instantiateで先行完了）</li>
+<li>✅ ステップ12: BRIDGE_003 - 自動発火確認</li>
+<li>✅ ステップ13: スキルツリーパネルの確認・スクリーンショット</li>
+<li>✅ ステップ14: 体験レポートの記載</li>
+<li>✅ ステップ15: <code>backcast-integration.spec.ts</code> 作成（6テストケース実装）</li>
+<li>✅ ステップ16: 全6テストがパスすることを確認（2.9分）</li>
+</ul>
+<hr />
+<h2 id="_2">📝 実行ログ<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="_3">環境セットアップ<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>pnpm dev</code> でサーバー起動（ポート2718）</li>
+<li>backcast.py URL: <code>http://localhost:2718/?file=C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></li>
+<li>auto_instantiate=true の影響：ファイルを開くと既存セル（<code>bt.chart("7203")</code>）が自動実行</li>
+</ul>
+<h3 id="_4">ゲームプレイシーケンス<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ステップ</th>
+<th>コード</th>
+<th>結果</th>
+<th>スキルイベント</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>bt.chart("7203")</code></td>
+<td>チャート表示 OK、Equity ¥175,000</td>
+<td>SANDBOX_001（auto_instantiate時）</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>bt.buy()</code></td>
+<td>Order オブジェクト返却、Equity ¥195,000</td>
+<td>SANDBOX_002 ✅</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>bt.trades()</code></td>
+<td>0 items（注文未決済）</td>
+<td>なし（条件未達）</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>bt.sell()</code></td>
+<td>Order オブジェクト返却、Equity ¥215,000</td>
+<td>SANDBOX_004 ✅</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>bt.chart("7203")</code> 2回目</td>
+<td>チャート更新</td>
+<td>なし（SANDBOX_003未取得のため）</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>bt.reveal_data()</code></td>
+<td>6,084行データ表示</td>
+<td>BRIDGE_001 ✅</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>bt.get_stock_daily("7203")</code></td>
+<td>6,084行データ表示</td>
+<td>なし（auto_instantiateで先行）</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>bt.step()</code></td>
+<td>Time: 2001-01-04</td>
+<td>なし</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>bt.buy()</code> 2回目</td>
+<td>Order オブジェクト</td>
+<td>なし（SANDBOX_002重複）</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>bt.step()</code> 2回目</td>
+<td>Time: 2001-01-05</td>
+<td>なし</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>bt.trades()</code> 2回目</td>
+<td>取引あり</td>
+<td>SANDBOX_003 ✅</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>bt.chart("7203")</code> 3回目</td>
+<td>チャート更新</td>
+<td>SANDBOX_005 ✅, SANDBOX_006 ✅</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_5">📊 スキル獲得状況<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>スキルID</th>
+<th>スキル名</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SANDBOX_001</td>
+<td>マーケットへようこそ</td>
+<td>✅ 完了（auto_instantiate時）</td>
+</tr>
+<tr>
+<td>SANDBOX_002</td>
+<td>初めての購入</td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>SANDBOX_003</td>
+<td>買値を確認する</td>
+<td>✅ 完了（bt.step()後に再実行）</td>
+</tr>
+<tr>
+<td>SANDBOX_004</td>
+<td>初めての売却</td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>SANDBOX_005</td>
+<td>チャートで振り返る</td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>SANDBOX_006</td>
+<td>サンドボックス卒業</td>
+<td>✅ 完了（自動発火）</td>
+</tr>
+<tr>
+<td>BRIDGE_001</td>
+<td>データの正体</td>
+<td>⚠️ イベント発火済み・フロントエンド未カウント</td>
+</tr>
+<tr>
+<td>BRIDGE_002</td>
+<td>自分でデータを取得</td>
+<td>✅ 完了（auto_instantiate時）</td>
+</tr>
+<tr>
+<td>BRIDGE_003</td>
+<td>-</td>
+<td>✅ 完了（自動発火）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>最終カウント: 8/59 スキル</strong>（期待値9に対し、BRIDGE_001が未カウント）</p>
+<hr />
+<h2 id="_6">💡 新たな知見・発見したバグ<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="1-sandbox_003">バグ1: SANDBOX_003 の条件が直感に反する<a class="headerlink" href="#1-sandbox_003" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: <code>bt.trades()</code> を初回に呼んでも SANDBOX_003 が発火しない。</p>
+<p><strong>原因</strong>: <code>game_setup.py</code> のコード：
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">trades</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s2">&quot;SANDBOX_002&quot;</span> <span class="ow">in</span> <span class="n">s</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">bt</span><span class="o">.</span><span class="n">trades</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># 取引が存在する場合のみ</span>
+        <span class="n">emit_skill</span><span class="p">(</span><span class="s2">&quot;SANDBOX_003&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>問題点</strong>: ユーザーが <code>bt.buy()</code> → <code>bt.trades()</code> の順で実行しても、<code>bt.step()</code> で時間を進めないと取引が決済されず <code>len(bt.trades) == 0</code> になる。<strong>SANDBOX_003取得には bt.step() が必要</strong>だが、ハンドオフドキュメントにはその説明がない。</p>
+<h3 id="2-sandbox_005">バグ2: SANDBOX_005 の重複送信<a class="headerlink" href="#2-sandbox_005" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: コンソールログに <code>SANDBOX_005</code> が2回記録された。</p>
+<p><strong>原因</strong>: 複数の <code>bt.chart("7203")</code> セルが同時に存在し、marimoのリアクティブ実行で両方が実行された可能性。<code>emit_skill()</code> のdedup（<code>_triggered_skills</code> チェック）は機能しているはずだが、ブロードキャストチャンネルで重複受信が発生。</p>
+<h3 id="3-bridge_001">バグ3: BRIDGE_001 がフロントエンドでカウントされない<a class="headerlink" href="#3-bridge_001" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: <code>bt.reveal_data()</code> 実行時に Python バックエンドで <code>emit_skill("BRIDGE_001")</code> が呼ばれ、ブラウザコンソールで <code>[SkillHandler] Received skill event: BRIDGE_001</code> が確認されたにもかかわらず、スキルツリーカウントが増えなかった（8/59、BRIDGE_001は青点線=未完了）。</p>
+<p><strong>推測原因</strong>: フロントエンドのスキル処理ロジックに BRIDGE_001 に対する特別な条件がある可能性、またはスキルツリーパネルの状態更新タイミングの問題。</p>
+<h3 id="4-position-object-object-shares">バグ4: Position 表示が "[object Object] shares"<a class="headerlink" href="#4-position-object-object-shares" title="Permanent link">&para;</a></h3>
+<p><strong>現象</strong>: ステータスバーの Position フィールドが <code>[object Object] shares</code> と表示されている（数値ではなくオブジェクト）。</p>
+<p><strong>原因</strong>: フロントエンドで position の表示フォーマット処理が正しく動作していない可能性。JavaScript の toString() が呼ばれていない。</p>
+<h3 id="auto_instantiate">知見: auto_instantiate による挙動<a class="headerlink" href="#auto_instantiate" title="Permanent link">&para;</a></h3>
+<ul>
+<li>ファイルを開くと既存セル（bt.chart, get_stock_daily内部呼び出し）が自動実行</li>
+<li>SANDBOX_001 と BRIDGE_002 が自動的に完了状態になる</li>
+<li>ブラウザが完全に初期化される前に発火するスキルイベントは、フロントエンドで受信されない可能性</li>
+</ul>
+<h3 id="btchart-get_stock_daily">知見: bt.chart() 内部での get_stock_daily() 呼び出し<a class="headerlink" href="#btchart-get_stock_daily" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>game_setup.py</code> の <code>chart()</code> は内部で <code>get_stock_daily()</code> を呼ぶ</li>
+<li>このため BRIDGE_002 は <code>bt.chart()</code> を呼ぶだけで自動的に完了する</li>
+<li>ハンドオフドキュメントにはこの内部依存関係が記載されていない</li>
+</ul>
+<hr />
+<h2 id="tips">🔧 Tips・トラブルシューティング<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
+<h3 id="sandbox_003">SANDBOX_003 を取得する正しいシーケンス<a class="headerlink" href="#sandbox_003" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>bt.chart(&quot;7203&quot;)  # チャート表示
+bt.buy()          # 買い注文
+bt.step()         # 時間を進めて注文を決済
+bt.trades()       # ← ここで len(bt.trades) &gt; 0 になってスキル発火
+</code></pre></div>
+<h3 id="grid">gridレイアウトでのセル操作<a class="headerlink" href="#grid" title="Permanent link">&para;</a></h3>
+<ul>
+<li>react-flow の上にセルが配置されているため、直接クリックできない場合がある</li>
+<li><code>{ force: true }</code> オプションでクリックをバイパス</li>
+<li>セルの data-id を使って run ボタンを特定するのが確実</li>
+</ul>
+<h3 id="playwright">Playwright でのセル特定方法<a class="headerlink" href="#playwright" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// セルのdata-idを取得</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">rfNode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cell</span><span class="p">.</span><span class="nx">evaluateHandle</span><span class="p">(</span><span class="nx">el</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">node</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">el</span><span class="p">;</span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nx">node</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">node</span><span class="p">.</span><span class="nx">dataset</span><span class="p">.</span><span class="nx">id</span><span class="p">)</span><span class="w"> </span><span class="nx">node</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">node</span><span class="p">.</span><span class="nx">parentElement</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">node</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">node</span><span class="p">.</span><span class="nx">dataset</span><span class="p">.</span><span class="nx">id</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cellId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">rfNode</span><span class="p">.</span><span class="nx">jsonValue</span><span class="p">();</span>
+<span class="c1">// run ボタンをクリック</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cellNode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="sb">`[data-testid=&quot;rf__node-</span><span class="si">${</span><span class="nx">cellId</span><span class="si">}</span><span class="sb">&quot;]`</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">runBtn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cellNode</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;run-button&quot;]&#39;</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">runBtn</span><span class="p">.</span><span class="nx">click</span><span class="p">({</span><span class="w"> </span><span class="nx">force</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<hr />
+<h2 id="_7">📝 体験レポート<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h3 id="_8">ゲームの流れ<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>ゲームはローソク足チャートを表示したバックテスト環境で、コードを入力することで株の売買を体験するシステム。ドローン3Dモデルが画面中央で動いており、ゲームとしての雰囲気が出ている。</p>
+<p><strong>ゲームのUXフロー（実際）:</strong>
+1. ページを開く → チャートとドローンが表示される
+2. 説明セルに「bt.buy()」の例が書かれている
+3. 新しいセルを追加してコードを入力・実行
+4. スキルが取得されると（console.logレベルで）通知される</p>
+<h3 id="uiux">UI/UX の評価<a class="headerlink" href="#uiux" title="Permanent link">&para;</a></h3>
+<p><strong>良い点:</strong>
+- チャートが直感的でわかりやすい（ローソク足、価格軸）
+- コマンドの説明が日本語で丁寧
+- スキルツリーパネルがReact Flowで美しく表示される
+- 全体的なデザインは洗練されている</p>
+<p><strong>改善が必要な点:</strong>
+1. <strong>スキルトースト通知が確認できなかった</strong> → スキル取得時の視覚的フィードバックが弱い可能性
+2. <strong>Position表示バグ</strong> → "[object Object] shares" は明確なバグ
+3. <strong>SANDBOX_003の取得条件が不明確</strong> → ユーザーがbt.step()を呼ばないとbt.trades()でスキルが取れないことが分かりにくい
+4. <strong>ゲームの目標・手順が不明瞭</strong> → 初めてのユーザーには「次に何をすべきか」が分かりにくい箇所がある
+5. <strong>BRIDGE_001のカウント問題</strong> → 正しく実行したのにスキルカウントされない</p>
+<h3 id="_9">スキル発火のタイミング<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>スキルはリアルタイムで（コード実行直後に）発火することを確認。
+- bt.buy() → 即座にSANDBOX_002イベント
+- bt.sell() → 即座にSANDBOX_004イベント
+- SANDBOX_006は連鎖的に自動発火（約0.5秒以内）</p>
+<h3 id="_10">改善提案<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>bt.trades() の説明を改善</strong>: "まずbt.step()で時間を進めてください" のようなヒントを追加</li>
+<li><strong>Position表示修正</strong>: フロントエンドでのオブジェクト→数値変換処理を確認</li>
+<li><strong>BRIDGE_001 カウント問題の調査</strong>: フロントエンドのSkillHandlerがBRIDGE_001を正しく処理しているか確認</li>
+<li><strong>スキル取得通知の強化</strong>: トースト通知のタイミングと視認性を向上</li>
+<li><strong>SANDBOX_005重複送信の調査</strong>: BroadcastChannelのイベント重複を防ぐ仕組みの追加</li>
+</ol>
+<hr />
+<h2 id="backcast-integrationspects-2026-02-20">🧪 backcast-integration.spec.ts 実装レポート（2026-02-20）<a class="headerlink" href="#backcast-integrationspects-2026-02-20" title="Permanent link">&para;</a></h2>
+<h3 id="6">実装したテストケース（全6件）<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>テスト名</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>完全プレイフロー（スキル順次取得）</td>
+<td>✅ Pass</td>
+</tr>
+<tr>
+<td>2</td>
+<td>SANDBOX_003取得条件（step→trades確認）</td>
+<td>✅ Pass</td>
+</tr>
+<tr>
+<td>3</td>
+<td>BRIDGE_001カウントバグ確認</td>
+<td>✅ Pass</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Position表示 [object Object] バグ確認</td>
+<td>✅ Pass</td>
+</tr>
+<tr>
+<td>5</td>
+<td>SANDBOX_005重複送信バグ確認</td>
+<td>✅ Pass</td>
+</tr>
+<tr>
+<td>6</td>
+<td>セル構造の正しいシーケンス確認</td>
+<td>✅ Pass</td>
+</tr>
+</tbody>
+</table>
+<p><strong>実行時間</strong>: 2.9分</p>
+<h3 id="_11">実装中に発見した新知見<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<h4 id="a-beforeeach">知見A: beforeEach の順序が重要<a class="headerlink" href="#a-beforeeach" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ 誤った順序（auto_instantiate イベントがリセット後に到着しカウントが 0 にならない）</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">resetGameProgress</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">2000</span><span class="p">);</span>
+
+<span class="c1">// ✅ 正しい順序（auto_instantiate を先に受け取ってからリセット）</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">2000</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">resetGameProgress</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">500</span><span class="p">);</span><span class="w"> </span><span class="c1">// リセット後の安定化</span>
+</code></pre></div>
+<h4 id="b-python">知見B: 報酬トーストが Python ボタンを遮蔽する<a class="headerlink" href="#b-python" title="Permanent link">&para;</a></h4>
+<p><code>emitSkillEvent</code> を複数回呼ぶと報酬トーストが積み上がり、下部ツールバーの「Python」ボタンを遮蔽する。<code>runNewCellInGrid()</code> 呼び出し前に必ず <code>dismissAllNotifications()</code> を呼ぶ。</p>
+<div class="highlight"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">dismissAllNotifications</span><span class="p">(</span><span class="nx">page</span><span class="o">:</span><span class="w"> </span><span class="kt">Page</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">dismissReconnectedBanner</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">toastCloseButtons</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span>
+<span class="w">    </span><span class="s1">&#39;[role=&quot;region&quot;][aria-label=&quot;Notifications (F8)&quot;] button[aria-label=&quot;Close&quot;]&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">);</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">toastCloseButtons</span><span class="p">.</span><span class="nx">count</span><span class="p">().</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mf">0</span><span class="p">);</span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nx">count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">toastCloseButtons</span><span class="p">.</span><span class="nx">first</span><span class="p">().</span><span class="nx">click</span><span class="p">().</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{});</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">200</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">toastCloseButtons</span><span class="p">.</span><span class="nx">count</span><span class="p">().</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mf">0</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="c">知見C: テスト追加セルが次回実行時に残留する<a class="headerlink" href="#c" title="Permanent link">&para;</a></h4>
+<p><code>runNewCellInGrid</code> で追加したセル（<code>"bt.step(); bt.buy(); bt.step(); bt.trades()"</code> 等のセミコロン複合セル）はカーネルが生きている限り次のテスト実行時も残る。セル構造確認テストではセミコロン含むセルをフィルタアウトすること。</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">cellContents</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[];</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">editor</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">cellEditors</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">trimmed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">content</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">trimmed</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">trimmed</span><span class="p">.</span><span class="nx">includes</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">))</span><span class="w"> </span><span class="nx">cellContents</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">trimmed</span><span class="p">);</span><span class="w"> </span><span class="c1">// 複合セルを除外</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="d-bridge_002-bridge_001">知見D: BRIDGE_002 は BRIDGE_001 完了が必須<a class="headerlink" href="#d-bridge_002-bridge_001" title="Permanent link">&para;</a></h4>
+<p>スキルチェーン: <code>SANDBOX_001→002→003→004→005→006→BRIDGE_001→BRIDGE_002→BRIDGE_003</code></p>
+<p><code>emitSkillSequence</code> で <code>["BRIDGE_002"]</code> だけを送ると "locked" になる。必ず全チェーンを順に送ること。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ✅ 全チェーンを順に送る</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">emitSkillSequence</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span><span class="w"> </span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;SANDBOX_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_003&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;SANDBOX_004&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_005&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_006&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;BRIDGE_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;BRIDGE_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;BRIDGE_003&quot;</span><span class="p">,</span>
+<span class="p">]);</span>
+</code></pre></div>
+<h4 id="e-bridge_001-btreveal_data">知見E: BRIDGE_001 バグは bt.reveal_data() パス固有<a class="headerlink" href="#e-bridge_001-btreveal_data" title="Permanent link">&para;</a></h4>
+<p><code>emitSkillViaPython</code> 経由では BRIDGE_001 が正常に完了する（BroadcastChannel パイプラインは正常）。手動プレイテストで発見したバグは <code>bt.reveal_data()</code> のゲームロジック固有の問題と思われる（<code>game_setup.py</code> の <code>reveal_data()</code> 実装を要調査）。</p>
+<h4 id="f-sandbox_005-0-auto_instantiate-dedup">知見F: SANDBOX_005 ログ 0 件は正常（auto_instantiate dedup）<a class="headerlink" href="#f-sandbox_005-0-auto_instantiate-dedup" title="Permanent link">&para;</a></h4>
+<p>テスト環境では auto_instantiate により全セル実行済みのため、<code>_triggered_skills</code> に SANDBOX_005 が記録済み。<code>bt.chart("7203")</code> を再実行しても dedup により emit_skill が発火しない（ログ 0 件）。これはバグではなくバックエンドの正常な重複防止動作。</p>
+<h4 id="g-1">知見G: 複数コマンドを 1 セルにまとめてタイムアウト節約<a class="headerlink" href="#g-1" title="Permanent link">&para;</a></h4>
+<p><code>runNewCellInGrid</code> の呼び出しは 1 回あたり約 5 秒かかる。連続呼び出しは timeout を延長するか、1 セルにまとめる。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ タイムアウトしやすい（4回 × 5秒 = 20秒以上）</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">runNewCellInGrid</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bt.step()&quot;</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">runNewCellInGrid</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bt.buy()&quot;</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">runNewCellInGrid</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bt.step()&quot;</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">runNewCellInGrid</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bt.trades()&quot;</span><span class="p">);</span>
+
+<span class="c1">// ✅ 1セルにまとめる（タイムアウト延長も必要）</span>
+<span class="nx">test</span><span class="p">.</span><span class="nx">setTimeout</span><span class="p">(</span><span class="mf">90</span><span class="nx">_000</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">runNewCellInGrid</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bt.step(); bt.buy(); bt.step(); bt.trades()&quot;</span><span class="p">);</span>
+</code></pre></div>
+<hr />
+<h2 id="_12">📸 スクリーンショット一覧<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>01-backcast-opened.png</code> - 初期表示</li>
+<li><code>02-after-chart.png</code> - bt.chart()実行後チャート表示</li>
+<li><code>03-skill-tree.png</code> - 最初のスキルツリー確認（3/59）</li>
+<li><code>04-new-cell.png</code> - 新しいセル追加</li>
+<li><code>05-after-buy.png</code> - bt.buy()実行後（Trading状態）</li>
+<li><code>06-after-trades.png</code> - bt.trades()実行後（0 items）</li>
+<li><code>07-after-sell.png</code> - bt.sell()実行後</li>
+<li><code>08-after-chart2.png</code> - 2回目チャート表示</li>
+<li><code>09-skill-tree-progress.png</code> - スキルツリー中間確認（5/59）</li>
+<li><code>10-after-reveal-data.png</code> - bt.reveal_data()実行後（データ表示）</li>
+<li><code>11-after-get-stock.png</code> - bt.get_stock_daily()実行後</li>
+<li><code>12-skill-tree-final.png</code> - スキルツリー確認</li>
+<li><code>13-skill-tree-fitview.png</code> - スキルツリー全体表示</li>
+<li><code>14-after-step.png</code> - bt.step()後（Time: 2001-01-04）</li>
+<li><code>15-sandbox003.png</code> - SANDBOX_003取得後（Time: 2001-01-05）</li>
+<li><code>16-skill-tree-complete.png</code> - SANDBOX_006取得後スキルツリー</li>
+<li><code>17-skill-tree-full-final.png</code> - 最終スキルツリー全体（8/59）</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

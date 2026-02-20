@@ -1,0 +1,3614 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>ゲーム e2e レビューシステム - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#e2e" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ゲーム e2e レビューシステム
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_backend_and_mcp_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide-custom-wheel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-widget-caching-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ui-switch-state-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-backend-sync.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-performance.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend-freeze-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grid-layout-auto-placement.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../broadcast-channel-hud.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-theme.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skill-tree-panel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../electron-startup-config.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-deploy.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-integration-fixes.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        作業進捗
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="作業進捗">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（設計・実装フェーズ）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（2026-02-19 ブロッカー修正 &amp; テスト通過セッション）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-02-19_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（2026-02-19 サーバー接続安定化セッション）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-02-19_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（2026-02-19 カバレッジギャップ修正セッション）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-02-19_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（2026-02-19 全スイート実行確認セッション）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-02-19-e2e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（2026-02-19 E2E カバレッジ改善セッション）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-02-19-python-e2e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（2026-02-19 Python セル実行 E2E テスト追加セッション）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-02-20-sandboxspects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（2026-02-20 sandbox.spec.ts 再接続汚染バグ修正セッション）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⬜ 未完了・今後の課題
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-02-19_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-02-19 実機確認レポート
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2026-02-19 実機確認レポート">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        確認手順
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        確認結果
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コンソールログでの受信確認
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景・このシステムを作った理由
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ファイル構成
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計思想
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="設計思想">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        「実際にプレイする」とは何か
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jotai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Jotai ストアを直接操作しなかった理由
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テスト分離戦略
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装上の知見と落とし穴
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装上の知見と落とし穴">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-broadcastchannel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. BroadcastChannel は同一コンテキストに届かない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. メッセージの形式に注意
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. スキルノードのセレクターはタイトル文字列依存 → ✅ 解決済み
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-data-skill-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. ステータス判定は data-skill-status 属性で行う → ✅ 解決済み
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-waitfortimeout300" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. waitForTimeout(300) の根拠
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. ハンドオフドキュメントのスキルタイトルが実際と異なっていた
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-data-skill-id-data-skill-status-getskillstatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. data-skill-id / data-skill-status 属性の追加で getSkillStatus() が高速化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. スキルツリーの表示方式はダイアログ（サイドバーパネルではない） → ✅ 対応済み
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. ~~🚨 ファイルパス解決の問題（テスト実行ブロッカー）~~ → ✅ 解決済み
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. ~~🚨 プリビルドフロントエンドにスキルツリー未含有（テスト実行ブロッカー）~~ → ✅ 解決済み
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 報酬トーストが UI 操作を遮る場合がある
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-game_testpy-width-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. game_test.py の width が "grid" に変更されている
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-es-__dirname-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. ES モジュールでは __dirname が使えない（2026-02-19 修正で発見）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-broadcastchannel-playwright-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. BroadcastChannel 別タブ方式は Playwright テストで実用困難（2026-02-19 修正で発見）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. ダイアログに進捗バッジ・現金表示がなかった（2026-02-19 修正で発見）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-reconnected-1920" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. ~~⚠️ テスト中に「Reconnected」バナーが表示される問題~~ → ✅ 解決済み（知見 19・20）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#17-react-flow-usenodesstate-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. React Flow の useNodesState は初期値しか使わない（2026-02-19 修正で発見）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#18-windows-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Windows 環境での Tips
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#19-ensureconnected-2026-02-19-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        19. ensureConnected() パターン — テスト前のサーバー接続確認（2026-02-19 追加・知見 21 で強化）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#20-pagereload-websocket-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        20. page.reload() を廃止して WebSocket 接続を維持する（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#21-ensureconnected-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        21. ensureConnected() の接続安定化ループ — 遅延バナー対策（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22. カバレッジギャップ修正のユニットテスト（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-badge-badge-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        23. Badge コンポーネントのセレクターには "Badge" が含まれない（2026-02-19 修正）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-vimock-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24. vi.mock() で重い依存をモックしてユニットテスト高速化（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-__testinjectbroadcasthtml-html-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25. __testInjectBroadcastHTML フック — HTML パイプライン統合テスト（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-testfixme-vs-testskip-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26. test.fixme() vs test.skip() — 意図の明示（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#27-pnpm-turbo-build-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27. ビルド反映忘れ — 本番コード変更後は pnpm turbo build 必須（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#28-constantsts-production-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        28. constants.ts で production コードからテスト定数を導出（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#29-expecttopass-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        29. expect().toPass() で状態ベース待機に統一（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#30-python-17-emitskillviapython2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        30. Python セル実行で ①→⑦ 全経路テスト — emitSkillViaPython()（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#31-runnewcellingrid2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        31. グリッドレイアウトでのセル作成 — runNewCellInGrid()（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-force-true2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        32. トースト・ツールバーによるポインター遮蔽と force: true（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-python-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        33. スキルツリーダイアログが Python ボタンを遮る（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-waitforloadstatenetworkidle-2026-02-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        35. 再接続スキル再発火と waitForLoadState("networkidle") タイムアウト（2026-02-20 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        34. カーネル永続セルの状態汚染と実行順序制御（2026-02-19 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-broadcastchannel-2026-02-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        36. リセット後の BroadcastChannel イベント抑制（2026-02-20 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-ux-2026-02-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        37. UX プレイテストで発見されたスキルイベント消失問題（2026-02-20 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        セレクター早見表
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキルツリーの開き方（✅ 実装済み・テスト通過）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="スキルツリーの開き方（✅ 実装済み・テスト通過）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        現在の方式: ダイアログ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#helpersts-openskilltreepanel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        helpers.ts の openSkillTreePanel() — ✅ 修正済み・テスト通過
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テスト実行方法
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="テスト実行方法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前提条件（重要）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テスト実行
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vite-dev" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        開発中の手動確認（Vite dev サーバー方式）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        初回実行前に確認すること
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テストカバレッジ全体像
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        既知の非カバー範囲と理由
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        今後のテスト拡張ガイド
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="今後のテスト拡張ガイド">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ ブリッジトラックのテスト — 完了
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        新しいスキルを追加した場合のテスト手順
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        セル実行経由の統合テストを追加する
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#59-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全 59 スキル一覧（2026-02-19 実機確認済み）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        関連ドキュメント
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        関連ソースファイル
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="e2e">ゲーム e2e レビューシステム<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h1>
+<p><strong>ステータス</strong>: 全 7 スイート パス済み（53 passed / 3 fixme / 0 failed）
+<strong>場所</strong>: <code>frontend/e2e-tests/game/</code>
+<strong>担当</strong>: game ブランチで継続作業中
+<strong>最終確認日</strong>: 2026-02-19（Python セル実行 E2E テスト追加・①→⑦全経路カバー完了）</p>
+<hr />
+<h2 id="_1">作業進捗<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h3 id="_2">✅ 完了（設計・実装フェーズ）<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[x] <code>frontend/e2e-tests/py/game_test.py</code> — テスト用ノートブック作成</li>
+<li>[x] <code>frontend/e2e-tests/game/helpers.ts</code> — 共通ヘルパー実装</li>
+<li>[x] <code>frontend/e2e-tests/game/sandbox.spec.ts</code> — サンドボックストラックテスト（10ケース）</li>
+<li>[x] <code>frontend/e2e-tests/game/ui.spec.ts</code> — UI テスト（11ケース）</li>
+<li>[x] <code>frontend/e2e-tests/game/persistence.spec.ts</code> — 永続化・イベント処理テスト（8ケース）</li>
+<li>[x] <code>playwright.config.ts</code> に <code>"game_test.py"</code> エントリ追加</li>
+<li>[x] <code>development_docs/index.md</code> にこのドキュメントをリンク追加</li>
+<li>[x] BroadcastChannel の「同一コンテキストには届かない」問題を調査・解決</li>
+<li>[x] <code>playerProgressAtom</code> が plain atom（非永続化）であることを確認</li>
+<li>[x] <code>skill-tree-panel.tsx</code> に <code>data-testid="skill-tree-panel"</code> 追加</li>
+<li>[x] <code>skill-node.tsx</code> のスキルカード div に <code>data-skill-id</code> と <code>data-skill-status</code> 属性追加</li>
+<li>[x] <code>helpers.ts</code> を ID ベースセレクターに全面更新（タイトル文字列依存を排除）</li>
+<li>[x] <code>sandbox.spec.ts</code> / <code>ui.spec.ts</code> / <code>persistence.spec.ts</code> を skill ID 使用に書き換え</li>
+<li>[x] <code>bridge.spec.ts</code> 作成（9ケース: BRIDGE_001〜003 の解放条件・完了フロー・ガード）</li>
+<li>[x] e2e-tests/tsconfig.json での型チェックがエラー 0 であることを確認</li>
+<li>[x] <strong>実機確認</strong>: Vite dev サーバー（port 3000）でスキルツリー UI が正しく表示されることを確認</li>
+<li>[x] <strong>実機確認</strong>: BroadcastChannel 別タブ送信→React リスナー受信→スキル完了→UI 更新の全フロー動作確認</li>
+<li>[x] <strong>実機確認</strong>: <code>data-skill-id</code> / <code>data-skill-status</code> 属性が全 59 スキルに正しく付与されていることを確認</li>
+<li>[x] <strong>実機確認</strong>: 前提条件チェーン動作確認（SANDBOX_001 完了→SANDBOX_002 が unlocked に遷移）</li>
+<li>[x] <strong>実機確認</strong>: <code>SkillTreeButton</code>（<code>data-testid="skill-tree-button"</code>）がコントロールバーに存在することを確認</li>
+<li>[x] Playwright Chromium ブラウザのインストール（<code>npx playwright install chromium</code>）</li>
+</ul>
+<h3 id="2026-02-19">✅ 完了（2026-02-19 ブロッカー修正 &amp; テスト通過セッション）<a class="headerlink" href="#2026-02-19" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[x] ✅ <strong>ブロッカー 1 解消</strong>: <code>playwright.config.ts</code> のパス解決を <code>path.resolve(import.meta.dirname!, ...)</code> で絶対パス化（知見 9 → 知見 13）</li>
+<li>[x] ✅ <strong>ブロッカー 2 解消</strong>: <code>pnpm turbo build</code> → <code>cp -R dist/* marimo/_static/</code> でフロントエンドビルド反映（知見 10）</li>
+<li>[x] ✅ <strong><code>openSkillTreePanel()</code> 修正</strong>: サイドバーパネル前提からダイアログモードに対応（知見 8）</li>
+<li>[x] ✅ <strong><code>emitSkillEvent()</code> 全面書き換え</strong>: BroadcastChannel 別タブ方式 → <code>window.__testCompleteSkill</code> テストフック直接呼び出しに変更（知見 14）</li>
+<li>[x] ✅ <strong><code>skill-complete-handler.ts</code> にテストフック追加</strong>: <code>setupSkillEventListener()</code> が <code>window.__testCompleteSkill</code> を公開するように修正</li>
+<li>[x] ✅ <strong><code>skill-tree-button.tsx</code> に <code>data-testid="skill-tree-panel"</code> 追加</strong>: ダイアログ内の div に testid を付与（知見 15）</li>
+<li>[x] ✅ <strong><code>skill-tree-button.tsx</code> に進捗バッジ・現金表示追加</strong>: <code>{n}/{total} スキル</code> バッジと <code>¥{cash}</code> 表示をダイアログに追加（知見 15）</li>
+<li>[x] ✅ <strong><code>skill-tree-graph.tsx</code> の React Flow 同期バグ修正</strong>: <code>useEffect</code> で atom 更新時にノード・エッジを同期（知見 17）</li>
+<li>[x] ✅ <strong><code>atoms.ts</code> からデバッグ用 <code>console.log</code> 削除</strong></li>
+<li>[x] ✅ <strong><code>diag.spec.ts</code> 診断テスト削除</strong>: デバッグ用に一時作成したファイルをクリーンアップ</li>
+<li>[x] ✅ <strong><code>sandbox.spec.ts</code> 全 10 件パス</strong>: <code>npx playwright test e2e-tests/game/sandbox.spec.ts --headed</code> → 10 passed (1.8m)</li>
+</ul>
+<h3 id="2026-02-19_1">✅ 完了（2026-02-19 サーバー接続安定化セッション）<a class="headerlink" href="#2026-02-19_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[x] ✅ <strong>「Reconnected」問題の原因特定</strong>: marimo edit モードは 1 ファイル 1 カーネルを永続するため、<code>page.reload()</code> / <code>page.goto()</code> のたびに既存セッションへの再接続が発生しバナーが表示される（知見 16 → 知見 19 で解決）</li>
+<li>[x] ✅ <strong><code>ensureConnected()</code> 追加</strong>: <code>[data-testid="backend-status"]</code> の緑チェックマーク（Kernel healthy）をポーリング確認してからテスト開始（知見 19）</li>
+<li>[x] ✅ <strong><code>dismissReconnectedBanner()</code> 追加</strong>: "Reconnected" バナーを検出→閉じる共通ヘルパー。<code>ensureConnected()</code> と <code>openSkillTreePanel()</code> の両方で使用</li>
+<li>[x] ✅ <strong><code>resetGameProgress()</code> 全面書き換え</strong>: <code>page.reload()</code> → <code>window.__testResetProgress</code> に変更。WebSocket 接続を維持したまま Jotai atom をリセット（知見 20）</li>
+<li>[x] ✅ <strong><code>window.__testResetProgress</code> テストフック追加</strong>: <code>setupSkillEventListener()</code> に <code>onReset</code> パラメータ追加、<code>skill-tree-button.tsx</code> から <code>resetProgressAtom</code> を渡す</li>
+<li>[x] ✅ <strong><code>beforeEach</code> 最適化</strong>: 初回テストのみ <code>page.goto()</code> で navigate、テスト 2 以降はナビゲーションをスキップして WebSocket 再接続を回避</li>
+<li>[x] ✅ <strong><code>sandbox.spec.ts</code> 安定パス確認</strong>: Kernel healthy 確認付きで全 10 件パス（2.0m）</li>
+</ul>
+<h3 id="2026-02-19_2">✅ 完了（2026-02-19 カバレッジギャップ修正セッション）<a class="headerlink" href="#2026-02-19_2" title="Permanent link">&para;</a></h3>
+<p>E2E テスト（案 E）がバイパスしていたレイヤー①③⑤をユニットテストで個別カバー。詳細分析は <code>.claude/plans/e2e-test-coverage-gap-analysis.md</code> を参照。</p>
+<ul>
+<li>[x] ✅ <strong>レイヤー① Python <code>emit_skill()</code> HTML 生成テスト</strong>: <code>src-tauri/resources/files/test_skill_events.py</code>（12件パス）— HTML タグ・属性名・base64 payload・重複防止・フロントエンドとの契約テスト</li>
+<li>[x] ✅ <strong>レイヤー③ HTML パーステスト</strong>: <code>frontend/src/core/kernel/__tests__/extractBroadcast.test.ts</code>（10件パス）— Pattern 1（<code>&lt;marimo-broadcast&gt;</code> タグ）/ Pattern 2（<code>data-marimo-broadcast</code> 属性）/ emit_skill() 出力との契約テスト</li>
+<li>[x] ✅ <strong>レイヤー⑤ BroadcastChannel リスナーテスト</strong>: <code>frontend/src/components/skill-tree/__tests__/skill-complete-handler.test.ts</code>（11件パス）— 正常系・異常系・クリーンアップ・sendBroadcastMessage() との結合テスト</li>
+<li>[x] ✅ <strong><code>handlers.ts</code> の <code>extractAndSendBroadcastMessages</code> を <code>export</code> に変更</strong>: テストからのアクセスのため</li>
+</ul>
+<h3 id="2026-02-19_3">✅ 完了（2026-02-19 全スイート実行確認セッション）<a class="headerlink" href="#2026-02-19_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[x] ✅ <strong><code>sandbox.spec.ts</code></strong>: 10 passed (2.2m)</li>
+<li>[x] ✅ <strong><code>ui.spec.ts</code></strong>: 9 passed / 3 skipped (1.9m) — 報酬バッジセレクター修正（知見 22）</li>
+<li>[x] ✅ <strong><code>persistence.spec.ts</code></strong>: 8 passed (1.7m)</li>
+<li>[x] ✅ <strong><code>bridge.spec.ts</code></strong>: 10 passed (2.3m)</li>
+<li>[x] ✅ <strong><code>ui.spec.ts</code> の報酬バッジテスト修正</strong>: Badge コンポーネントは <code>&lt;div&gt;</code> に Tailwind クラスを付与するだけで <code>class</code> に "Badge" 文字列が含まれないため、<code>[class*="Badge"]</code> → <code>.border-t .rounded-full</code> セレクターに変更</li>
+</ul>
+<h3 id="2026-02-19-e2e">✅ 完了（2026-02-19 E2E カバレッジ改善セッション）<a class="headerlink" href="#2026-02-19-e2e" title="Permanent link">&para;</a></h3>
+<p>計画書: <code>.claude/plans/refactored-discovering-map.md</code>（全 6 Step）</p>
+<ul>
+<li>[x] ✅ <strong>Step 1: ユニットテスト失敗修正</strong>: <code>skill-complete-handler.test.ts</code> の 3 件のタイムアウト/失敗を修正。原因は <code>extractAndSendBroadcastMessages</code> の import が <code>vi.resetModules()</code> + 動的 <code>import()</code> でカーネル初期化の重い副作用を再実行していたこと。<code>vi.mock("@/core/kernel/handlers")</code> で解決（テスト時間 21.7s → 3.2s）（知見 24）</li>
+<li>[x] ✅ <strong>Step 1: <code>__testInjectBroadcastHTML</code> フック追加済み</strong>: <code>skill-complete-handler.ts</code> に HTML パイプライン（③→⑦）経由のテストフックを追加（知見 25）</li>
+<li>[x] ✅ <strong>Step 2: <code>emitSkillEventViaHTML()</code> ヘルパー追加</strong>: <code>helpers.ts</code> に HTML 注入方式のヘルパーを追加。<code>emitSkillSequenceViaHTML()</code> も追加</li>
+<li>[x] ✅ <strong>Step 3: <code>integration.spec.ts</code> 新規作成</strong>: HTML パイプライン経由の統合テスト 9 件（全通過）。BroadcastChannel 同一コンテキスト配信が動作することを確認（知見 25）</li>
+<li>[x] ✅ <strong>Step 4: 弱いアサーション修正</strong>: <code>persistence.spec.ts</code> の <code>.catch(() =&gt; {})</code> トースト握りつぶし除去。<code>ui.spec.ts</code> の <code>if/else test.skip()</code> パターン 3 箇所を <code>test.fixme()</code> に変更（知見 26）</li>
+<li>[x] ✅ <strong>Step 5: タイムアウト改善</strong>: <code>sandbox.spec.ts</code> / <code>bridge.spec.ts</code> の <code>waitForTimeout</code> → <code>expect().toPass()</code> 状態ベース待機に変更。<code>bridge.spec.ts</code> のエスカレーティングタイムアウトを <code>SKILL_STATUS_TIMEOUT</code> 定数に統一（知見 29）</li>
+<li>[x] ✅ <strong>Step 6: マジックナンバー排除</strong>: <code>constants.ts</code> を新規作成。<code>TOTAL_SKILL_COUNT</code>, <code>SANDBOX_SKILL_IDS</code>, <code>BRIDGE_SKILL_IDS</code>, <code>getTotalCashAfterSkills()</code>, <code>FIRST_MILESTONE</code> を production コード（<code>skill-data.ts</code>, <code>reward-system.ts</code>）から導出（知見 28）</li>
+<li>[x] ✅ <strong>最終検証</strong>: ユニットテスト 21/21 passed、E2E テスト 46 passed / 3 fixme / 0 failed (7.0m)</li>
+</ul>
+<h3 id="2026-02-19-python-e2e">✅ 完了（2026-02-19 Python セル実行 E2E テスト追加セッション）<a class="headerlink" href="#2026-02-19-python-e2e" title="Permanent link">&para;</a></h3>
+<p>計画書: <code>.claude/plans/python-cell-e2e-prompt.md</code>（案 G: ①→⑦全経路）</p>
+<ul>
+<li>[x] ✅ <strong><code>z-python-e2e.spec.ts</code> 新規作成</strong>: Python セル実行で ①→⑦ 全経路を検証する E2E テスト（4 ケース全通過）</li>
+<li>[x] ✅ <strong><code>emitSkillViaPython()</code> ヘルパー追加</strong>: <code>helpers.ts</code> に Python セル実行でスキル完了させるヘルパーを追加（知見 30）</li>
+<li>[x] ✅ <strong><code>runNewCellInGrid()</code> ヘルパー追加</strong>: グリッドレイアウトモードでのセル作成・実行ヘルパー（知見 31）</li>
+<li>[x] ✅ <strong>カーネル永続セルの状態汚染対策</strong>: ファイル名を <code>z-</code> 接頭辞にして最後に実行（知見 34）</li>
+<li>[x] ✅ <strong>全 7 スイート（53 テスト）パス確認</strong>: 既存テストへのリグレッションなし</li>
+</ul>
+<h3 id="2026-02-20-sandboxspects">✅ 完了（2026-02-20 sandbox.spec.ts 再接続汚染バグ修正セッション）<a class="headerlink" href="#2026-02-20-sandboxspects" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[x] ✅ <strong><code>waitForLoadState("networkidle")</code> タイムアウト修正</strong>: marimo は WebSocket を常時接続するため <code>networkidle</code> には永遠に到達しない。<code>"load"</code> に変更（知見 35a）</li>
+<li>[x] ✅ <strong>再接続スキル再発火バグ修正</strong>: <code>beforeEach</code> の <code>ensureConnected()</code> 後に <code>resetGameProgress()</code> を追加。再接続時にカーネルがセル出力を再送し game_test.py のスキル発火セルが再実行されて初期状態が汚染される問題を修正（知見 35b）</li>
+<li>[x] ✅ <strong><code>sandbox.spec.ts</code> 全 10 件パス</strong>: 3.1m</li>
+</ul>
+<h3 id="_3">⬜ 未完了・今後の課題<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] フルトラックのテスト（<code>trade.spec.ts</code>, <code>risk.spec.ts</code> 等）</li>
+<li>[ ] Electron（Tauri）モードでのテスト対応</li>
+<li>[ ] CI への組み込み</li>
+<li>[ ] <strong>UX プレイテストで発見された問題の対応</strong> — 詳細は <a href="../ux-playtest-report/">ux-playtest-report.md</a></li>
+<li>[ ] P1: 再接続時のスキルイベント消失（進捗 0/59 のまま）</li>
+<li>[ ] P2: <code>bt.buy()</code> 出力が <code>&lt;Order object&gt;</code> で意味不明</li>
+<li>[ ] P3: <code>bt.step()</code> 出力が <code>True</code> のみ</li>
+<li>[ ] P5: AI Fix バナーがゲームモードで表示される</li>
+</ul>
+<hr />
+<h2 id="2026-02-19_4">2026-02-19 実機確認レポート<a class="headerlink" href="#2026-02-19_4" title="Permanent link">&para;</a></h2>
+<h3 id="_4">確認手順<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>uv run marimo edit --no-token --headless /tmp --port 2718</code> でバックエンド起動</li>
+<li><code>cd frontend &amp;&amp; pnpm dev</code> で Vite dev サーバー（port 3000）起動</li>
+<li><code>http://localhost:3000/?file=frontend\e2e-tests\py\game_test.py</code> でノートブック開封</li>
+<li>Playwright MCP ブラウザで操作・検証</li>
+</ol>
+<h3 id="_5">確認結果<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>結果</th>
+<th>備考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>59 スキル全表示</td>
+<td><strong>OK</strong></td>
+<td>全ノードに <code>data-skill-id</code> / <code>data-skill-status</code> 付与済み</td>
+</tr>
+<tr>
+<td>SANDBOX_001 初期状態</td>
+<td><strong>OK</strong></td>
+<td><code>data-skill-status="unlocked"</code>（前提条件なし）</td>
+</tr>
+<tr>
+<td>その他 58 スキル初期状態</td>
+<td><strong>OK</strong></td>
+<td>全て <code>data-skill-status="locked"</code></td>
+</tr>
+<tr>
+<td>BroadcastChannel 通信</td>
+<td><strong>OK</strong></td>
+<td>別タブ→<code>skill_event_channel</code>→React リスナー受信</td>
+</tr>
+<tr>
+<td>スキル完了→UI 更新</td>
+<td><strong>OK</strong></td>
+<td>SANDBOX_001: unlocked→<strong>completed</strong>（緑チェック）</td>
+</tr>
+<tr>
+<td>前提条件チェーン</td>
+<td><strong>OK</strong></td>
+<td>SANDBOX_002: locked→<strong>unlocked</strong>（青ボーダー）</td>
+</tr>
+<tr>
+<td>報酬トースト</td>
+<td><strong>OK</strong></td>
+<td>完了時にトースト表示（通知エリアに出現を確認）</td>
+</tr>
+<tr>
+<td><code>SkillTreeButton</code></td>
+<td><strong>OK</strong></td>
+<td>ダイアログモードで正常にスキルツリー表示</td>
+</tr>
+<tr>
+<td><code>openSkillTreePanel()</code></td>
+<td><strong>✅ 修正済み</strong></td>
+<td>ダイアログモードに対応（知見 8）</td>
+</tr>
+<tr>
+<td>Playwright e2e テスト</td>
+<td><strong>✅ 10 passed</strong></td>
+<td>ブロッカー解消 + Kernel healthy 確認付き・Reconnected 問題解決済み</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_6">コンソールログでの受信確認<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code>[SkillHandler] Received skill event: SANDBOX_001
+</code></pre></div>
+→ <code>skill-complete-handler.ts:90</code> が BroadcastChannel メッセージを正しくパースしている。</p>
+<hr />
+<h2 id="_7">背景・このシステムを作った理由<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p>スキルツリーゲームは 59 スキル × 複雑な前提条件グラフを持つ。
+スキルの追加・修正のたびに人間が「プレイしてみて動くか確認する」のは現実的ではない。</p>
+<p>レビュアーが手動で確認していたチェックリスト:</p>
+<div class="highlight"><pre><span></span><code>□ SANDBOX_001 を完了すると SANDBOX_002 が開く
+□ 前提スキル未完了なのに解除されていないか
+□ スキル完了後に現金が増えているか
+□ 同じスキルが 2 回完了扱いにならないか
+□ ページリロード後の挙動
+□ 報酬トーストが表示されるか
+...（全 59 スキル分）
+</code></pre></div>
+<p>これを Playwright で自動化し、PR ごとに回帰テストとして実行する。</p>
+<hr />
+<h2 id="_8">ファイル構成<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>frontend/e2e-tests/game/
+├── helpers.ts           # 共通ヘルパー（イベント送信・HTML注入・Python セル実行・状態取得・パネル操作）
+├── constants.ts         # ✅ production コードから導出した定数（マジックナンバー排除）
+├── sandbox.spec.ts      # サンドボックストラック SANDBOX_001〜006（10ケース）
+├── ui.spec.ts           # パネル UI・視覚状態・報酬表示（9ケース + 3 fixme）
+├── persistence.spec.ts  # 進捗の初期化・BroadcastChannel 処理（8ケース）
+├── bridge.spec.ts       # ブリッジトラック BRIDGE_001〜003（10ケース）
+├── integration.spec.ts  # ✅ HTML パイプライン統合テスト（9ケース）③→⑦経路
+└── z-python-e2e.spec.ts # ✅ Python セル実行 E2E テスト（4ケース）①→⑦全経路
+
+frontend/e2e-tests/py/
+└── game_test.py         # テスト用マリモノートブック（grid レイアウト）
+
+# ユニットテスト（レイヤー①③⑤のカバレッジギャップ修正）
+src-tauri/resources/files/
+└── test_skill_events.py                    # ① emit_skill() HTML 生成テスト（12件）
+
+frontend/src/core/kernel/__tests__/
+└── extractBroadcast.test.ts                # ③ HTML パーステスト（10件）
+
+frontend/src/components/skill-tree/__tests__/
+└── skill-complete-handler.test.ts          # ⑤ BroadcastChannel リスナーテスト（11件）
+</code></pre></div>
+<p>既存テストとの対比:</p>
+<div class="highlight"><pre><span></span><code>e2e-tests/
+├── cells.spec.ts        # edit モード・セル操作（既存）
+├── components.spec.ts   # run モード・UI コンポーネント（既存）
+└── game/                # ← 今回追加（edit モード・ゲーム固有）
+</code></pre></div>
+<hr />
+<h2 id="_9">設計思想<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h3 id="_10">「実際にプレイする」とは何か<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>「Playwright がゲームをプレイする」と言うとき、選択肢は 3 つあった:</p>
+<p><strong>案 A: Python セルを実際に実行</strong>
+<div class="highlight"><pre><span></span><code>テスト → marimo エディタのセルに bt.buy() を入力 → 実行
+       → Python が emit_skill() → DOM に &lt;marimo-broadcast&gt; 追加
+       → React が検知 → スキル完了
+</code></pre></div>
+- ✅ 最もリアルなフロー
+- ❌ Backcast エンジンのインストールが必要（CI で管理困難）
+- ❌ 株価データ・エンジン状態に依存し不安定</p>
+<p><strong>案 B: BroadcastChannel を直接操作</strong>
+<div class="highlight"><pre><span></span><code>テスト → page.evaluate() で BroadcastChannel.postMessage()
+       → React リスナーが受信 → スキル完了
+</code></pre></div>
+- ✅ 依存なし・高速
+- ❌ BroadcastChannel は送信元コンテキスト自身には届かない（Web 仕様）→ 動かない</p>
+<p><strong>案 C: 同一オリジンの別タブから BroadcastChannel 送信</strong> ← 採用・<strong>実機動作確認済み</strong>
+<div class="highlight"><pre><span></span><code>テスト → 別タブ（同一オリジン）を開く
+       → 別タブから BroadcastChannel.postMessage()
+       → テスト対象ページの React リスナーが受信 → スキル完了
+</code></pre></div>
+- ✅ 依存なし・高速・Web 仕様に準拠
+- ✅ <strong>2026-02-19 実機確認済み</strong>: 別タブ送信→受信→atom 更新→DOM 反映の全フロー動作
+- △ タブの開閉コストあり（1 スキルあたり約 300〜500ms）</p>
+<p><code>helpers.ts</code> の <code>emitSkillEvent()</code> は当初案 C を実装していた。</p>
+<p><strong>案 E: テストフック経由で直接呼び出し</strong> ← <strong>現在採用中</strong>（2026-02-19 修正）
+<div class="highlight"><pre><span></span><code>テスト → page.evaluate() で window.__testCompleteSkill(skillId) を呼ぶ
+       → setupSkillEventListener() が公開したコールバック
+       → completeSkillWithRewardAtom → playerProgressAtom → UI 更新
+</code></pre></div>
+- ✅ 依存なし・高速・BroadcastChannel の制約を完全回避
+- ✅ atom 書き込み → derived atom 再計算 → DOM 更新の全経路をテスト
+- ✅ タブの開閉コストなし（1 スキルあたり 300ms の waitForTimeout のみ）
+- △ テスト専用フックのため、BroadcastChannel 自体の E2E テストにはならない
+- △ <code>setupSkillEventListener()</code> が mount されている必要がある</p>
+<p><strong>案 C → 案 E へ移行した理由</strong>:
+案 C（別タブから BroadcastChannel 送信）は手動確認では動作したが、Playwright テストでは別タブを開いた際に marimo サーバーが「Reconnected（既存セッションに再接続しました）」バナーを表示し、テスト対象ページのセッション状態が不安定になった。また Web Worker を経由する方式も試みたが、Worker は BroadcastChannel のコンテキスト分離の観点で同一エージェントに属するため同じ制約を受けた。</p>
+<p>BroadcastChannel 自体の動作は手動で確認済みのため、テストではフック経由に切り替えた。</p>
+<p><code>helpers.ts</code> の <code>emitSkillEvent()</code> が案 E を実装している。</p>
+<p><strong>案 F: HTML 注入方式（③→⑦統合テスト）</strong> ← <strong>2026-02-19 追加・テスト通過</strong>
+<div class="highlight"><pre><span></span><code>テスト → page.evaluate() で window.__testInjectBroadcastHTML(html) を呼ぶ
+       → extractAndSendBroadcastMessages() が HTML をパース
+       → sendBroadcastMessage() が BroadcastChannel で配信
+       → setupSkillEventListener() のリスナーが受信
+       → completeSkillWithRewardAtom → playerProgressAtom → UI 更新
+</code></pre></div>
+- ✅ レイヤー③→⑦の全経路をテスト（案 E より広いカバレッジ）
+- ✅ BroadcastChannel の同一コンテキスト配信が動作することを確認済み
+- ✅ emit_skill() と同じ HTML フォーマットを使用（契約テスト的側面）
+- △ 案 E より若干遅い（HTML パース + BroadcastChannel 配信のオーバーヘッド）
+- △ テスト専用フックのため、レイヤー①②（Python HTML 生成・WebSocket 転送）はテストされない</p>
+<p><strong>案 G: Python セル実行方式（①→⑦全経路）</strong> ← <strong>2026-02-19 追加・テスト通過</strong>
+<div class="highlight"><pre><span></span><code>テスト → runNewCellInGrid() で Python セルを作成・実行
+       → Python カーネルが HTML を生成（①）
+       → WebSocket で Frontend に転送（②）
+       → extractAndSendBroadcastMessages() が HTML パース（③）
+       → sendBroadcastMessage() が BroadcastChannel で配信（④）
+       → setupSkillEventListener() のリスナーが受信（⑤）
+       → completeSkillWithRewardAtom → playerProgressAtom → UI 更新（⑥→⑦）
+</code></pre></div>
+- ✅ <strong>全 7 レイヤーをカバー</strong>（テストフック一切不使用）
+- ✅ Backcast エンジン不要（インライン版 emit_skill で <code>progress_manager</code> 依存を回避）
+- ✅ BroadcastChannel の実際の送受信を検証
+- △ セルが最も遅い（5〜10 秒/セル）
+- △ カーネルにセルが永続するため、テスト実行順序に注意（知見 34）</p>
+<p><strong>案 E / F / G の使い分け</strong>:
+- 案 E（<code>emitSkillEvent</code>）: 回帰テスト・既存テストスイートに使用。高速・安定（⑥→⑦）
+- 案 F（<code>emitSkillEventViaHTML</code>）: 統合テスト（<code>integration.spec.ts</code>）に使用。パイプライン部分検証（③→⑦）
+- 案 G（<code>emitSkillViaPython</code>）: 全経路テスト（<code>z-python-e2e.spec.ts</code>）に使用。最もリアルな検証（①→⑦）</p>
+<h3 id="jotai">Jotai ストアを直接操作しなかった理由<a class="headerlink" href="#jotai" title="Permanent link">&para;</a></h3>
+<p>案 D として「<code>page.evaluate()</code> で Jotai ストアの atom を直接書き換える」を検討したが採用しなかった。</p>
+<p>理由:
+- Jotai はグローバルオブジェクトにストアを公開しない（<code>window.__jotai__</code> 等が存在しない）
+- 仮に公開しても「イベント → リスナー → atom 更新」の中間処理をスキップする
+- テストしたいのは「イベントが届いたときに UI が正しく更新されるか」であり、atom の状態ではない</p>
+<h3 id="_11">テスト分離戦略<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>各テストは <code>afterEach</code> で Jotai atom を直接リセットして初期状態に戻す。
+<code>page.reload()</code> は使わない — WebSocket 接続を維持し「Reconnected」バナーを防ぐため（知見 19・20）。</p>
+<div class="highlight"><pre><span></span><code><span class="nx">test</span><span class="p">.</span><span class="nx">beforeEach</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">info</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 初回テストまたはリトライ時のみナビゲーション</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">needsNavigation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="nx">page</span><span class="p">.</span><span class="nx">url</span><span class="p">().</span><span class="nx">includes</span><span class="p">(</span><span class="s2">&quot;game_test.py&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">info</span><span class="p">.</span><span class="nx">retry</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">needsNavigation</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="nx">getAppUrl</span><span class="p">(</span><span class="nx">APP</span><span class="p">));</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForLoadState</span><span class="p">(</span><span class="s2">&quot;networkidle&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">ensureConnected</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span><span class="w">   </span><span class="c1">// 接続安定化ループ（知見 19・21）</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">openSkillTreePanel</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">test</span><span class="p">.</span><span class="nx">afterEach</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">resetGameProgress</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span><span class="w"> </span><span class="c1">// = __testResetProgress + ダイアログ close</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>これにより:
+- テスト間の状態汚染ゼロ（atom 直接リセット）
+- WebSocket 接続を維持（再接続なし・「Reconnected」バナーなし）
+- 各テスト開始前に Kernel healthy を確認（切断状態でのテスト実行を防止）
+- <code>atomWithStorage</code> に変更された場合は <code>__testResetProgress</code> の修正が必要（検知可能）</p>
+<hr />
+<h2 id="_12">実装上の知見と落とし穴<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<h3 id="1-broadcastchannel">1. BroadcastChannel は同一コンテキストに届かない<a class="headerlink" href="#1-broadcastchannel" title="Permanent link">&para;</a></h3>
+<p>Web の仕様で、BroadcastChannel は <strong>送信元のブラウジングコンテキスト（タブ）自身には届かない</strong>。
+<code>page.evaluate()</code> 内から送信したメッセージは、同じ <code>page</code> の React リスナーには届かない。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ これは動かない</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">BroadcastChannel</span><span class="p">(</span><span class="s2">&quot;skill_event_channel&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">bc</span><span class="p">.</span><span class="nx">postMessage</span><span class="p">({</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;skill_complete&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">skill_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;SANDBOX_001&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="c1">// → 同じページのリスナーには届かない</span>
+<span class="p">});</span>
+
+<span class="c1">// ✅ これが正解（別タブから送信）— 2026-02-19 実機動作確認済み</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">sender</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">newPage</span><span class="p">();</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">sender</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="nx">origin</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">waitUntil</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;commit&quot;</span><span class="w"> </span><span class="p">});</span><span class="w"> </span><span class="c1">// 同一オリジン必須</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">sender</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(...</span><span class="nx">postMessage</span><span class="p">...);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">sender</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+</code></pre></div>
+<p>別タブも <code>about:blank</code> では不可。<strong>同一オリジン</strong>（<code>http://127.0.0.1:2718</code> や <code>http://localhost:3000</code>）に navigate してから送信する必要がある。</p>
+<h3 id="2">2. メッセージの形式に注意<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<p><code>skill-complete-handler.ts:90</code> のパース処理:</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">msg</span><span class="o">?</span><span class="p">.</span><span class="kr">type</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;skill_complete&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">msg</span><span class="o">?</span><span class="p">.</span><span class="nx">data</span><span class="o">?</span><span class="p">.</span><span class="nx">skill_id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</code></pre></div>
+<p><code>skill_id</code>（スネークケース）であることに注意。<code>skillId</code>（キャメルケース）にすると届いても無視される。</p>
+<h3 id="3">3. スキルノードのセレクターはタイトル文字列依存 → ✅ 解決済み<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
+<p><code>data-skill-id</code> 属性の導入により、タイトル文字列への依存は排除された。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ✅ 現在のセレクター（安定）</span>
+<span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="sb">`[data-skill-id=&quot;SANDBOX_001&quot;]`</span><span class="p">)</span>
+
+<span class="c1">// ⚠️ 旧セレクター（非推奨・残存している場合は更新すること）</span>
+<span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s2">&quot;.react-flow__node&quot;</span><span class="p">).</span><span class="nx">filter</span><span class="p">({</span><span class="w"> </span><span class="nx">hasText</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;マーケットへようこそ&quot;</span><span class="w"> </span><span class="p">})</span>
+</code></pre></div>
+<h3 id="4-data-skill-status">4. ステータス判定は <code>data-skill-status</code> 属性で行う → ✅ 解決済み<a class="headerlink" href="#4-data-skill-status" title="Permanent link">&para;</a></h3>
+<p><code>getSkillStatus()</code> は <code>data-skill-status</code> 属性を直接読み取る方式に更新済み。
+CSS クラスベースの判定はフォールバックとして残存。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ✅ 現在の判定方式（高速・確実）</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">node</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s2">&quot;data-skill-status&quot;</span><span class="p">);</span>
+<span class="c1">// → &quot;completed&quot; | &quot;unlocked&quot; | &quot;locked&quot;</span>
+</code></pre></div>
+<h3 id="5-waitfortimeout300">5. <code>waitForTimeout(300)</code> の根拠<a class="headerlink" href="#5-waitfortimeout300" title="Permanent link">&para;</a></h3>
+<p>BroadcastChannel メッセージ → React 状態更新 → DOM 再レンダリングの経路で約 300ms かかる（経験的な値）。</p>
+<p>不安定になる場合は <code>waitForSkillStatus()</code> で能動的にポーリングすることが望ましい:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ 固定待機（テストが速い環境では足りないことも）</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">300</span><span class="p">);</span>
+
+<span class="c1">// ✅ ポーリングで確実に待つ</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="6">6. ハンドオフドキュメントのスキルタイトルが実際と異なっていた<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
+<p>ハンドオフドキュメントに記載されていたスキルタイトル（日本語）は <code>skill-data.ts</code> の実際のタイトルと不一致だった。</p>
+<table>
+<thead>
+<tr>
+<th>ドキュメント記載</th>
+<th>実際の skill-data.ts</th>
+<th>正解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BRIDGE_001: "データを明かす"</td>
+<td>"データの正体"</td>
+<td><code>skill-data.ts</code> が正</td>
+</tr>
+<tr>
+<td>BRIDGE_002: "全モード準備"</td>
+<td>"自分でデータを取得"</td>
+<td><code>skill-data.ts</code> が正</td>
+</tr>
+</tbody>
+</table>
+<p><strong>対策</strong>: <code>data-skill-id</code> 属性を導入したことで、タイトル変更がテストを壊さなくなった。
+ハンドオフドキュメントのタイトルが古くても今後は問題なし。</p>
+<h3 id="7-data-skill-id-data-skill-status-getskillstatus">7. <code>data-skill-id</code> / <code>data-skill-status</code> 属性の追加で <code>getSkillStatus()</code> が高速化<a class="headerlink" href="#7-data-skill-id-data-skill-status-getskillstatus" title="Permanent link">&para;</a></h3>
+<p>変更前: CSS クラス（<code>opacity-50</code>, <code>border-green-500</code>）をパースして判定
+変更後: <code>data-skill-status</code> 属性を <code>getAttribute()</code> で直接読み取り</p>
+<p><code>data-skill-status</code> は <code>SkillNode</code> が <code>statusConfig</code> に基づいてレンダリング時に付与する。
+React 側の状態と DOM 属性が確実に同期するため、テストの判定精度が上がった。</p>
+<h3 id="8">8. スキルツリーの表示方式はダイアログ（サイドバーパネルではない） → ✅ 対応済み<a class="headerlink" href="#8" title="Permanent link">&para;</a></h3>
+<p><strong>2026-02-19 実機確認で判明</strong>: スキルツリーは<strong>サイドバーパネルとして登録されていない</strong>。</p>
+<p>左サイドバーに表示されるパネルは以下の 7 種のみ:
+<code>files</code>, <code>variables</code>, <code>packages</code>, <code>ai</code>, <code>outline</code>, <code>documentation</code>, <code>dependencies</code></p>
+<p>スキルツリーは <code>SkillTreeButton</code>（<code>data-testid="skill-tree-button"</code>）をクリックすると<strong>ダイアログ</strong>として開く。ボタンはエディタ右側のコントロールバーに配置されている（<code>Controls.tsx:139</code>）。</p>
+<div class="highlight"><pre><span></span><code>Controls.tsx:
+  &lt;CommandPaletteButton /&gt;
+  &lt;SkillTreeButton /&gt;       ← ここ
+  &lt;KeyboardShortcuts /&gt;
+</code></pre></div>
+<p><strong>テストへの影響</strong>: <code>openSkillTreePanel()</code> は <code>data-testid="skill-tree-panel"</code> をサイドバーから探すが、実際にはダイアログ内にある。テストではまず <code>data-testid="skill-tree-button"</code> をクリックしてダイアログを開く必要がある。</p>
+<p><strong>サイドバーパネル化する場合の手順</strong>:</p>
+<ol>
+<li><code>frontend/src/components/editor/chrome/types.ts</code> の <code>PanelType</code> に <code>"skill-tree"</code> を追加し、<code>PANELS</code> 配列にエントリ追加</li>
+<li><code>frontend/src/components/editor/chrome/wrapper/app-chrome.tsx</code> に lazy import と <code>SIDEBAR_PANELS</code> マッピング追加</li>
+<li><code>skill-tree-panel.tsx</code> は <code>default export</code> 済みなのでそのまま使える</li>
+</ol>
+<h3 id="9">9. ~~🚨 ファイルパス解決の問題（テスト実行ブロッカー）~~ → ✅ 解決済み<a class="headerlink" href="#9" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: Playwright テスト実行時、marimo サーバーがテスト用ノートブックを見つけられない。</p>
+<p><strong>解決</strong>: <code>playwright.config.ts</code> の <code>pydir</code> を <code>path.resolve(import.meta.dirname!, "e2e-tests", "py")</code> に変更し、絶対パスで解決するようにした。詳細は知見 13 を参照。</p>
+<h3 id="10">10. ~~🚨 プリビルドフロントエンドにスキルツリー未含有（テスト実行ブロッカー）~~ → ✅ 解決済み<a class="headerlink" href="#10" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>uv run marimo edit</code> は <code>marimo/_static/</code> のプリビルド済みフロントエンドを配信するが、スキルツリー関連コンポーネントの変更がビルドに反映されていない。</p>
+<p><strong>解決</strong>: ビルド済み。Windows 環境では <code>make</code> が使えないため以下の手順で実施:
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span>turbo<span class="w"> </span>build
+cp<span class="w"> </span>-R<span class="w"> </span>dist/*<span class="w"> </span>../marimo/_static/
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;d:/Documents/marimo&quot;</span><span class="w">  </span><span class="c1"># marimo.exe がロック中なら先に taskkill //F //IM marimo.exe</span>
+</code></pre></div></p>
+<p><strong>今後ソースを変更した場合は再ビルドが必要</strong>。ビルド忘れに注意。</p>
+<h3 id="11-ui">11. 報酬トーストが UI 操作を遮る場合がある<a class="headerlink" href="#11-ui" title="Permanent link">&para;</a></h3>
+<p><strong>2026-02-19 実機確認で発見</strong>: スキル完了時に表示される報酬トースト（<code>Notifications (F8)</code> 領域）がスキルツリーボタンの上に重なり、Playwright の <code>.click()</code> がタイムアウトする。</p>
+<div class="highlight"><pre><span></span><code>&lt;ol class=&quot;fixed top-0 z-100 ...&quot;&gt; from
+&lt;div role=&quot;region&quot; aria-label=&quot;Notifications (F8)&quot;&gt; subtree intercepts pointer events
+</code></pre></div>
+<p><strong>対策</strong>: <code>page.evaluate()</code> 経由で <code>.click()</code> を呼ぶとオーバーレイを無視できる:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ Playwright の click はオーバーレイに遮られる</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;skill-tree-button&quot;]&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">();</span>
+
+<span class="c1">// ✅ evaluate 経由なら通る</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;skill-tree-button&quot;]&#39;</span><span class="p">)</span><span class="o">?</span><span class="p">.</span><span class="nx">click</span><span class="p">();</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>テスト内で <code>emitSkillEvent()</code> の直後にボタンクリックする場合は、トーストが消えるのを待つか上記回避策を使う。</p>
+<h3 id="12-game_testpy-width-grid">12. <code>game_test.py</code> の <code>width</code> が <code>"grid"</code> に変更されている<a class="headerlink" href="#12-game_testpy-width-grid" title="Permanent link">&para;</a></h3>
+<p>テスト用ノートブックの <code>width</code> が <code>"medium"</code> から <code>"grid"</code> に変更され、<code>layout_file</code> が追加された:</p>
+<div class="highlight"><pre><span></span><code><span class="n">app</span> <span class="o">=</span> <span class="n">marimo</span><span class="o">.</span><span class="n">App</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="s2">&quot;grid&quot;</span><span class="p">,</span>
+    <span class="n">app_title</span><span class="o">=</span><span class="s2">&quot;Game Test&quot;</span><span class="p">,</span>
+    <span class="n">layout_file</span><span class="o">=</span><span class="s2">&quot;layouts/game_test.grid.json&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>grid レイアウトでも BroadcastChannel テストには影響なし（実機確認済み）。ただしレイアウトファイルが存在しない場合のフォールバック動作は未確認。</p>
+<h3 id="13-es-__dirname-2026-02-19">13. ES モジュールでは <code>__dirname</code> が使えない（2026-02-19 修正で発見）<a class="headerlink" href="#13-es-__dirname-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><code>playwright.config.ts</code> は ESM (<code>import</code> 構文) で書かれている。Node.js の ESM では <code>__dirname</code> が定義されないため、使用すると <code>ReferenceError: __dirname is not defined</code> になる。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ ESM では動かない</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">pydir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;e2e-tests&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;py&quot;</span><span class="p">);</span>
+
+<span class="c1">// ✅ ESM では import.meta.dirname を使う（Node 22+）</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">pydir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="k">import</span><span class="p">.</span><span class="nx">meta</span><span class="p">.</span><span class="nx">dirname</span><span class="o">!</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;e2e-tests&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;py&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><code>import.meta.dirname</code> は Node.js 21.2+ / 22+ で利用可能。TypeScript では <code>!</code> (non-null assertion) が必要。</p>
+<h3 id="14-broadcastchannel-playwright-2026-02-19">14. BroadcastChannel 別タブ方式は Playwright テストで実用困難（2026-02-19 修正で発見）<a class="headerlink" href="#14-broadcastchannel-playwright-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>設計思想では案 C（別タブから送信）を採用していたが、実際の Playwright テストでは以下の問題が発生した:</strong></p>
+<ol>
+<li>
+<p><strong>「Reconnected」セッション競合</strong>: 別タブで marimo サーバーの URL を開くと、marimo がセッション再接続を検知し「Reconnected（既存セッションに再接続しました）」バナーをテスト対象ページに表示する。これによりテスト対象ページの状態が不安定になる。</p>
+</li>
+<li>
+<p><strong>Web Worker 方式も失敗</strong>: BroadcastChannel のコンテキスト分離を Worker で実現しようとしたが、Worker はメインページと同じ BroadcastChannel エージェントに属するため、同一コンテキスト制約を受ける。</p>
+</li>
+</ol>
+<p><strong>解決策（案 E）</strong>: <code>setupSkillEventListener()</code> が <code>window.__testCompleteSkill</code> にコールバックを公開し、テストからは <code>page.evaluate()</code> 経由で直接呼び出す。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// helpers.ts の emitSkillEvent()</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">((</span><span class="nx">id</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">fn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">).</span><span class="nx">__testCompleteSkill</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">fn</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;function&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">fn</span><span class="p">(</span><span class="nx">id</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">&quot;__testCompleteSkill not found&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">},</span><span class="w"> </span><span class="nx">skillId</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">300</span><span class="p">);</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1">// skill-complete-handler.ts の setupSkillEventListener()</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">setupSkillEventListener</span><span class="p">(</span>
+<span class="w">  </span><span class="nx">onSkillComplete</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">skillId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span>
+<span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// テストフック公開</span>
+<span class="w">  </span><span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">).</span><span class="nx">__testCompleteSkill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">onSkillComplete</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// BroadcastChannel リスナー（本番用）</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">BroadcastChannel</span><span class="p">(</span><span class="nx">CHANNEL</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">bc</span><span class="p">.</span><span class="nx">onmessage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">};</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="ow">delete</span><span class="w"> </span><span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">).</span><span class="nx">__testCompleteSkill</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">bc</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>テスト範囲のトレードオフ</strong>: この方式では BroadcastChannel の受信経路はテストされない。ただし BroadcastChannel 自体は Web 標準 API であり、受信→パース→コールバック呼び出しの経路は手動確認済みのため、テストフック方式で十分と判断した。</p>
+<h3 id="15-2026-02-19">15. ダイアログに進捗バッジ・現金表示がなかった（2026-02-19 修正で発見）<a class="headerlink" href="#15-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>skill-tree-button.tsx</code> のダイアログは <code>&lt;SkillTree&gt;</code> コンポーネントだけを表示していた。一方、テストの <code>getProgressText()</code> は <code>text=/\d+\/\d+ スキル/</code> を、現金テストは <code>text=/¥[1-9][0-9,]*/</code> を探す。これらの要素はサイドバー版の <code>skill-tree-panel.tsx</code> にのみ存在し、ダイアログには無かった。</p>
+<p><strong>修正内容</strong>:
+- <code>skill-tree-button.tsx</code> の <code>DialogHeader</code> に <code>&lt;Badge&gt;</code> で <code>{completedCount}/{totalCount} スキル</code> を追加
+- <code>DialogContent</code> のフッターに <code>&lt;CoinsIcon&gt;</code> + <code>¥{progress.currentCash.toLocaleString()}</code> を追加
+- <code>playerProgressAtom</code> を <code>useAtomValue</code> で購読し、リアクティブに更新されるようにした
+- <code>data-testid="skill-tree-panel"</code> もダイアログ内の div に追加（サイドバーパネルにしか無かった）</p>
+<p><strong>教訓</strong>: サイドバーパネル版とダイアログ版で UI 要素が乖離していた。テストが前提とする UI 要素が、テスト対象のコンポーネントに実際に存在するか事前確認が必要。</p>
+<h3 id="16-reconnected-1920">16. ~~⚠️ テスト中に「Reconnected」バナーが表示される問題~~ → ✅ 解決済み（知見 19・20）<a class="headerlink" href="#16-reconnected-1920" title="Permanent link">&para;</a></h3>
+<p><strong>症状</strong>: <code>sandbox.spec.ts</code> の実行中、ページスナップショットに以下が表示される:
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">text</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Reconnected</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">generic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">You have reconnected to an existing session.</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">button &quot;Restart&quot;</span>
+</code></pre></div></p>
+<p><strong>原因（確定）</strong>: marimo の edit モードは 1 ファイルにつき 1 カーネルを永続する。<code>page.reload()</code> や <code>page.goto()</code> のたびに既存カーネルへの WebSocket 再接続が発生し、サーバーが「Reconnected」通知を送信する。接続自体は健全（Green チェック確認済み）。</p>
+<p><strong>解決策</strong>: 知見 19（<code>ensureConnected</code> + バナー dismiss）と知見 20（<code>page.reload()</code> 廃止）で対処済み。</p>
+<h3 id="17-react-flow-usenodesstate-2026-02-19">17. React Flow の <code>useNodesState</code> は初期値しか使わない（2026-02-19 修正で発見）<a class="headerlink" href="#17-react-flow-usenodesstate-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong><code>skill-tree-graph.tsx</code> で最も厄介だったバグ。</strong></p>
+<p><code>useNodesState(initialNodes)</code> は React の <code>useState(initialNodes)</code> と同様に、<strong>引数を初期値としてのみ使用する</strong>。Jotai atom が更新され <code>useMemo</code> で <code>initial</code> が再計算されても、<code>useNodesState</code> はその変更を無視する。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ atom 更新後もノードが古いまま</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">initial</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useMemo</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">createSkillElements</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">skills</span><span class="p">),</span><span class="w"> </span><span class="p">[</span><span class="nx">data</span><span class="p">]);</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">nodes</span><span class="p">,</span><span class="w"> </span><span class="nx">setNodes</span><span class="p">,</span><span class="w"> </span><span class="nx">onNodesChange</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useNodesState</span><span class="p">(</span><span class="nx">initial</span><span class="p">.</span><span class="nx">nodes</span><span class="p">);</span>
+<span class="c1">// → data.skills が変わっても nodes は初期値のまま</span>
+
+<span class="c1">// ✅ useEffect で同期する</span>
+<span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">setNodes</span><span class="p">(</span><span class="nx">initial</span><span class="p">.</span><span class="nx">nodes</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">setEdges</span><span class="p">(</span><span class="nx">initial</span><span class="p">.</span><span class="nx">edges</span><span class="p">);</span>
+<span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="nx">initial</span><span class="p">,</span><span class="w"> </span><span class="nx">setNodes</span><span class="p">,</span><span class="w"> </span><span class="nx">setEdges</span><span class="p">]);</span>
+</code></pre></div>
+<p><strong>症状</strong>: <code>completeSkillWithRewardAtom</code> が正しく実行され（console.log で確認済み）、<code>playerProgressAtom</code> が更新されているにもかかわらず、React Flow のノードが <code>unlocked</code> のまま <code>completed</code> に変わらない。atom の書き込みは成功するが DOM に反映されない。</p>
+<p><strong>デバッグ経路</strong>: atom に console.log → 実行確認 → 「DOM に反映されない」→ React Flow の <code>useNodesState</code> が犯人と特定。</p>
+<p><strong>教訓</strong>: React Flow の state hook は <code>useState</code> ラッパーであり、外部状態との同期には <code>useEffect</code> が必須。</p>
+<h3 id="18-windows-tips">18. Windows 環境での Tips<a class="headerlink" href="#18-windows-tips" title="Permanent link">&para;</a></h3>
+<p><strong><code>make</code> コマンドが使えない</strong>: Windows の bash には <code>make</code> がインストールされていないことが多い。以下で代替:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># make fe の代替</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span>turbo<span class="w"> </span>build
+cp<span class="w"> </span>-R<span class="w"> </span>dist/*<span class="w"> </span>../marimo/_static/
+
+<span class="c1"># make py の代替</span>
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;d:/Documents/marimo&quot;</span>
+
+<span class="c1"># marimo.exe がロックされている場合</span>
+taskkill<span class="w"> </span>//F<span class="w"> </span>//IM<span class="w"> </span>marimo.exe
+<span class="c1"># その後 uv pip install を再実行</span>
+</code></pre></div>
+<p><strong>パスのスラッシュ</strong>: Windows bash ではフォワードスラッシュ <code>/</code> を使う。バックスラッシュ <code>\</code> はエスケープ文字として解釈される。</p>
+<p><strong><code>import.meta.dirname</code></strong>: TypeScript では <code>!</code> (non-null assertion) が必要。<code>import.meta.dirname!</code></p>
+<h3 id="19-ensureconnected-2026-02-19-21">19. <code>ensureConnected()</code> パターン — テスト前のサーバー接続確認（2026-02-19 追加・知見 21 で強化）<a class="headerlink" href="#19-ensureconnected-2026-02-19-21" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: テストが marimo サーバーとの WebSocket 接続が確立されていない状態（切断中・未接続・再接続中）で走ると、テスト結果が信頼できない。<code>window.__testCompleteSkill</code> はフロントエンドの Jotai atom を直接操作するため、サーバー未接続でもテストが通ってしまう。</p>
+<p><strong>解決</strong>: <code>beforeEach</code> で <code>ensureConnected(page)</code> を呼び出し、実際のユーザーと同じフローで接続安定を待ってからテストを開始する:</p>
+<ol>
+<li><strong>Kernel healthy 確認</strong>: <code>waitForKernelHealthy()</code> で <code>[data-testid="backend-status"]</code> 内の SVG が <code>green</code> クラスを持つまで最大 20 秒ポーリング</li>
+<li><strong>接続安定化ループ</strong>: "Reconnected" バナーが出ていれば dismiss し、1 秒間バナーが再出現しないことを確認してから安定と判定（知見 21）</li>
+<li><strong>最終 healthy 確認</strong>: 安定化後にカーネルが健全であることを再確認</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">ensureConnected</span><span class="p">(</span><span class="nx">page</span><span class="o">:</span><span class="w"> </span><span class="kt">Page</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Phase 1: カーネルが healthy になるまで待機</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">waitForKernelHealthy</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Phase 2: 接続安定化ループ（最大 5 回）</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">5</span><span class="p">;</span><span class="w"> </span><span class="nx">attempt</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">hasBanner</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">dismiss</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">waitForKernelHealthy</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="k">continue</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">1</span><span class="nx">_000</span><span class="p">);</span><span class="w"> </span><span class="c1">// 安定化待機</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">lateArrival</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">waitForKernelHealthy</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// 安定</span>
+<span class="w">    </span><span class="nx">dismiss</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">waitForKernelHealthy</span><span class="p">;</span><span class="w"> </span><span class="c1">// 遅延到着 → 再ループ</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>接続状態の判定ロジック</strong>（<code>backend-status.tsx</code> の SVG クラス）:</p>
+<table>
+<thead>
+<tr>
+<th>SVG クラス</th>
+<th>状態</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>animate-spin</code></td>
+<td>connecting</td>
+<td>WebSocket 接続中または health check 中</td>
+</tr>
+<tr>
+<td><code>green</code> (= <code>text-(--green-9)</code>)</td>
+<td>healthy</td>
+<td>接続済み・健全</td>
+</tr>
+<tr>
+<td><code>yellow</code> (= <code>text-(--yellow-9)</code>)</td>
+<td>unhealthy</td>
+<td>接続済みだが health check 失敗</td>
+</tr>
+<tr>
+<td><code>red</code> (= <code>text-red-500</code>)</td>
+<td>disconnected</td>
+<td>切断済み</td>
+</tr>
+<tr>
+<td>なし（<code>PowerOffIcon</code>）</td>
+<td>not_started</td>
+<td>未接続</td>
+</tr>
+</tbody>
+</table>
+<h3 id="20-pagereload-websocket-2026-02-19">20. <code>page.reload()</code> を廃止して WebSocket 接続を維持する（2026-02-19 追加）<a class="headerlink" href="#20-pagereload-websocket-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>afterEach</code> の <code>resetGameProgress()</code> が <code>page.reload()</code> を使っていたため、テストごとに WebSocket が切断→再接続され「Reconnected」バナーが表示されていた。</p>
+<p><strong>解決</strong>: <code>page.reload()</code> を廃止し、テストフック <code>window.__testResetProgress</code> で Jotai atom を直接リセットする方式に変更。</p>
+<p><strong>変更内容</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>変更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>skill-complete-handler.ts</code></td>
+<td><code>setupSkillEventListener(onComplete, onReset?)</code> に <code>onReset</code> パラメータ追加。<code>window.__testResetProgress</code> として公開</td>
+</tr>
+<tr>
+<td><code>skill-tree-button.tsx</code></td>
+<td><code>resetProgressAtom</code> を <code>useSetAtom</code> で取得し、<code>setupSkillEventListener</code> に渡す</td>
+</tr>
+<tr>
+<td><code>helpers.ts</code> の <code>resetGameProgress()</code></td>
+<td><code>page.reload()</code> → <code>page.evaluate(() =&gt; window.__testResetProgress())</code> + ダイアログ close</td>
+</tr>
+<tr>
+<td><code>sandbox.spec.ts</code> の <code>beforeEach</code></td>
+<td>初回テストのみ <code>page.goto()</code> で navigate。テスト 2 以降はスキップ</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="c1">// helpers.ts — 新しい resetGameProgress</span>
+<span class="k">export</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">resetGameProgress</span><span class="p">(</span><span class="nx">page</span><span class="o">:</span><span class="w"> </span><span class="kt">Page</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">fn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">).</span><span class="nx">__testResetProgress</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">fn</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;function&quot;</span><span class="p">)</span><span class="w"> </span><span class="nx">fn</span><span class="p">();</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">&quot;__testResetProgress not found&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="c1">// ダイアログが開いていれば閉じる</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">dialog</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[role=&quot;dialog&quot;]&#39;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">dialog</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">().</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kc">false</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">keyboard</span><span class="p">.</span><span class="nx">press</span><span class="p">(</span><span class="s2">&quot;Escape&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">dialog</span><span class="p">.</span><span class="nx">waitFor</span><span class="p">({</span><span class="w"> </span><span class="nx">state</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;hidden&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">3_000</span><span class="w"> </span><span class="p">}).</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{});</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">300</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>効果</strong>:
+- WebSocket 接続が 10 テスト通して維持される（切断ゼロ）
+- 「Reconnected」バナーの新規発生を防止
+- テスト実行時間が 1.8m → 2.0m（ほぼ変化なし。reload のコスト削減と ensureConnected の追加で相殺）</p>
+<h3 id="21-ensureconnected-2026-02-19">21. <code>ensureConnected()</code> の接続安定化ループ — 遅延バナー対策（2026-02-19 追加）<a class="headerlink" href="#21-ensureconnected-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: 知見 20 で <code>page.reload()</code> を廃止したにもかかわらず、テスト 2〜10 の全てで「Reconnected」バナーが表示されていた。原因は以下の2つ:</p>
+<ol>
+<li><strong>遅延通知</strong>: 初回 <code>page.goto()</code> で既存セッションに再接続した際、バックエンド (<code>ws_endpoint.py:_reconnect_session</code>) が <code>BannerNotification("Reconnected")</code> を送信するが、WebSocket メッセージの到着が遅延し、テスト 1 の <code>ensureConnected()</code> が確認した後に到着する。</li>
+<li><strong>WebSocket 自動再接続</strong>: <code>ReconnectingWebSocket</code> (partysocket) が接続切断を検知すると自動で再接続する。バックエンドはこれを既存セッションへの再接続と判定し、再び <code>BannerNotification</code> を送信する。</li>
+</ol>
+<p><strong>旧 <code>ensureConnected()</code></strong>: カーネル healthy チェック → バナーを 1 回だけ確認 → dismiss → 即座にテスト開始。遅延到着するバナーを見逃し、次のテストに影響する構造だった。</p>
+<p><strong>新 <code>ensureConnected()</code></strong>: 接続安定化ループを導入。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Phase 1: カーネルが healthy になるまで待機</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">waitForKernelHealthy</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+
+<span class="c1">// Phase 2: 接続安定化ループ（最大 5 回）</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">maxAttempts</span><span class="p">;</span><span class="w"> </span><span class="nx">attempt</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// バナーがあれば dismiss → healthy 再確認 → ループ先頭に戻る</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">hasBanner</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">dismiss</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">waitForKernelHealthy</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="k">continue</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// バナーなし → 1 秒待って遅延到着がないか確認</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">1</span><span class="nx">_000</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// 遅延到着なし → 安定確認 → 最終 healthy チェック → return</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">lateArrival</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">waitForKernelHealthy</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// 遅延到着あり → dismiss → ループ先頭に戻る</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>テスト結果</strong>:
+- 毎テスト <code>attempt 1/5</code> でバナーを検出→dismiss→1 秒安定化待機→再出現なし→テスト開始
+- 安定化ループ 2 回目以降に進むケースは未観測（バナーは常に 1 回で収束）
+- 全 10 テスト passed（2.4m、安定化待機分 +0.3m）</p>
+<p><strong><code>dismissReconnectedBanner()</code> も改善</strong>: 複数バナーに対応するためループ化（最大 5 回 dismiss）。<code>bannersAtom</code> は配列のため、複数の再接続イベントで複数バナーが蓄積される可能性がある。</p>
+<h3 id="22-2026-02-19">22. カバレッジギャップ修正のユニットテスト（2026-02-19 追加）<a class="headerlink" href="#22-2026-02-19" title="Permanent link">&para;</a></h3>
+<p>案 E がバイパスするレイヤー①③⑤を<strong>契約テスト（Contract Test）</strong>のアプローチでカバー。各テストはレイヤー間の通信プロトコル（HTML 属性名・JSON キー名・BroadcastChannel チャネル名）が両端で一致することを検証し、一方が変更された場合に検知できる。</p>
+<p><strong>Python テスト（レイヤー①）の注意点</strong>:
+- <code>skill_events.py</code> の <code>_triggered_skills</code> はモジュールグローバルな <code>set</code>。テストごとに <code>sys.modules.pop("skill_events", None)</code> でリロードが必要
+- <code>Html</code> オブジェクトは <code>str()</code> で HTML を返さない。<code>.text</code> プロパティを使う
+- 実行: <code>uvx hatch run +py=3.12 test:test src-tauri/resources/files/test_skill_events.py -v</code></p>
+<p><strong>TypeScript パーステスト（レイヤー③）の注意点</strong>:
+- <code>extractAndSendBroadcastMessages</code> は元々非公開だったが <code>export</code> に変更済み（<code>handlers.ts</code> L232）
+- <code>sendBroadcastMessage</code> をモックしてパース結果（channel, type, payload）をキャプチャ
+- 実行: <code>cd frontend &amp;&amp; pnpm test src/core/kernel/__tests__/extractBroadcast.test.ts</code></p>
+<p><strong>TypeScript リスナーテスト（レイヤー⑤）の注意点</strong>:
+- jsdom は <code>BroadcastChannel</code> をサポートしないため <code>MockBroadcastChannel</code> クラスを使用
+- <code>vi.resetModules()</code> + 動的 <code>import()</code> でモック適用後のモジュールを取得
+- <code>msg.data.skill_id</code>（snake_case）であることが検証の要点。camelCase <code>skillId</code> では動かない
+- 実行: <code>cd frontend &amp;&amp; pnpm test src/components/skill-tree/__tests__/skill-complete-handler.test.ts</code></p>
+<h3 id="23-badge-badge-2026-02-19">23. Badge コンポーネントのセレクターには "Badge" が含まれない（2026-02-19 修正）<a class="headerlink" href="#23-badge-badge-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>ui.spec.ts</code> の「スキルノードに報酬バッジが表示される」テストが <code>[class*="Badge"]</code> / <code>.badge</code> で Badge を探していたが、Badge コンポーネント（<code>components/ui/badge.tsx</code>）は <code>&lt;div&gt;</code> に <code>inline-flex items-center border rounded-full ...</code> の Tailwind クラスを付与するだけで、"Badge" という文字列はクラスに含まれない。</p>
+<p><strong>修正</strong>: 報酬セクション（<code>border-t</code> クラスを持つ div）内の <code>rounded-full</code> 要素で Badge の存在を判定する方式に変更。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ 旧セレクター（class に &quot;Badge&quot; が含まれないため一致しない）</span>
+<span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-skill-id=&quot;SANDBOX_001&quot;] [class*=&quot;Badge&quot;]&#39;</span><span class="p">)</span>
+
+<span class="c1">// ✅ 新セレクター（Badge の Tailwind クラス rounded-full で判定）</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">rewardSection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-skill-id=&quot;SANDBOX_001&quot;] .border-t&#39;</span><span class="p">).</span><span class="nx">first</span><span class="p">();</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">badge</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">rewardSection</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s2">&quot;.rounded-full&quot;</span><span class="p">).</span><span class="nx">first</span><span class="p">();</span>
+</code></pre></div>
+<p><strong>教訓</strong>: shadcn/ui の Badge や Button 等のコンポーネントは、レンダリング時にコンポーネント名をクラスに含めない。Tailwind の実際のクラス名か <code>data-testid</code> 属性でセレクターを構成する必要がある。</p>
+<h3 id="24-vimock-2026-02-19">24. <code>vi.mock()</code> で重い依存をモックしてユニットテスト高速化（2026-02-19 追加）<a class="headerlink" href="#24-vimock-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>skill-complete-handler.test.ts</code> の正常系テスト 3 件がタイムアウト（5s）していた。<code>vi.resetModules()</code> + 動的 <code>import("../skill-complete-handler")</code> のたびに <code>@/core/kernel/handlers</code> モジュール全体が再初期化され、カーネルセッション開始（"Starting a new session"）やバージョン取得（"Failed to get version from mount config"）などの重い副作用が走っていた。</p>
+<p><strong>原因</strong>: Step 1 で <code>skill-complete-handler.ts</code> に追加した <code>import { extractAndSendBroadcastMessages } from "@/core/kernel/handlers"</code> が、テストの動的インポート時に <code>handlers.ts</code> → <code>broadcastChannel.ts</code> → その他カーネル依存を丸ごと引き込んでいた。</p>
+<p><strong>修正</strong>: テストファイルの先頭で <code>vi.mock()</code> を追加。Vitest の <code>vi.mock()</code> は自動ホイストされ、<code>vi.resetModules()</code> 後の動的インポートでも mock factory が再適用される。</p>
+<div class="highlight"><pre><span></span><code><span class="nx">vi</span><span class="p">.</span><span class="nx">mock</span><span class="p">(</span><span class="s2">&quot;@/core/kernel/handlers&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">({</span>
+<span class="w">  </span><span class="nx">extractAndSendBroadcastMessages</span><span class="o">:</span><span class="w"> </span><span class="kt">vi.fn</span><span class="p">(),</span>
+<span class="p">}));</span>
+</code></pre></div>
+<p><strong>効果</strong>: テスト時間 21.7s → 3.2s（6.8x 高速化）。11 テスト全通過。</p>
+<p><strong>教訓</strong>: ユニットテストで <code>vi.resetModules()</code> + 動的 import を使う場合、テスト対象モジュールの import グラフ全体が再初期化される。テストに不要な重い依存は <code>vi.mock()</code> で切り離すべき。</p>
+<h3 id="25-__testinjectbroadcasthtml-html-2026-02-19">25. <code>__testInjectBroadcastHTML</code> フック — HTML パイプライン統合テスト（2026-02-19 追加）<a class="headerlink" href="#25-__testinjectbroadcasthtml-html-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>背景</strong>: 既存の <code>__testCompleteSkill</code> フックはレイヤー⑥→⑦（atom 更新→UI 反映）のみをテストし、③→⑤（HTML パース→BroadcastChannel 送信→リスナー受信）をバイパスしていた。</p>
+<p><strong>新フック</strong>: <code>setupSkillEventListener()</code> に <code>__testInjectBroadcastHTML</code> を追加。<code>extractAndSendBroadcastMessages(html)</code> を呼び出し、本番と同じ HTML パース→BroadcastChannel 配信→リスナー受信→atom 更新→UI 反映の経路（③→⑦）を通す。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// skill-complete-handler.ts 内</span>
+<span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">).</span><span class="nx">__testInjectBroadcastHTML</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">html</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">extractAndSendBroadcastMessages</span><span class="p">(</span><span class="nx">html</span><span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><strong>テストヘルパー</strong>: <code>emitSkillEventViaHTML(page, skillId)</code> が emit_skill() と同じ HTML を生成して注入する。</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">btoa</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span><span class="w"> </span><span class="nx">skill_id</span><span class="o">:</span><span class="w"> </span><span class="kt">id</span><span class="p">,</span><span class="w"> </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{},</span><span class="w"> </span><span class="nx">timestamp</span><span class="o">:</span><span class="w"> </span><span class="kt">Date.now</span><span class="p">()</span><span class="w"> </span><span class="p">}));</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">html</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`&lt;marimo-broadcast channel=&quot;skill_event_channel&quot; type=&quot;skill_complete&quot; payload=&quot;</span><span class="si">${</span><span class="nx">payload</span><span class="si">}</span><span class="sb">&quot; style=&quot;display:none;&quot;&gt;&lt;/marimo-broadcast&gt;`</span><span class="p">;</span>
+</code></pre></div>
+<p><strong>BroadcastChannel 同一コンテキスト配信の確認</strong>: <code>integration.spec.ts</code> のテスト 1 が通過したことで、<code>sendBroadcastMessage()</code> の送信インスタンスと <code>setupSkillEventListener()</code> の受信インスタンスが別の <code>BroadcastChannel</code> オブジェクトであるため、Web 仕様どおり配信されることを確認。フォールバック不要。</p>
+<p><strong>テスト範囲の使い分け</strong>:
+- <code>emitSkillEvent()</code> (案 E): 高速・安定。既存テストの回帰テストに最適
+- <code>emitSkillEventViaHTML()</code> (新規): ③→⑦のパイプライン全体を検証。統合テストに使用</p>
+<h3 id="26-testfixme-vs-testskip-2026-02-19">26. <code>test.fixme()</code> vs <code>test.skip()</code> — 意図の明示（2026-02-19 追加）<a class="headerlink" href="#26-testfixme-vs-testskip-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>ui.spec.ts</code> に <code>if (await element.isVisible()) { test } else { test.skip() }</code> パターンが 3 箇所あった。このパターンは「UI が消えたら skip」= 機能が消失しても気づかない。さらに <code>.catch(() =&gt; {})</code> でアサーション失敗を握りつぶすパターンも併用されており、テストが「失敗しても通る」状態だった。</p>
+<p><strong>修正</strong>: <code>test.fixme("理由", async () =&gt; { ... })</code> に変更。</p>
+<table>
+<thead>
+<tr>
+<th>パターン</th>
+<th>テスト結果</th>
+<th>レポート表示</th>
+<th>検知力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>if (visible) test else test.skip()</code></td>
+<td>UI 消失 → skip</td>
+<td>"skipped"</td>
+<td><strong>弱い</strong>: 機能消失を隠蔽</td>
+</tr>
+<tr>
+<td><code>test.fixme("理由", ...)</code></td>
+<td>実行スキップ</td>
+<td><strong>"fixme"</strong></td>
+<td><strong>強い</strong>: テスト数にカウント、レポートで目立つ</td>
+</tr>
+<tr>
+<td><code>.catch(() =&gt; {})</code></td>
+<td>失敗 → 警告のみ</td>
+<td>passed（偽陽性）</td>
+<td><strong>なし</strong>: 失敗を完全に握りつぶす</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教訓</strong>: <code>test.skip()</code> は「このテストは今は関係ない」。<code>test.fixme()</code> は「この機能は未実装だが、実装されたら有効化すべき」。意図を区別して使い分ける。<code>.catch(() =&gt; {})</code> でアサーション失敗を握りつぶすのは<strong>決してやらない</strong>。</p>
+<h3 id="27-pnpm-turbo-build-2026-02-19">27. ビルド反映忘れ — 本番コード変更後は <code>pnpm turbo build</code> 必須（2026-02-19 追加）<a class="headerlink" href="#27-pnpm-turbo-build-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: Step 1 で <code>skill-complete-handler.ts</code> に <code>__testInjectBroadcastHTML</code> フックを追加したが、ビルドせずに E2E テストを実行したところ、全統合テスト（9 件）が <code>__testInjectBroadcastHTML not found</code> で失敗した。</p>
+<p><strong>原因</strong>: E2E テストは <code>marimo/_static/</code> のプリビルド済みフロントエンドを使う。ソースコードの変更はビルドしないと反映されない（知見 10 と同根）。</p>
+<p><strong>対策</strong>: 本番コード（<code>frontend/src/</code> 以下）を変更したら必ず以下を実行:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span>turbo<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cp<span class="w"> </span>-R<span class="w"> </span>dist/*<span class="w"> </span>../marimo/_static/
+</code></pre></div>
+<p><strong>チェックポイント</strong>: テストで <code>not found</code> エラーが出たら、まずビルド反映漏れを疑う。</p>
+<h3 id="28-constantsts-production-2026-02-19">28. <code>constants.ts</code> で production コードからテスト定数を導出（2026-02-19 追加）<a class="headerlink" href="#28-constantsts-production-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: テストコードにマジックナンバーが散在していた。例: <code>59</code>（総スキル数）、<code>210_000</code>（全スキル報酬合計）、<code>50_000</code>（第 1 マイルストーンボーナス）。スキル追加・報酬変更のたびにテストも修正が必要で、乖離に気づけない。</p>
+<p><strong>解決</strong>: <code>frontend/e2e-tests/game/constants.ts</code> を新規作成し、production コードからデータを導出:</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">skillDefinitions</span><span class="p">,</span><span class="w"> </span><span class="nx">milestones</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;../../src/components/skill-tree/skill-data&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">calculateTotalRewards</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;../../src/components/skill-tree/rewards/reward-system&quot;</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">TOTAL_SKILL_COUNT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">skillDefinitions</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span><span class="w">           </span><span class="c1">// 59</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">SANDBOX_SKILL_IDS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">skillDefinitions</span><span class="p">.</span><span class="nx">filter</span><span class="p">(...).</span><span class="nx">map</span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">BRIDGE_SKILL_IDS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">skillDefinitions</span><span class="p">.</span><span class="nx">filter</span><span class="p">(...).</span><span class="nx">map</span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">getTotalCashAfterSkills</span><span class="p">(</span><span class="nx">skillIds</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[])</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">FIRST_MILESTONE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">milestones</span><span class="p">[</span><span class="mf">0</span><span class="p">];</span><span class="w">                       </span><span class="c1">// { skillCount: 10, bonus: 50000 }</span>
+</code></pre></div>
+<p><strong>前提条件</strong>: Playwright テストは Node.js で実行される。<code>skill-data.ts</code> と <code>reward-system.ts</code> はブラウザ API 非依存の純粋データ/ロジックファイルのため Node.js から直接 import 可能。<code>e2e-tests/tsconfig.json</code> に <code>"@/*": ["../src/*"]</code> パスマッピングあり。</p>
+<p><strong>教訓</strong>: テストのマジックナンバーは production コードから導出できる場合、直接 import して導出する。「59」と書くよりも <code>skillDefinitions.length</code> と書くほうが、スキル追加時に自動で追従する。</p>
+<h3 id="29-expecttopass-2026-02-19">29. <code>expect().toPass()</code> で状態ベース待機に統一（2026-02-19 追加）<a class="headerlink" href="#29-expecttopass-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>waitForTimeout(500)</code> / <code>waitForTimeout(300)</code> による固定時間待機が散在していた。テスト環境の速度によって不安定になる（速い環境: 足りない、遅い環境: 無駄に待つ）。また <code>bridge.spec.ts</code> では <code>10_000</code> → <code>12_000</code> → <code>15_000</code> とエスカレーティングタイムアウトが使われ、根拠が不明だった。</p>
+<p><strong>修正パターン</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ 固定時間待機</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">500</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">getSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_002&quot;</span><span class="p">);</span>
+<span class="nx">expect</span><span class="p">(</span><span class="nx">status</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s2">&quot;locked&quot;</span><span class="p">);</span>
+
+<span class="c1">// ✅ 状態ベース待機（ポーリング）</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">getSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_002&quot;</span><span class="p">)).</span><span class="nx">toBe</span><span class="p">(</span><span class="s2">&quot;locked&quot;</span><span class="p">);</span>
+<span class="p">}).</span><span class="nx">toPass</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">3_000</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<p><strong><code>bridge.spec.ts</code> のタイムアウト統一</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">SKILL_STATUS_TIMEOUT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10</span><span class="nx">_000</span><span class="p">;</span>
+<span class="c1">// 全 waitForSkillStatus で統一使用</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;BRIDGE_003&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">SKILL_STATUS_TIMEOUT</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>教訓</strong>: <code>waitForTimeout</code> は「最低でもこの時間待つ」であり、「この時間で十分」の保証がない。<code>expect().toPass()</code> はタイムアウト内でポーリングし、条件成立時点で即座に次に進むため、速くかつ確実。</p>
+<h3 id="30-python-17-emitskillviapython2026-02-19">30. Python セル実行で ①→⑦ 全経路テスト — <code>emitSkillViaPython()</code>（2026-02-19 追加）<a class="headerlink" href="#30-python-17-emitskillviapython2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>背景</strong>: 既存テストは全てフロントエンド側のテストフック（<code>__testCompleteSkill</code> で ⑥→⑦、<code>__testInjectBroadcastHTML</code> で ③→⑦）を使用しており、レイヤー①②（Python HTML 生成→WebSocket 転送）をバイパスしていた。</p>
+<p><strong>解決策（案 G）</strong>: <code>progress_manager</code> への依存を避けるため、<code>emit_skill()</code> のインライン版をセルに直接書く:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">base64</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_base64</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_json</span><span class="o">,</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">marimo._output.hypertext</span><span class="w"> </span><span class="kn">import</span> <span class="n">Html</span> <span class="k">as</span> <span class="n">_Html</span>
+<span class="n">_ev</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;skill_id&quot;</span><span class="p">:</span> <span class="s2">&quot;SANDBOX_001&quot;</span><span class="p">,</span> <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">_time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)}</span>
+<span class="n">_b</span> <span class="o">=</span> <span class="n">_base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">_json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">_ev</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+<span class="n">_Html</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;marimo-broadcast channel=&quot;skill_event_channel&quot; type=&quot;skill_complete&quot; payload=&quot;</span><span class="si">{</span><span class="n">_b</span><span class="si">}</span><span class="s1">&quot; style=&quot;display:none;&quot;&gt;&lt;/marimo-broadcast&gt;&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>重要な制約</strong>:
+- <code>mo.output.append(Html(...))</code> はコンソール出力に送られ、<code>extractAndSendBroadcastMessages</code> の処理対象外。<strong>セルの最終式</strong>として <code>_Html(...)</code> を返す必要がある（メイン出力になる）
+- marimo はセル間で同じ変数名を禁止するため、全 import/変数に <code>_</code> 接頭辞を付ける（<code>_base64</code>, <code>_json</code>, <code>_Html</code> 等）。<code>_</code> 接頭辞の変数は marimo の依存グラフから除外される</p>
+<h3 id="31-runnewcellingrid2026-02-19">31. グリッドレイアウトでのセル作成 — <code>runNewCellInGrid()</code>（2026-02-19 追加）<a class="headerlink" href="#31-runnewcellingrid2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>game_test.py</code> は <code>width="grid"</code> を使用。グリッドレイアウトでは <code>create-cell-button</code>（<code>CreateCellButton.tsx</code>）が DOM に存在しない。既存の <code>runNewCell()</code> が使えない。</p>
+<p><strong>解決</strong>: 下部ツールバーの「Python」ボタン（<code>getByRole("button", { name: "Python", exact: true })</code>）を使用してセルを追加する。</p>
+<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">runNewCellInGrid</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="nx">code</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// ダイアログが開いていれば閉じる（Python ボタンを遮るため）</span>
+<span class="w">  </span><span class="c1">// ← 知見 33 参照</span>
+
+<span class="w">  </span><span class="c1">// ツールバーの Python ボタンでセル追加</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">getByRole</span><span class="p">(</span><span class="s2">&quot;button&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Python&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">exact</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">}).</span><span class="nx">click</span><span class="p">();</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">1</span><span class="nx">_000</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// CodeMirror エディタをフォーカスしてコード入力</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">cmContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s2">&quot;.cm-content&quot;</span><span class="p">).</span><span class="nx">last</span><span class="p">();</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">cmContent</span><span class="p">.</span><span class="nx">click</span><span class="p">({</span><span class="w"> </span><span class="nx">force</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">});</span><span class="w">  </span><span class="c1">// ← 知見 32 参照</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">cmContent</span><span class="p">.</span><span class="nx">fill</span><span class="p">(</span><span class="nx">code</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// run-button をクリック（force: true でトースト遮蔽回避）</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">getByTestId</span><span class="p">(</span><span class="s2">&quot;run-button&quot;</span><span class="p">).</span><span class="nx">locator</span><span class="p">(</span><span class="s2">&quot;:visible&quot;</span><span class="p">).</span><span class="nx">last</span><span class="p">().</span><span class="nx">click</span><span class="p">({</span><span class="w"> </span><span class="nx">force</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">});</span>
+
+<span class="w">  </span><span class="c1">// セル実行完了待機</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s2">&quot;[data-cell-status=&#39;running&#39;]&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="nx">waitFor</span><span class="p">({</span><span class="w"> </span><span class="nx">state</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;detached&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">15_000</span><span class="w"> </span><span class="p">}).</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{});</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="32-force-true2026-02-19">32. トースト・ツールバーによるポインター遮蔽と <code>force: true</code>（2026-02-19 追加）<a class="headerlink" href="#32-force-true2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: テストが進むとセルが蓄積し、グリッドレイアウトが混雑する。以下の要素が <code>.cm-content</code> や run-button のクリックを遮蔽する:
+- 報酬トースト（<code>&lt;ol class="fixed top-0 z-100 ..."&gt;</code>）
+- Reconnected バナー（<code>&lt;div role="region" aria-label="Notifications (F8)"&gt;</code>）
+- 下部ツールバーのボタン（<code>&lt;button class="... uppercase text-xs"&gt;</code>）
+- セルのタイトルバー（<code>&lt;div class="titlebar-left"&gt;</code>）</p>
+<p><strong>対策（3 層防御）</strong>:
+1. <code>dismissReconnectedBanner()</code> でバナーを閉じる
+2. 報酬トーストの Close ボタンをクリックして閉じる（<code>[aria-label="Notifications (F8)"] button[aria-label="Close"]</code>）
+3. <code>click({ force: true })</code> で残りの遮蔽要素を無視</p>
+<h3 id="33-python-2026-02-19">33. スキルツリーダイアログが Python ボタンを遮る（2026-02-19 追加）<a class="headerlink" href="#33-python-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: テスト 2 で 1 回目の <code>emitSkillViaPython()</code> 成功後、スキル完了の報酬ダイアログが表示され、2 回目の <code>runNewCellInGrid()</code> → Python ボタンクリックがタイムアウトする。</p>
+<p><strong>対策</strong>: <code>runNewCellInGrid()</code> の先頭でダイアログを閉じる:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">dialog</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[role=&quot;dialog&quot;]&#39;</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">dialog</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">().</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kc">false</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">keyboard</span><span class="p">.</span><span class="nx">press</span><span class="p">(</span><span class="s2">&quot;Escape&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">dialog</span><span class="p">.</span><span class="nx">waitFor</span><span class="p">({</span><span class="w"> </span><span class="nx">state</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;hidden&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">3_000</span><span class="w"> </span><span class="p">}).</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{});</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="35-waitforloadstatenetworkidle-2026-02-20">35. 再接続スキル再発火と <code>waitForLoadState("networkidle")</code> タイムアウト（2026-02-20 追加）<a class="headerlink" href="#35-waitforloadstatenetworkidle-2026-02-20" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>sandbox.spec.ts</code> で 5 件が失敗。症状は以下の 2 種：</p>
+<ol>
+<li><strong>Test 1</strong>: <code>page.waitForLoadState("networkidle")</code> が 10s タイムアウト</li>
+<li><strong>Test 2〜5</strong>: 初期状態で SANDBOX_002 が "completed"、進捗が "3/59 スキル"（期待: "locked" / "0/59 スキル"）</li>
+</ol>
+<p><strong>原因 A — <code>networkidle</code> 到達不能（知見 35a）</strong>:</p>
+<p>marimo はページロード後も WebSocket を常時接続する。Playwright の <code>networkidle</code> はアクティブな接続が 500ms 以上ゼロになることが条件のため、marimo アプリでは永遠に到達しない。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ WebSocket 常時接続のため networkidle には到達しない</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForLoadState</span><span class="p">(</span><span class="s2">&quot;networkidle&quot;</span><span class="p">);</span>
+
+<span class="c1">// ✅ HTML/CSS/JS のロード完了で十分</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForLoadState</span><span class="p">(</span><span class="s2">&quot;load&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>原因 B — 再接続時のカーネルスキル再発火（知見 35b）</strong>:</p>
+<p><code>game_test.py</code> には integration.spec.ts / z-python-e2e.spec.ts のために多数のスキル発火セルが存在する。各テスト前の <code>ensureConnected()</code> が Reconnected バナーを処理する際、marimo カーネルが既存セルのキャッシュ出力を WebSocket で再送信する。この再送信により <code>extractAndSendBroadcastMessages</code> がスキル HTML をパース→発火し、<code>afterEach</code> でリセットした Jotai atom が汚染される。</p>
+<div class="highlight"><pre><span></span><code>テスト afterEach → resetGameProgress() → atom: 0/59 ✓
+  ↓
+次テスト beforeEach → ensureConnected() → Reconnected 処理
+  ↓ カーネルが出力を再送信
+  ↓ SANDBOX_001, SANDBOX_002, SANDBOX_003 が発火
+  ↓ atom: 3/59（汚染）
+  ↓
+テスト: SANDBOX_002 の状態確認 → &quot;completed&quot;（期待 &quot;locked&quot;） → FAIL
+</code></pre></div>
+<p><strong>解決策</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// sandbox.spec.ts beforeEach</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">ensureConnected</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="c1">// ↓ 再接続による汚染をリセット（afterEach のリセットより後に再発火が起きるため）</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">resetGameProgress</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">openSkillTreePanel</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>教訓</strong>: <code>resetGameProgress()</code> を <code>afterEach</code> のみに置くと、次テストの接続安定化フェーズで再汚染される。<code>beforeEach</code> の接続安定化 (<code>ensureConnected</code>) の直後にもリセットを置くことで防御する。</p>
+<h3 id="34-2026-02-19">34. カーネル永続セルの状態汚染と実行順序制御（2026-02-19 追加）<a class="headerlink" href="#34-2026-02-19" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: Python セル実行テストが作成するセルは marimo カーネルに永続する。セル出力の <code>&lt;marimo-broadcast&gt;</code> HTML が、後続テストファイル（sandbox.spec.ts, ui.spec.ts）のページロード時に WebSocket 経由で再送信され、<code>extractAndSendBroadcastMessages</code> で処理されてスキルが意図せず完了する。</p>
+<p><strong>具体的な症状</strong>: python-e2e → sandbox.spec.ts の順で実行されると、sandbox.spec.ts の「初期状態: SANDBOX_001 は unlocked」テストで SANDBOX_001 が既に "completed" になっている。</p>
+<p><strong>原因の連鎖</strong>:
+1. python-e2e が <code>emitSkillViaPython("SANDBOX_001")</code> を実行 → セルがカーネルに追加
+2. テスト後の <code>resetGameProgress()</code> は Jotai atom のみリセット（セルは残る）
+3. sandbox.spec.ts がページロード → カーネルが既存セルの出力を WebSocket で再送信
+4. <code>extractAndSendBroadcastMessages</code> がセル出力の HTML をパース → BroadcastChannel で配信
+5. スキルリスナーが受信 → SANDBOX_001 が completed に</p>
+<p><strong>解決策</strong>: ファイル名を <code>z-python-e2e.spec.ts</code> にして、全テストファイルの最後に実行させる（Playwright はアルファベット順で実行）。次回テスト実行時にはサーバーが再起動されるため、前回の永続セルは消える。</p>
+<p><strong>検討した代替案</strong>:
+- セル削除（<code>Shift+Backspace</code>）: グリッドモードでの UI 操作が複雑で不安定
+- カーネル再起動: WebSocket 再接続が発生し、Reconnected バナー問題を誘発
+- <code>page.evaluate()</code> で内部 API を呼ぶ: Jotai ストアがグローバルに公開されていないため困難</p>
+<h3 id="36-broadcastchannel-2026-02-20">36. リセット後の BroadcastChannel イベント抑制（2026-02-20 追加）<a class="headerlink" href="#36-broadcastchannel-2026-02-20" title="Permanent link">&para;</a></h3>
+<p><strong>問題</strong>: <code>resetGameProgress()</code> で atom をリセットしても、カーネルが再送するセル出力由来の <code>&lt;marimo-broadcast&gt;</code> HTML が BroadcastChannel → <code>handleMessage</code> → <code>onSkillComplete</code> の経路でスキルを再完了してしまう。知見 35b の <code>beforeEach</code> リセットだけでは、リセット後にさらにカーネルメッセージが到着するタイミングレースに対処できない。</p>
+<p><strong>症状</strong>: <code>sandbox.spec.ts</code> の「初期状態: SANDBOX_001 は unlocked」が断続的に失敗。リセット後 〜 アサーションの数百 ms の間にカーネル再送メッセージが到着し SANDBOX_001 が completed になる。</p>
+<p><strong>原因の連鎖</strong>:
+1. <code>resetGameProgress()</code> → <code>__testResetProgress()</code> → <code>onReset()</code> → atom リセット
+2. 直後にカーネルが WebSocket でセル出力を再送信
+3. <code>extractAndSendBroadcastMessages</code> → BroadcastChannel → <code>handleMessage</code> → <code>onSkillComplete</code>
+4. atom が再汚染 → テスト失敗</p>
+<p><strong>解決策</strong>: <code>skill-complete-handler.ts</code> の <code>setupSkillEventListener</code> 内に <code>suppressBroadcast</code> フラグを追加。<code>__testResetProgress</code> がリセット実行後 1 秒間 BroadcastChannel 経由のイベントを抑制する。<code>__testCompleteSkill</code>（テストから直接発火する経路）は抑制しない。</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">suppressBroadcast</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">suppressTimer</span><span class="o">:</span><span class="w"> </span><span class="kt">ReturnType</span><span class="o">&lt;</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">setTimeout</span><span class="o">&gt;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+
+<span class="c1">// __testResetProgress</span>
+<span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">).</span><span class="nx">__testResetProgress</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">onReset</span><span class="p">();</span>
+<span class="w">  </span><span class="nx">suppressBroadcast</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">suppressTimer</span><span class="p">)</span><span class="w"> </span><span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">suppressTimer</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">suppressTimer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">suppressBroadcast</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">suppressTimer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="mf">1</span><span class="nx">_000</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="c1">// handleMessage</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">handleMessage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="o">:</span><span class="w"> </span><span class="kt">MessageEvent</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">suppressBroadcast</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="c1">// カーネル再送を無視</span>
+<span class="w">  </span><span class="c1">// ...</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><strong>教訓</strong>: atom リセットだけでは不十分。BroadcastChannel リスナーへの遅延配信も抑制する必要がある。テスト専用の <code>__testCompleteSkill</code> は影響を受けないため、テストからの明示的なスキル発火は正常に動作する。</p>
+<h3 id="37-ux-2026-02-20">37. UX プレイテストで発見されたスキルイベント消失問題（2026-02-20 追加）<a class="headerlink" href="#37-ux-2026-02-20" title="Permanent link">&para;</a></h3>
+<p><strong>概要</strong>: 初心者視点でのプレイテスト（Playwright MCP でブラウザ操作）により、E2E テストでは検出不可能な UX 問題を 10 件発見。詳細は <a href="../ux-playtest-report/">ux-playtest-report.md</a> を参照。</p>
+<p><strong>最も深刻な発見 — スキルイベントの消失</strong>:</p>
+<p><code>bt.chart("7203")</code> → <code>bt.buy()</code> → <code>bt.step()</code> を実行後、スキルツリーが <strong>0/59</strong> のまま更新されない。</p>
+<p><strong>発生条件</strong>:
+1. marimo サーバー（port 2718）でバックエンドを起動
+2. Vite dev server（port 3000）またはブラウザリロードで接続
+3. 既存セッションに再接続（Reconnected）
+4. セルが自動再実行され <code>emit_skill()</code> が発火するが、フロントエンドのスキルリスナーがまだ初期化されていない
+5. BroadcastChannel はリアルタイム配信のみで、過去のイベントは再生されない
+6. → スキル進捗がフロントエンドに反映されない</p>
+<p><strong>E2E テストとの関係</strong>:
+- E2E テスト（案 E）は <code>window.__testCompleteSkill</code> テストフックで atom を直接操作するため、この問題を検出しない
+- 案 G（<code>z-python-e2e.spec.ts</code>）も初回接続から一貫してテストするため再接続シナリオは通らない
+- この問題を自動テストするには「再接続後にスキル状態がフロントエンドに正しく同期されるか」を検証する新しいテストスイートが必要</p>
+<p><strong>改善方向</strong>:
+1. フロントエンド初期化時に Python カーネルの <code>get_triggered_skills()</code> 結果を取得し、スキルツリーと同期
+2. <code>.backcast.progress.json</code> からの状態復元をフロントエンド初期化時に実行
+3. BroadcastChannel リスナー起動後に「過去のスキル状態を再同期するリクエスト」を送信</p>
+<p><strong>その他の主な発見</strong>:
+- <code>bt.buy()</code> の出力が <code>&lt;Order object at 0x...&gt;</code> で初心者に意味不明
+- <code>bt.step()</code> の出力が <code>True</code> のみで状況不明
+- AI Fix バナーがゲームモードでも表示され混乱を招く
+- Grid レイアウトでセルが重なり、入力場所が不明確</p>
+<hr />
+<h2 id="_13">セレクター早見表<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>目的</th>
+<th>セレクター</th>
+<th>備考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>スキルツリーボタン</td>
+<td><code>[data-testid="skill-tree-button"]</code></td>
+<td>✅ Controls.tsx に配置・<strong>実機確認済み・テスト通過</strong></td>
+</tr>
+<tr>
+<td>スキルツリーパネル全体</td>
+<td><code>[data-testid="skill-tree-panel"]</code></td>
+<td>✅ <strong>ダイアログ内に追加済み</strong>（<code>skill-tree-button.tsx</code>）・テスト通過</td>
+</tr>
+<tr>
+<td>スキルノード（ID 指定）</td>
+<td><code>[data-skill-id="SANDBOX_001"]</code></td>
+<td>✅ skill-node.tsx に追加済み・<strong>テスト通過</strong>（推奨）</td>
+</tr>
+<tr>
+<td>スキルのステータス確認</td>
+<td><code>node.getAttribute("data-skill-status")</code></td>
+<td>✅ "completed"|"unlocked"|"locked" を返す・<strong>テスト通過</strong></td>
+</tr>
+<tr>
+<td>スキルノード（タイトル指定）</td>
+<td><code>.react-flow__node:has-text("タイトル")</code></td>
+<td>⚠️ 非推奨（タイトル変更で壊れる）</td>
+</tr>
+<tr>
+<td>進捗バッジ</td>
+<td><code>text=/\d+\/\d+ スキル/</code></td>
+<td>✅ <strong>ダイアログの DialogHeader 内</strong> Badge コンポーネント・テスト通過</td>
+</tr>
+<tr>
+<td>現金表示</td>
+<td><code>text=/¥[0-9,]+/</code></td>
+<td>✅ <strong>ダイアログのフッター</strong>の CoinsIcon 隣・テスト通過</td>
+</tr>
+<tr>
+<td>報酬トースト</td>
+<td><code>[role='status']</code></td>
+<td>一時表示のため要タイミング調整（知見 11 参照）</td>
+</tr>
+<tr>
+<td>Reconnected バナー</td>
+<td><code>text=Reconnected</code></td>
+<td>✅ <code>dismissReconnectedBanner()</code> で自動 dismiss（知見 19）</td>
+</tr>
+<tr>
+<td>バナー閉じるボタン</td>
+<td><code>[data-testid="remove-banner-button"]</code></td>
+<td>Reconnected バナーの X ボタン</td>
+</tr>
+<tr>
+<td>Kernel 接続状態</td>
+<td><code>[data-testid="backend-status"]</code></td>
+<td>✅ <code>ensureConnected()</code> で healthy 確認（知見 19）</td>
+</tr>
+<tr>
+<td>テストフック（完了）</td>
+<td><code>window.__testCompleteSkill</code></td>
+<td>✅ <code>setupSkillEventListener()</code> が公開・テスト通過（⑥→⑦のみ）</td>
+</tr>
+<tr>
+<td>テストフック（HTML注入）</td>
+<td><code>window.__testInjectBroadcastHTML</code></td>
+<td>✅ <code>setupSkillEventListener()</code> が公開（③→⑦経路）（知見 25）</td>
+</tr>
+<tr>
+<td>テストフック（リセット）</td>
+<td><code>window.__testResetProgress</code></td>
+<td>✅ <code>setupSkillEventListener()</code> が公開（知見 20）</td>
+</tr>
+<tr>
+<td>セル追加ボタン</td>
+<td><code>[data-testid="create-cell-button"]:visible</code></td>
+<td>既存テストと共通</td>
+</tr>
+<tr>
+<td>実行ボタン</td>
+<td><code>[data-testid="run-button"]:visible</code></td>
+<td>既存テストと共通</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_14">スキルツリーの開き方（✅ 実装済み・テスト通過）<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
+<h3 id="_15">現在の方式: ダイアログ<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// 1. スキルツリーボタンをクリック（トースト回避のため evaluate 経由）</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;skill-tree-button&quot;]&#39;</span><span class="p">)</span><span class="o">?</span><span class="p">.</span><span class="nx">click</span><span class="p">();</span>
+<span class="p">});</span>
+
+<span class="c1">// 2. ダイアログ内のパネルが表示されるまで待機</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;skill-tree-panel&quot;]&#39;</span><span class="p">).</span><span class="nx">waitFor</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">5_000</span><span class="w"> </span><span class="p">});</span>
+
+<span class="c1">// 3. スキルノードの状態を確認</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-skill-id=&quot;SANDBOX_001&quot;]&#39;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s1">&#39;data-skill-status&#39;</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="helpersts-openskilltreepanel">helpers.ts の <code>openSkillTreePanel()</code> — ✅ 修正済み・テスト通過<a class="headerlink" href="#helpersts-openskilltreepanel" title="Permanent link">&para;</a></h3>
+<p>ダイアログモードに対応済み。実装は <code>helpers.ts</code> を参照。</p>
+<hr />
+<h2 id="_16">テスト実行方法<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h2>
+<h3 id="_17">前提条件（重要）<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. フロントエンドをビルド（スキルツリーコンポーネントを _static に反映）</span>
+<span class="c1"># Linux/Mac:</span>
+make<span class="w"> </span>fe
+<span class="c1"># Windows（make が使えない場合）:</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span>turbo<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cp<span class="w"> </span>-R<span class="w"> </span>dist/*<span class="w"> </span>../marimo/_static/
+
+<span class="c1"># 2. Python パッケージを再インストール</span>
+<span class="c1"># Linux/Mac:</span>
+make<span class="w"> </span>py
+<span class="c1"># Windows:</span>
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;d:/Documents/marimo&quot;</span>
+
+<span class="c1"># 3. Playwright ブラウザがインストールされていること</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span>install<span class="w"> </span>chromium
+
+<span class="c1"># 4. 既存の marimo プロセスが残っていないこと（Windows）</span>
+taskkill<span class="w"> </span>//F<span class="w"> </span>//IM<span class="w"> </span>marimo.exe
+</code></pre></div>
+<h3 id="_18">テスト実行<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ゲームテストのみ</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/
+
+<span class="c1"># 目視確認（ヘッドあり）</span>
+pnpm<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/sandbox.spec.ts<span class="w"> </span>--headed
+
+<span class="c1"># 特定のテストケースのみ</span>
+pnpm<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/<span class="w"> </span>-g<span class="w"> </span><span class="s2">&quot;SANDBOX_006&quot;</span>
+
+<span class="c1"># 失敗時のトレース付き</span>
+pnpm<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/<span class="w"> </span>--trace<span class="w"> </span>on
+
+<span class="c1"># HTML レポートを開く</span>
+pnpm<span class="w"> </span>playwright<span class="w"> </span>show-report
+</code></pre></div>
+<h3 id="vite-dev">開発中の手動確認（Vite dev サーバー方式）<a class="headerlink" href="#vite-dev" title="Permanent link">&para;</a></h3>
+<p>ビルドせずにソース変更を即座に確認したい場合:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># ターミナル 1: バックエンド起動</span>
+uv<span class="w"> </span>run<span class="w"> </span>marimo<span class="w"> </span>edit<span class="w"> </span>--no-token<span class="w"> </span>--headless<span class="w"> </span>/tmp<span class="w"> </span>--port<span class="w"> </span><span class="m">2718</span>
+
+<span class="c1"># ターミナル 2: Vite dev サーバー起動</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span>dev
+
+<span class="c1"># ブラウザで開く（ポート 3000）</span>
+<span class="c1"># http://localhost:3000/?file=frontend\e2e-tests\py\game_test.py</span>
+<span class="c1">#</span>
+<span class="c1"># ※ ホームページ (http://localhost:3000/) の &quot;Running notebooks&quot; からも開ける</span>
+</code></pre></div>
+<h3 id="_19">初回実行前に確認すること<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<ol>
+<li>フロントエンドビルドが最新であること（<code>marimo/_static/</code> に反映済み）</li>
+<li><code>npx playwright install chromium</code> が完了していること</li>
+<li>既存の marimo プロセスが残っていないこと（<code>taskkill //F //IM marimo.exe</code>）</li>
+<li><code>ensureConnected()</code> が各テスト前に Kernel healthy を確認する（自動・知見 19）</li>
+<li>「Reconnected」バナーは <code>dismissReconnectedBanner()</code> が自動で閉じる（知見 19・20）</li>
+</ol>
+<hr />
+<h2 id="_20">テストカバレッジ全体像<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h2>
+<p>本番フローの 7 レイヤーに対するテストカバレッジ:</p>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>内容</th>
+<th>テスト</th>
+<th>テスト種別</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① Python <code>emit_skill()</code></td>
+<td>HTML 生成・base64 エンコード</td>
+<td>✅ カバー済</td>
+<td>Python ユニットテスト（<code>test_skill_events.py</code>）+ <strong>E2E 全経路テスト</strong>（<code>z-python-e2e.spec.ts</code>）</td>
+</tr>
+<tr>
+<td>② WebSocket 転送</td>
+<td>Python → Frontend 通信</td>
+<td>✅ カバー済</td>
+<td><strong>E2E 全経路テスト</strong>（<code>z-python-e2e.spec.ts</code>）— Python セル実行でカバー</td>
+</tr>
+<tr>
+<td>③ HTML パース</td>
+<td><code>extractAndSendBroadcastMessages()</code></td>
+<td>✅ カバー済</td>
+<td>ユニットテスト + E2E 統合テスト（<code>integration.spec.ts</code>）+ E2E 全経路テスト</td>
+</tr>
+<tr>
+<td>④ BroadcastChannel 送信</td>
+<td><code>postMessage()</code></td>
+<td>✅ カバー済</td>
+<td>E2E 統合テスト（<code>integration.spec.ts</code>）+ E2E 全経路テスト</td>
+</tr>
+<tr>
+<td>⑤ リスナー受信・検証</td>
+<td><code>setupSkillEventListener()</code></td>
+<td>✅ カバー済</td>
+<td>ユニットテスト + E2E 統合テスト + E2E 全経路テスト</td>
+</tr>
+<tr>
+<td>⑥ Jotai atom 更新</td>
+<td>前提条件・報酬計算</td>
+<td>✅ カバー済</td>
+<td>E2E テスト（案 E + 案 F + 案 G）</td>
+</tr>
+<tr>
+<td>⑦ React UI 反映</td>
+<td>DOM 更新</td>
+<td>✅ カバー済</td>
+<td>E2E テスト（案 E + 案 F + 案 G）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_21">既知の非カバー範囲と理由<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>非カバー範囲</th>
+<th>理由</th>
+<th>対策案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>①〜⑦の全経路（emit_skill → UI）</td>
+<td>✅ <strong>カバー済</strong>: <code>z-python-e2e.spec.ts</code>（案 G）で ①→⑦ 全経路をテスト。インライン版 emit_skill で <code>progress_manager</code> 依存を回避</td>
+<td>完了</td>
+</tr>
+<tr>
+<td>Electron の cell injection</td>
+<td>Tauri 環境が必要</td>
+<td><code>tauri/</code> サブフォルダに別テスト作成</td>
+</tr>
+<tr>
+<td><code>progress_manager.py</code> のファイル永続化</td>
+<td>Python バックエンドの統合が必要</td>
+<td>Python 側のユニットテストで担保</td>
+</tr>
+<tr>
+<td>本番 <code>emit_skill()</code> → DOM 経路</td>
+<td>Backcast エンジン + <code>progress_manager</code> 依存</td>
+<td>インライン版でレイヤー①②はカバー済。本番との差異は <code>_triggered_skills</code> 重複防止と <code>add_completed_skill</code> 永続化のみ</td>
+</tr>
+<tr>
+<td><code>SkillRewardToast</code> の表示</td>
+<td>タイムアウトが短く不安定</td>
+<td><code>.catch()</code> 握りつぶしを除去済み（知見 26）。失敗なら fail に</td>
+</tr>
+<tr>
+<td>ブリッジ・フルトラック</td>
+<td>✅ <code>bridge.spec.ts</code> 10 ケース全通過</td>
+<td>完了</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_22">今後のテスト拡張ガイド<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h2>
+<h3 id="_23">✅ ブリッジトラックのテスト — 完了<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h3>
+<p><code>bridge.spec.ts</code> で 10 ケース全通過。<code>SKILL_STATUS_TIMEOUT</code> で統一、<code>waitForTimeout</code> → 状態ベース待機に改善済み（知見 29）。</p>
+<h3 id="_24">新しいスキルを追加した場合のテスト手順<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>skill-data.ts</code> にスキル定義を追加</li>
+<li><code>constants.ts</code> は自動追従（<code>skillDefinitions</code> から動的に導出するため修正不要）</li>
+<li>必要に応じて spec ファイルにテストケースを追加</li>
+<li>ビルド反映: <code>cd frontend &amp;&amp; pnpm turbo build &amp;&amp; cp -R dist/* ../marimo/_static/</code></li>
+</ol>
+<h3 id="_25">セル実行経由の統合テストを追加する<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h3>
+<p>Backcast エンジン環境専用として別 describe にまとめる:</p>
+<div class="highlight"><pre><span></span><code><span class="nx">test</span><span class="p">.</span><span class="nx">describe</span><span class="p">(</span><span class="s2">&quot;統合テスト（Backcast 環境必須）&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">.</span><span class="nx">skip</span><span class="p">(</span><span class="o">!</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">BACKCAST_INSTALLED</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Backcast が必要&quot;</span><span class="p">);</span>
+
+<span class="w">  </span><span class="nx">test</span><span class="p">(</span><span class="s2">&quot;bt.buy() 実行で SANDBOX_002 が完了する&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">runNewCell</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bt.buy()&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div>
+<hr />
+<h2 id="59-2026-02-19">全 59 スキル一覧（2026-02-19 実機確認済み）<a class="headerlink" href="#59-2026-02-19" title="Permanent link">&para;</a></h2>
+<p>実機確認時に全スキルの <code>data-skill-id</code> / <code>data-skill-status</code> / タイトルを取得した。</p>
+<details>
+<summary>サンドボックストラック（6 スキル）</summary>
+
+| ID | タイトル | 初期状態 | 報酬 |
+|---|---|---|---|
+| SANDBOX_001 | マーケットへようこそ | **unlocked** | +30,000円 +1 |
+| SANDBOX_002 | 初めての購入 | locked | +20,000円 |
+| SANDBOX_003 | 買値を確認する | locked | +10,000円 |
+| SANDBOX_004 | 初めての売却 | locked | +20,000円 |
+| SANDBOX_005 | チャートで振り返る | locked | +20,000円 |
+| SANDBOX_006 | サンドボックス卒業 | locked | +50,000円 +1 |
+
+</details>
+
+<details>
+<summary>失敗体験トラック（3 スキル）</summary>
+
+| ID | タイトル | 初期状態 | 報酬 |
+|---|---|---|---|
+| FAIL_001 | 初めての含み損 | locked | +5,000円 +1 |
+| FAIL_002 | 初めての損切り | locked | +10,000円 +1 |
+| FAIL_003 | 初めての破産 | locked | +20,000円 +1 |
+
+</details>
+
+<details>
+<summary>ブリッジトラック（3 スキル）</summary>
+
+| ID | タイトル | 初期状態 | 報酬 |
+|---|---|---|---|
+| BRIDGE_001 | データの正体 | locked | +15,000円 |
+| BRIDGE_002 | 自分でデータを取得 | locked | +20,000円 +1 |
+| BRIDGE_003 | フルモードへ | locked | +25,000円 +1 |
+
+</details>
+
+<details>
+<summary>セットアップトラック（5 スキル）</summary>
+
+| ID | タイトル | 初期状態 |
+|---|---|---|
+| SETUP_001 | marimoを起動する | locked |
+| SETUP_002 | BackcastProをインポート | locked |
+| SETUP_003 | Backtestを初期化する | locked |
+| SETUP_004 | 初期資金を設定する | locked |
+| SETUP_005 | 手数料を設定する | locked |
+
+</details>
+
+<details>
+<summary>データトラック（6 スキル）、トレードトラック（10 スキル）、チャートトラック（4 スキル）、インジケータートラック（9 スキル）、リスク管理トラック（10 スキル）</summary>
+
+全て `locked` 状態で正しく初期化されていることを確認済み。
+計 39 スキル、合計 59 スキル。
+
+</details>
+
+<hr />
+<h2 id="_26">関連ドキュメント<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ドキュメント</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../skill-tree-implementation/">skill-tree-implementation.md</a></td>
+<td>スキルツリーシステム全体のアーキテクチャ</td>
+</tr>
+<tr>
+<td><a href="../skill-event-wiring/">skill-event-wiring.md</a></td>
+<td>BroadcastChannel リスナーの接続バグと修正</td>
+</tr>
+<tr>
+<td><a href="testing.md">testing.md</a></td>
+<td>Python 側のテスト規約</td>
+</tr>
+<tr>
+<td><a href="../progress-persistence/">progress-persistence.md</a></td>
+<td>進捗の永続化（Electron / Web の差異）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_27">関連ソースファイル<a class="headerlink" href="#_27" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>役割</th>
+<th>テストへの影響</th>
+<th>修正状況</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frontend/e2e-tests/game/helpers.ts</code></td>
+<td>テストフック呼び出し・HTML注入・接続確認・バナー dismiss・パネル操作</td>
+<td>セレクター変更時ここを修正</td>
+<td>✅ 修正済み</td>
+</tr>
+<tr>
+<td><code>frontend/e2e-tests/game/constants.ts</code></td>
+<td>production コードから導出したテスト定数（知見 28）</td>
+<td>スキル追加時に自動追従</td>
+<td>✅ 新規作成</td>
+</tr>
+<tr>
+<td><code>frontend/e2e-tests/game/integration.spec.ts</code></td>
+<td>HTML パイプライン統合テスト（③→⑦）9 ケース</td>
+<td>パイプライン変更時に検知</td>
+<td>✅ 新規作成</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/skill-complete-handler.ts</code></td>
+<td>BroadcastChannel 受信 + <code>__testCompleteSkill</code> / <code>__testResetProgress</code> フック公開</td>
+<td>フック名変更時にテストが壊れる。ユニットテストあり</td>
+<td>✅ 修正済み</td>
+</tr>
+<tr>
+<td><code>frontend/src/core/kernel/handlers.ts</code></td>
+<td><code>extractAndSendBroadcastMessages()</code> — HTML パース + BroadcastChannel 送信</td>
+<td><code>export</code> 追加済み。ユニットテストあり</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>src-tauri/resources/files/skill_events.py</code></td>
+<td><code>emit_skill()</code> — <code>&lt;marimo-broadcast&gt;</code> HTML 生成</td>
+<td>HTML 属性名変更時にテストが壊れる。ユニットテストあり</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/atoms.ts</code></td>
+<td>prerequisites チェック・atom 更新</td>
+<td>ガードロジックの変更を検知</td>
+<td>✅ console.log 削除済み</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/skill-tree-graph.tsx</code></td>
+<td>React Flow ノード・エッジの表示</td>
+<td><code>useEffect</code> 同期が必須（知見 17）</td>
+<td>✅ 修正済み</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/skill-node.tsx</code></td>
+<td><code>data-skill-id</code> / <code>data-skill-status</code> 属性</td>
+<td>テスト通過確認済み</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/skill-data.ts</code></td>
+<td>全 59 スキルのタイトル・前提条件</td>
+<td><code>data-skill-id</code> 使用のため影響小</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/editor/controls/skill-tree-button.tsx</code></td>
+<td>スキルツリーダイアログ・進捗バッジ・現金表示</td>
+<td><code>data-testid</code> + バッジ + 現金がここ</td>
+<td>✅ 修正済み</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/editor/chrome/panels/skill-tree-panel.tsx</code></td>
+<td>サイドバー版パネル（テストでは不使用）</td>
+<td>ダイアログ版と UI が乖離しないよう注意</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/editor/controls/Controls.tsx</code></td>
+<td>SkillTreeButton の配置位置</td>
+<td>コントロールバー内</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>frontend/playwright.config.ts</code></td>
+<td>テスト設定・<code>game_test.py</code> エントリ・パス解決</td>
+<td><code>import.meta.dirname</code> 使用（知見 13）</td>
+<td>✅ 修正済み</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

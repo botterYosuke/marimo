@@ -1,0 +1,1755 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Issue: ゲームリセット時に .backcast.progress.json が残りスキル再発火を阻害 - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#issue-backcastprogressjson" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Issue: ゲームリセット時に .backcast.progress.json が残りスキル再発火を阻害
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_backend_and_mcp_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide-custom-wheel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-widget-caching-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ui-switch-state-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-backend-sync.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-performance.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend-freeze-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grid-layout-auto-placement.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../broadcast-channel-hud.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-theme.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skill-tree-panel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../electron-startup-config.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-deploy.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-integration-fixes.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概要
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        根本原因
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unnamed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 採用した解決策: unnamed テンプレート方式
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="✅ 採用した解決策: unnamed テンプレート方式">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計思想
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        データフローの全体像
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装詳細（6ファイル）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装詳細（6ファイル）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rust-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rust 側（3ファイル）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rust 側（3ファイル）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src-taurisrclibrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        src-tauri/src/lib.rs — メニューハンドラのユニークキー生成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src-taurisrcwindowmanagerrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        src-tauri/src/window/manager.rs — タイトル表示
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src-taurisrcserverlifecyclers-pythonpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        src-tauri/src/server/lifecycle.rs — PYTHONPATH 追加
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python 側（2ファイル）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Python 側（2ファイル）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#marimo_serverfile_routerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        marimo/_server/file_router.py — テンプレート解決
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#marimo_sessionnotebookfile_managerpy-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        marimo/_session/notebook/file_manager.py — template パラメータ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dev-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dev 環境（1ファイル）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="dev 環境（1ファイル）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#packagejson-devbackend-pythonpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        package.json — dev:backend に PYTHONPATH 追加
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更しないもの
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#__new__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __new__ プレフィックスの規約
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        フォールバック設計
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        関連ファイル
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="issue-backcastprogressjson">Issue: ゲームリセット時に .backcast.progress.json が残りスキル再発火を阻害<a class="headerlink" href="#issue-backcastprogressjson" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-20
+<strong>重要度</strong>: Medium
+<strong>カテゴリ</strong>: Game / Developer Experience
+<strong>ステータス</strong>: ✅ 修正済み（unnamed テンプレート方式で解決）</p>
+<hr />
+<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p><code>src-tauri/sample-notebooks/</code> を <code>notebooks/</code> にコピーしてゲームをリセットしても、<code>.backcast.progress.json</code> が残存するため <code>_triggered_skills</code> が前回の完了スキルで初期化され、スキルが再発火しない。</p>
+<p><strong>現象</strong>:
+1. <code>backcast.py</code> を含むサンプルファイルを notebooks にコピーしてリセット
+2. ページを開いてセルを実行してもスキルのトースト通知が表示されない
+3. ブラウザコンソールに <code>[SkillHandler]</code> メッセージが出ない
+4. ステータスバーは <code>Progress: 0.0%</code> のままで Equity も増えない</p>
+<hr />
+<h2 id="_2">根本原因<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p><code>skill_events.py</code> のモジュールロード時に <code>progress_manager.load_progress()</code> で進捗ファイルを読み込み、<code>_triggered_skills</code> を初期化している。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># skill_events.py — モジュールロード時に実行される</span>
+<span class="n">_triggered_skills</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">load_progress</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;completed_skills&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+</code></pre></div>
+<p>進捗ファイルはノートブック名に紐づく（<code>backcast.py</code> → <code>.backcast.progress.json</code>）。ゲームリセットでノートブックファイルだけをコピーしても <code>.backcast.progress.json</code> は残存する。</p>
+<div class="highlight"><pre><span></span><code>ゲームリセット（ファイルコピー）
+  → .backcast.progress.json は削除されない
+  → skill_events.py ロード時に _triggered_skills が前回完了スキルで初期化
+  → bt.chart() → emit_skill(&quot;SANDBOX_001&quot;) → _triggered_skills に含まれるためスキップ
+  → フロントエンドへのイベント送信なし → スキル完了なし
+</code></pre></div>
+<hr />
+<h2 id="unnamed">✅ 採用した解決策: unnamed テンプレート方式<a class="headerlink" href="#unnamed" title="Permanent link">&para;</a></h2>
+<h3 id="_3">設計思想<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p><strong>核心</strong>: 新しいノートブックを unnamed（ファイル名未定）で開き、<code>backcast.py</code> の内容をテンプレートとして読み込む。ファイル名がないため進捗ファイルも存在せず、クリーンな状態で開始できる。保存時にユーザーがファイル名を決定する。</p>
+<div class="highlight"><pre><span></span><code>New Notebook 作成時:
+  filename = None (unnamed)
+  → progress_manager: _get_progress_path() が None を返す → 進捗保存なし
+  → セル内容は backcast.py のテンプレートから読み込み済み
+  → スキルはすべて未完了状態 → 正常に発火する
+
+Ctrl+S で保存時:
+  filename = &quot;my_game.py&quot; (ユーザーが命名)
+  → .my_game.progress.json が新規作成される（クリーン状態）
+</code></pre></div>
+<p><strong>却下した代替案</strong>:
+- オプション A（<code>bt.reset()</code> 関数）: Python 側の変更が必要、ユーザーが手動で呼ぶ必要がある
+- オプション B（<code>.gitignore</code> / 手動削除）: 手順として直感的でない
+- オプション C（リセット UI ボタン）: フロントエンド変更が大きい
+- オプション D（ファイルコピー方式）: Rust 側でファイルをコピーして実ファイルとして開く案。動作するが notebooks ディレクトリにファイルが増殖する問題がある</p>
+<h3 id="_4">データフローの全体像<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>[ユーザーが &quot;New Notebook&quot; クリック]
+  ↓
+[Rust] lib.rs: file_key = &quot;__new__menu_{timestamp}&quot; を生成
+  → commands::window_open_notebook(app, file_key)
+    → manager::open_window(app, Some(&quot;__new__menu_...&quot;))
+      → URL: http://localhost:{port}/?file=__new__menu_...
+        ↓
+[Python] session_manager.create_session(file_key=&quot;__new__menu_...&quot;)
+  → file_router.get_file_manager(&quot;__new__menu_...&quot;)
+    → resolve_file_path() → None  (key.startswith(&quot;__new__&quot;))
+    → notebooks ディレクトリ内の backcast.py をテンプレートとして検出
+    → AppFileManager(filename=None, template=&quot;...notebooks/backcast.py&quot;)
+      → _load_app(template_path)
+        → load.load_app(&quot;backcast.py&quot;) でセル内容を読み込み
+        → result._app._filename = None でファイル名をクリア（テンプレート上書き防止）
+</code></pre></div>
+<hr />
+<h2 id="6">実装詳細（6ファイル）<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<h3 id="rust-3">Rust 側（3ファイル）<a class="headerlink" href="#rust-3" title="Permanent link">&para;</a></h3>
+<h4 id="src-taurisrclibrs"><code>src-tauri/src/lib.rs</code> — メニューハンドラのユニークキー生成<a class="headerlink" href="#src-taurisrclibrs" title="Permanent link">&para;</a></h4>
+<p><code>"__new__"</code> 固定だとウィンドウハッシュが同一 → 2回目以降は既存ウィンドウにフォーカスしてしまう。タイムスタンプで一意にする。</p>
+<div class="highlight"><pre><span></span><code><span class="s">&quot;new_notebook&quot;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">app_clone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">ts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">time</span><span class="p">::</span><span class="n">SystemTime</span><span class="p">::</span><span class="n">now</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="n">duration_since</span><span class="p">(</span><span class="n">std</span><span class="p">::</span><span class="n">time</span><span class="p">::</span><span class="n">UNIX_EPOCH</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">unwrap_or_default</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="n">as_millis</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">file_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">format!</span><span class="p">(</span><span class="s">&quot;__new__menu_{}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ts</span><span class="p">);</span>
+<span class="w">    </span><span class="n">tauri</span><span class="p">::</span><span class="n">async_runtime</span><span class="p">::</span><span class="n">spawn</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">commands</span><span class="p">::</span><span class="n">window_open_notebook</span><span class="p">(</span>
+<span class="w">            </span><span class="n">app_clone</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">file_key</span><span class="p">),</span>
+<span class="w">        </span><span class="p">).</span><span class="k">await</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">log</span><span class="p">::</span><span class="n">error</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Failed to open new notebook: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="src-taurisrcwindowmanagerrs"><code>src-tauri/src/window/manager.rs</code> — タイトル表示<a class="headerlink" href="#src-taurisrcwindowmanagerrs" title="Permanent link">&para;</a></h4>
+<p><code>__new__menu_1234</code> がそのままタイトルに出るのを防止。<code>__new__</code> プレフィックスを検出して "New Notebook" に差し替え。</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">file_path</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="n">to_string_lossy</span><span class="p">();</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">name</span><span class="p">.</span><span class="n">starts_with</span><span class="p">(</span><span class="s">&quot;__new__&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">&quot;backcast - New Notebook&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">()</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 通常のファイル名表示 */</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nb">None</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s">&quot;backcast&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="p">};</span>
+</code></pre></div>
+<h4 id="src-taurisrcserverlifecyclers-pythonpath"><code>src-tauri/src/server/lifecycle.rs</code> — PYTHONPATH 追加<a class="headerlink" href="#src-taurisrcserverlifecyclers-pythonpath" title="Permanent link">&para;</a></h4>
+<p>unnamed ノートブックには <code>sys.path</code> にディレクトリが入らないため、<code>import game_setup</code> が失敗する。notebooks ディレクトリを <code>PYTHONPATH</code> に追加して解決。</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">delimiter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="fm">cfg!</span><span class="p">(</span><span class="n">windows</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&quot;;&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="p">};</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">current_pythonpath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">env</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;PYTHONPATH&quot;</span><span class="p">).</span><span class="n">cloned</span><span class="p">().</span><span class="n">unwrap_or_default</span><span class="p">();</span>
+<span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">current_pythonpath</span><span class="p">.</span><span class="n">contains</span><span class="p">(</span><span class="o">&amp;</span><span class="n">notebooks_dir_str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">env</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="s">&quot;PYTHONPATH&quot;</span><span class="p">.</span><span class="n">into</span><span class="p">(),</span><span class="w"> </span><span class="cm">/* notebooks_dir_str を先頭に追加 */</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="python-2">Python 側（2ファイル）<a class="headerlink" href="#python-2" title="Permanent link">&para;</a></h3>
+<h4 id="marimo_serverfile_routerpy"><code>marimo/_server/file_router.py</code> — テンプレート解決<a class="headerlink" href="#marimo_serverfile_routerpy" title="Permanent link">&para;</a></h4>
+<p><code>LazyListOfFilesAppFileRouter.get_file_manager()</code> で <code>__new__</code> キーを検出し、notebooks ディレクトリ内の <code>backcast.py</code> をテンプレートとして <code>AppFileManager</code> に渡す。</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="n">resolved_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">AppFileRouter</span><span class="o">.</span><span class="n">NEW_FILE</span><span class="p">):</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_directory</span><span class="p">,</span> <span class="s2">&quot;backcast.py&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">candidate</span><span class="p">):</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">candidate</span>
+    <span class="k">return</span> <span class="n">AppFileManager</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="marimo_sessionnotebookfile_managerpy-template"><code>marimo/_session/notebook/file_manager.py</code> — template パラメータ<a class="headerlink" href="#marimo_sessionnotebookfile_managerpy-template" title="Permanent link">&para;</a></h4>
+<p><code>AppFileManager.__init__()</code> に <code>template</code> パラメータを追加。テンプレートからセル内容を読み込むが <code>_filename</code> は <code>None</code> のまま維持する。</p>
+<p><strong><code>_filename</code> クリアが必須な理由</strong>: <code>load.load_app(template_path)</code> → <code>App(_filename=filepath)</code> でテンプレートのパスが <code>_filename</code> にセットされる。クリアしないと保存時にテンプレート（<code>backcast.py</code>）を上書きしてしまう。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># __init__: テンプレートからロード</span>
+<span class="n">load_path</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">template</span>
+    <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">template</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
+<span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_app</span><span class="p">(</span><span class="n">load_path</span><span class="p">)</span>
+
+<span class="c1"># _load_app: ファイル名クリア</span>
+<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_unnamed</span><span class="p">():</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="kc">None</span>
+</code></pre></div>
+<h3 id="dev-1">dev 環境（1ファイル）<a class="headerlink" href="#dev-1" title="Permanent link">&para;</a></h3>
+<h4 id="packagejson-devbackend-pythonpath"><code>package.json</code> — dev:backend に PYTHONPATH 追加<a class="headerlink" href="#packagejson-devbackend-pythonpath" title="Permanent link">&para;</a></h4>
+<p>prod では <code>lifecycle.rs</code> が PYTHONPATH を設定するが、dev モード (<code>pnpm dev</code>) では外部サーバーのため使われない。<code>dev:backend</code> スクリプトに環境変数を前置して解決。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;dev:backend&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;set \&quot;PYTHONPATH=%APPDATA%\\marimo\\notebooks\&quot; &amp;&amp; .venv\\Scripts\\python.exe -m marimo edit ...&quot;</span>
+</code></pre></div>
+<p>prod/dev ともに「PYTHONPATH 環境変数」戦略で統一。</p>
+<hr />
+<h2 id="_5">変更しないもの<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src-tauri/src/commands.rs</code></td>
+<td><code>open_window</code> シグネチャ不変のため変更不要</td>
+</tr>
+<tr>
+<td><code>marimo/_server/session_manager.py</code></td>
+<td>テンプレートは file_router 内で完結</td>
+</tr>
+<tr>
+<td><code>frontend/src/utils/urls.ts</code></td>
+<td><code>__new__&lt;sessionId&gt;</code> 形式は既に正しい</td>
+</tr>
+<tr>
+<td><code>progress_manager.py</code></td>
+<td><code>filename=None</code> で自動的にデフォルト値を返す</td>
+</tr>
+<tr>
+<td><code>skill_events.py</code></td>
+<td>unnamed 時は進捗が空 → <code>_triggered_skills</code> も空 → 変更不要</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="__new__"><code>__new__</code> プレフィックスの規約<a class="headerlink" href="#__new__" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>AppFileRouter.NEW_FILE = "__new__"</code> が定数定義 (<code>file_router.py</code> L32)</li>
+<li>Python 側は <code>key.startswith("__new__")</code> で判定 → <code>__new__</code>, <code>__new__menu_123</code>, <code>__new__&lt;sessionId&gt;</code> 全てマッチ</li>
+<li>Rust 側も <code>name.starts_with("__new__")</code> で同じロジック</li>
+<li>新しい <code>__new__</code> バリアントを追加する場合はこのプレフィックス規約に従うこと</li>
+</ul>
+<hr />
+<h2 id="_6">フォールバック設計<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>backcast.py</code> が notebooks ディレクトリに存在しない場合: <code>template=None</code> → 空ノートブック（従来動作）</li>
+<li>テンプレート読み込みに失敗した場合: <code>load.load_app()</code> が <code>None</code> を返す → 空ノートブック作成</li>
+</ul>
+<hr />
+<h2 id="_7">関連ファイル<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>役割</th>
+<th>変更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src-tauri/src/lib.rs</code></td>
+<td>メニューハンドラ</td>
+<td>✅ ユニークキー生成</td>
+</tr>
+<tr>
+<td><code>src-tauri/src/window/manager.rs</code></td>
+<td>ウィンドウタイトル</td>
+<td>✅ <code>__new__</code> プレフィックス処理</td>
+</tr>
+<tr>
+<td><code>src-tauri/src/server/lifecycle.rs</code></td>
+<td>サーバー起動</td>
+<td>✅ PYTHONPATH 追加</td>
+</tr>
+<tr>
+<td><code>marimo/_server/file_router.py</code></td>
+<td>ファイルルーティング</td>
+<td>✅ テンプレート解決</td>
+</tr>
+<tr>
+<td><code>marimo/_session/notebook/file_manager.py</code></td>
+<td>ノートブック管理</td>
+<td>✅ template パラメータ + <code>_filename</code> クリア</td>
+</tr>
+<tr>
+<td><code>package.json</code></td>
+<td>dev スクリプト</td>
+<td>✅ PYTHONPATH 環境変数追加</td>
+</tr>
+<tr>
+<td><code>skill_events.py</code></td>
+<td>スキル発火管理</td>
+<td>変更なし</td>
+</tr>
+<tr>
+<td><code>progress_manager.py</code></td>
+<td>進捗ファイル管理</td>
+<td>変更なし</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

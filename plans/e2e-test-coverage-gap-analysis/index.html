@@ -1,0 +1,1902 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>E2E テストカバレッジギャップ分析 - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#e2e" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              E2E テストカバレッジギャップ分析
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_backend_and_mcp_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide-custom-wheel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-widget-caching-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ui-switch-state-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-backend-sync.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-performance.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend-freeze-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grid-layout-auto-placement.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../broadcast-channel-hud.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-theme.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skill-tree-panel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../electron-startup-config.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-deploy.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-integration-fixes.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題提起
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        本番フローの全体像（7 レイヤー）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案 E がテストする範囲
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#e_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案 E が検出できないバグの具体例
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="案 E が検出できないバグの具体例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Python 側の条件分岐ロジックの誤り
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-html" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. HTML 生成・パースの不一致
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-broadcastchannel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. BroadcastChannel メッセージ形式の不一致
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. WebSocket シリアライズの問題
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        現状の評価
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="現状の評価">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#e_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案 E の強み（現実的な価値）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案 E の限界（正直な評価）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カバレッジを拡大するための選択肢
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="カバレッジを拡大するための選択肢">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        選択肢 1: ①〜⑤をユニットテストで個別にカバー
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-apython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        選択肢 2: 案 A（Python セル実行）を限定的に追加
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-37" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        選択肢 3: ③〜⑦をカバーする中間案
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        推奨アクション
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        選択肢 1 実施記録（2026-02-19）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="選択肢 1 実施記録（2026-02-19）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        作成したテストファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装上の知見
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装上の知見">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-test_skill_eventspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python テスト (test_skill_events.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typescript-extractbroadcasttestts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TypeScript パーステスト (extractBroadcast.test.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typescript-skill-complete-handlertestts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TypeScript リスナーテスト (skill-complete-handler.test.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計思想
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カバレッジ状況の更新
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e2e-2026-02-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E2E テスト全スイート実行結果（2026-02-19）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="e2e">E2E テストカバレッジギャップ分析<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-19
+<strong>対象</strong>: <code>frontend/e2e-tests/game/sandbox.spec.ts</code> および案 E（テストフック方式）
+<strong>結論</strong>: 現在の案 E は「ユーザーの行動の再現」ではなく「フロントエンド状態管理の回帰テスト」である</p>
+<hr />
+<h2 id="_1">問題提起<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p><code>game-e2e-review-system.md</code> には以下の記述がある:</p>
+<blockquote>
+<p>テストしたいのは「イベントが届いたときに UI が正しく更新されるか」であり、atom の状態ではない</p>
+</blockquote>
+<p>しかし案 E（<code>window.__testCompleteSkill</code> 直接呼び出し）が実際にテストしているのは「<code>onSkillComplete</code> コールバックが呼ばれたときに UI が正しく更新されるか」であり、「イベントが届いたとき」ではない。イベントが届く経路そのものがテストから除外されている。</p>
+<hr />
+<h2 id="7">本番フローの全体像（7 レイヤー）<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>① Python emit_skill(&quot;SANDBOX_001&quot;)
+    ↓ HTML &lt;marimo-broadcast&gt; 要素を生成 + base64 エンコード
+② WebSocket でフロントエンドに転送
+    ↓ marimo カーネルのセル出力として送信
+③ handlers.ts extractAndSendBroadcastMessages() が HTML を正規表現でパース
+    ↓ base64 デコード → JSON
+④ BroadcastChannel.postMessage() で送信
+    ↓ クロスコンテキスト通信
+⑤ skill-complete-handler.ts の BroadcastChannel リスナーが受信
+    ↓ msg.type === &quot;skill_complete&quot; &amp;&amp; msg.data.skill_id を検証
+⑥ completeSkillWithRewardAtom（Jotai atom 更新）
+    ↓ 前提条件チェック → 報酬計算 → 進捗更新
+⑦ React 再レンダリング → DOM 更新 → UI 反映
+</code></pre></div>
+<h2 id="e">案 E がテストする範囲<a class="headerlink" href="#e" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>内容</th>
+<th>テストされる？</th>
+<th>所在ファイル</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① Python <code>emit_skill()</code></td>
+<td>HTML 生成・base64 エンコード</td>
+<td><strong>スキップ</strong></td>
+<td><code>src-tauri/resources/files/skill_events.py</code></td>
+</tr>
+<tr>
+<td>② WebSocket 転送</td>
+<td>Python → Frontend の通信</td>
+<td><strong>スキップ</strong></td>
+<td>marimo コア (<code>_server/</code>)</td>
+</tr>
+<tr>
+<td>③ HTML パース</td>
+<td>正規表現で <code>&lt;marimo-broadcast&gt;</code> を抽出</td>
+<td><strong>スキップ</strong></td>
+<td><code>frontend/src/core/kernel/handlers.ts</code></td>
+</tr>
+<tr>
+<td>④ BroadcastChannel 送信</td>
+<td><code>postMessage()</code> + クロスタブ通信</td>
+<td><strong>スキップ</strong></td>
+<td><code>frontend/src/core/kernel/broadcastChannel.ts</code></td>
+</tr>
+<tr>
+<td>⑤ リスナー受信・メッセージ検証</td>
+<td><code>type</code>/<code>skill_id</code> の検証ロジック</td>
+<td><strong>スキップ</strong></td>
+<td><code>skill-complete-handler.ts</code></td>
+</tr>
+<tr>
+<td>⑥ Jotai atom 更新</td>
+<td>前提条件・報酬計算・進捗管理</td>
+<td><strong>テストされる</strong></td>
+<td><code>atoms.ts</code></td>
+</tr>
+<tr>
+<td>⑦ React UI 反映</td>
+<td>ノード状態・バッジ・現金表示</td>
+<td><strong>テストされる</strong></td>
+<td><code>skill-node.tsx</code>, <code>skill-tree-button.tsx</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>テストフックと BroadcastChannel リスナーは同じ <code>onSkillComplete</code> コールバックを共有</strong>しているため、⑥⑦は確実にテストされる。しかし①〜⑤は完全にバイパスされる。</p>
+<hr />
+<h2 id="e_1">案 E が検出できないバグの具体例<a class="headerlink" href="#e_1" title="Permanent link">&para;</a></h2>
+<h3 id="1-python">1. Python 側の条件分岐ロジックの誤り<a class="headerlink" href="#1-python" title="Permanent link">&para;</a></h3>
+<p><code>game_setup.py</code> では <code>emit_skill()</code> が条件付きで呼ばれている:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 例: 含み損発生時に FAIL_001 を発火</span>
+<span class="n">emit_skill</span><span class="p">(</span><span class="s2">&quot;FAIL_001&quot;</span><span class="p">)</span>
+
+<span class="c1"># 例: チャート表示後に SANDBOX_005 を発火</span>
+<span class="n">emit_skill</span><span class="p">(</span><span class="s2">&quot;SANDBOX_005&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>「ユーザーが特定の操作をしたときに正しいスキルイベントが発火されるか」という判定ロジック自体がテスト範囲外。</p>
+<h3 id="2-html">2. HTML 生成・パースの不一致<a class="headerlink" href="#2-html" title="Permanent link">&para;</a></h3>
+<p><code>skill_events.py</code> の <code>emit_skill()</code> が生成する <code>&lt;marimo-broadcast&gt;</code> の attribute 名と、<code>handlers.ts</code> の正規表現パーサーが期待する attribute 名が乖離した場合、案 E では検出不可。</p>
+<h3 id="3-broadcastchannel">3. BroadcastChannel メッセージ形式の不一致<a class="headerlink" href="#3-broadcastchannel" title="Permanent link">&para;</a></h3>
+<p><code>skill_events.py</code> が <code>skill_id</code>（snake_case）で送信し、<code>skill-complete-handler.ts</code> が <code>msg.data.skill_id</code> で検証する。どちらかが <code>skillId</code>（camelCase）に変更された場合、⑤のリスナーで無視されるが、案 E は⑤を通らないので気づけない。</p>
+<h3 id="4-websocket">4. WebSocket シリアライズの問題<a class="headerlink" href="#4-websocket" title="Permanent link">&para;</a></h3>
+<p>セル出力に <code>&lt;marimo-broadcast&gt;</code> が含まれなくなった場合（例: marimo コアの出力フォーマット変更）、案 E では検出不可。</p>
+<hr />
+<h2 id="_2">現状の評価<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="e_2">案 E の強み（現実的な価値）<a class="headerlink" href="#e_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>①〜④は Web 標準 API + marimo コア機能であり、ゲーム固有のロジックではない</li>
+<li>最もバグが混入しやすい⑥（前提条件ロジック、報酬計算）と⑦（UI 反映）はカバーされている</li>
+<li>59 スキル × 複雑な前提条件グラフの回帰テストとして十分に実用的</li>
+<li>Backcast エンジンや統合テスト環境なしで CI 実行可能</li>
+</ul>
+<h3 id="e_3">案 E の限界（正直な評価）<a class="headerlink" href="#e_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>「ユーザーの行動を再現する E2E テスト」ではなく「フロントエンド状態管理の回帰テスト」</li>
+<li>Python → WebSocket → HTML パース → BroadcastChannel の経路は未テスト</li>
+<li><code>emit_skill()</code> の発火条件ロジックは完全にテスト範囲外</li>
+</ul>
+<hr />
+<h2 id="_3">カバレッジを拡大するための選択肢<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="1-15">選択肢 1: ①〜⑤をユニットテストで個別にカバー<a class="headerlink" href="#1-15" title="Permanent link">&para;</a></h3>
+<p>案 E はそのまま維持し、スキップしているレイヤーを個別にテストする。</p>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>テスト方法</th>
+<th>コスト</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① <code>emit_skill()</code></td>
+<td>Python ユニットテスト: 出力 HTML が正しい形式か検証</td>
+<td>低</td>
+</tr>
+<tr>
+<td>③ HTML パース</td>
+<td>TypeScript ユニットテスト: <code>extractAndSendBroadcastMessages()</code> に固定 HTML を渡してパース結果を検証</td>
+<td>低</td>
+</tr>
+<tr>
+<td>⑤ メッセージ検証</td>
+<td>TypeScript ユニットテスト: <code>setupSkillEventListener</code> のコールバックが正しい形式のメッセージで発火されるか検証</td>
+<td>低</td>
+</tr>
+<tr>
+<td>②④ WebSocket / BroadcastChannel</td>
+<td>Web 標準 API なのでテスト不要</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>メリット</strong>: 案 E の高速さを維持しつつ、各レイヤーの契約を個別に保証できる
+<strong>デメリット</strong>: レイヤー間の結合テストにはならない</p>
+<h3 id="2-apython">選択肢 2: 案 A（Python セル実行）を限定的に追加<a class="headerlink" href="#2-apython" title="Permanent link">&para;</a></h3>
+<p>Backcast エンジン環境でのみ実行する統合テストを別 describe で追加:</p>
+<div class="highlight"><pre><span></span><code><span class="nx">test</span><span class="p">.</span><span class="nx">describe</span><span class="p">(</span><span class="s2">&quot;統合テスト（Backcast 環境必須）&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">.</span><span class="nx">skip</span><span class="p">(</span><span class="o">!</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">BACKCAST_INSTALLED</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Backcast が必要&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// Python セルを実行 → emit_skill() → WebSocket → UI 更新の全経路をテスト</span>
+<span class="p">});</span>
+</code></pre></div>
+<p><strong>メリット</strong>: ①〜⑦の全経路をテスト（真の E2E）
+<strong>デメリット</strong>: CI 環境構築が重い、Backcast エンジン依存</p>
+<h3 id="3-37">選択肢 3: ③〜⑦をカバーする中間案<a class="headerlink" href="#3-37" title="Permanent link">&para;</a></h3>
+<p>Python セルの代わりに、テストから直接 <code>&lt;marimo-broadcast&gt;</code> HTML をセル出力に注入し、③以降の経路をテスト:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// page.evaluate() でセル出力領域に &lt;marimo-broadcast&gt; を挿入</span>
+<span class="c1">// → handlers.ts がパース → BroadcastChannel → リスナー → atom → UI</span>
+</code></pre></div>
+<p><strong>メリット</strong>: Python/Backcast 不要で③〜⑦をカバー
+<strong>デメリット</strong>: <code>handlers.ts</code> の呼び出し方法の調査が必要</p>
+<hr />
+<h2 id="_4">推奨アクション<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>ドキュメントの表現を修正</strong>: 「ユーザーの行動を再現する」→「フロントエンド状態管理の回帰テスト」と明記</li>
+<li>✅ <strong>選択肢 1 を優先実施</strong>: コスト最小でカバレッジギャップを埋められる → <strong>完了（2026-02-19）</strong></li>
+<li><strong>選択肢 3 を検討</strong>: ③〜⑦の結合テストとして実現可能性を調査</li>
+<li><strong>選択肢 2 は後回し</strong>: Backcast 環境の CI 構築後に検討</li>
+</ol>
+<hr />
+<h2 id="1-2026-02-19">選択肢 1 実施記録（2026-02-19）<a class="headerlink" href="#1-2026-02-19" title="Permanent link">&para;</a></h2>
+<h3 id="_5">作成したテストファイル<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>テストファイル</th>
+<th>テスト数</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① <code>emit_skill()</code></td>
+<td><code>src-tauri/resources/files/test_skill_events.py</code></td>
+<td>12</td>
+<td>✅ All passed</td>
+</tr>
+<tr>
+<td>③ HTML パース</td>
+<td><code>frontend/src/core/kernel/__tests__/extractBroadcast.test.ts</code></td>
+<td>10</td>
+<td>✅ All passed</td>
+</tr>
+<tr>
+<td>⑤ メッセージ検証</td>
+<td><code>frontend/src/components/skill-tree/__tests__/skill-complete-handler.test.ts</code></td>
+<td>11</td>
+<td>✅ All passed</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_6">実装上の知見<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<h4 id="python-test_skill_eventspy">Python テスト (<code>test_skill_events.py</code>)<a class="headerlink" href="#python-test_skill_eventspy" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>モジュール隔離</strong>: <code>emit_skill()</code> は <code>_triggered_skills</code> というモジュールレベルグローバル <code>set</code> で重複防止するため、テストごとに <code>sys.modules.pop("skill_events", None)</code> でリロードが必要</li>
+<li><strong>Html オブジェクト</strong>: <code>marimo._output.hypertext.Html</code> は <code>str()</code> で HTML を返さない。<code>.text</code> プロパティを使う必要がある</li>
+<li><strong>契約テスト</strong>: <code>handlers.ts</code> の正規表現パターン（<code>/&lt;marimo-broadcast([^&gt;]*)&gt;/gi</code> + 各属性の <code>/"([^"]+)"/</code>）と同じパターンで Python 出力を検証し、両言語間の形式一致を保証</li>
+<li><strong>テスト実行</strong>: <code>uvx hatch run +py=3.12 test:test src-tauri/resources/files/test_skill_events.py -v</code></li>
+</ul>
+<h4 id="typescript-extractbroadcasttestts">TypeScript パーステスト (<code>extractBroadcast.test.ts</code>)<a class="headerlink" href="#typescript-extractbroadcasttestts" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>export 変更</strong>: <code>extractAndSendBroadcastMessages</code> は元々非公開関数だったが、テストのために <code>export</code> を追加（<code>handlers.ts</code> L232）</li>
+<li><strong>モック対象</strong>: <code>@/utils/broadcastChannel</code> の <code>sendBroadcastMessage</code> をモックし、パース結果（channel, type, payload）をキャプチャ</li>
+<li><strong>Pattern 1 / Pattern 2</strong>: <code>handlers.ts</code> は2つのパース戦略を持つ（<code>&lt;marimo-broadcast&gt;</code> タグ方式と <code>data-marimo-broadcast</code> 属性方式）。<code>emit_skill()</code> は Pattern 1 を使用</li>
+<li><strong>テスト実行</strong>: <code>cd frontend &amp;&amp; pnpm test src/core/kernel/__tests__/extractBroadcast.test.ts</code></li>
+</ul>
+<h4 id="typescript-skill-complete-handlertestts">TypeScript リスナーテスト (<code>skill-complete-handler.test.ts</code>)<a class="headerlink" href="#typescript-skill-complete-handlertestts" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>BroadcastChannel モック</strong>: jsdom は <code>BroadcastChannel</code> を標準サポートしないため、<code>MockBroadcastChannel</code> クラスを作成。<code>_simulateMessage()</code> メソッドで <code>MessageEvent</code> を発火</li>
+<li><strong>動的インポート</strong>: <code>vi.resetModules()</code> + <code>await import()</code> でモック適用後のモジュールを取得</li>
+<li><strong>メッセージ形式の検証ポイント</strong>: <code>msg.type === "skill_complete"</code> と <code>msg.data.skill_id</code> の両方が必須。<code>skill_id</code> (snake_case) であることが重要（camelCase <code>skillId</code> では動かない）</li>
+<li><strong>テスト実行</strong>: <code>cd frontend &amp;&amp; pnpm test src/components/skill-tree/__tests__/skill-complete-handler.test.ts</code></li>
+</ul>
+<h3 id="_7">設計思想<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>各テストは<strong>契約テスト（Contract Test）</strong>のアプローチを採用している。レイヤー間の通信プロトコル（HTML 属性名、JSON キー名、BroadcastChannel チャネル名）が両端で一致することを検証する。これにより、一方のレイヤーでフォーマットが変更された場合にテストが失敗して検知できる。</p>
+<h3 id="_8">カバレッジ状況の更新<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>内容</th>
+<th>テストされる？</th>
+<th>テスト種別</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① Python <code>emit_skill()</code></td>
+<td>HTML 生成・base64 エンコード</td>
+<td>✅ <strong>テスト済</strong></td>
+<td>Python ユニットテスト</td>
+</tr>
+<tr>
+<td>② WebSocket 転送</td>
+<td>Python → Frontend の通信</td>
+<td>スキップ（Web 標準 API）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>③ HTML パース</td>
+<td>正規表現で抽出</td>
+<td>✅ <strong>テスト済</strong></td>
+<td>TypeScript ユニットテスト</td>
+</tr>
+<tr>
+<td>④ BroadcastChannel 送信</td>
+<td><code>postMessage()</code></td>
+<td>スキップ（Web 標準 API）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>⑤ リスナー受信・検証</td>
+<td><code>type</code>/<code>skill_id</code> の検証</td>
+<td>✅ <strong>テスト済</strong></td>
+<td>TypeScript ユニットテスト</td>
+</tr>
+<tr>
+<td>⑥ Jotai atom 更新</td>
+<td>前提条件・報酬計算</td>
+<td>✅ テスト済</td>
+<td>E2E テスト（案 E: 全4スイート37件パス）</td>
+</tr>
+<tr>
+<td>⑦ React UI 反映</td>
+<td>DOM 更新</td>
+<td>✅ テスト済</td>
+<td>E2E テスト（案 E: 全4スイート37件パス）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="e2e-2026-02-19">E2E テスト全スイート実行結果（2026-02-19）<a class="headerlink" href="#e2e-2026-02-19" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>スイート</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sandbox.spec.ts</code></td>
+<td>10 passed (2.2m)</td>
+</tr>
+<tr>
+<td><code>ui.spec.ts</code></td>
+<td>9 passed / 3 skipped (1.9m)</td>
+</tr>
+<tr>
+<td><code>persistence.spec.ts</code></td>
+<td>8 passed (1.7m)</td>
+</tr>
+<tr>
+<td><code>bridge.spec.ts</code></td>
+<td>10 passed (2.3m)</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

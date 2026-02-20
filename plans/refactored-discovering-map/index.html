@@ -1,0 +1,1926 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>ゲーム E2E テスト改善プラン - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#e2e" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ゲーム E2E テスト改善プラン
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_backend_and_mcp_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pyodide-custom-wheel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-widget-caching-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ui-switch-state-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-backend-sync.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../anywidget-performance.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend-freeze-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grid-layout-auto-placement.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../broadcast-channel-hud.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chart-theme.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skill-tree-panel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../electron-startup-config.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-deploy.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../steam-integration-fixes.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更概要
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: テストフック追加（本番コード — 唯一の変更） ✅
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: ヘルパー関数追加 ✅
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-integrationspects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: integration.spec.ts 新規作成 ✅
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: integration.spec.ts 新規作成 ✅">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テストケース（9件）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#broadcastchannel-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BroadcastChannel 動作確認（テスト 1 が兼ねる）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: 弱いアサーション修正 ✅
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: 弱いアサーション修正 ✅">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4a-persistencespects-catch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4A. persistence.spec.ts — トースト .catch() 握りつぶし
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4b-uispects-testskip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4B. ui.spec.ts — test.skip() による機能消失の隠蔽
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4c-uispects-l132-catch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4C. ui.spec.ts L132 — .catch(() =&gt; {}) アサーション握りつぶし
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: タイムアウト改善 ✅
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: タイムアウト改善 ✅">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#5a-sandboxspects-waitfortimeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5A. sandbox.spec.ts — waitForTimeout → 状態ベース待機
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5b-bridgespects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5B. bridge.spec.ts — エスカレーティングタイムアウト統一
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: マジックナンバー排除 ✅
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: マジックナンバー排除 ✅">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6a-constantsts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6A. constants.ts 新規作成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6b-spec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6B. 各 spec ファイルの修正
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装順序
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        最終検証 ✅
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        改善後のカバレッジ
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="e2e">ゲーム E2E テスト改善プラン<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h1>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>現在のゲーム E2E テスト（37 cases）は <code>window.__testCompleteSkill</code> を直接呼び出しており、本番の 7 レイヤーのうちレイヤー⑥⑦（Jotai atom + React 描画）しかテストしていない。レイヤー①〜⑤（Python HTML 生成 → HTML パース → BroadcastChannel 配信 → リスナー受信）は完全にバイパスされている。</p>
+<p>加えて、既存テストには <code>.catch(() =&gt; {})</code> で失敗を握りつぶすパターン、<code>test.skip()</code> で機能の消失を隠すパターン、ハードコードされたマジックナンバーが多数存在する。</p>
+<p><strong>このプランの目的</strong>: 本番のデータパイプラインを実際に通す統合テストを追加し、弱いアサーションを修正して、テストが「本当にバグを検知できる最後の砦」として機能するようにする。</p>
+<hr />
+<h2 id="_1">変更概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>変更内容</th>
+<th>種別</th>
+<th>対象ファイル</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>__testInjectBroadcastHTML</code> フック追加</td>
+<td>本番コード変更（1箇所）</td>
+<td><code>skill-complete-handler.ts</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>emitSkillEventViaHTML()</code> ヘルパー追加</td>
+<td>テストコード</td>
+<td><code>helpers.ts</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>integration.spec.ts</code> 新規作成</td>
+<td>テストコード（新規）</td>
+<td><code>e2e-tests/game/integration.spec.ts</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>弱いアサーション修正</td>
+<td>テストコード</td>
+<td><code>persistence.spec.ts</code>, <code>ui.spec.ts</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>タイムアウト改善</td>
+<td>テストコード</td>
+<td><code>sandbox.spec.ts</code>, <code>bridge.spec.ts</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>マジックナンバー排除</td>
+<td>テストコード（新規+修正）</td>
+<td><code>constants.ts</code>（新規）, 各 spec</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="step-1">Step 1: テストフック追加（本番コード — 唯一の変更） ✅<a class="headerlink" href="#step-1" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p><strong>知見</strong>: ユニットテスト(<code>skill-complete-handler.test.ts</code>)で 3 件失敗していた原因は、<code>extractAndSendBroadcastMessages</code> の import により <code>@/core/kernel/handlers</code> モジュール全体（セッション初期化等の重い副作用を含む）が <code>vi.resetModules()</code> + 動的 <code>import()</code> のたびに再初期化されてタイムアウトしていたこと。<code>vi.mock("@/core/kernel/handlers", ...)</code> でモックし解決。テスト時間 21.7s → 3.2s に短縮。</p>
+</blockquote>
+<p><strong>ファイル</strong>: <code>frontend/src/components/skill-tree/skill-complete-handler.ts</code></p>
+<p><code>setupSkillEventListener()</code> 内の既存フック（<code>__testCompleteSkill</code>, <code>__testResetProgress</code>）に並べて追加:</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">extractAndSendBroadcastMessages</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@/core/kernel/handlers&quot;</span><span class="p">;</span>
+
+<span class="c1">// setupSkillEventListener() 内:</span>
+<span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">).</span><span class="nx">__testInjectBroadcastHTML</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">html</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">extractAndSendBroadcastMessages</span><span class="p">(</span><span class="nx">html</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="c1">// cleanup 関数内:</span>
+<span class="ow">delete</span><span class="w"> </span><span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">).</span><span class="nx">__testInjectBroadcastHTML</span><span class="p">;</span>
+</code></pre></div>
+<p><strong>テスト対象レイヤーの変化</strong>:
+- 既存 <code>__testCompleteSkill</code>: ⑥→⑦ のみ
+- 新規 <code>__testInjectBroadcastHTML</code>: <strong>③→④→⑤→⑥→⑦</strong> を通過</p>
+<p><strong>BroadcastChannel 同一コンテキスト配信について</strong>:
+- <code>sendBroadcastMessage()</code> は <code>broadcastChannelManager</code> のインスタンスから送信
+- <code>setupSkillEventListener()</code> は別の <code>new BroadcastChannel()</code> で受信
+- Web 仕様: 送信インスタンス以外の同名チャネルには配信される → 動作するはず
+- 万一動かない場合のフォールバック: フック内でパース結果を直接 <code>onSkillComplete</code> に渡す（③④のみテスト、⑤はスキップ）</p>
+<p><strong>検証</strong>: 既存ユニットテスト通過確認
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>src/components/skill-tree/__tests__/skill-complete-handler.test.ts
+</code></pre></div></p>
+<hr />
+<h2 id="step-2">Step 2: ヘルパー関数追加 ✅<a class="headerlink" href="#step-2" title="Permanent link">&para;</a></h2>
+<p><strong>ファイル</strong>: <code>frontend/e2e-tests/game/helpers.ts</code></p>
+<div class="highlight"><pre><span></span><code><span class="cm">/**</span>
+<span class="cm"> * emit_skill() と同じ HTML を生成し、本番パイプライン（③→⑦）経由でスキルを完了。</span>
+<span class="cm"> * __testCompleteSkill（⑥→⑦のみ）とは異なり、HTML パース・BroadcastChannel を通過する。</span>
+<span class="cm"> */</span>
+<span class="k">export</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">emitSkillEventViaHTML</span><span class="p">(</span><span class="nx">page</span><span class="o">:</span><span class="w"> </span><span class="kt">Page</span><span class="p">,</span><span class="w"> </span><span class="nx">skillId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">((</span><span class="nx">id</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">fn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">).</span><span class="nx">__testInjectBroadcastHTML</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">fn</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="s2">&quot;function&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">&quot;__testInjectBroadcastHTML not found&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">btoa</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
+<span class="w">      </span><span class="nx">skill_id</span><span class="o">:</span><span class="w"> </span><span class="kt">id</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">      </span><span class="nx">timestamp</span><span class="o">:</span><span class="w"> </span><span class="kt">Date.now</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">}));</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">html</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`&lt;marimo-broadcast channel=&quot;skill_event_channel&quot; type=&quot;skill_complete&quot; payload=&quot;</span><span class="si">${</span><span class="nx">payload</span><span class="si">}</span><span class="sb">&quot; style=&quot;display:none;&quot;&gt;&lt;/marimo-broadcast&gt;`</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">fn</span><span class="p">(</span><span class="nx">html</span><span class="p">);</span>
+<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="nx">skillId</span><span class="p">);</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">300</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>同様に <code>emitSkillSequenceViaHTML(page, skillIds[])</code> も追加。</p>
+<hr />
+<h2 id="step-3-integrationspects">Step 3: <code>integration.spec.ts</code> 新規作成 ✅<a class="headerlink" href="#step-3-integrationspects" title="Permanent link">&para;</a></h2>
+<p><strong>ファイル</strong>: <code>frontend/e2e-tests/game/integration.spec.ts</code>（新規）</p>
+<p>既存テストがレイヤー⑥⑦の回帰テストとして機能する一方、このファイルは <strong>③→⑦の結合テスト</strong> として機能する。</p>
+<h3 id="9">テストケース（9件）<a class="headerlink" href="#9" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>テスト名</th>
+<th>検証内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>HTML 注入でスキルが完了する</td>
+<td>③パース→④BC送信→⑤リスナー→⑥atom→⑦DOM の全経路</td>
+</tr>
+<tr>
+<td>2</td>
+<td>前提条件チェーンが動作する</td>
+<td>001→002 の順序依存が HTML 経由でも正しく動く</td>
+</tr>
+<tr>
+<td>3</td>
+<td>進捗バッジが更新される</td>
+<td>HTML 経由でも UI カウンターが正しく増加</td>
+</tr>
+<tr>
+<td>4</td>
+<td>現金報酬が加算される</td>
+<td>HTML 経由でも <code>¥</code> 表示が更新される</td>
+</tr>
+<tr>
+<td>5</td>
+<td>重複発火が防止される</td>
+<td>同一 HTML を 2 回注入しても 1 回のみカウント</td>
+</tr>
+<tr>
+<td>6</td>
+<td>前提条件未達でスキップされる</td>
+<td>前提未完了のスキル HTML を注入しても変化なし</td>
+</tr>
+<tr>
+<td>7</td>
+<td>不正な base64 で UI がクラッシュしない</td>
+<td><code>sendBroadcastMessage</code> が <code>false</code> を返し、UI に影響なし</td>
+</tr>
+<tr>
+<td>8</td>
+<td>payload 属性欠落で無視される</td>
+<td>3 属性揃わない HTML はパーサーがスキップ</td>
+</tr>
+<tr>
+<td>9</td>
+<td>サンドボックス全完了→ブリッジ解放</td>
+<td>HTML 経由の 6 スキル連続完了でトラック遷移</td>
+</tr>
+</tbody>
+</table>
+<h3 id="broadcastchannel-1">BroadcastChannel 動作確認（テスト 1 が兼ねる）<a class="headerlink" href="#broadcastchannel-1" title="Permanent link">&para;</a></h3>
+<p>テスト 1 が通れば、BroadcastChannel の同一コンテキスト配信が動作する証拠。通らない場合は Step 1 のフォールバックを適用し、テスト名に「(BC bypass)」を付記して、レイヤー⑤がテストされていないことを明示する。</p>
+<blockquote>
+<p><strong>✅ 2026-02-19 実装完了</strong>: テスト 1〜9 全通過。BroadcastChannel 同一コンテキスト配信は問題なく動作。フォールバック不要。</p>
+</blockquote>
+<p><strong>検証</strong>:
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/integration.spec.ts<span class="w"> </span>--headed
+</code></pre></div></p>
+<hr />
+<h2 id="step-4">Step 4: 弱いアサーション修正 ✅<a class="headerlink" href="#step-4" title="Permanent link">&para;</a></h2>
+<h3 id="4a-persistencespects-catch">4A. <code>persistence.spec.ts</code> — トースト <code>.catch()</code> 握りつぶし<a class="headerlink" href="#4a-persistencespects-catch" title="Permanent link">&para;</a></h3>
+<p><strong>L168-182</strong>: <code>.catch(() =&gt; { console.warn(...) })</code> を除去</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Before（失敗しても通る）</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">toast</span><span class="p">).</span><span class="nx">toBeVisible</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">3_000</span><span class="w"> </span><span class="p">})</span>
+<span class="w">  </span><span class="p">.</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="s2">&quot;...&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">});</span>
+
+<span class="c1">// After（失敗なら fail）</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">toast</span><span class="p">).</span><span class="nx">toBeVisible</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">3_000</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<p>トーストが不安定な場合は <code>test.fixme("RewardToast の安定化が必要")</code> に変更。<strong>決して <code>.catch</code> で握りつぶさない</strong>。</p>
+<h3 id="4b-uispects-testskip">4B. <code>ui.spec.ts</code> — <code>test.skip()</code> による機能消失の隠蔽<a class="headerlink" href="#4b-uispects-testskip" title="Permanent link">&para;</a></h3>
+<p><strong>L115-138, L140-156, L162-181</strong>: 3 箇所の <code>if (visible) { test } else { test.skip() }</code> パターン</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Before（UIが消えても気づかない）</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">sandboxTab</span><span class="p">.</span><span class="nx">isVisible</span><span class="p">().</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kc">false</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// ...test...</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">.</span><span class="nx">skip</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// After（UIが消えたら fail）</span>
+<span class="nx">test</span><span class="p">.</span><span class="nx">fixme</span><span class="p">(</span><span class="s2">&quot;トラック切り替え: sandbox フィルター&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// トラックフィルターUI未実装のため fixme</span>
+<span class="w">  </span><span class="c1">// 実装されたら test() に昇格し、以下のアサーションを有効化</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">sandboxTab</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">getByRole</span><span class="p">(</span><span class="s2">&quot;button&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="sr">/sandbox|サンドボックス/i</span><span class="w"> </span><span class="p">}).</span><span class="nx">first</span><span class="p">();</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">sandboxTab</span><span class="p">).</span><span class="nx">toBeVisible</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">3_000</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">sandboxTab</span><span class="p">.</span><span class="nx">click</span><span class="p">();</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">getSkillNodeLocator</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_001&quot;</span><span class="p">)).</span><span class="nx">toBeVisible</span><span class="p">();</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">getSkillNodeLocator</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;BRIDGE_001&quot;</span><span class="p">)).</span><span class="nx">toBeHidden</span><span class="p">();</span>
+<span class="p">});</span>
+</code></pre></div>
+<p><code>test.fixme()</code> はテストレポートに <strong>"fixme"</strong> として表示され、実行はスキップされるが、テスト数としてカウントされる。<code>test.skip()</code> との違いは意図の明示性。</p>
+<h3 id="4c-uispects-l132-catch">4C. <code>ui.spec.ts</code> L132 — <code>.catch(() =&gt; {})</code> アサーション握りつぶし<a class="headerlink" href="#4c-uispects-l132-catch" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Before</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">bridgeNode</span><span class="p">).</span><span class="nx">toBeHidden</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">3_000</span><span class="w"> </span><span class="p">}).</span><span class="k">catch</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{});</span>
+
+<span class="c1">// After（4B の test.fixme 化で解消）</span>
+</code></pre></div>
+<p><strong>検証</strong>:
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/persistence.spec.ts<span class="w"> </span>e2e-tests/game/ui.spec.ts
+</code></pre></div></p>
+<hr />
+<h2 id="step-5">Step 5: タイムアウト改善 ✅<a class="headerlink" href="#step-5" title="Permanent link">&para;</a></h2>
+<h3 id="5a-sandboxspects-waitfortimeout">5A. <code>sandbox.spec.ts</code> — <code>waitForTimeout</code> → 状態ベース待機<a class="headerlink" href="#5a-sandboxspects-waitfortimeout" title="Permanent link">&para;</a></h3>
+<p><strong>L115</strong> (<code>waitForTimeout(500)</code> — 前提条件未達の確認):
+<div class="highlight"><pre><span></span><code><span class="c1">// Before</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">500</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">getSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_002&quot;</span><span class="p">);</span>
+<span class="nx">expect</span><span class="p">(</span><span class="nx">status</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s2">&quot;locked&quot;</span><span class="p">);</span>
+
+<span class="c1">// After</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">getSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_002&quot;</span><span class="p">)).</span><span class="nx">toBe</span><span class="p">(</span><span class="s2">&quot;locked&quot;</span><span class="p">);</span>
+<span class="p">}).</span><span class="nx">toPass</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">3_000</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div></p>
+<p><strong>L179</strong> (<code>waitForTimeout(300)</code> — 重複発火後のカウント確認):
+<div class="highlight"><pre><span></span><code><span class="c1">// Before</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">300</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">countAfter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">getCompletedCount</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="nx">expect</span><span class="p">(</span><span class="nx">countAfter</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">countBefore</span><span class="p">);</span>
+
+<span class="c1">// After</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">getCompletedCount</span><span class="p">(</span><span class="nx">page</span><span class="p">)).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">countBefore</span><span class="p">);</span>
+<span class="p">}).</span><span class="nx">toPass</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">3_000</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div></p>
+<h3 id="5b-bridgespects">5B. <code>bridge.spec.ts</code> — エスカレーティングタイムアウト統一<a class="headerlink" href="#5b-bridgespects" title="Permanent link">&para;</a></h3>
+<p><strong>L77-182</strong>: <code>10_000</code> → <code>12_000</code> → <code>15_000</code> のエスカレーションを統一</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ファイル先頭に定数定義</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">SKILL_STATUS_TIMEOUT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10</span><span class="nx">_000</span><span class="p">;</span>
+
+<span class="c1">// 全ての waitForSkillStatus で統一</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SANDBOX_006&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">SKILL_STATUS_TIMEOUT</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;BRIDGE_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">SKILL_STATUS_TIMEOUT</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;BRIDGE_003&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">SKILL_STATUS_TIMEOUT</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>L211, L225</strong> (<code>waitForTimeout(500)</code> — 前提条件ガードの確認): 5A と同じ状態ベース待機に変更。</p>
+<p><strong>検証</strong>:
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/sandbox.spec.ts<span class="w"> </span>e2e-tests/game/bridge.spec.ts
+</code></pre></div></p>
+<hr />
+<h2 id="step-6">Step 6: マジックナンバー排除 ✅<a class="headerlink" href="#step-6" title="Permanent link">&para;</a></h2>
+<h3 id="6a-constantsts">6A. <code>constants.ts</code> 新規作成<a class="headerlink" href="#6a-constantsts" title="Permanent link">&para;</a></h3>
+<p><strong>ファイル</strong>: <code>frontend/e2e-tests/game/constants.ts</code>（新規）</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">skillDefinitions</span><span class="p">,</span><span class="w"> </span><span class="nx">milestones</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;../../src/components/skill-tree/skill-data&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">calculateTotalRewards</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;../../src/components/skill-tree/rewards/reward-system&quot;</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">TOTAL_SKILL_COUNT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">skillDefinitions</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span><span class="w"> </span><span class="c1">// 59</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">SANDBOX_SKILL_IDS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">skillDefinitions</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">filter</span><span class="p">((</span><span class="nx">s</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">category</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;sandbox&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">s</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span><span class="w"> </span><span class="c1">// [&quot;SANDBOX_001&quot;, ..., &quot;SANDBOX_006&quot;]</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">BRIDGE_SKILL_IDS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">skillDefinitions</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">filter</span><span class="p">((</span><span class="nx">s</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">category</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;bridge&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">s</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span><span class="w"> </span><span class="c1">// [&quot;BRIDGE_001&quot;, ..., &quot;BRIDGE_003&quot;]</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">getTotalCashAfterSkills</span><span class="p">(</span><span class="nx">skillIds</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[])</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">totalCash</span><span class="p">,</span><span class="w"> </span><span class="nx">milestoneCash</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">calculateTotalRewards</span><span class="p">(</span><span class="nx">skillIds</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">totalCash</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">milestoneCash</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">FIRST_MILESTONE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">milestones</span><span class="p">[</span><span class="mf">0</span><span class="p">];</span><span class="w"> </span><span class="c1">// { skillCount: 10, bonus: 50000 }</span>
+</code></pre></div>
+<p><strong>注意</strong>: Playwright テストは Node.js で実行される。<code>skill-data.ts</code> と <code>reward-system.ts</code> は純粋なデータ/ロジックファイルでブラウザ API 非依存のため、Node.js から直接 import 可能。e2e-tests の tsconfig に <code>"@/*": ["../src/*"]</code> パスマッピングあり。</p>
+<h3 id="6b-spec">6B. 各 spec ファイルの修正<a class="headerlink" href="#6b-spec" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>箇所</th>
+<th>Before</th>
+<th>After</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ui.spec.ts</code></td>
+<td>L53</td>
+<td><code>text=/\d+\/59 スキル/</code></td>
+<td><code>`\d+/${TOTAL_SKILL_COUNT} スキル`</code></td>
+</tr>
+<tr>
+<td><code>ui.spec.ts</code></td>
+<td>L238</td>
+<td><code>expect(cash).toBeGreaterThan(50_000)</code></td>
+<td><code>expect(cash).toBeGreaterThan(FIRST_MILESTONE.bonus)</code></td>
+</tr>
+<tr>
+<td><code>bridge.spec.ts</code></td>
+<td>L190</td>
+<td><code>expect(cash).toBeGreaterThanOrEqual(210_000)</code></td>
+<td><code>expect(cash).toBeGreaterThanOrEqual(getTotalCashAfterSkills([...SANDBOX_SKILL_IDS, ...BRIDGE_SKILL_IDS]))</code></td>
+</tr>
+<tr>
+<td><code>bridge.spec.ts</code></td>
+<td>テスト名</td>
+<td><code>"BRIDGE_001 完了後に現金が増える（+15,000円）"</code></td>
+<td><code>"BRIDGE_001 完了後に現金が増える"</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>検証</strong>:
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/
+</code></pre></div></p>
+<hr />
+<h2 id="_2">実装順序<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>Step 1 → Step 2 → Step 3 → Step 4 → Step 5 → Step 6
+  ↓        ↓        ↓        ↓        ↓        ↓
+ 本番     helper   統合テスト  assertion timeout  constants
+ hook     追加     新規作成    修正      改善      導入
+</code></pre></div>
+<p>Step 1-3 は依存関係あり（順序厳守）。Step 4-6 は独立して実施可能。</p>
+<hr />
+<h2 id="_3">最終検証 ✅<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p><strong>2026-02-19 全 Step 完了・検証済み</strong>
+- ユニットテスト: <code>skill-complete-handler.test.ts</code> 11/11 passed, <code>extractBroadcast.test.ts</code> 10/10 passed
+- E2E テスト: <strong>46 passed / 3 fixme (skipped) / 0 failed</strong> (7.0m)
+  - integration.spec.ts: 9/9 passed (新規)
+  - sandbox.spec.ts: 10/10 passed
+  - bridge.spec.ts: 10/10 passed
+  - persistence.spec.ts: 8/8 passed
+  - ui.spec.ts: 9/9 passed + 3 fixme</p>
+<p><strong>知見</strong>: ビルド反映忘れに注意（<code>pnpm turbo build &amp;&amp; cp -R dist/* ../marimo/_static/</code>）。
+Step 1 の本番コード変更後にビルドせずテストすると <code>__testInjectBroadcastHTML not found</code> で全統合テストが失敗する。</p>
+</blockquote>
+<p>全 Step 完了後:
+<div class="highlight"><pre><span></span><code><span class="c1"># ゲーム e2e 全スイート</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/
+
+<span class="c1"># 既存ユニットテスト</span>
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>src/components/skill-tree/__tests__/skill-complete-handler.test.ts
+<span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>src/core/kernel/__tests__/extractBroadcast.test.ts
+</code></pre></div></p>
+<h2 id="_4">改善後のカバレッジ<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>Before</th>
+<th>After</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>③ HTML パース</td>
+<td>ユニットテストのみ</td>
+<td><strong>E2E 結合テスト + ユニットテスト</strong></td>
+</tr>
+<tr>
+<td>④ BroadcastChannel 送信</td>
+<td>なし</td>
+<td><strong>E2E 結合テスト</strong></td>
+</tr>
+<tr>
+<td>⑤ リスナー受信</td>
+<td>ユニットテストのみ</td>
+<td><strong>E2E 結合テスト + ユニットテスト</strong></td>
+</tr>
+<tr>
+<td>⑥ atom 更新</td>
+<td>E2E テスト</td>
+<td>E2E テスト（既存 + 統合）</td>
+</tr>
+<tr>
+<td>⑦ UI 反映</td>
+<td>E2E テスト</td>
+<td>E2E テスト（既存 + 統合）</td>
+</tr>
+<tr>
+<td>弱いアサーション</td>
+<td>5 箇所で失敗握りつぶし</td>
+<td><strong>全て除去</strong></td>
+</tr>
+<tr>
+<td>マジックナンバー</td>
+<td>6 箇所以上</td>
+<td><strong>production コードから導出</strong></td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
