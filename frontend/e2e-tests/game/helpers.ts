@@ -421,18 +421,22 @@ export async function runNewCellInGrid(
 
   // ツールバーの「Python」ボタンをクリックする前にトーストを閉じる。
   // 報酬トーストが積み上がるとボタンを遮蔽して click() が TimeoutError になる（知見 36）。
+  // while ループで新着トーストも含めて完全に除去する（知見 41）。
   await dismissReconnectedBanner(page);
   const toastCloseButtonsPre = page.locator(
     '[role="region"][aria-label="Notifications (F8)"] button[aria-label="Close"]',
   );
-  const preToastCount = await toastCloseButtonsPre.count().catch(() => 0);
-  for (let i = 0; i < preToastCount; i++) {
+  let preToastCount = await toastCloseButtonsPre.count().catch(() => 0);
+  while (preToastCount > 0) {
     await toastCloseButtonsPre.first().click().catch(() => {});
     await page.waitForTimeout(200);
+    preToastCount = await toastCloseButtonsPre.count().catch(() => 0);
   }
 
   // ツールバーの「Python」ボタンでセルを追加
-  await page.getByRole("button", { name: "Python", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Python", exact: true })
+    .click({ timeout: 10_000 });
 
   // 新セルのエディタが DOM に追加されるまで待機
   await page.waitForTimeout(1_000);

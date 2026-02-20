@@ -2,8 +2,12 @@
 /** biome-ignore-all lint/suspicious/noConsole: for debugging */
 
 import { exec } from "node:child_process";
+import { copyFile, access, unlink } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
+
+const BACKCAST_BACKUP_PATH =
+  "C:\\Users\\sasac\\AppData\\Roaming\\marimo\\notebooks\\backcast.py.test-backup";
 
 const execAsync = promisify(exec);
 
@@ -32,6 +36,20 @@ async function globalTeardown() {
       console.log("✅ Restored game_test.py to committed state");
     } catch {
       console.log("⚠️  Could not restore game_test.py (non-fatal)");
+    }
+
+    // Restore backcast.py from the pre-test backup to prevent cell accumulation.
+    // backcast-integration tests add cells via runNewCellInGrid(); restoring
+    // ensures each test run starts with the original file（知見 41）.
+    try {
+      await access(BACKCAST_BACKUP_PATH);
+      const backcastPath =
+        "C:\\Users\\sasac\\AppData\\Roaming\\marimo\\notebooks\\backcast.py";
+      await copyFile(BACKCAST_BACKUP_PATH, backcastPath);
+      await unlink(BACKCAST_BACKUP_PATH);
+      console.log("✅ Restored backcast.py from backup");
+    } catch {
+      console.log("⚠️  Could not restore backcast.py (non-fatal)");
     }
 
     // Small delay to ensure cleanup completes

@@ -19,7 +19,7 @@ allowed-tools:
 **最初に必ず読むこと**: `development_docs/game-e2e-review-system.md`
 知見 1〜39、セレクター早見表、設計思想がすべて記載されている。
 
-**最終確認日**: 2026-02-20（z-python-e2e 前提条件チェーン修正・global-teardown game_test.py 復元追加・全10スイート 75 passed / 5 skipped / 0 failed）
+**最終確認日**: 2026-02-20（backcast.py 汚染防止・global-setup backup/restore 追加・2連続実行で全10スイート 75 passed / 5 skipped / 0 failed）
 
 ## 実行手順
 
@@ -94,6 +94,7 @@ cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/ --headed
 | スキルが "completed" → "locked" に戻る（数秒後） | 知見 39 | `useProgressSync.ts` が `progress_channel` の `progress_init` で `playerProgressAtom` をリセットしている。`__testSuppressProgressSync` フラグが設定されているか確認 |
 | トースト X ボタンでスキルツリーが再オープン | 知見 38 | `toast.tsx` の `ToastClose` に `e.stopPropagation()` があるか確認 |
 | SANDBOX_002 が前提条件チェーンで "unlocked" のまま | 知見 40 | z-python-e2e の `emitSkillViaPython("SANDBOX_001")` の後、SANDBOX_001 が "completed" になることを `waitForSkillStatus` で確認してから SANDBOX_002 を発火する。確認前に発火すると前提条件チェックが競合で失敗する |
+| Python ボタンが 2 回目以降のテスト実行でタイムアウト | 知見 41 | `backcast.py` にテストが追加したセルが蓄積し auto_instantiate で多数のトーストが発生してボタンを遮蔽する。`global-setup.ts` で backup → `global-teardown.ts` で restore を実装。現在は自動対応済み |
 
 5. **修正 → 再ビルド → 再テスト**: ソースを修正したら必ずビルドしてから再テスト
 
@@ -116,6 +117,7 @@ cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/sandbox.sp
 - 再接続後リセット: `ensureConnected()` の後に必ず `resetGameProgress()` を呼ぶ（知見 35b）
 - `progress_channel` 抑制: `__testResetProgress()` 呼び出し後は `window.__testSuppressProgressSync = true` が自動設定され、Python の `broadcast_progress()` によるフロントエンド状態リセットを防ぐ（知見 39）
 - `game_test.py` 汚染: `z-python-e2e` はテストごとに Python セルを追加する。`global-teardown.ts` が `git restore` で実行後に復元する（知見 40）。前提条件チェーンには中間確認が必須（知見 40）
+- `backcast.py` 汚染: `backcast-integration` はテストごとに Python セルを追加する。`global-setup.ts` が backup を作成し、`global-teardown.ts` が復元・削除する（知見 41）
 
 ## Tips
 

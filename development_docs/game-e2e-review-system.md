@@ -3,7 +3,7 @@
 **ステータス**: 全 10 スイート パス済み（75 passed / 5 skipped / 0 failed / 80 total）
 **場所**: `frontend/e2e-tests/game/`
 **担当**: game ブランチで継続作業中
-**最終確認日**: 2026-02-20（z-python-e2e 前提条件チェーン修正・global-teardown game_test.py 復元追加・知見40追加）
+**最終確認日**: 2026-02-20（backcast.py 汚染防止・global-setup backup/restore 追加・知見41追加）
 
 ---
 
@@ -132,6 +132,14 @@ E2E テスト（案 E）がバイパスしていたレイヤー①③⑤をユ�
 - [x] ✅ **`global-teardown.ts` game_test.py 復元追加**: テスト実行後に `git restore` で `game_test.py` をコミット済み状態に戻す（知見 40）
 - [x] ✅ **`game_test.py` クリーンアップ**: 529 行の汚染セルを削除して 214 行のクリーン版に整理
 - [x] ✅ **全 10 スイート（80 tests）パス確認**: 75 passed / 5 skipped / 0 failed (15.2m)
+
+### ✅ 完了（2026-02-20 backcast.py 汚染防止セッション）
+
+- [x] ✅ **`backcast.py` クリーンアップ**: 321 行の汚染セル（bt.buy/bt.chart/BRIDGE_001 emit ×8 以上）を削除して 50 行のクリーン版に整理
+- [x] ✅ **`global-setup.ts` backcast.py バックアップ追加**: テスト開始前に `backcast.py` をバックアップ。stale バックアップが存在する場合は先に復元してから新しいバックアップを作成（知見 41）
+- [x] ✅ **`global-teardown.ts` backcast.py 復元追加**: テスト終了後にバックアップから `backcast.py` を復元・バックアップ削除（知見 41）
+- [x] ✅ **`helpers.ts` Python ボタンクリック安定化**: `for` ループ → `while` ループに変更（新着トーストも除去）・タイムアウト 5s → 10s に延長
+- [x] ✅ **2 連続実行で全 4 passed / 2 skipped / 0 failed を確認**
 
 ### ⬜ 未完了・今後の課題
 
@@ -1234,6 +1242,54 @@ await execAsync("git restore frontend/e2e-tests/py/game_test.py", {
 **補足**: `emitSkillViaPython` が使用するセルコード（アンダースコア接頭辞の変数 + `return` なし）は正しいパターン。セルの最後の式が main output として `extractAndSendBroadcastMessages` に処理される。`return` を付けると `None` が output になりイベントが発火しない。
 
 **教訓**: Python セル実行系テストは `game_test.py` を永続的に汚染する。前提条件チェーンを持つスキルは連続発火ではなく、完了確認後に次を発火するパターンが必須。
+
+### 41. backcast.py のセル汚染と backup/restore による防止（2026-02-20 追加）
+
+**問題**: `backcast-integration.spec.ts` の各テストが `runNewCellInGrid()` / `emitSkillViaPython()` を呼ぶと、`backcast.py`（`C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py`）に Python セルが追加される。この追加セルは次回テスト実行時に auto_instantiate で実行され、以下の問題を引き起こす。
+
+```
+症状: 2 回目以降の backcast-integration.spec.ts 実行で test 3 が失敗
+原因: backcast.py に 8+ 個の bt.buy/bt.chart/BRIDGE_001 emit セルが蓄積
+     → auto_instantiate で全セルが実行 → 多数の報酬トーストが発生
+     → 下部ツールバーの「Python」ボタンが遮蔽される
+     → runNewCellInGrid() の locator.click() が 5s タイムアウト
+```
+
+**解決策**: `global-setup.ts` でテスト開始前に backcast.py をバックアップし、`global-teardown.ts` でテスト終了後に復元する。
+
+```typescript
+// global-setup.ts — バックアップ作成（stale バックアップがある場合は先に復元）
+const BACKCAST_PATH = "C:\\Users\\sasac\\AppData\\Roaming\\marimo\\notebooks\\backcast.py";
+const BACKCAST_BACKUP_PATH = BACKCAST_PATH + ".test-backup";
+
+// 前回クラッシュ時の stale バックアップを処理
+try {
+  await access(BACKCAST_BACKUP_PATH);
+  await copyFile(BACKCAST_BACKUP_PATH, BACKCAST_PATH); // stale → 復元
+  await unlink(BACKCAST_BACKUP_PATH);
+} catch { /* stale なし → 正常 */ }
+
+// 今回分のバックアップ作成
+await copyFile(BACKCAST_PATH, BACKCAST_BACKUP_PATH);
+```
+
+```typescript
+// global-teardown.ts — バックアップから復元
+await copyFile(BACKCAST_BACKUP_PATH, BACKCAST_PATH); // 復元
+await unlink(BACKCAST_BACKUP_PATH);                  // バックアップ削除
+```
+
+**backcast.py との違い（game_test.py との対比）**:
+
+| 項目 | game_test.py | backcast.py |
+|------|-------------|-------------|
+| 場所 | git リポジトリ内 | ユーザーのローカルノートブックディレクトリ |
+| 復元方法 | `git restore` | `copyFile` backup/restore |
+| 復元タイミング | teardown のみ | setup（stale 処理）+ teardown |
+
+**追加の安定化**: `runNewCellInGrid` の Python ボタン待機ループを `for` → `while` に変更し、新着トーストも含めて完全除去するよう改善。クリック タイムアウトも 5s → 10s に延長。
+
+**教訓**: `backcast.py` は git 管理外のため `git restore` で復元できない。backup/restore パターンを使い、stale バックアップの検出・処理も備えることで冪等性を確保する。
 
 ### 37a. BackcastPro ローカルソース依存設定（2026-02-20 追加）
 
