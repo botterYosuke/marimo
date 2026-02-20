@@ -142,3 +142,4 @@ NUL
 src-tauri/resources/
 .playwright-mcp/
 .mcp.json
+frontend/dist-pyodide/
