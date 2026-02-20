@@ -13,7 +13,8 @@
       "Bash(kill:*)"
     ],
     "additionalDirectories": [
-      "d:\\Documents\\marimo\\.claude\\skills"
+      "d:\\Documents\\marimo\\.claude\\skills",
+      "C:\\Users\\sasac\\AppData\\Local\\Temp"
     ]
   },
   "enableAllProjectMcpServers": true,
