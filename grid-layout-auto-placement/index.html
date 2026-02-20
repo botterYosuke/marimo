@@ -1131,7 +1131,101 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#2026-02-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コンテンツ高さに基づく自動配置 (2026-02-20)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="コンテンツ高さに基づく自動配置 (2026-02-20)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-grid-height-html" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解決: data-grid-height HTML属性によるメタデータ伝搬
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        データフロー
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更ファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-placementts_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        高さ変換ロジック（auto-placement.ts）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_grid_height" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ウィジェットへの _grid_height 設定方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        注意事項
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       
         テストコマンド
@@ -1649,7 +1743,101 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#2026-02-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コンテンツ高さに基づく自動配置 (2026-02-20)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="コンテンツ高さに基づく自動配置 (2026-02-20)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-grid-height-html" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解決: data-grid-height HTML属性によるメタデータ伝搬
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        データフロー
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更ファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-placementts_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        高さ変換ロジック（auto-placement.ts）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_grid_height" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ウィジェットへの _grid_height 設定方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        注意事項
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       
         テストコマンド
@@ -1802,15 +1990,78 @@ Tests: 50 passed (50)
 </code></pre></div>
 <h3 id="auto-placementts">auto-placement.ts<a class="headerlink" href="#auto-placementts" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">calculateAutoPlacement</span><span class="p">(</span><span class="nx">visualCellIds</span><span class="o">:</span><span class="w"> </span><span class="kt">CellId</span><span class="p">[],</span><span class="w"> </span><span class="nx">config?</span><span class="o">:</span><span class="w"> </span><span class="kt">PlacementConfig</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">GridCellPosition</span><span class="p">[];</span>
-<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">calculateNewCellPlacement</span><span class="p">(</span><span class="nx">cellId</span><span class="o">:</span><span class="w"> </span><span class="kt">CellId</span><span class="p">,</span><span class="w"> </span><span class="nx">existingCells</span><span class="o">:</span><span class="w"> </span><span class="kt">GridCellPosition</span><span class="p">[],</span><span class="w"> </span><span class="nx">config?</span><span class="o">:</span><span class="w"> </span><span class="kt">PlacementConfig</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">GridCellPosition</span><span class="p">;</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">calculateNewCellPlacement</span><span class="p">(</span><span class="nx">cellId</span><span class="o">:</span><span class="w"> </span><span class="kt">CellId</span><span class="p">,</span><span class="w"> </span><span class="nx">existingCells</span><span class="o">:</span><span class="w"> </span><span class="kt">GridCellPosition</span><span class="p">[],</span><span class="w"> </span><span class="nx">config?</span><span class="o">:</span><span class="w"> </span><span class="kt">PlacementConfig</span><span class="p">,</span><span class="w"> </span><span class="nx">heightPx?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">GridCellPosition</span><span class="p">;</span>
 <span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">DEFAULT_PLACEMENT_CONFIG</span><span class="o">:</span><span class="w"> </span><span class="kt">PlacementConfig</span><span class="p">;</span>
 </code></pre></div>
 <h3 id="layoutts">layout.ts<a class="headerlink" href="#layoutts" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">addCellToGridLayout</span><span class="p">(</span><span class="nx">cellId</span><span class="o">:</span><span class="w"> </span><span class="kt">CellId</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">addCellToGridLayout</span><span class="p">(</span><span class="nx">cellId</span><span class="o">:</span><span class="w"> </span><span class="kt">CellId</span><span class="p">,</span><span class="w"> </span><span class="nx">heightPx?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span>
 <span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">isCellInGrid</span><span class="p">(</span><span class="nx">cellId</span><span class="o">:</span><span class="w"> </span><span class="kt">CellId</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
 </code></pre></div>
 <hr />
-<h2 id="_11">テストコマンド<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<h2 id="2026-02-20">コンテンツ高さに基づく自動配置 (2026-02-20)<a class="headerlink" href="#2026-02-20" title="Permanent link">&para;</a></h2>
+<h3 id="_11">背景<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>従来の自動配置では、すべてのセルが固定高さ <code>defaultHeight: 20</code> rows (= 400px) で配置されていた。チャートウィジェットが <code>options.height</code> で 600px を指定しても、グリッドセルは 400px のままでチャートが切り詰められる問題があった。</p>
+<h3 id="data-grid-height-html">解決: <code>data-grid-height</code> HTML属性によるメタデータ伝搬<a class="headerlink" href="#data-grid-height-html" title="Permanent link">&para;</a></h3>
+<p>anywidget が <code>_grid_height</code> プロパティを持つ場合、出力HTMLに <code>data-grid-height='600'</code> 属性を埋め込み、フロントエンドの自動配置で解析してグリッドセルの高さに反映する。</p>
+<h3 id="_12">データフロー<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>Python: widget._grid_height = 600
+  → from_anywidget.py: args[&quot;grid-height&quot;] = 600
+    → HTML出力: data-grid-height=&#39;600&#39;
+      → handlers.ts: extractGridHeight() → 600
+        → layout.ts: addCellToGridLayout(cellId, 600)
+          → auto-placement.ts: h = ceil(600 / 20) = 30 rows
+</code></pre></div>
+<h3 id="_13">変更ファイル<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>変更内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>marimo/_plugins/ui/_impl/from_anywidget.py</code></td>
+<td><code>_grid_height</code> 属性を <code>data-grid-height</code> HTML属性として <code>args</code> に追加</td>
+</tr>
+<tr>
+<td><code>src-tauri/sample-notebooks/chart.py</code></td>
+<td><code>chart_by_df()</code> と <code>_ensure_backtest_widget()</code> で <code>widget._grid_height = height</code> を設定</td>
+</tr>
+<tr>
+<td><code>frontend/src/core/kernel/handlers.ts</code></td>
+<td><code>extractGridHeight()</code> 関数追加、<code>autoPlaceVisualOutput</code> から高さを <code>addCellToGridLayout</code> に渡す</td>
+</tr>
+<tr>
+<td><code>frontend/src/core/layout/layout.ts</code></td>
+<td><code>addCellToGridLayout(cellId, heightPx?)</code> にオプション高さパラメータ追加</td>
+</tr>
+<tr>
+<td><code>frontend/src/core/layout/auto-placement.ts</code></td>
+<td><code>calculateNewCellPlacement</code> に <code>heightPx</code> パラメータ追加、px→行数変換ロジック</td>
+</tr>
+</tbody>
+</table>
+<h3 id="auto-placementts_1">高さ変換ロジック（auto-placement.ts）<a class="headerlink" href="#auto-placementts_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// heightPx が指定されていればグリッド行数に変換、なければデフォルト</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">heightPx</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">heightPx</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0</span>
+<span class="w">  </span><span class="o">?</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">ceil</span><span class="p">(</span><span class="nx">heightPx</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">rowHeight</span><span class="p">)</span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="nx">defaultHeight</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="_grid_height">ウィジェットへの _grid_height 設定方法<a class="headerlink" href="#_grid_height" title="Permanent link">&para;</a></h3>
+<p>任意の anywidget で <code>_grid_height</code> 属性を設定するだけで利用可能:</p>
+<div class="highlight"><pre><span></span><code><span class="n">widget</span> <span class="o">=</span> <span class="n">MyAnyWidget</span><span class="p">()</span>
+<span class="n">widget</span><span class="o">.</span><span class="n">_grid_height</span> <span class="o">=</span> <span class="mi">600</span>  <span class="c1"># グリッド自動配置で 600px の高さを使用</span>
+</code></pre></div>
+<p><code>_grid_height</code> が未設定の場合は従来通り <code>defaultHeight</code> (20 rows = 400px) で配置される。</p>
+<h3 id="_14">注意事項<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>calculateAutoPlacement()</code>（初期一括配置）は今回未変更。こちらは固定 <code>defaultHeight</code> を使用</li>
+<li><code>calculateNewCellPlacement()</code>（1セルずつ追加時）のみ <code>heightPx</code> に対応</li>
+<li>regex <code>data-grid-height='([\d.]+)'</code> で解析するため、<code>_grid_height</code> には整数値を設定すること</li>
+</ul>
+<hr />
+<h2 id="_15">テストコマンド<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="c1"># ユニットテスト実行</span>
 <span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pnpm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>src/core/layout/__tests__/
 
