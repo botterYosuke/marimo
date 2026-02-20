@@ -77,7 +77,7 @@ ToastAction.displayName = ToastPrimitives.Action.displayName;
 const ToastClose = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Close>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
->(({ className, ...props }, ref) => (
+>(({ className, onClick, ...props }, ref) => (
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
@@ -86,6 +86,12 @@ const ToastClose = React.forwardRef<
     )}
     toast-close=""
     {...props}
+    onClick={(e) => {
+      // クリックイベントが Toast ルートの onClick（スキルツリーを開く）に
+      // バブルアップしないようにする（知見 37）
+      e.stopPropagation();
+      onClick?.(e);
+    }}
   >
     <X className="h-4 w-4" />
   </ToastPrimitives.Close>

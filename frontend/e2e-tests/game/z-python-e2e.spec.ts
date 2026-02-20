@@ -90,6 +90,14 @@ test.describe("Python セル実行 E2E: レイヤー①→⑦", () => {
 
   test("2つのセルで前提条件チェーンが動作する", async ({ page }) => {
     await emitSkillViaPython(page, "SANDBOX_001");
+
+    // SANDBOX_001 が完了してからでないと SANDBOX_002 の前提条件チェックが通らない。
+    // Python セル出力の WebSocket 伝播→BroadcastChannel→atom 更新のラグを確実に待つため、
+    // スキルツリーを開いて completed 確認後にダイアログを閉じてから SANDBOX_002 を発火する。
+    await openSkillTreePanel(page);
+    await waitForSkillStatus(page, "SANDBOX_001", "completed", 10_000);
+    await closeSkillTreeDialog(page);
+
     await emitSkillViaPython(page, "SANDBOX_002");
 
     await openSkillTreePanel(page);

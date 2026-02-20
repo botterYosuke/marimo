@@ -11,26 +11,64 @@
 |---------|------|------|
 | ✅ レポートファイル作成 | 完了 | このファイル |
 | ✅ 事前チェック（プロセスクリーンアップ） | 完了 | `taskkill //F //IM marimo.exe` 実行 |
-| ✅ 知見ドキュメント確認 | 完了 | `development_docs/game-e2e-review-system.md` 読了（知見1〜35） |
-| ✅ sandbox.spec.ts 実行 | 完了 | **10/10 passed (3.4m)** |
+| ✅ 知見ドキュメント確認 | 完了 | `development_docs/game-e2e-review-system.md` 読了（知見1〜36） |
+| ✅ sandbox.spec.ts 実行（v3前セッション） | 完了 | **10/10 passed (3.4m)** |
+| ✅ sandbox.spec.ts 実行（v3本セッション） | 完了 | **10/10 passed (2.1m)** ※障害対処後 |
 
 ---
 
 ## 実行ログ
 
-### sandbox.spec.ts 実行結果（2026-02-20）
+### 1回目実行（障害発生）
+
+#### WebServer 起動失敗
+
+```
+Error: Process from config.webServer was not able to start. Exit code: 1
+× No solution found when resolving dependencies for split (markers:
+│ python_full_version == '3.12.*' and sys_platform == 'linux'):
+╰─▶ Because only backcastpro<=0.6.3 is available and marimo[game] depends
+    on backcastpro>=0.6.4
+```
+
+**原因**: `pyproject.toml` が `BackcastPro>=0.6.4` を要求するが PyPI には `0.6.3` しかない
+
+**対処**:
+1. `d:\Documents\BackcastPro` を `git pull` → 0.6.4 に更新
+2. `pyproject.toml` の `[tool.uv.sources]` に `BackcastPro = { path = "../BackcastPro", editable = true }` を追加
+3. `uv lock` 実行 → `backcastpro v0.6.3 → v0.6.4` 更新完了
+
+#### 2回目実行（テスト1失敗）
+
+```
+テスト1: 初期状態: SANDBOX_001 は unlocked
+Expected: "unlocked"
+Received: "completed"
+→ 9 passed, 1 failed
+```
+
+**原因**: `game_test.py` が前セッションの `z-python-e2e.spec.ts` で追加された大量（約50個）のスキル発火セルで汚染されており、カーネルが再実行することで SANDBOX_001 が `completed` 状態になる
+
+**対処**:
+```bash
+# clean バージョン（e60ce233b）に復元
+git show e60ce233b:frontend/e2e-tests/py/game_test.py > frontend/e2e-tests/py/game_test.py
+taskkill //F //IM marimo.exe
+```
+
+### 3回目実行（全通過）
 
 ```
 実行コマンド: npx playwright test e2e-tests/game/sandbox.spec.ts --headed
 
-結果: 10 passed (3.4m)
+結果: 10 passed (2.1m)
 ```
 
 #### テストケース別結果
 
 | # | テスト名 | 結果 | 備考 |
 |---|---------|------|------|
-| 1 | 初期状態: SANDBOX_001 は unlocked | ✅ PASS | |
+| 1 | 初期状態: SANDBOX_001 は unlocked | ✅ PASS | game_test.py 復元後 |
 | 2 | 初期状態: SANDBOX_002 は locked（SANDBOX_001 未完了） | ✅ PASS | Reconnected バナーを dismiss して継続 |
 | 3 | 初期状態: 進捗バッジが 0/59 スキルを表示 | ✅ PASS | Reconnected バナーを dismiss して継続 |
 | 4 | SANDBOX_001 完了後、SANDBOX_002 が unlocked になる | ✅ PASS | Reconnected バナーを dismiss して継続 |
@@ -43,46 +81,49 @@
 
 #### 観察された挙動
 
-- **Reconnected バナー**: テスト 2〜10 の全テストで `[ensureConnected] Reconnected バナー検出（attempt 1/5）— dismiss して再確認` が出力された。`ensureConnected()` の安定化ループが自動で dismiss しており、テストは問題なく継続。
-- **WebServer セットアップ**: uv が 18パッケージをアンインストール → 20パッケージを再インストール（約5秒）。`components.py` の準備完了確認後にテスト開始。
-- **クリーンアップ**: テスト終了後に `marimo processes` を自動クリーンアップ。
+- **Reconnected バナー**: テスト 2〜10 で毎回 dismiss（正常動作・知見21）
+- **テスト実行時間**: 2.1分（前回 3.4分 より高速）
+- **クリーンアップ**: テスト終了後に marimo processes を自動クリーンアップ
 
 ---
 
 ## 発見したバグ・知見
 
-### ✅ 全テスト正常通過（新規バグなし）
+### 🐛 知見37a: BackcastPro ローカルソース依存問題
 
-v4ハンドオフ計画で記載されていた修正済みバグ（BRIDGE_001未カウント・Position表示・SANDBOX_005重複）は全て正常動作を確認。
+- `pyproject.toml` の `game` extras が `BackcastPro>=0.6.4` を要求するが PyPI には未公開
+- `[tool.uv.sources]` にローカルパスを追加することで解消
+- 詳細: `development_docs/game-e2e-review-system.md` 知見37a
+
+### 🐛 知見37b: game_test.py セル汚染問題（セッション間持続）
+
+- `z-python-e2e.spec.ts` がセルを追加し次セッションで SANDBOX_001 が `completed` になる
+- `global-teardown.ts` がファイルをクリーンアップしていない
+- **対処**: 毎セッション前に `git show e60ce233b:...game_test.py > game_test.py` で復元
+- **TODO**: `global-teardown.ts` に自動クリーンアップを追加
+- 詳細: `development_docs/game-e2e-review-system.md` 知見37b
 
 ### 📝 観察事項
 
-1. **Reconnected バナーは毎テスト出現するが正常動作**
-   - 知見21に記載の通り、`ensureConnected()` の接続安定化ループが自動 dismiss する
-   - テスト全体に影響なし
-
-2. **WebServer 起動時のパッケージ差分**
-   - uv が毎回パッケージを再インストールしている（18 uninstall → 20 install）
-   - テスト時間の冗長な増加要因になる可能性あり（約5秒のオーバーヘッド）
-
-3. **テスト実行時間**: 3.4分（前回 v3 相当の 3.1分 と同等）
-   - 知見35b で修正済みの再接続汚染バグは発生せず
+1. **Reconnected バナーは毎テスト出現するが正常動作** - 知見21
+2. **テスト実行時間**: 2.1分（前回 3.4分 より短縮）
 
 ---
 
-## v3 との差分
+## v3前セッションとの差分
 
-| 項目 | v3 状態 | v4（今回）状態 |
+| 項目 | v3前セッション | v3本セッション（今回） |
 |-----|---------|--------------|
-| sandbox.spec.ts | 10 passed (3.1m) | **10 passed (3.4m)** ✅ |
-| Reconnected バナー対処 | 知見35で修正済み | 安定動作を確認 |
-| 新規バグ | — | なし |
+| sandbox.spec.ts | 10 passed (3.4m) | **10 passed (2.1m)** ✅ |
+| BackcastPro 依存 | 問題なし | 知見37a で解消 |
+| game_test.py 汚染 | 問題なし | 知見37b で復元・解消 |
+| Reconnected バナー対処 | 安定動作 | 安定動作を確認 |
 
 ---
 
 ## 結論
 
-`sandbox.spec.ts` の全10テストが正常通過。サンドボックストラック（SANDBOX_001〜006）の
-スキル発火・前提条件チェーン・重複防止・現金残高更新の全ロジックが期待通りに動作している。
+`sandbox.spec.ts` の全10テストが正常通過（2.1m）。
 
-v4ハンドオフ計画で記載された修正内容はすべて有効であり、リグレッションなし。
+2つの新規障害（BackcastPro 依存 / game_test.py セル汚染）を発見・対処し、
+知見37a・37b としてドキュメント化。次セッションは `game_test.py` 復元を先に実施すること。

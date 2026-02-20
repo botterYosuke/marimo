@@ -25,6 +25,13 @@ export function useProgressSync(): void {
     const channel = new BroadcastChannel(PROGRESS_CHANNEL);
 
     channel.onmessage = (event: MessageEvent) => {
+      // テスト中の suppressProgressSync フラグが立っていれば progress_channel を無視（知見 39）
+      // auto_instantiate の broadcast_progress() がテスト中に割り込まないようにする
+      if (
+        (window as unknown as Record<string, unknown>).__testSuppressProgressSync
+      ) {
+        return;
+      }
       try {
         const msg = event.data;
         if (msg?.type !== "progress_init" || !msg?.data) {

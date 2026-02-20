@@ -419,16 +419,25 @@ export async function runNewCellInGrid(
       .catch(() => {});
   }
 
+  // ツールバーの「Python」ボタンをクリックする前にトーストを閉じる。
+  // 報酬トーストが積み上がるとボタンを遮蔽して click() が TimeoutError になる（知見 36）。
+  await dismissReconnectedBanner(page);
+  const toastCloseButtonsPre = page.locator(
+    '[role="region"][aria-label="Notifications (F8)"] button[aria-label="Close"]',
+  );
+  const preToastCount = await toastCloseButtonsPre.count().catch(() => 0);
+  for (let i = 0; i < preToastCount; i++) {
+    await toastCloseButtonsPre.first().click().catch(() => {});
+    await page.waitForTimeout(200);
+  }
+
   // ツールバーの「Python」ボタンでセルを追加
   await page.getByRole("button", { name: "Python", exact: true }).click();
 
   // 新セルのエディタが DOM に追加されるまで待機
   await page.waitForTimeout(1_000);
 
-  // トースト通知（報酬トースト、Reconnected バナー等）を dismiss
-  // セルが多い場合、通知が cm-content やボタンを遮るため早めに処理する
-  await dismissReconnectedBanner(page);
-  // 報酬トーストなど Reconnected 以外の通知も閉じる
+  // クリック後に新たに出現したトースト通知も閉じる
   const toastCloseButtons = page.locator(
     '[role="region"][aria-label="Notifications (F8)"] button[aria-label="Close"]',
   );

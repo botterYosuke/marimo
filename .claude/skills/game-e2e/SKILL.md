@@ -17,9 +17,9 @@ allowed-tools:
 ## 参照ドキュメント
 
 **最初に必ず読むこと**: `development_docs/game-e2e-review-system.md`
-知見 1〜35、セレクター早見表、設計思想がすべて記載されている。
+知見 1〜39、セレクター早見表、設計思想がすべて記載されている。
 
-**最終確認日**: 2026-02-19（Python セル実行 E2E テスト追加・全7スイート 53 passed / 3 fixme / 0 failed）
+**最終確認日**: 2026-02-20（z-python-e2e 前提条件チェーン修正・global-teardown game_test.py 復元追加・全10スイート 75 passed / 5 skipped / 0 failed）
 
 ## 実行手順
 
@@ -53,13 +53,16 @@ cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/ --headed
 
 | ファイル | テスト数 | 内容 |
 |---------|---------|------|
-| `sandbox.spec.ts` | 10 | SANDBOX_001〜006 スキル発火・前提条件チェーン |
-| `ui.spec.ts` | 9 passed / 3 fixme | パネル UI・視覚状態・報酬表示 |
-| `persistence.spec.ts` | 8 | 進捗の初期化・BroadcastChannel 処理 |
+| `backcast-integration.spec.ts` | 4 passed / 2 skipped | backcast.py 完全プレイフロー・BRIDGE_001 auto_instantiate |
 | `bridge.spec.ts` | 10 | BRIDGE_001〜003 の解放条件・完了フロー |
+| `data.spec.ts` | 11 | データ取得トラック（DATA_001〜006） |
 | `integration.spec.ts` | 9 | HTML パイプライン統合テスト（③→⑦経路） |
+| `persistence.spec.ts` | 8 | 進捗の初期化・BroadcastChannel 処理 |
+| `sandbox.spec.ts` | 10 | SANDBOX_001〜006 スキル発火・前提条件チェーン |
+| `setup.spec.ts` | 10 | セットアップトラック（SETUP_001〜005） |
+| `ui.spec.ts` | 9 passed / 3 skipped | パネル UI・視覚状態・報酬表示 |
 | `z-python-e2e.spec.ts` | 4 | Python セル実行 E2E テスト（①→⑦全経路） |
-| **合計** | **53 passed / 3 fixme** | |
+| **合計** | **75 passed / 5 skipped** | **80 total** |
 
 > **注**: `z-python-e2e.spec.ts` はファイル名の `z-` 接頭辞により最後に実行される（知見 34）。カーネルにセルが永続するため実行順序に依存。
 
@@ -88,6 +91,9 @@ cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/ --headed
 | 再接続時にスキルが意図せず発火する | 知見 35b | `beforeEach` の `ensureConnected()` 後に `resetGameProgress()` を呼ぶ。再接続でカーネルがセル出力を再送してスキル発火が汚染される |
 | タイムアウト不安定・`waitForTimeout` が長い | 知見 29 | `waitForTimeout` → `expect().toPass()` 状態ベース待機に変更する |
 | テストフック経由の `vi.resetModules()` が重い | 知見 24 | `vi.mock("@/core/kernel/handlers")` でモック化して副作用を回避する |
+| スキルが "completed" → "locked" に戻る（数秒後） | 知見 39 | `useProgressSync.ts` が `progress_channel` の `progress_init` で `playerProgressAtom` をリセットしている。`__testSuppressProgressSync` フラグが設定されているか確認 |
+| トースト X ボタンでスキルツリーが再オープン | 知見 38 | `toast.tsx` の `ToastClose` に `e.stopPropagation()` があるか確認 |
+| SANDBOX_002 が前提条件チェーンで "unlocked" のまま | 知見 40 | z-python-e2e の `emitSkillViaPython("SANDBOX_001")` の後、SANDBOX_001 が "completed" になることを `waitForSkillStatus` で確認してから SANDBOX_002 を発火する。確認前に発火すると前提条件チェックが競合で失敗する |
 
 5. **修正 → 再ビルド → 再テスト**: ソースを修正したら必ずビルドしてから再テスト
 
@@ -108,6 +114,8 @@ cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/sandbox.sp
 - 接続安定化: `ensureConnected(page)` が各テスト前に Kernel healthy 確認 → バナー dismiss → 1秒安定化待機 → 再確認の安定化ループを実行する（知見 19・21）
 - `waitForLoadState`: `"networkidle"` は使わない。`"load"` を使う（知見 35a）
 - 再接続後リセット: `ensureConnected()` の後に必ず `resetGameProgress()` を呼ぶ（知見 35b）
+- `progress_channel` 抑制: `__testResetProgress()` 呼び出し後は `window.__testSuppressProgressSync = true` が自動設定され、Python の `broadcast_progress()` によるフロントエンド状態リセットを防ぐ（知見 39）
+- `game_test.py` 汚染: `z-python-e2e` はテストごとに Python セルを追加する。`global-teardown.ts` が `git restore` で実行後に復元する（知見 40）。前提条件チェーンには中間確認が必須（知見 40）
 
 ## Tips
 

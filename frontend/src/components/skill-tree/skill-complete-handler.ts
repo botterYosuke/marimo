@@ -138,6 +138,11 @@ export function setupSkillEventListener(
         suppressBroadcast = false;
         suppressTimer = null;
       }, 1_000);
+      // progress_channel も抑制する（知見 39）
+      // auto_instantiate の broadcast_progress() がテスト中に割り込み、
+      // __testCompleteSkill で追加したスキルを消してしまうのを防ぐ
+      (window as unknown as Record<string, unknown>).__testSuppressProgressSync =
+        true;
     };
   }
   // e2e 統合テスト用フック: emit_skill() 形式の HTML を本番パイプライン（③→⑦）経由で処理する
@@ -183,6 +188,7 @@ export function setupSkillEventListener(
   return () => {
     delete (window as unknown as Record<string, unknown>).__testCompleteSkill;
     delete (window as unknown as Record<string, unknown>).__testResetProgress;
+    delete (window as unknown as Record<string, unknown>).__testSuppressProgressSync;
     delete (window as unknown as Record<string, unknown>).__testInjectBroadcastHTML;
     if (suppressTimer) clearTimeout(suppressTimer);
     channel.removeEventListener("message", handleMessage);
