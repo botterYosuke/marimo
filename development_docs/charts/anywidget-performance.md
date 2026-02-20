@@ -51,18 +51,15 @@ Plotly から Lightweight Charts への移行により、CPU負荷の大幅な�
 **問題:** `comm_id`（UUID）と `jsHash` が異なり、WebSocketメッセージが正しいReactコンポーネントにルーティングされない
 
 **解決:**
-1. `comm_id` として `js_hash` を使用
-2. グローバルコールバック機能を追加
-3. Reactコンポーネントでコールバック登録
+1. `comm_id` として `_model_id` を使用（`anywidget/init.py`）
 
 ### 4. "Object is disposed" エラー
 
 **問題:** lightweight-chartsが内部で `requestAnimationFrame` を使用し、コンポーネントアンマウント後もコールバックが実行される
 
 **解決:**
-1. `window.onerror` でエラーを抑制（HMR対応・sourceフィルタ付き）
-2. `model.dispose()` でアンマウント時にリスナーをクリア
-3. try-catchでエラーを捕捉
+1. `model.dispose()` でアンマウント時にリスナーをクリア
+2. try-catchでエラーを捕捉
 
 ---
 
@@ -92,17 +89,15 @@ model.on("change:last_bar", () => {
 });
 ```
 
-### Phase 2: React バイパス
+### Phase 2: React バイパス（未実装）
+
+> ⚠️ 以下は構想のみ。コードベースには未反映。
 
 `directUpdateKeys` 機能を追加し、特定キーの React 再レンダーをスキップ。
 
-```javascript
-if (model.setDirectUpdateKeys) {
-    model.setDirectUpdateKeys(['last_bar']);
-}
-```
+### Phase 3: msgpack バイナリプロトコル（未実装）
 
-### Phase 3: msgpack バイナリプロトコル
+> ⚠️ 以下は構想のみ。コードベースには未反映。
 
 JSON シリアライズを msgpack バイナリに変更し、ペイロードとパース時間を削減。
 
@@ -123,8 +118,8 @@ JSON シリアライズを msgpack バイナリに変更し、ペイロードと
 
 | ファイル | 変更内容 |
 |---------|---------|
-| `frontend/src/plugins/impl/anywidget/model.ts` | グローバルコールバック、disposed フラグ、try-catch追加、`directUpdateKeys` |
-| `frontend/src/plugins/impl/anywidget/AnyWidgetPlugin.tsx` | コールバック登録、isEqual比較、window.onerror エラー抑制 |
+| `frontend/src/plugins/impl/anywidget/model.ts` | disposed フラグ、try-catch追加 |
+| `frontend/src/plugins/impl/anywidget/AnyWidgetPlugin.tsx` | isEqual比較 |
 
 ---
 

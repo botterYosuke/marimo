@@ -280,7 +280,7 @@ uv run hatch run test:test tests/_lint
 uv run hatch run test:test tests/_lint/test_your_rule.py
 
 # Update snapshots if needed
-uv run hatch run test:test tests/_lint/test_snapshots.py --snapshot-update
+uv run hatch run test:test tests/_lint/test_snapshot.py --snapshot-update
 ```
 
 ## Rule Implementation Guidelines
@@ -359,7 +359,7 @@ tests/_lint/
 ├── snapshots/            # Expected outputs
 │   └── your_rule_name_errors.txt
 ├── test_your_rule.py     # Unit tests
-└── test_snapshots.py  # Snapshot tests
+└── test_snapshot.py   # Snapshot tests
 ```
 
 ## Documentation Requirements

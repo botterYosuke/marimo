@@ -18,9 +18,7 @@
 |---------|------|
 | `frontend/src/core/layout/visual-output-detector.ts` | ビジュアルアウトプット判定ユーティリティ |
 | `frontend/src/core/layout/auto-placement.ts` | グリッド配置位置計算アルゴリズム |
-| `frontend/src/core/layout/__tests__/visual-output-detector.test.ts` | テスト（29ケース） |
-| `frontend/src/core/layout/__tests__/auto-placement.test.ts` | テスト（12ケース） |
-| `frontend/src/core/layout/__tests__/layout.test.ts` | テスト（9ケース） |
+| `frontend/src/core/layout/__tests__/auto-placement.test.ts` | テスト |
 
 ### 変更ファイル
 
@@ -32,8 +30,8 @@
 ### テスト結果
 
 ```
-Test Files: 3 passed (3)
-Tests: 50 passed (50)
+Test Files: 1 passed (1)
+Tests: 12 passed (12)
 ```
 
 ---

@@ -23,7 +23,7 @@ PYODIDE=true pnpm dev
 
 ## Pyodide ファイル初期化（Backcast）
 
-起動時に `frontend/public/files/` のPythonファイルを仮想ファイルシステムにコピーし、`backcast.py` をデフォルトで開く。
+起動時に `src-tauri/sample-notebooks/` のPythonファイルを仮想ファイルシステムにコピーし、`backcast.py` をデフォルトで開く。
 
 ### 実装済みファイル
 

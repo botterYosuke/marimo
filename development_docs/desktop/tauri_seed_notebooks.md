@@ -2,7 +2,7 @@
 
 ## 概要
 
-marimo の Tauri デスクトップアプリ（`src-tauri/`）を起動するたびに、`frontend/public/files/` 内のサンプル Python ファイルを作業フォルダ（notebooks ディレクトリ）に自動コピーする機能。
+marimo の Tauri デスクトップアプリ（`src-tauri/`）を起動するたびに、`src-tauri/sample-notebooks/` 内のサンプル Python ファイルを作業フォルダ（notebooks ディレクトリ）に自動コピーする機能。
 
 ---
 
@@ -17,7 +17,7 @@ marimo の Tauri デスクトップアプリ（`src-tauri/`）を起動するた
 
 ## コピー元ファイル一覧
 
-`frontend/public/files/` に含まれるサンプルファイル（17 個）：
+`src-tauri/sample-notebooks/` に含まれるサンプルファイル：
 
 | ファイル名 | 内容 |
 |-----------|------|

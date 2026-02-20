@@ -19,7 +19,7 @@
 ### セル注入フロー
 
 ```
-スキル完了 → Frontend検知 → Electron IPC → ノートブック編集 → marimo reload
+スキル完了 → Frontend検知 → Tauri IPC → ノートブック編集 → marimo reload
        ↓
    _emit_skill()    →    BroadcastChannel    →    injectCells()
 ```
@@ -31,7 +31,7 @@
 - **グラフ**: ReactFlow + Dagre
 - **UI**: Radix UI + Tailwind CSS
 - **通信**: BroadcastChannel（`<marimo-broadcast>` 要素）
-- **セル注入**: Electron IPC + notebook-injector.js
+- **セル注入**: Tauri IPC（`window.electronAPI` インターフェース経由）
 
 ---
 
@@ -39,7 +39,7 @@
 
 | Phase | タイトル | ステータス |
 |-------|---------|-----------|
-| 0-A | Electron拡張（セル注入IPC） | ✅完了 |
+| 0-A | デスクトップ拡張（セル注入IPC） | ✅完了 |
 | 1 | データモデル（型定義・状態管理） | ✅完了 |
 | 2 | トリガーシステム（BroadcastChannel・セル注入） | ✅完了 |
 | 3 | UI強化（ノード・グラフ・詳細パネル） | ✅完了 |
@@ -53,7 +53,7 @@
 ### 依存関係
 
 ```
-Phase 0-A (Electron: セル注入IPC)
+Phase 0-A (Tauri: セル注入IPC)
     │
 Phase 1 (データモデル)
     ├── Phase 2 (トリガー + 注入ハンドラー)
@@ -70,13 +70,16 @@ Phase 9 (統合) ← 全フェーズ完了後
 
 ---
 
-## Phase 0-A: Electron拡張
+## Phase 0-A: デスクトップ拡張（セル注入IPC）
+
+> **注意**: 当初 Electron で実装されたが、現在は **Tauri** に移行済み。
+> `electron/` ディレクトリは存在しない。フロントエンドの `window.electronAPI` インターフェース
+> （`skill-complete-handler.ts` で定義）を通じてセル注入IPCを呼び出す設計。
 
 | ファイル | 機能 |
 |---------|------|
-| `electron/main.js` | `notebook:inject-cells`, `notebook:read-progress`, `notebook:update-setup` IPC |
-| `electron/preload.js` | `injectCells()`, `readProgress()`, `updateSetupBlock()` API |
-| `electron/utils/notebook-injector.js` | セル注入・進捗読み取り・setup節更新 |
+| `src-tauri/src/commands.rs` | Tauri IPC コマンド定義 |
+| `frontend/src/components/skill-tree/skill-complete-handler.ts` | `injectCells()`, `readProgress()` API呼び出し |
 
 v4で削除された機能:
 - ~~`switchNotebook()`~~ → 削除（単一ノートブック方式に変更）
@@ -130,7 +133,7 @@ v4で削除された機能:
 │ │ _emit_skill()│ │                            │ │ skill-tree   │ │
 │ │ (関数)       │ │                            │ │ handler.ts   │ │
 │ └──────────────┘ │                            │ └──────────────┘ │
-│                  │    Electron IPC            │         │        │
+│                  │    Tauri IPC               │         │        │
 │                  │ ←─────────────────────────  │ injectCells()   │
 │                  │   セル注入 + 進捗更新       │                  │
 └─────────────────┘                             └─────────────────┘
@@ -140,9 +143,8 @@ v4で削除された機能:
 
 | ファイル | 役割 |
 |---------|------|
-| `frontend/public/files/backcast.py` | `_emit_skill()` 関数（with app.setup:内） |
-| `frontend/src/components/skill-tree/skill-complete-handler.ts` | BroadcastChannel監視 + Electron IPC |
-| `electron/utils/notebook-injector.js` | ノートブックファイル編集 |
+| `src-tauri/sample-notebooks/backcast.py` | `_emit_skill()` 関数（with app.setup:内） |
+| `frontend/src/components/skill-tree/skill-complete-handler.ts` | BroadcastChannel監視 + Tauri IPC |
 | `frontend/src/components/skill-tree/injection-templates.ts` | スキル別注入テンプレート |
 
 ### `_emit_skill()` の仕組み
@@ -333,7 +335,7 @@ const categoryColors: Record<SkillCategory, string> = {
 
 | ファイル | Phase | 役割 |
 |---------|-------|------|
-| `electron/utils/notebook-injector.js` | 0-A | セル注入ロジック |
+| `skill-complete-handler.ts` | 0-A | セル注入ロジック（Tauri IPC経由） |
 | `skill-tree/types.ts` | 1 | 型定義 |
 | `skill-tree/atoms.ts` | 1 | Jotai状態管理 |
 | `skill-tree/skill-data.ts` | 1 | 59スキル+マイルストーン定義 |
@@ -353,17 +355,16 @@ const categoryColors: Record<SkillCategory, string> = {
 
 | ファイル | Phase | 変更内容 |
 |---------|-------|---------|
-| `electron/main.js` | 0-A | IPC ハンドラー追加 |
-| `electron/preload.js` | 0-A | API公開 |
+| `src-tauri/src/commands.rs` | 0-A | Tauri IPC コマンド |
 | `skill-tree/skill-node.tsx` | 1,3 | カテゴリ色、難易度、報酬配列対応 |
 | `skill-tree/elements.ts` | 3 | トラック別Dagreレイアウト |
 | `skill-tree/skill-tree.css` | 3 | アニメーション追加 |
 | `skill-tree/skill-tree-graph.tsx` | 3 | layoutElements削除 |
-| `frontend/public/files/backcast.py` | 2,4 | _emit_skill(), サンドボックス初期化 |
+| `src-tauri/sample-notebooks/backcast.py` | 2,4 | _emit_skill(), サンドボックス初期化 |
 | `skill-tree-panel.tsx` | 4,5,7 | Indicator統合、報酬UI統合 |
 | `editor/controls/Controls.tsx` | 統合 | `<SkillTreeButton />` を `bottomRightControls` 内（`CommandPaletteButton` と `KeyboardShortcuts` の間）に追加 |
 
-全ファイルパスのプレフィックス: `frontend/src/components/` （ノートブックテンプレートは `frontend/public/files/`）
+全ファイルパスのプレフィックス: `frontend/src/components/` （ノートブックテンプレートは `src-tauri/sample-notebooks/`）
 
 ---
 

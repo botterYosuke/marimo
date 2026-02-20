@@ -72,7 +72,7 @@ class LightweightChartWidget(anywidget.AnyWidget):
 
 | ファイル | 変更内容 |
 |---------|---------|
-| `frontend/public/files/chart.py` | JavaScript ACK 送信、Python threading.Event 待機、`update_and_wait()` 追加 |
+| `src-tauri/sample-notebooks/chart.py` | JavaScript ACK 送信、Python threading.Event 待機、`update_and_wait()` 追加 |
 
 ## タイムアウト処理
 

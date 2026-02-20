@@ -14,7 +14,7 @@
 
 ## 修正内容
 
-**ファイル**: `frontend/public/files/chart.py`
+**ファイル**: `src-tauri/sample-notebooks/chart.py`
 
 ```python
 if prev_len == 0:
@@ -45,9 +45,9 @@ elif current_len > prev_len:
 ### `_prev_data_len` の初期化箇所
 
 必ず以下の3箇所で設定すること:
-1. `backtest_chart()` 既存ウィジェット全データ更新時 (1332行)
-2. `backtest_chart()` 既存ウィジェット差分更新時 (1358行)
-3. `backtest_chart()` 初回ウィジェット作成時 (1396行)
+1. `backtest_chart()` 既存ウィジェット全データ更新時 (1330行)
+2. `backtest_chart()` 既存ウィジェット差分更新時 (1363行)
+3. `backtest_chart()` 初回ウィジェット作成時 (1398行)
 
 ---
 
@@ -83,11 +83,11 @@ model.on("change:append_bars", () => {
 
 | ファイル | パス |
 |---------|------|
-| chart.py | `frontend/public/files/chart.py` |
+| chart.py | `src-tauri/sample-notebooks/chart.py` |
 
 | 関数名 | 行番号 | 役割 |
 |--------|--------|------|
-| `LightweightChartWidget` | 380 | anywidget ウィジェットクラス |
-| `backtest_chart()` | 1237 | バックテスト用チャート表示（キャッシュ管理） |
-| `update_all_backtest_charts()` | 1456 | 全チャートの差分更新 |
-| `df_to_lwc_data()` | 162 | DataFrameをLWC形式に変換 |
+| `LightweightChartWidget` | 379 | anywidget ウィジェットクラス |
+| `backtest_chart()` | 1402 | バックテスト用チャート表示（キャッシュ管理） |
+| `update_all_backtest_charts()` | 1596 | 全チャートの差分更新 |
+| `df_to_lwc_data()` | 168 | DataFrameをLWC形式に変換 |

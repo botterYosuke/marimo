@@ -169,7 +169,7 @@ steamapps/common/backcast/
 | Step 4 | `src-tauri/src/environment/bootstrap.rs` | ✅ 変更不要（引数渡しで自動追従） |
 | Step 5 | `marimo/_utils/xdg.py` | ✅ 完了 |
 | Step 6 | `src-tauri/Cargo.toml` | ✅ 完了 |
-| Step 7 | `src-tauri/tauri-steam.conf.json` | ✅ 新規作成済み |
+| Step 7 | `src-tauri/tauri-steam-{windows,mac,linux}.conf.json` | ✅ 新規作成済み（プラットフォーム別） |
 | Step 8 | `.github/workflows/release-steam.yml` | ✅ 完了 |
 | Step 9 | `src-tauri/prepare-resources.js` | ✅ 完了（UV バンドル修正） |
 
@@ -370,36 +370,26 @@ Steam 向け CI ビルド時は `cargo tauri build --features steam` を使う�
 
 ---
 
-### Step 7: `src-tauri/tauri-steam.conf.json`（新規作成）
+### Step 7: `src-tauri/tauri-steam-{platform}.conf.json`（新規作成）
 
-Steam 版の設定は **既存の `tauri.conf.json` を変更せず**、専用の設定ファイルを新規作成する。
+Steam 版の設定は **既存の `tauri.conf.json` を変更せず**、プラットフォーム別の専用設定ファイルを新規作成する。
 これにより通常配布 CI に影響を与えない。
 
-`tauri-steam.conf.json` は差分のみ記述し、Tauri が `tauri.conf.json` とマージする:
+各ファイルは差分のみ記述し、Tauri が `tauri.conf.json` とマージする:
 
-```json
-{
-  "bundle": {
-    "targets": ["nsis", "app", "appimage"],
-    "windows": {
-      "webviewInstallMode": {
-        "type": "skip"
-      }
-    }
-  }
-}
-```
+- `tauri-steam-windows.conf.json` — Windows 用（`nsis` ターゲット、`webviewInstallMode: skip`）
+- `tauri-steam-mac.conf.json` — macOS 用（`app` ターゲット）
+- `tauri-steam-linux.conf.json` — Linux 用（`appimage` ターゲット）
 
-> **`targets` の設定理由:**
+> **プラットフォーム別に分割した理由:**
 > - **Windows `nsis`**: インストーラーの生成は副産物として許容し、Steam depot には
 >   ステージングディレクトリ（`bundle/nsis/_/`）の内容をアップロードする。
 >   `webviewInstallMode: skip` により WebView2 BootStrapper のダウンロードは行われない。
 > - **macOS `app`**: `.app` バンドル（`bundle/macos/*.app`）を生成。
 >   Steam には `.app` バンドルが必要なため `dmg` でなくこちらを使う。
->   Tauri v2 では `"app"` ターゲットを指定する。
 > - **Linux `appimage`**: 従来通り（変更なし）。
 
-Steam ビルド時は `--config src-tauri/tauri-steam.conf.json` で指定する（Step 8 参照）。
+Steam ビルド時は `--config src-tauri/tauri-steam-{platform}.conf.json` で指定する（Step 8 参照）。
 通常配布 CI は既存の `tauri.conf.json` をそのまま使い続ける。
 
 ---
@@ -453,7 +443,7 @@ Steam depot には **このステージングディレクトリの内容**をア
 
 # 変更後
 - name: 🔨 Build Tauri app (Steam)
-  run: cargo tauri build --features steam --config src-tauri/tauri-steam.conf.json
+  run: cargo tauri build --features steam --config src-tauri/tauri-steam-windows.conf.json
 ```
 
 #### 変更: macOS のアップロードパスを .app に変更
@@ -497,7 +487,7 @@ path: src-tauri/target/release/bundle/macos/
 | `src-tauri/src/lib.rs` | `get_log_file_path()` を `get_data_root()` ベースに変更（`None` 時は既存ロジックにフォールバック） |
 | `src-tauri/src/server/lifecycle.rs` | `start_server()` で `get_data_root()` が `Some` の場合のみ XDG env 変数を Python プロセスに注入 |
 | `marimo/_utils/xdg.py` | `marimo_state_dir()` に `MARIMO_STATE_DIR` オーバーライドを追加 |
-| `src-tauri/tauri-steam.conf.json` | 新規作成。`webviewInstallMode: skip`、`targets` を `["nsis", "app", "appimage"]` に設定 |
+| `src-tauri/tauri-steam-{windows,mac,linux}.conf.json` | プラットフォーム別に新規作成。Windows: `webviewInstallMode: skip` + `nsis`、macOS: `app`、Linux: `appimage` |
 | `src-tauri/Cargo.toml` | `[features]` に `steam = []` を追加 |
 | `.github/workflows/release-steam.yml` | Windows: depot パスを `bundle/nsis/_/` に変更、`--features steam` を追加。macOS: depot パスを `bundle/macos/` に変更 |
 | `src-tauri/prepare-resources.js` | `uv.exe` を `resources/binaries/` にコピーする処理を追加 |

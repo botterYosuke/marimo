@@ -41,5 +41,5 @@ Frontend: MutationObserver が <marimo-broadcast> を検出
 | `frontend/src/components/skill-tree/skill-complete-handler.ts` | リスナー定義（未接続だった） |
 | `frontend/src/components/skill-tree/atoms.ts` | `completeSkillWithRewardAtom` |
 | `frontend/src/components/skill-tree/skill-tree.tsx` | SkillTree コンポーネント（マウント先） |
-| `frontend/public/files/skill_events.py` | Python 側 `emit_skill()` |
-| `frontend/public/files/game_setup.py` | `buy()` 等のトリガー関数 |
+| `src-tauri/sample-notebooks/skill_events.py` | Python 側 `emit_skill()` |
+| `src-tauri/sample-notebooks/game_setup.py` | `buy()` 等のトリガー関数 |
