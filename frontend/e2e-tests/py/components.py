@@ -2,68 +2,69 @@
 # [tool.marimo.runtime]
 # auto_instantiate = true
 # ///
+
 import marimo
 
-__generated_with = "0.9.15"
+__generated_with = "0.19.11"
 app = marimo.App()
 
 
 @app.cell
-def __(mo):
-    mo.md("""# UI Elements""")
+def _(mo):
+    mo.md("""
+    # UI Elements
+    """)
     return
 
 
 @app.cell
-def __(basic_ui_elements, mo):
-    mo.md(
-        f"""### Basic elements
+def _(basic_ui_elements, mo):
+    mo.md(f"""
+    ### Basic elements
 
         {basic_ui_elements}
-        """
-    )
+    """)
     return
 
 
 @app.cell
-def __(basic_ui_elements, construct_element, show_element):
+def _(basic_ui_elements, construct_element, show_element):
     selected_element = construct_element(basic_ui_elements.value)
     show_element(selected_element)
     return (selected_element,)
 
 
 @app.cell
-def __(selected_element, value):
+def _(selected_element, value):
     value(selected_element)
     return
 
 
 @app.cell
-def __(composite_elements, mo):
-    mo.md(
-        f"""### Composite elements
+def _(composite_elements, mo):
+    mo.md(f"""
+    ### Composite elements
 
         {composite_elements}
-        """
-    )
+    """)
     return
 
 
 @app.cell
-def __(composite_elements, construct_element, show_element):
+def _(composite_elements, construct_element, show_element):
     composite_element = construct_element(composite_elements.value)
     show_element(composite_element)
     return (composite_element,)
 
 
 @app.cell
-def __(composite_element, value):
+def _(composite_element, value):
     value(composite_element)
     return
 
 
 @app.cell
-def __(mo):
+def _(mo):
     composite_elements = mo.ui.dropdown(
         options=dict(sorted({
             'array': mo.ui.array,
@@ -78,7 +79,7 @@ def __(mo):
 
 
 @app.cell
-def __(mo):
+def _(mo):
     file_button = lambda: mo.ui.file(kind="button", multiple=True)
     file_area = lambda: mo.ui.file(kind="area", multiple=True)
     file_area_single = lambda: mo.ui.file(kind="area", multiple=False)
@@ -110,7 +111,7 @@ def __(mo):
 
 
 @app.cell
-def __(file_area, file_area_single, file_button, mo):
+def _(file_area, file_area_single, file_button, mo):
     def construct_element(value):
         if value == mo.ui.array:
             return mo.ui.array([mo.ui.text(), mo.ui.slider(1, 10), mo.ui.date()])
@@ -189,19 +190,21 @@ def __(file_area, file_area_single, file_button, mo):
         elif value == mo.ui.text_area:
             return mo.ui.text_area()
         return None
+
     return (construct_element,)
 
 
 @app.cell
-def __(mo):
+def _(mo):
     def show_element(element):
         if element is not None:
           return mo.hstack([element], justify="center")
+
     return (show_element,)
 
 
 @app.cell
-def __(mo):
+def _(mo):
     def value(element):
         def all_values_are_strings(values):
             if values is not None and isinstance(values, list):
@@ -221,12 +224,14 @@ def __(mo):
                 The element's current value is {printed_value}
                 """
             )
+
     return (value,)
 
 
 @app.cell
-def __():
+def _():
     import marimo as mo
+
     return (mo,)
 
 

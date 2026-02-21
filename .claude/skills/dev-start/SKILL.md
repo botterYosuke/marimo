@@ -1,7 +1,7 @@
 ---
 name: dev-start
 description: Start the marimo dev server (frontend on port 3000, backend on port 2718)
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: Bash
 argument-hint: "[--frontend-only | --backend-only]"
 ---

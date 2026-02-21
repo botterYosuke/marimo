@@ -1,7 +1,7 @@
 ---
 name: dev-restart
 description: Restart the marimo dev server by stopping existing processes and starting fresh
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: Bash
 ---
 
