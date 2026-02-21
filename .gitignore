@@ -116,7 +116,6 @@ marimo/_lsp/
 .vscode
 .vercel
 .idea
-.claude
 
 .marimo.toml
 .mypy_cache/

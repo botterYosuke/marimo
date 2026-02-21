@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rustfmt:*)",
+      "Bash(echo:*)",
+      "Bash(pnpm run dev:*)"
+    ]
+  }
+}
