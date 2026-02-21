@@ -58,8 +58,8 @@ def _check_graduations() -> None:
     # サンドボックス卒業
     if all(f"SANDBOX_{i:03d}" in s for i in range(1, 6)):
         emit_skill("SANDBOX_006")
-    # ブリッジ卒業
-    if "BRIDGE_002" in s:
+    # ブリッジ卒業（BRIDGE_001 と BRIDGE_002 の両方が必要）
+    if "BRIDGE_001" in s and "BRIDGE_002" in s:
         emit_skill("BRIDGE_003")
 
 

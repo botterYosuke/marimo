@@ -62,3 +62,8 @@ cd frontend && pnpm test src/path/to/file.test.ts
 
 - Run `make check` before committing
 - See [CONTRIBUTING.md](CONTRIBUTING.md) for PR guidelines and CLA
+
+## Progress and Documentation Guidelines
+
+進捗があり次第 ドキュメントに状況、新たな知見、設計思想と背景、Tips などほかの作業者に必要な情報を書き込んでください。
+完了した作業項目には✅を付けて進捗を共有してください

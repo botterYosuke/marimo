@@ -1,9 +1,9 @@
 # ゲーム e2e レビューシステム
 
-**ステータス**: 全 7 スイート パス済み（53 passed / 3 fixme / 0 failed）
+**ステータス**: 全 9 スイート パス済み（75 passed / 5 skipped / 0 failed）
 **場所**: `frontend/e2e-tests/game/`
 **担当**: game ブランチで継続作業中
-**最終確認日**: 2026-02-19（Python セル実行 E2E テスト追加・①→⑦全経路カバー完了）
+**最終確認日**: 2026-02-21（backcast-integration.spec.ts 追加・全 80 テスト実行確認）
 
 ---
 
@@ -102,6 +102,14 @@ E2E テスト（案 E）がバイパスしていたレイヤー①③⑤をユ�
 - [x] ✅ **`waitForLoadState("networkidle")` タイムアウト修正**: marimo は WebSocket を常時接続するため `networkidle` には永遠に到達しない。`"load"` に変更（知見 35a）
 - [x] ✅ **再接続スキル再発火バグ修正**: `beforeEach` の `ensureConnected()` 後に `resetGameProgress()` を追加。再接続時にカーネルがセル出力を再送し game_test.py のスキル発火セルが再実行されて初期状態が汚染される問題を修正（知見 35b）
 - [x] ✅ **`sandbox.spec.ts` 全 10 件パス**: 3.1m
+
+### ✅ 完了（2026-02-21 backcast.py ファイル不在バグ修正セッション）
+
+- [x] ✅ **`backcast-integration.spec.ts` 4 件失敗の原因特定**: `C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py` が存在しなかったため全テストが `backend-status` 待機で 20 秒タイムアウト。エラーコンテキストに `{"detail":"File ... not found"}` と記録されていた（知見 42）
+- [x] ✅ **`backcast.py` および関連モジュールを `notebooks/` にコピー**: `game_setup.py`, `skill_events.py`, `backtest_wrapper.py`, `chart.py`, `headless_broadcast.py`, `progress_manager.py`
+- [x] ✅ **`layouts/backcast.grid.json` のコピー追加**: `backcast.py` は `layout_file="layouts/backcast.grid.json"` を参照するが `notebooks/layouts/` が存在しなかった。`mkdir` + コピーで解消（知見 42）
+- [x] ✅ **マニュアル訂正**: `development_docs/plans/backcast-game-play.md` の問題4コピー手順に `layouts/backcast.grid.json` コピーコマンドを追記
+- [x] ✅ **全 9 スイート（80 テスト）パス確認**: 75 passed / 5 skipped / 0 failed（16.4m）
 
 ### ⬜ 未完了・今後の課題
 
@@ -1116,6 +1124,47 @@ const handleMessage = (event: MessageEvent) => {
 - `bt.step()` の出力が `True` のみで状況不明
 - AI Fix バナーがゲームモードでも表示され混乱を招く
 - Grid レイアウトでセルが重なり、入力場所が不明確
+
+### 38. backcast.py が notebooks/ に存在しない場合の症状（2026-02-21 追加）
+
+**症状**: `backcast-integration.spec.ts` の全テストが `backend-status` 待機で 20 秒タイムアウト。エラーコンテキストには以下が記録される:
+
+```yaml
+- generic [ref=e2]: '{"detail":"File C:\\Users\\sasac\\AppData\\Roaming\\marimo\\notebooks\\backcast.py not found"}'
+```
+
+サーバーは起動しているが `backend-status` ボタンがページに現れない（Playwright はノートブックが見つからず空ページしか表示できない）。
+
+**原因**: `C:\Users\sasac\AppData\Roaming\marimo\notebooks\` に `backcast.py` および必要な依存ファイルが配置されていなかった。
+
+**解決策**: `src-tauri/sample-notebooks/` から以下をコピー:
+```bash
+cp /d/Documents/marimo/src-tauri/sample-notebooks/backcast.py "C:/..."
+# game_setup.py, skill_events.py, backtest_wrapper.py, chart.py,
+# headless_broadcast.py, progress_manager.py も同様にコピー
+# さらに layouts/backcast.grid.json も必須（以下の知見参照）
+```
+
+**global-setup の警告との関連**: `⚠️  Could not back up backcast.py (non-fatal)` が表示される場合も同じ原因（ファイルが存在しないためバックアップ不可）。
+
+### 39. layouts/backcast.grid.json が存在しない場合の症状（2026-02-21 追加）
+
+**症状**: backcast.py 起動時に以下の警告が出てグリッドレイアウトが機能しない:
+
+```
+[W] Layout file C:\Users\sasac\...\notebooks\layouts/backcast.grid.json does not exist
+```
+
+**原因**: `backcast.py` は `marimo.App(layout_file="layouts/backcast.grid.json")` を参照しているが、`notebooks/layouts/` ディレクトリが存在しなかった。
+
+**解決策**:
+```bash
+mkdir -p "C:/Users/sasac/AppData/Roaming/marimo/notebooks/layouts"
+cp /d/Documents/marimo/src-tauri/sample-notebooks/layouts/backcast.grid.json \
+   "C:/Users/sasac/AppData/Roaming/marimo/notebooks/layouts/"
+```
+
+**教訓**: `backcast.py` 配置マニュアルのコピー手順に `layouts/` ディレクトリのコピーが漏れていた。モジュールのコピーだけでなく、`layouts/` も必ずセットでコピーすること。
 
 ---
 
