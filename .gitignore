@@ -118,7 +118,6 @@ marimo/_lsp/
 .vercel
 .idea
 
-
 .marimo.toml
 .mypy_cache/
 __marimo__

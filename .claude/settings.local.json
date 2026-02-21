@@ -20,7 +20,10 @@
       "Bash(uv lock:*)",
       "Bash(uv build:*)",
       "Bash(uv publish:*)",
-      "Bash(pnpm lint:*)"
+      "Bash(pnpm lint:*)",
+      "Bash(rustfmt:*)",
+      "Bash(echo:*)",
+      "Bash(pnpm run dev:*)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\marimo\\.claude\\skills",
