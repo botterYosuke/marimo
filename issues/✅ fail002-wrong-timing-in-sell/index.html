@@ -21,7 +21,7 @@
     
     
       
-        <title>Backcast ゲームプレイ — Skill Orchestration マニュアル - marimo Developer Docs</title>
+        <title>Issue: FAIL_002 の発火タイミングが誤っている（sell() 時点では損切りは未確定） - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#backcast-skill-orchestration" class="md-skip">
+        <a href="#issue-fail_002-sell" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Backcast ゲームプレイ — Skill Orchestration マニュアル
+              Issue: FAIL_002 の発火タイミングが誤っている（sell() 時点では損切りは未確定）
             
           </span>
         </div>
@@ -1210,66 +1210,32 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        アーキテクチャ
+        概要
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="アーキテクチャ">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        依存関係
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#skill" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Skill 一覧
+        再現手順
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Skill 一覧">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        オーケストレーター
+        根本原因
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skill_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        個別 Skill
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1277,7 +1243,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        クイックスタート（推奨）
+        影響範囲
       
     </span>
   </a>
@@ -1288,19 +1254,19 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実行手順（手動実行の場合）
+        修正案
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="実行手順（手動実行の場合）">
+    <nav class="md-nav" aria-label="修正案">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#step-1" class="md-nav__link">
+  <a href="#a-step" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: 環境整備
+        オプション A: step() 内でチェックする
       
     </span>
   </a>
@@ -1308,10 +1274,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2" class="md-nav__link">
+  <a href="#b-sell-step" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: ゲームプレイ
+        オプション B: sell() 後の最初の step() でチェック
       
     </span>
   </a>
@@ -1319,21 +1285,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-3" class="md-nav__link">
+  <a href="#a" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 3: 分析（並列実行可）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: 成果物確認
+        推奨: オプション A
       
     </span>
   </a>
@@ -1346,85 +1301,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#2026-02-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正確認（2026-02-21）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        共通情報
+        関連ファイル
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="共通情報">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ゲーム概要
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ゲームファイル
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        操作コマンド
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        スキルツリー前提条件チェーン
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        マイルストーン
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        参照ドキュメント
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1445,302 +1339,89 @@
 
 
 
-<h1 id="backcast-skill-orchestration">Backcast ゲームプレイ — Skill Orchestration マニュアル<a class="headerlink" href="#backcast-skill-orchestration" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-20
-<strong>更新日</strong>: 2026-02-21
-<strong>目的</strong>: 5つの Claude Code Skill を順序制御しながら実行し、ゲームの品質・面白さ・ドキュメント正確性を多角的に評価する</p>
+<h1 id="issue-fail_002-sell">Issue: FAIL_002 の発火タイミングが誤っている（sell() 時点では損切りは未確定）<a class="headerlink" href="#issue-fail_002-sell" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-21
+<strong>重要度</strong>: Medium
+<strong>カテゴリ</strong>: Game / Skill System
+<strong>ステータス</strong>: ✅ 修正済み（2026-02-21 実装確認）</p>
 <hr />
-<h2 id="_1">アーキテクチャ<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────┐
-│                 Orchestrator（人間）                    │
-│                                                       │
-│  Step 1:  /game-setup          → 環境 Ready            │
-│  Step 2:  /game-play           → プレイログ生成          │
-│  Step 3:  /game-bug-hunt       ┐                       │
-│           /game-manual-review  ├ 並列実行               │
-│           /game-fun-review     ┘                       │
-│  Step 4:  成果物確認                                    │
-└──────────────────────────────────────────────────────┘
+<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p><code>game_setup.py</code> の <code>sell()</code> 関数で FAIL_002（「初めての損切り」）を発火する際、<code>bt.closed_trades</code> を参照してチェックしているが、<code>bt.sell()</code> が生成するのはまだ未決済の「売り注文（Order）」に過ぎない。実際の取引（Trade）が <code>closed_trades</code> に追加されるのは、次回 <code>bt.step()</code> が呼ばれて注文が決済された後である。</p>
+<p>このため、現在の <code>sell()</code> 内の FAIL_002 チェックは、直前に発行した売り注文の損益ではなく、それ以前に決済済みの古い取引の損益に基づいて判定される。</p>
+<h2 id="_2">再現手順<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>bt.chart("7203")</code> → <code>bt.buy()</code> → <code>bt.step()</code> で買い注文を決済させる</li>
+<li>いくつか <code>bt.step()</code> を進めて含み損状態になる</li>
+<li><code>bt.sell()</code> を実行する</li>
+<li>この時点で <code>bt.closed_trades</code> には現在の売り注文は含まれていない（注文はまだ未決済）</li>
+<li><code>bt.step()</code> を呼ぶと売り注文が決済されて <code>bt.closed_trades</code> に追加されるが、FAIL_002 はすでにチェック済みで発火機会を逃している（または誤った取引に基づいて判定されている）</li>
+</ol>
+<h2 id="_3">根本原因<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>BackcastPro のライフサイクルにおいて Order と Trade は別物である：</p>
+<div class="highlight"><pre><span></span><code>bt.sell() → 売り注文（Order）が pending_orders に追加（まだ未決済）
+bt.step() → 時間を進めて Order が決済 → closed_trades に Trade として追加
 </code></pre></div>
-<h3 id="_2">依存関係<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-setup ──→ /game-play ──┬──→ /game-bug-hunt
-                             ├──→ /game-manual-review
-                             └──→ /game-fun-review
+<p><code>game_setup.py</code> の <code>sell()</code> 関数：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sell</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;保有中の株を売る&quot;&quot;&quot;</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">sell</span><span class="p">()</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">_broker_instance</span><span class="o">.</span><span class="n">last_price</span><span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+    <span class="n">emit_skill</span><span class="p">(</span><span class="s2">&quot;SANDBOX_004&quot;</span><span class="p">)</span>
+    <span class="c1"># 損切りチェック  ← バグ: この時点では現在の売り注文はまだ closed_trades に存在しない</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;pl&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">t</span><span class="o">.</span><span class="n">pl</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">bt</span><span class="o">.</span><span class="n">closed_trades</span><span class="p">):</span>
+        <span class="n">emit_skill</span><span class="p">(</span><span class="s2">&quot;FAIL_002&quot;</span><span class="p">)</span>
+    <span class="o">...</span>
 </code></pre></div>
-<hr />
-<h2 id="skill">Skill 一覧<a class="headerlink" href="#skill" title="Permanent link">&para;</a></h2>
-<h3 id="_3">オーケストレーター<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Skill</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>/game-orchestrate</code></td>
-<td><strong>全自動</strong>: Step 1〜3 を順序実行（環境整備 → プレイ → 分析）</td>
-</tr>
-</tbody>
-</table>
-<h3 id="skill_1">個別 Skill<a class="headerlink" href="#skill_1" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Skill</th>
-<th>説明</th>
-<th>入力</th>
-<th>出力先</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td><code>/game-setup</code></td>
-<td>環境整備・起動・リセット</td>
-<td>なし</td>
-<td>(口頭: READY/FAILED)</td>
-</tr>
-<tr>
-<td>2</td>
-<td><code>/game-play</code></td>
-<td>ゲーム実プレイ・ログ記録</td>
-<td>setup READY</td>
-<td><code>game-play-reports/play-log-*.md</code></td>
-</tr>
-<tr>
-<td>3</td>
-<td><code>/game-bug-hunt</code></td>
-<td>バグ発見・Issue 記録</td>
-<td>プレイログ</td>
-<td><code>development_docs/issues/&lt;slug&gt;.md</code></td>
-</tr>
-<tr>
-<td>4</td>
-<td><code>/game-manual-review</code></td>
-<td>マニュアル正確性検証</td>
-<td>プレイログ</td>
-<td><code>game-play-reports/manual-review-*.md</code></td>
-</tr>
-<tr>
-<td>5</td>
-<td><code>/game-fun-review</code></td>
-<td>面白さ評価・改善提案</td>
-<td>プレイログ</td>
-<td><code>game-play-reports/fun-review-*.md</code></td>
-</tr>
-</tbody>
-</table>
-<p>Skill 定義ファイル: <code>.claude/skills/game-*/SKILL.md</code></p>
-<hr />
-<h2 id="_4">クイックスタート（推奨）<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p><strong>全ステップを一気に実行</strong>:</p>
-<div class="highlight"><pre><span></span><code>/game-orchestrate
-</code></pre></div>
-<p>このコマンドで Step 1〜3（環境整備 → プレイ → 分析）を自動実行します。</p>
-<p>詳細な手動実行手順は以下のセクションを参照してください。</p>
-<hr />
-<h2 id="_5">実行手順（手動実行の場合）<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<h3 id="step-1">Step 1: 環境整備<a class="headerlink" href="#step-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-setup
-</code></pre></div>
-<p>サーバー起動・ファイル配置・接続確認を行う。
-出力が <code>READY</code> になったら Step 2 へ進む。</p>
-<h3 id="step-2">Step 2: ゲームプレイ<a class="headerlink" href="#step-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-play
-</code></pre></div>
-<p>Sandbox モード → Bridge モードの順にプレイし、ログとスクリーンショットを記録。
-レポートが <code>development_docs/game-play-reports/play-log-YYYY-MM-DD.md</code> に生成される。</p>
-<h3 id="step-3">Step 3: 分析（並列実行可）<a class="headerlink" href="#step-3" title="Permanent link">&para;</a></h3>
-<p>以下の3つは互いに独立しているため、<strong>並列実行</strong>が可能。</p>
-<div class="highlight"><pre><span></span><code>/game-bug-hunt
-/game-manual-review
-/game-fun-review
-</code></pre></div>
-<p>各スキルは Step 2 で生成されたプレイログを入力として使用する。</p>
-<h3 id="step-4">Step 4: 成果物確認<a class="headerlink" href="#step-4" title="Permanent link">&para;</a></h3>
-<p>全スキルの完了後、<code>development_docs/game-play-reports/</code> に以下が揃っていることを確認:</p>
+<p><code>sell()</code> 呼び出し時の <code>bt.closed_trades</code> には、今回の売り注文で生まれる取引はまだ含まれていない。チェックされているのはそれ以前に決済された取引のみである。</p>
+<p>これはすでに修正済みの SANDBOX_003 の問題（<code>trades()</code> が <code>bt.step()</code> 前は空だった）と同じ構造的な問題である。</p>
+<h2 id="_4">影響範囲<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <ul>
-<li>[ ] <code>play-log-YYYY-MM-DD.md</code> — プレイログ</li>
-<li>[ ] <code>manual-review-YYYY-MM-DD.md</code> — マニュアルレビュー</li>
-<li>[ ] <code>fun-review-YYYY-MM-DD.md</code> — 面白さ評価</li>
-<li>[ ] <code>development_docs/issues/</code> に新規 Issue（バグがあった場合）</li>
+<li>FAIL_002 が本来の意図（「今回の売りが損切りだった」）とは異なる条件で発火または不発になる</li>
+<li>具体的には次の2つのシナリオで誤動作する：</li>
+<li>今回初めての取引で損切りした場合: <code>bt.closed_trades</code> が空のため FAIL_002 が発火しない（本来は発火すべき）</li>
+<li>過去に損切りがあった後で利確した場合: <code>bt.closed_trades</code> に過去の損切り取引が残っているため FAIL_002 が誤って発火する</li>
 </ul>
-<hr />
-<h2 id="_6">共通情報<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<h3 id="_7">ゲーム概要<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
-<p><strong>Backcast</strong> = トヨタ自動車（7203）の株価を使った投資シミュレーション（marimo ノートブック上で動作）</p>
-<h3 id="_8">ゲームファイル<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>種別</th>
-<th>パス</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>プレイファイル</td>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-</tr>
-<tr>
-<td>ゲームロジック</td>
-<td><code>src-tauri/sample-notebooks/game_setup.py</code></td>
-</tr>
-<tr>
-<td>スキル発火</td>
-<td><code>src-tauri/sample-notebooks/skill_events.py</code></td>
-</tr>
-<tr>
-<td>スキル定義</td>
-<td><code>frontend/src/components/skill-tree/skill-data.ts</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="_9">操作コマンド<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>コマンド</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>bt.chart(code)</code></td>
-<td>銘柄チャート表示</td>
-</tr>
-<tr>
-<td><code>bt.buy()</code></td>
-<td>株購入</td>
-</tr>
-<tr>
-<td><code>bt.sell()</code></td>
-<td>株売却</td>
-</tr>
-<tr>
-<td><code>bt.step()</code></td>
-<td>次の日に進む</td>
-</tr>
-<tr>
-<td><code>bt.trades()</code></td>
-<td>保有株確認</td>
-</tr>
-<tr>
-<td><code>bt.reveal_data()</code></td>
-<td>データの正体確認</td>
-</tr>
-<tr>
-<td><code>bt.get_stock_daily(code)</code></td>
-<td>株価データ取得</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_10">スキルツリー前提条件チェーン<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>SANDBOX_001 → SANDBOX_002 → SANDBOX_003 ─┐
-                           → SANDBOX_004 ─┤→ SANDBOX_005 → SANDBOX_006
-                                          └─ FAIL_001
-                                             FAIL_002（SANDBOX_004 + FAIL_001）
+<h2 id="_5">修正案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="a-step">オプション A: <code>step()</code> 内でチェックする<a class="headerlink" href="#a-step" title="Permanent link">&para;</a></h3>
+<p>FAIL_002 のチェックを <code>step()</code> 内の <code>_check_unrealized_loss()</code> と同様の仕組みで <code>bt.closed_trades</code> を監視する関数に移動する：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_check_stop_loss</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;損切りチェック（FAIL_002 トリガー）&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;SANDBOX_004&quot;</span> <span class="ow">in</span> <span class="n">get_triggered_skills</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;pl&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">t</span><span class="o">.</span><span class="n">pl</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">bt</span><span class="o">.</span><span class="n">closed_trades</span><span class="p">):</span>
+            <span class="n">emit_skill</span><span class="p">(</span><span class="s2">&quot;FAIL_002&quot;</span><span class="p">)</span>
 
-SANDBOX_006 → BRIDGE_001 → BRIDGE_002 → BRIDGE_003
-                                            ↓
-BRIDGE_003 → SETUP_001 → SETUP_002 ─→ SETUP_003 → SETUP_004
-                       └→ DATA_001 ─┘              → SETUP_005
-                            ↓
-                  DATA_002 → DATA_003
-                  DATA_004 → DATA_005
-                  DATA_006
-
-SETUP_003 + DATA_001 → SET_001 → SET_002
-                SET_001 + DATA_005 → SET_003
-
-SET_001 → TRADE_001 → TRADE_002
-                    → TRADE_003 → TRADE_004
-                               → TRADE_007 → TRADE_008
-                                           → RISK_005 → RISK_006 → RISK_007 → RISK_008
-                                                                  → RISK_010
-                    → TRADE_006
-                    → RISK_001 → RISK_002 → RISK_003 → RISK_004
-                    → RISK_009
-SET_001 → TRADE_009 → TRADE_010
-SET_001 → CHART_001 → CHART_002（+ TRADE_003）
-                    → CHART_003（+ IND_001）→ CHART_004
-
-DATA_002 → IND_001 → IND_002 → IND_003 → IND_004
-                             → IND_003 + IND_005 → IND_008
-                    → IND_005 → IND_006
-                    → IND_007
-                    → IND_009
-
-TRADE_001 → FAIL_003（資金0で発火）
+<span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">():</span>
+    <span class="o">...</span>
+    <span class="n">_check_unrealized_loss</span><span class="p">()</span>
+    <span class="n">_check_stop_loss</span><span class="p">()</span>  <span class="c1"># step 後に損切り確認</span>
+    <span class="o">...</span>
 </code></pre></div>
-<h3 id="_11">マイルストーン<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<h3 id="b-sell-step">オプション B: sell() 後の最初の step() でチェック<a class="headerlink" href="#b-sell-step" title="Permanent link">&para;</a></h3>
+<p><code>sell()</code> 内でフラグを立て、次回 <code>step()</code> で FAIL_002 チェックを行う（実装が複雑になるため非推奨）。</p>
+<h3 id="a">推奨: オプション A<a class="headerlink" href="#a" title="Permanent link">&para;</a></h3>
+<p><code>_check_unrealized_loss()</code> と同じパターンで <code>step()</code> 後に損切りチェックを行うのが最もシンプルで一貫性がある。<code>emit_skill</code> の dedup 機構により二重発火は防止される。</p>
+<h2 id="2026-02-21">修正確認（2026-02-21）<a class="headerlink" href="#2026-02-21" title="Permanent link">&para;</a></h2>
+<p><code>game_setup.py</code> の <code>step()</code> 内に FAIL_002 の損切りチェックが実装済みであることを確認（オプション A）。<code>sell()</code> には FAIL_002 発火コードが存在せず、<code>step()</code> 内の <code>new_closed</code> チェックで発火する設計になっている。<code>_check_unrealized_loss()</code> と同じパターンで実装されている。</p>
+<h2 id="_6">関連ファイル<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>スキル数</th>
-<th>ボーナス</th>
-<th>称号/アイテム</th>
+<th>ファイル</th>
+<th>関連箇所</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>10</td>
-<td>+50,000円</td>
-<td>「見習い投資家」</td>
+<td><code>src-tauri/sample-notebooks/game_setup.py</code></td>
+<td><code>sell()</code> 101行目 — 修正対象</td>
 </tr>
 <tr>
-<td>20</td>
-<td>+100,000円</td>
-<td>「新進トレーダー」</td>
+<td><code>src-tauri/sample-notebooks/game_setup.py</code></td>
+<td><code>step()</code> / <code>_check_unrealized_loss()</code> — 参考にすべきパターン</td>
 </tr>
 <tr>
-<td>35</td>
-<td>+200,000円</td>
-<td>米国株ETF</td>
-</tr>
-<tr>
-<td>50</td>
-<td>+400,000円</td>
-<td>「Backcastエキスパート」</td>
-</tr>
-<tr>
-<td>58</td>
-<td>+600,000円</td>
-<td>「マスター投資家」</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_12">参照ドキュメント<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>ドキュメント</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>development_docs/game/game-e2e-review-system.md</code></td>
-<td>E2E テスト知見集（知見 1〜35）</td>
-</tr>
-<tr>
-<td><code>frontend/e2e-tests/game/helpers.ts</code></td>
-<td>共通ヘルパー関数</td>
-</tr>
-<tr>
-<td><code>frontend/e2e-tests/game/constants.ts</code></td>
-<td>テスト定数</td>
-</tr>
-<tr>
-<td><code>frontend/e2e-tests/game/sandbox.spec.ts</code></td>
-<td>テスト構造のリファレンス</td>
-</tr>
-<tr>
-<td><code>development_docs/issues/</code></td>
-<td>既知バグ一覧</td>
+<td><code>development_docs/issues/sandbox003-skill-trigger-condition.md</code></td>
+<td>同種の問題（Order/Trade ライフサイクル）の修正事例</td>
 </tr>
 </tbody>
 </table>

@@ -1,0 +1,2978 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Internal developer documentation for marimo">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>Backcast ゲーム Skills システム — 完全ガイド - marimo Developer Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#backcast-skills" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="marimo Developer Docs" class="md-header__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            marimo Developer Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Backcast ゲーム Skills システム — 完全ガイド
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="marimo Developer Docs" class="md-nav__button md-logo" aria-label="marimo Developer Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    marimo Developer Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & MCP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend & MCP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding_backend_and_mcp_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Backend and MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding_lint_rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Lint Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../traces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pyodide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pyodide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pyodide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pyodide-custom-wheel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Wheel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fixes & Improvements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Fixes & Improvements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../chart-widget-caching-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Widget Caching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui-switch-state-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Switch State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../anywidget-backend-sync.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Backend Sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../anywidget-performance.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AnyWidget Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../frontend-freeze-fix.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Freeze
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../grid-layout-auto-placement.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grid Layout Auto Placement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../broadcast-channel-hud.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Broadcast Channel HUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../chart-theme.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart Theme
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../skill-tree-panel.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Tree Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../electron-startup-config.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron Startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../steam-deploy.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Deploy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../steam-integration-fixes.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Steam Integration Fixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 目次
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概要
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="概要">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        これは何？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        何ができるの？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        誰のため？
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        なぜこのシステムを作ったのか
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="なぜこのシステムを作ったのか">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景: 従来の問題点
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="背景: 従来の問題点">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題1: 手動テストの負担
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題2: 評価の偏り
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題3: 再現性の欠如
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題4: 知見の散逸
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-agent-orchestration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解決策: 5-Agent Orchestration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        アーキテクチャ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="アーキテクチャ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        システム構成図
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実行フロー
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent 役割分担
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        なぜ並列実行？
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        使い方
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="使い方">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        最も簡単な使い方（推奨）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        手動で段階実行（デバッグ時）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        特定の分析だけ実行
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        成果物の確認
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill の作り方
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Skill の作り方">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skill_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill とは？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skill_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill の基本構造
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        作成手順
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="作成手順">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. スキル定義ファイルを作成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-skillmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. SKILL.md に内容を記述
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 自動登録の確認
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allowed-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        allowed-tools の設定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="allowed-tools の設定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        基本的なツール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bash の制限パターン
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skill_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        良い Skill の条件
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="良い Skill の条件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 良い例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ 悪い例
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        命名規則
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="命名規則">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキル名（name:）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ファイル構成
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        よくある質問
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="よくある質問">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q1-skill-task-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q1: Skill と Task tool の違いは？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q2-skill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q2: 既存の Skill を修正したらどうなる？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q3-skill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q3: Skill が認識されない場合は？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q4: 並列実行はどうやって制御する？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q5-skill-skill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q5: Skill から別の Skill を呼び出せる？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q6: プレイログが古い状態で分析スキルを実行したら？
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        トラブルシューティング
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="トラブルシューティング">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-game-setup-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題1: /game-setup が FAILED になる
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="問題1: /game-setup が FAILED になる">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        症状
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原因
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解決策
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-game-play" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題2: /game-play でテストが失敗する
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="問題2: /game-play でテストが失敗する">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        症状
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原因
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解決策
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題3: バグが Issue として記録されない
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="問題3: バグが Issue として記録されない">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        症状
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原因
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_33" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        確認方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題4: オーケストレーターが途中で止まる
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="問題4: オーケストレーターが途中で止まる">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_34" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        症状
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原因
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_36" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解決策
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題5: スクリーンショットが撮影されない
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="問題5: スクリーンショットが撮影されない">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_37" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        症状
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_38" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        原因
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_39" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解決策
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_40" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計上のポイント（開発者向け）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="設計上のポイント（開発者向け）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_41" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        なぜオーケストレーションなのか？
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="なぜオーケストレーションなのか？">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_42" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        メリット
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_43" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        デメリット
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        なぜ5つの Agent？
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_44" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        成果物のフォーマット統一
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_45" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        日付ベースのファイル名
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_46" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        まとめ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="まとめ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_47" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        このシステムで何が変わったか
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_48" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        次のステップ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_49" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        関連ドキュメント
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="backcast-skills">Backcast ゲーム Skills システム — 完全ガイド<a class="headerlink" href="#backcast-skills" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-21
+<strong>対象読者</strong>: marimo プロジェクトの開発者・QA担当者・新規参加者</p>
+<hr />
+<h2 id="_1">📚 目次<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#概要">概要</a></li>
+<li><a href="#なぜこのシステムを作ったのか">なぜこのシステムを作ったのか</a></li>
+<li><a href="#アーキテクチャ">アーキテクチャ</a></li>
+<li><a href="#使い方">使い方</a></li>
+<li><a href="#skill-の作り方">Skill の作り方</a></li>
+<li><a href="#よくある質問">よくある質問</a></li>
+<li><a href="#トラブルシューティング">トラブルシューティング</a></li>
+</ol>
+<hr />
+<h2 id="_2">概要<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="_3">これは何？<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p><strong>Backcast ゲーム Skills システム</strong> = Claude Code の Skill 機能を使って、Backcast ゲームのテスト・評価を自動化・体系化するためのオーケストレーションシステムです。</p>
+<h3 id="_4">何ができるの？<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>たった <strong>1つのコマンド</strong> (<code>/game-orchestrate</code>) で、以下のすべてを自動実行できます:</p>
+<div class="highlight"><pre><span></span><code>1. 環境整備（サーバー起動、ファイル配置、リセット）
+   ↓
+2. ゲームプレイ（Sandbox + Bridge モードを実プレイ）
+   ↓
+3. 分析（バグ発見 + マニュアル検証 + 面白さ評価）を並列実行
+   ↓
+4. レポート生成（プレイログ、Issue、改善提案）
+</code></pre></div>
+<h3 id="_5">誰のため？<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>開発者</strong>: ゲーム機能を変更した後の動作確認・リグレッションテスト</li>
+<li><strong>QA担当者</strong>: 体系的なバグ発見・品質評価</li>
+<li><strong>プロダクトマネージャー</strong>: ゲーム体験の改善提案を得る</li>
+<li><strong>新規参加者</strong>: Backcast ゲームの全体像を素早く把握</li>
+</ul>
+<hr />
+<h2 id="_6">なぜこのシステムを作ったのか<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="_7">背景: 従来の問題点<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>Backcast ゲームの開発・テストには以下の課題がありました:</p>
+<h4 id="1">問題1: 手動テストの負担<a class="headerlink" href="#1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>❌ 従来の手順:
+1. ターミナルで `pnpm dev` 起動
+2. ブラウザで backcast.py を開く
+3. セルを1つずつ手動で入力・実行
+4. スキルツリーパネルを開いて確認
+5. スクリーンショット撮影
+6. 結果を手動で記録
+7. バグを発見したら Issue を手動で作成
+8. マニュアルの記述が正しいか手動でチェック
+9. 面白さを主観で評価
+
+→ **1回のテストに30分〜1時間**
+</code></pre></div>
+<h4 id="2">問題2: 評価の偏り<a class="headerlink" href="#2" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>バグ発見</strong>のみに注力し、UX 評価やドキュメント品質がおろそかになる</li>
+<li>同じ人が連続テストすると視点が固定化される</li>
+</ul>
+<h4 id="3">問題3: 再現性の欠如<a class="headerlink" href="#3" title="Permanent link">&para;</a></h4>
+<ul>
+<li>手動テストは毎回微妙に操作が変わる</li>
+<li>バグの再現手順が不明確</li>
+<li>「自分の環境では動く」問題が多発</li>
+</ul>
+<h4 id="4">問題4: 知見の散逸<a class="headerlink" href="#4" title="Permanent link">&para;</a></h4>
+<ul>
+<li>テスト結果がSlack・メモ帳・頭の中に分散</li>
+<li>「前回どこまで確認したか」が不明</li>
+<li>新規参加者が過去の問題を再発見</li>
+</ul>
+<h3 id="5-agent-orchestration">解決策: 5-Agent Orchestration<a class="headerlink" href="#5-agent-orchestration" title="Permanent link">&para;</a></h3>
+<p>上記の問題を解決するため、<strong>役割分担 + 自動化 + 再現性</strong> を実現する Skills システムを設計しました。</p>
+<div class="highlight"><pre><span></span><code>┌────────────────────────────────────────────────────┐
+│         /game-orchestrate（1コマンド）                │
+└────────────────────────────────────────────────────┘
+                      ↓
+   ┌──────────────┬──────────────┬──────────────┐
+   │ Agent 1      │ Agent 2      │ Agent 3〜5    │
+   │ 環境整備      │ プレイ        │ 分析（並列）   │
+   │ 自動化       │ E2E自動化     │ 多角的評価     │
+   └──────────────┴──────────────┴──────────────┘
+                      ↓
+              成果物が自動生成
+   （プレイログ、Issue、レビュー、改善提案）
+</code></pre></div>
+<p><strong>メリット</strong>:
+- ⏱️ <strong>時間短縮</strong>: 1時間 → 5分（自動化による12倍速）
+- 🔄 <strong>再現性</strong>: 毎回同じ手順でテスト
+- 📊 <strong>多角的評価</strong>: バグ・マニュアル・UX を同時評価
+- 📝 <strong>知見の蓄積</strong>: Issue・レポートがすべて <code>development_docs/</code> に記録
+- 🆕 <strong>オンボーディング</strong>: 新規参加者も <code>/game-orchestrate</code> だけで全体像を把握</p>
+<hr />
+<h2 id="_8">アーキテクチャ<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="_9">システム構成図<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────┐
+│              .claude/skills/（Skills定義）                 │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  game-orchestrate/   ← オーケストレーター（全体制御）        │
+│      SKILL.md                                            │
+│                                                          │
+│  game-setup/         ← Agent 1: 環境整備                 │
+│      SKILL.md                                            │
+│                                                          │
+│  game-play/          ← Agent 2: ゲームプレイ              │
+│      SKILL.md                                            │
+│                                                          │
+│  game-bug-hunt/      ← Agent 3: バグ発見                 │
+│      SKILL.md                                            │
+│                                                          │
+│  game-manual-review/ ← Agent 4: マニュアル検証            │
+│      SKILL.md                                            │
+│                                                          │
+│  game-fun-review/    ← Agent 5: 面白さ評価               │
+│      SKILL.md                                            │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│           development_docs/（成果物の出力先）              │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  game-play-reports/  ← レポート類                         │
+│    - play-log-YYYY-MM-DD.md                              │
+│    - manual-review-YYYY-MM-DD.md                         │
+│    - fun-review-YYYY-MM-DD.md                            │
+│                                                          │
+│  issues/             ← バグ Issue                         │
+│    - &lt;slug&gt;.md                                           │
+│                                                          │
+│  game/               ← 既存ドキュメント                    │
+│    - game-e2e-review-system.md（E2E テスト知見集）         │
+│                                                          │
+│  plans/              ← マニュアル                         │
+│    - backcast-game-play.md（本マニュアル）                 │
+│                                                          │
+│  game-skills-system.md ← 本ドキュメント                    │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3 id="_10">実行フロー<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>ユーザー: /game-orchestrate を実行
+   ↓
+┌────────────────────────────────────┐
+│ Step 1: /game-setup                 │
+│ - marimo サーバー起動                │
+│ - backcast.py 配置確認              │
+│ - 進捗データリセット                  │
+│ → 出力: READY/FAILED                │
+└────────────────────────────────────┘
+   ↓（READY の場合のみ）
+┌────────────────────────────────────┐
+│ Step 2: /game-play                  │
+│ - E2E テストで自動プレイ              │
+│ - SANDBOX_001〜006 実行             │
+│ - BRIDGE_001〜003 実行              │
+│ - スクリーンショット撮影              │
+│ → 出力: play-log-*.md               │
+└────────────────────────────────────┘
+   ↓（play-log 生成後）
+┌────────────────────────────────────┐
+│ Step 3a: /game-bug-hunt（並列）      │
+│ - プレイログ分析                      │
+│ - エラー抽出                         │
+│ - ソースコード調査                    │
+│ → 出力: issues/&lt;slug&gt;.md（新規バグ） │
+└────────────────────────────────────┘
+┌────────────────────────────────────┐
+│ Step 3b: /game-manual-review（並列） │
+│ - マニュアル vs 実際の動作を突合       │
+│ - コマンド・パス・手順の正確性チェック  │
+│ → 出力: manual-review-*.md          │
+└────────────────────────────────────┘
+┌────────────────────────────────────┐
+│ Step 3c: /game-fun-review（並列）    │
+│ - ゲームデザイン評価                  │
+│ - UX 分析                           │
+│ - 改善提案作成                       │
+│ → 出力: fun-review-*.md             │
+└────────────────────────────────────┘
+   ↓
+┌────────────────────────────────────┐
+│ 完了サマリー                          │
+│ - 全成果物へのリンク                  │
+│ - 各 Step の成功/失敗                │
+│ - 新規バグ数・改善提案数              │
+└────────────────────────────────────┘
+</code></pre></div>
+<h3 id="agent">Agent 役割分担<a class="headerlink" href="#agent" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>役割</th>
+<th>専門性</th>
+<th>成果物</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Agent 1</strong> (setup)</td>
+<td>環境整備・起動・リセット</td>
+<td>インフラ・DevOps</td>
+<td>口頭報告 (READY/FAILED)</td>
+</tr>
+<tr>
+<td><strong>Agent 2</strong> (play)</td>
+<td>ゲーム実プレイ</td>
+<td>E2E テスト・Playwright</td>
+<td>プレイログ + スクリーンショット</td>
+</tr>
+<tr>
+<td><strong>Agent 3</strong> (bug-hunt)</td>
+<td>バグ発見・根本原因調査</td>
+<td>デバッグ・ソースコード解析</td>
+<td>Issue ドキュメント（既存フォーマット準拠）</td>
+</tr>
+<tr>
+<td><strong>Agent 4</strong> (manual-review)</td>
+<td>ドキュメント品質保証</td>
+<td>テクニカルライティング</td>
+<td>マニュアルレビューレポート</td>
+</tr>
+<tr>
+<td><strong>Agent 5</strong> (fun-review)</td>
+<td>ゲーム体験評価</td>
+<td>ゲームデザイン・UX</td>
+<td>面白さ評価 + 改善提案</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_11">なぜ並列実行？<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>Step 3 の3つの Agent（bug-hunt / manual-review / fun-review）は<strong>入力が共通</strong>（<code>play-log-*.md</code>）で、<strong>互いに独立</strong>しています。</p>
+<div class="highlight"><pre><span></span><code>play-log-*.md ─┬─→ game-bug-hunt      ← バグに注目
+               ├─→ game-manual-review ← ドキュメントに注目
+               └─→ game-fun-review    ← 楽しさに注目
+</code></pre></div>
+<p>並列実行のメリット:
+- ⚡ <strong>高速化</strong>: 3つの分析を同時実行（3分 → 1分）
+- 🧠 <strong>視点の独立性</strong>: 各 Agent が専門性を発揮
+- 🔄 <strong>スケーラビリティ</strong>: 将来的に Agent を追加しやすい</p>
+<hr />
+<h2 id="_12">使い方<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<h3 id="_13">最も簡単な使い方（推奨）<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>/game-orchestrate
+</code></pre></div>
+<p>これだけで全プロセスが自動実行され、以下が生成されます:</p>
+<ul>
+<li>✅ <code>development_docs/game-play-reports/play-log-2026-02-21.md</code></li>
+<li>✅ <code>development_docs/game-play-reports/manual-review-2026-02-21.md</code></li>
+<li>✅ <code>development_docs/game-play-reports/fun-review-2026-02-21.md</code></li>
+<li>✅ <code>development_docs/issues/&lt;新規バグ&gt;.md</code>（バグがあれば）</li>
+</ul>
+<h3 id="_14">手動で段階実行（デバッグ時）<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<p>各 Step を個別に実行することも可能:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Step 1: 環境整備</span>
+/game-setup
+<span class="c1"># → 出力が &quot;READY&quot; になることを確認</span>
+
+<span class="c1"># Step 2: ゲームプレイ</span>
+/game-play
+<span class="c1"># → play-log-*.md が生成されることを確認</span>
+
+<span class="c1"># Step 3: 分析（好きな順序・組み合わせで実行可能）</span>
+/game-bug-hunt
+/game-manual-review
+/game-fun-review
+</code></pre></div>
+<h3 id="_15">特定の分析だけ実行<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<p>例: バグ発見だけやりたい場合</p>
+<div class="highlight"><pre><span></span><code>/game-setup
+/game-play
+/game-bug-hunt<span class="w">  </span><span class="c1"># これだけ実行</span>
+</code></pre></div>
+<p>例: マニュアルレビューだけやりたい場合</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># play-log-*.md が既にある場合は setup/play をスキップ可能</span>
+/game-manual-review
+</code></pre></div>
+<h3 id="_16">成果物の確認<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<p>実行後、以下のディレクトリを確認:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># レポート類</span>
+ls<span class="w"> </span>development_docs/game-play-reports/
+
+<span class="c1"># 新規 Issue</span>
+ls<span class="w"> </span>development_docs/issues/
+</code></pre></div>
+<hr />
+<h2 id="skill">Skill の作り方<a class="headerlink" href="#skill" title="Permanent link">&para;</a></h2>
+<h3 id="skill_1">Skill とは？<a class="headerlink" href="#skill_1" title="Permanent link">&para;</a></h3>
+<p>Claude Code の <strong>Skill</strong> = 特定のタスクを実行するための命令書（SKILL.md）です。</p>
+<h3 id="skill_2">Skill の基本構造<a class="headerlink" href="#skill_2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>---
+name: my-skill
+description: &quot;このスキルの簡潔な説明&quot;
+allowed-tools:
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Bash(cd /path &amp;&amp; command*)
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Read
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Write
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Glob
+<span class="gu">  - Grep</span>
+<span class="gu">---</span>
+
+<span class="gh"># スキルタイトル</span>
+
+<span class="gu">## 役割</span>
+
+このスキルが何をするのか
+
+<span class="gu">## 実行手順</span>
+
+<span class="k">1.</span> ステップ1
+<span class="k">2.</span> ステップ2
+<span class="k">3.</span> ...
+
+<span class="gu">## 出力</span>
+
+成果物の形式・保存先
+</code></pre></div>
+<h3 id="_17">作成手順<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<h4 id="1_1">1. スキル定義ファイルを作成<a class="headerlink" href="#1_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>.claude/skills/my-skill
+touch<span class="w"> </span>.claude/skills/my-skill/SKILL.md
+</code></pre></div>
+<h4 id="2-skillmd">2. SKILL.md に内容を記述<a class="headerlink" href="#2-skillmd" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>---
+name: my-skill
+description: &quot;簡潔な説明（1行）&quot;
+allowed-tools:
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Bash(特定のコマンド*)
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Read
+<span class="gu">  - Write</span>
+<span class="gu">---</span>
+
+<span class="gh"># スキルタイトル</span>
+
+<span class="gu">## 役割</span>
+
+何をするスキルか
+
+<span class="gu">## 実行手順</span>
+
+具体的な手順
+
+<span class="gu">## 出力</span>
+
+成果物
+</code></pre></div>
+<h4 id="3_1">3. 自動登録の確認<a class="headerlink" href="#3_1" title="Permanent link">&para;</a></h4>
+<p>Claude Code は <code>.claude/skills/</code> 配下のスキルを自動認識します。</p>
+<p>確認方法:
+<div class="highlight"><pre><span></span><code>Claude Code を起動 → スキルリストに表示される
+</code></pre></div></p>
+<h3 id="allowed-tools">allowed-tools の設定<a class="headerlink" href="#allowed-tools" title="Permanent link">&para;</a></h3>
+<p><strong>重要</strong>: セキュリティのため、スキルが使用するツールを明示的に許可する必要があります。</p>
+<h4 id="_18">基本的なツール<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nt">allowed-tools</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Read</span><span class="w">              </span><span class="c1"># ファイル読み取り</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Write</span><span class="w">             </span><span class="c1"># ファイル書き込み</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Edit</span><span class="w">              </span><span class="c1"># ファイル編集</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Glob</span><span class="w">              </span><span class="c1"># ファイル検索</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Grep</span><span class="w">              </span><span class="c1"># コンテンツ検索</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bash(ls*)</span><span class="w">         </span><span class="c1"># ls コマンド（ワイルドカード付き）</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Skill</span><span class="w">             </span><span class="c1"># 他のスキルを呼び出す（オーケストレーター用）</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Task</span><span class="w">              </span><span class="c1"># Agent を起動</span>
+</code></pre></div>
+<h4 id="bash">Bash の制限パターン<a class="headerlink" href="#bash" title="Permanent link">&para;</a></h4>
+<p>セキュリティのため、特定のコマンドのみ許可:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">allowed-tools</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bash(cd /d/Documents/marimo &amp;&amp; pnpm dev*)</span><span class="w">  </span><span class="c1"># pnpm dev のみ</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bash(npx playwright test*)</span><span class="w">                 </span><span class="c1"># playwright test のみ</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bash(ls*)</span><span class="w">                                  </span><span class="c1"># ls のみ</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bash(mkdir*)</span><span class="w">                               </span><span class="c1"># mkdir のみ</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bash(rm -f /specific/path/*)</span><span class="w">               </span><span class="c1"># 特定パスの削除のみ</span>
+</code></pre></div>
+<p>❌ 危険な例（許可しない）:
+<div class="highlight"><pre><span></span><code><span class="nt">allowed-tools</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Bash(*)</span><span class="w">  </span><span class="c1"># すべてのコマンドを許可（危険）</span>
+</code></pre></div></p>
+<h3 id="skill_3">良い Skill の条件<a class="headerlink" href="#skill_3" title="Permanent link">&para;</a></h3>
+<h4 id="_19">✅ 良い例<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>単一責任</strong>: 1つのスキルが1つの明確な役割を持つ</li>
+<li><strong>再利用可能</strong>: 他のプロジェクトでも使える汎用性</li>
+<li><strong>明確な入出力</strong>: 何が必要で何が生成されるか明記</li>
+<li><strong>エラーハンドリング</strong>: 失敗時の挙動を定義</li>
+</ul>
+<h4 id="_20">❌ 悪い例<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h4>
+<ul>
+<li>1つのスキルがあれもこれもやる（「何でも屋」スキル）</li>
+<li>前提条件が不明確（「環境が整っていれば動く」）</li>
+<li>出力がランダム（実行するたびに違う形式）</li>
+</ul>
+<h3 id="_21">命名規則<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
+<h4 id="name">スキル名（<code>name:</code>）<a class="headerlink" href="#name" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>小文字 + ハイフン</strong>: <code>game-setup</code>（○）、<code>GameSetup</code>（×）</li>
+<li><strong>動詞を含む</strong>: <code>game-play</code>（○）、<code>game</code>（×）</li>
+<li><strong>プロジェクト接頭辞</strong>: <code>game-xxx</code> で統一</li>
+</ul>
+<h4 id="_22">ファイル構成<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>.claude/skills/
+  game-setup/
+    SKILL.md
+  game-play/
+    SKILL.md
+  game-bug-hunt/
+    SKILL.md
+</code></pre></div>
+<hr />
+<h2 id="_23">よくある質問<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h2>
+<h3 id="q1-skill-task-tool">Q1: Skill と Task tool の違いは？<a class="headerlink" href="#q1-skill-task-tool" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>Skill</th>
+<th>Task tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用途</td>
+<td><strong>定型作業</strong>の自動化</td>
+<td><strong>一時的な探索</strong>・調査</td>
+</tr>
+<tr>
+<td>再利用性</td>
+<td>高い（何度も実行）</td>
+<td>低い（1回限り）</td>
+</tr>
+<tr>
+<td>定義場所</td>
+<td><code>.claude/skills/</code> に永続化</td>
+<td>その場で Agent に指示</td>
+</tr>
+<tr>
+<td>例</td>
+<td><code>/game-setup</code>（毎回同じ）</td>
+<td>「この関数がどこで使われてるか調べて」</td>
+</tr>
+</tbody>
+</table>
+<p><strong>使い分け</strong>:
+- <strong>定型作業</strong> → Skill
+- <strong>探索・調査</strong> → Task tool</p>
+<h3 id="q2-skill">Q2: 既存の Skill を修正したらどうなる？<a class="headerlink" href="#q2-skill" title="Permanent link">&para;</a></h3>
+<p>SKILL.md を編集 → <strong>即座に反映</strong>（Claude Code 再起動不要）</p>
+<h3 id="q3-skill">Q3: Skill が認識されない場合は？<a class="headerlink" href="#q3-skill" title="Permanent link">&para;</a></h3>
+<p>チェックリスト:
+- [ ] <code>.claude/skills/&lt;skill-name&gt;/SKILL.md</code> にファイルが存在するか
+- [ ] frontmatter（<code>---</code>で囲まれた部分）が正しいか
+- [ ] <code>name:</code> が定義されているか
+- [ ] <code>.claude/settings.local.json</code> の <code>additionalDirectories</code> に <code>.claude/skills</code> が含まれているか</p>
+<h3 id="q4">Q4: 並列実行はどうやって制御する？<a class="headerlink" href="#q4" title="Permanent link">&para;</a></h3>
+<p><strong>方法1: Skill ツールを複数回呼び出す</strong>（オーケストレーター内）</p>
+<p><div class="highlight"><pre><span></span><code><span class="gu">## Step 3: 分析</span>
+
+以下の3スキルを並列に実行:
+</code></pre></div>
+/game-bug-hunt
+/game-manual-review
+/game-fun-review
+<div class="highlight"><pre><span></span><code>
+</code></pre></div></p>
+<p>Claude Code が自動的に並列実行します。</p>
+<p><strong>方法2: Task ツールで Agent を起動</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// オーケストレーター Skill 内で</span>
+<span class="nx">Task</span><span class="p">({</span><span class="w"> </span><span class="nx">subagent_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;general-purpose&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">prompt</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/game-bug-hunt を実行&quot;</span><span class="w"> </span><span class="p">})</span>
+<span class="nx">Task</span><span class="p">({</span><span class="w"> </span><span class="nx">subagent_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;general-purpose&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">prompt</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/game-manual-review を実行&quot;</span><span class="w"> </span><span class="p">})</span>
+<span class="nx">Task</span><span class="p">({</span><span class="w"> </span><span class="nx">subagent_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;general-purpose&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">prompt</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/game-fun-review を実行&quot;</span><span class="w"> </span><span class="p">})</span>
+</code></pre></div>
+<h3 id="q5-skill-skill">Q5: Skill から別の Skill を呼び出せる？<a class="headerlink" href="#q5-skill-skill" title="Permanent link">&para;</a></h3>
+<p><strong>Yes</strong>（オーケストレーター Skill の場合のみ）</p>
+<div class="highlight"><pre><span></span><code><span class="nt">allowed-tools</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Skill</span><span class="w">  </span><span class="c1"># これを許可</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="gu">## 実行手順</span>
+
+<span class="k">1.</span> <span class="sb">`/game-setup`</span> を実行
+<span class="k">2.</span> <span class="sb">`/game-play`</span> を実行
+<span class="k">3.</span> <span class="sb">`/game-bug-hunt`</span> を実行
+</code></pre></div>
+<h3 id="q6">Q6: プレイログが古い状態で分析スキルを実行したら？<a class="headerlink" href="#q6" title="Permanent link">&para;</a></h3>
+<p><strong>古いプレイログを元に分析されます</strong>。最新の状態で分析したい場合は:</p>
+<div class="highlight"><pre><span></span><code>/game-play<span class="w">         </span><span class="c1"># 最新のプレイログを生成</span>
+/game-bug-hunt<span class="w">     </span><span class="c1"># 最新ログで分析</span>
+</code></pre></div>
+<p>または:</p>
+<div class="highlight"><pre><span></span><code>/game-orchestrate<span class="w">  </span><span class="c1"># すべて最新状態で実行</span>
+</code></pre></div>
+<hr />
+<h2 id="_24">トラブルシューティング<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h2>
+<h3 id="1-game-setup-failed">問題1: <code>/game-setup</code> が FAILED になる<a class="headerlink" href="#1-game-setup-failed" title="Permanent link">&para;</a></h3>
+<h4 id="_25">症状<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>## game-setup 結果
+- ステータス: FAILED
+- 失敗理由: Port 2718 is already in use
+</code></pre></div>
+<h4 id="_26">原因<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h4>
+<p>既存の marimo サーバーがポート 2718 を占有している</p>
+<h4 id="_27">解決策<a class="headerlink" href="#_27" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Windows</span>
+taskkill<span class="w"> </span>/F<span class="w"> </span>/IM<span class="w"> </span>marimo.exe
+
+<span class="c1"># 確認</span>
+netstat<span class="w"> </span>-ano<span class="w"> </span><span class="p">|</span><span class="w"> </span>findstr<span class="w"> </span>:2718
+</code></pre></div>
+<hr />
+<h3 id="2-game-play">問題2: <code>/game-play</code> でテストが失敗する<a class="headerlink" href="#2-game-play" title="Permanent link">&para;</a></h3>
+<h4 id="_28">症状<a class="headerlink" href="#_28" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>Error: Timeout 30000ms exceeded
+</code></pre></div>
+<h4 id="_29">原因<a class="headerlink" href="#_29" title="Permanent link">&para;</a></h4>
+<ul>
+<li>marimo サーバーが起動していない</li>
+<li><code>waitForLoadState("networkidle")</code> を使っている（marimo では永遠に到達しない）</li>
+</ul>
+<h4 id="_30">解決策<a class="headerlink" href="#_30" title="Permanent link">&para;</a></h4>
+<ol>
+<li><code>/game-setup</code> を先に実行したか確認</li>
+<li><code>development_docs/game/game-e2e-review-system.md</code> の知見35a を参照</li>
+<li><code>waitForLoadState("load")</code> に変更</li>
+</ol>
+<hr />
+<h3 id="3-issue">問題3: バグが Issue として記録されない<a class="headerlink" href="#3-issue" title="Permanent link">&para;</a></h3>
+<h4 id="_31">症状<a class="headerlink" href="#_31" title="Permanent link">&para;</a></h4>
+<p><code>/game-bug-hunt</code> が完了したが、<code>development_docs/issues/</code> に何も追加されていない</p>
+<h4 id="_32">原因<a class="headerlink" href="#_32" title="Permanent link">&para;</a></h4>
+<p>プレイログにエラー・異常が検出されなかった（= バグなし）</p>
+<h4 id="_33">確認方法<a class="headerlink" href="#_33" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># プレイログを確認</span>
+cat<span class="w"> </span>development_docs/game-play-reports/play-log-*.md
+</code></pre></div>
+<p>「エラー・異常」セクションが空 → バグなし（正常）</p>
+<hr />
+<h3 id="4_1">問題4: オーケストレーターが途中で止まる<a class="headerlink" href="#4_1" title="Permanent link">&para;</a></h3>
+<h4 id="_34">症状<a class="headerlink" href="#_34" title="Permanent link">&para;</a></h4>
+<p><code>/game-orchestrate</code> を実行したが、Step 2 で止まった</p>
+<h4 id="_35">原因<a class="headerlink" href="#_35" title="Permanent link">&para;</a></h4>
+<p>Step 1 が <code>FAILED</code> だった（依存関係により後続がスキップされる）</p>
+<h4 id="_36">解決策<a class="headerlink" href="#_36" title="Permanent link">&para;</a></h4>
+<ol>
+<li>オーケストレーターの出力を確認</li>
+<li>Step 1 のエラー内容を確認</li>
+<li><code>/game-setup</code> を個別に実行してデバッグ</li>
+</ol>
+<hr />
+<h3 id="5">問題5: スクリーンショットが撮影されない<a class="headerlink" href="#5" title="Permanent link">&para;</a></h3>
+<h4 id="_37">症状<a class="headerlink" href="#_37" title="Permanent link">&para;</a></h4>
+<p>プレイログに「スクリーンショット: なし」と記載される</p>
+<h4 id="_38">原因<a class="headerlink" href="#_38" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Playwright が headless モードで実行されている</li>
+<li><code>--headed</code> フラグが欠落</li>
+</ul>
+<h4 id="_39">解決策<a class="headerlink" href="#_39" title="Permanent link">&para;</a></h4>
+<p><code>game-play/SKILL.md</code> を確認:</p>
+<div class="highlight"><pre><span></span><code>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/sandbox.spec.ts<span class="w"> </span>--headed
+</code></pre></div>
+<p><code>--headed</code> が含まれているか確認。</p>
+<hr />
+<h2 id="_40">設計上のポイント（開発者向け）<a class="headerlink" href="#_40" title="Permanent link">&para;</a></h2>
+<h3 id="_41">なぜオーケストレーションなのか？<a class="headerlink" href="#_41" title="Permanent link">&para;</a></h3>
+<p>従来の「1つの巨大なテストスクリプト」ではなく、「小さなスキルの組み合わせ」にした理由:</p>
+<h4 id="_42">メリット<a class="headerlink" href="#_42" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>保守性</strong>: 各スキルが独立 → 修正が局所化</li>
+<li><strong>再利用性</strong>: <code>game-setup</code> は他のゲームテストでも使える</li>
+<li><strong>テスト容易性</strong>: 各スキルを個別にテスト可能</li>
+<li><strong>拡張性</strong>: 新しい分析（Agent 6）を追加しやすい</li>
+</ol>
+<h4 id="_43">デメリット<a class="headerlink" href="#_43" title="Permanent link">&para;</a></h4>
+<ul>
+<li>初期構築コストが高い（設計・ドキュメント作成）</li>
+<li>オーケストレーション層が必要</li>
+</ul>
+<p>→ ただし、長期的には <strong>メリット &gt;&gt; デメリット</strong></p>
+<h3 id="5-agent">なぜ5つの Agent？<a class="headerlink" href="#5-agent" title="Permanent link">&para;</a></h3>
+<p><strong>Single Responsibility Principle</strong>（単一責任の原則）に基づいています。</p>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>専門性</th>
+<th>なぜ分離？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>setup</td>
+<td>インフラ</td>
+<td>環境問題とゲームロジックを切り離す</td>
+</tr>
+<tr>
+<td>play</td>
+<td>テスト実行</td>
+<td>プレイと分析を切り離す</td>
+</tr>
+<tr>
+<td>bug-hunt</td>
+<td>デバッグ</td>
+<td>バグと UX を切り離す</td>
+</tr>
+<tr>
+<td>manual-review</td>
+<td>ドキュメント</td>
+<td>技術的正確性と面白さを切り離す</td>
+</tr>
+<tr>
+<td>fun-review</td>
+<td>ゲームデザイン</td>
+<td>主観評価を独立させる</td>
+</tr>
+</tbody>
+</table>
+<p>もし1つの巨大 Agent にすると:
+- バグ発見に集中しすぎて UX 評価がおろそかになる
+- ドキュメントレビューが抜け落ちる
+- 視点が固定化される</p>
+<h3 id="_44">成果物のフォーマット統一<a class="headerlink" href="#_44" title="Permanent link">&para;</a></h3>
+<p>すべての成果物は <strong>Markdown</strong> で統一:</p>
+<ul>
+<li>プレイログ: <code>play-log-YYYY-MM-DD.md</code></li>
+<li>Issue: <code>&lt;slug&gt;.md</code>（既存フォーマット準拠）</li>
+<li>レビュー: <code>manual-review-YYYY-MM-DD.md</code></li>
+<li>評価: <code>fun-review-YYYY-MM-DD.md</code></li>
+</ul>
+<p><strong>理由</strong>:
+- Git で差分管理しやすい
+- GitHub/GitLab でそのまま閲覧可能
+- 検索・加工が容易
+- AI（Claude Code）が読みやすい</p>
+<h3 id="_45">日付ベースのファイル名<a class="headerlink" href="#_45" title="Permanent link">&para;</a></h3>
+<p><code>play-log-YYYY-MM-DD.md</code> のように日付を含める理由:</p>
+<ul>
+<li>履歴が残る（上書きされない）</li>
+<li>時系列で並ぶ</li>
+<li>「いつのテストか」が一目瞭然</li>
+</ul>
+<hr />
+<h2 id="_46">まとめ<a class="headerlink" href="#_46" title="Permanent link">&para;</a></h2>
+<h3 id="_47">このシステムで何が変わったか<a class="headerlink" href="#_47" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>Before</th>
+<th>After</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>テスト時間</td>
+<td>30分〜1時間</td>
+<td>5分（自動化）</td>
+</tr>
+<tr>
+<td>バグ発見率</td>
+<td>主観的・ランダム</td>
+<td>体系的・再現可能</td>
+</tr>
+<tr>
+<td>ドキュメント品質</td>
+<td>チェックなし</td>
+<td>自動検証</td>
+</tr>
+<tr>
+<td>UX 評価</td>
+<td>たまに実施</td>
+<td>毎回実施</td>
+</tr>
+<tr>
+<td>知見の蓄積</td>
+<td>Slack・メモに散在</td>
+<td><code>development_docs/</code> に集約</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_48">次のステップ<a class="headerlink" href="#_48" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>実際に使ってみる</strong>:
+   <div class="highlight"><pre><span></span><code>/game-orchestrate
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>成果物を確認</strong>:
+   <div class="highlight"><pre><span></span><code>development_docs/game-play-reports/
+development_docs/issues/
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>フィードバック</strong>:</p>
+</li>
+<li>バグ・改善提案を Issue に記録</li>
+<li>このドキュメントを改善</li>
+</ol>
+<hr />
+<h2 id="_49">関連ドキュメント<a class="headerlink" href="#_49" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ドキュメント</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../plans/backcast-game-play/">backcast-game-play.md</a></td>
+<td>オーケストレーション実行マニュアル</td>
+</tr>
+<tr>
+<td><a href="../game/game-e2e-review-system/">game-e2e-review-system.md</a></td>
+<td>E2E テスト知見集</td>
+</tr>
+<tr>
+<td><code>.claude/skills/game-*/SKILL.md</code></td>
+<td>各スキルの詳細定義</td>
+</tr>
+<tr>
+<td><code>development_docs/issues/</code></td>
+<td>既知バグ一覧</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>作成者</strong>: Claude Code
+<strong>更新履歴</strong>:
+- 2026-02-21: 初版作成</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

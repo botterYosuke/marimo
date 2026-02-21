@@ -21,7 +21,7 @@
     
     
       
-        <title>Backcast ゲームプレイ — Skill Orchestration マニュアル - marimo Developer Docs</title>
+        <title>Issue: ui.spec.ts:176 現金マイルストーン境界テストが「Expected > 50000, Received 50000」で失敗する - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#backcast-skill-orchestration" class="md-skip">
+        <a href="#issue-uispects176-expected-50000-received-50000" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Backcast ゲームプレイ — Skill Orchestration マニュアル
+              Issue: ui.spec.ts:176 現金マイルストーン境界テストが「Expected &gt; 50000, Received 50000」で失敗する
             
           </span>
         </div>
@@ -1210,66 +1210,32 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        アーキテクチャ
+        概要
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="アーキテクチャ">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        依存関係
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#skill" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Skill 一覧
+        再現手順
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Skill 一覧">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        オーケストレーター
+        期待される動作
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skill_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        個別 Skill
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1277,7 +1243,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        クイックスタート（推奨）
+        実際の動作
       
     </span>
   </a>
@@ -1288,19 +1254,30 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実行手順（手動実行の場合）
+        関連ファイル
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="実行手順（手動実行の場合）">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        調査メモ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="調査メモ">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#step-1" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: 環境整備
+        状態汚染との関係
       
     </span>
   </a>
@@ -1308,10 +1285,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: ゲームプレイ
+        マイルストーン報酬額の確認
       
     </span>
   </a>
@@ -1319,10 +1296,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-3" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 3: 分析（並列実行可）
+        プレイログとの関係
       
     </span>
   </a>
@@ -1330,10 +1307,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-4" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 4: 成果物確認
+        単体実行での確認
       
     </span>
   </a>
@@ -1346,85 +1323,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        共通情報
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="共通情報">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ゲーム概要
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ゲームファイル
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        操作コマンド
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        スキルツリー前提条件チェーン
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
-        マイルストーン
+        推奨調査手順
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        参照ドキュメント
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1445,305 +1350,73 @@
 
 
 
-<h1 id="backcast-skill-orchestration">Backcast ゲームプレイ — Skill Orchestration マニュアル<a class="headerlink" href="#backcast-skill-orchestration" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-20
-<strong>更新日</strong>: 2026-02-21
-<strong>目的</strong>: 5つの Claude Code Skill を順序制御しながら実行し、ゲームの品質・面白さ・ドキュメント正確性を多角的に評価する</p>
+<h1 id="issue-uispects176-expected-50000-received-50000">Issue: ui.spec.ts:176 現金マイルストーン境界テストが「Expected &gt; 50000, Received 50000」で失敗する<a class="headerlink" href="#issue-uispects176-expected-50000-received-50000" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-21
+<strong>重要度</strong>: Medium
+<strong>カテゴリ</strong>: UI / データ
+<strong>ステータス</strong>: Open</p>
 <hr />
-<h2 id="_1">アーキテクチャ<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────┐
-│                 Orchestrator（人間）                    │
-│                                                       │
-│  Step 1:  /game-setup          → 環境 Ready            │
-│  Step 2:  /game-play           → プレイログ生成          │
-│  Step 3:  /game-bug-hunt       ┐                       │
-│           /game-manual-review  ├ 並列実行               │
-│           /game-fun-review     ┘                       │
-│  Step 4:  成果物確認                                    │
-└──────────────────────────────────────────────────────┘
-</code></pre></div>
-<h3 id="_2">依存関係<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-setup ──→ /game-play ──┬──→ /game-bug-hunt
-                             ├──→ /game-manual-review
-                             └──→ /game-fun-review
-</code></pre></div>
-<hr />
-<h2 id="skill">Skill 一覧<a class="headerlink" href="#skill" title="Permanent link">&para;</a></h2>
-<h3 id="_3">オーケストレーター<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p><code>ui.spec.ts</code> の 176 行目付近にある現金マイルストーン検証テストが失敗する。
+テストは「マイルストーン到達後に現金が 50,000 円を超えている」ことを確認するが、実際には現金が 50,000 円ちょうどになっており <code>Expected &gt; 50000, Received 50000</code> で失敗する。</p>
+<p>初期資産 ¥100,000 → マイルストーン報酬として +X 円が付与されるはずが、現金が初期値のまま、あるいはちょうど境界値（50,000）になっている。</p>
+<h2 id="_2">再現手順<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>npx playwright test e2e-tests/game/ --headed --reporter=line</code> でフルランを実行する</li>
+<li><code>ui.spec.ts:176</code> が <code>Expected &gt; 50000, Received 50000</code> で失敗する</li>
+</ol>
+<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>マイルストーン報酬が付与された後に HUD の Cash 表示が <code>&gt; 50,000</code> 円になっている。</p>
+<h2 id="_4">実際の動作<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>Cash が 50,000 円ちょうどであり、「50,000 を超えている」アサーションが失敗する。</p>
+<p>考えられるシナリオ:
+- <strong>シナリオ A（初期値問題）</strong>: テスト開始時点で既に Cash が 50,000 になっている（前スペックの状態汚染 or マイルストーン境界との一致）
+- <strong>シナリオ B（マイルストーン未付与）</strong>: スキル取得はされたがマイルストーン報酬（現金付与）が実行されていない
+- <strong>シナリオ C（初期 Cash が 50,000 設定）</strong>: ゲームの初期資産が ¥100,000 ではなく ¥50,000 に変更されており、初期 Cash が境界値と一致している</p>
+<h2 id="_5">関連ファイル<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Skill</th>
-<th>説明</th>
+<th>ファイル</th>
+<th>関連箇所</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>/game-orchestrate</code></td>
-<td><strong>全自動</strong>: Step 1〜3 を順序実行（環境整備 → プレイ → 分析）</td>
+<td><code>frontend/e2e-tests/game/ui.spec.ts</code></td>
+<td>176行目 — Cash マイルストーンアサーション</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/editor/controls/backtest-hud.tsx</code></td>
+<td>HUD の Cash 表示</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/atoms.ts</code></td>
+<td>マイルストーン報酬付与ロジック（<code>completeSkillWithRewardAtom</code>）</td>
 </tr>
 </tbody>
 </table>
-<h3 id="skill_1">個別 Skill<a class="headerlink" href="#skill_1" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Skill</th>
-<th>説明</th>
-<th>入力</th>
-<th>出力先</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td><code>/game-setup</code></td>
-<td>環境整備・起動・リセット</td>
-<td>なし</td>
-<td>(口頭: READY/FAILED)</td>
-</tr>
-<tr>
-<td>2</td>
-<td><code>/game-play</code></td>
-<td>ゲーム実プレイ・ログ記録</td>
-<td>setup READY</td>
-<td><code>game-play-reports/play-log-*.md</code></td>
-</tr>
-<tr>
-<td>3</td>
-<td><code>/game-bug-hunt</code></td>
-<td>バグ発見・Issue 記録</td>
-<td>プレイログ</td>
-<td><code>development_docs/issues/&lt;slug&gt;.md</code></td>
-</tr>
-<tr>
-<td>4</td>
-<td><code>/game-manual-review</code></td>
-<td>マニュアル正確性検証</td>
-<td>プレイログ</td>
-<td><code>game-play-reports/manual-review-*.md</code></td>
-</tr>
-<tr>
-<td>5</td>
-<td><code>/game-fun-review</code></td>
-<td>面白さ評価・改善提案</td>
-<td>プレイログ</td>
-<td><code>game-play-reports/fun-review-*.md</code></td>
-</tr>
-</tbody>
-</table>
-<p>Skill 定義ファイル: <code>.claude/skills/game-*/SKILL.md</code></p>
-<hr />
-<h2 id="_4">クイックスタート（推奨）<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p><strong>全ステップを一気に実行</strong>:</p>
-<div class="highlight"><pre><span></span><code>/game-orchestrate
+<h2 id="_6">調査メモ<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="_7">状態汚染との関係<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p><code>state-contamination-auto-instantiate-skill-leak.md</code> に記録された状態汚染が修正済みとされているが、フルランでは依然として発生している可能性がある。特に <code>ui.spec.ts</code> が実行される順番と前スペックの残留状態が影響している可能性がある。</p>
+<h3 id="_8">マイルストーン報酬額の確認<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p><code>skill-data.ts</code> の各スキルの <code>reward.value</code> と、マイルストーン報酬トリガー条件（<code>milestone</code> フィールド）を確認する必要がある。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 確認すべき点</span>
+<span class="c1">// 1. 最初のマイルストーンは何スキル取得後に発動するか</span>
+<span class="c1">// 2. マイルストーン報酬額はいくらか</span>
+<span class="c1">// 3. 初期 Cash + 報酬額 &gt; 50,000 が成立するか</span>
 </code></pre></div>
-<p>このコマンドで Step 1〜3（環境整備 → プレイ → 分析）を自動実行します。</p>
-<p>詳細な手動実行手順は以下のセクションを参照してください。</p>
-<hr />
-<h2 id="_5">実行手順（手動実行の場合）<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<h3 id="step-1">Step 1: 環境整備<a class="headerlink" href="#step-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-setup
-</code></pre></div>
-<p>サーバー起動・ファイル配置・接続確認を行う。
-出力が <code>READY</code> になったら Step 2 へ進む。</p>
-<h3 id="step-2">Step 2: ゲームプレイ<a class="headerlink" href="#step-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-play
-</code></pre></div>
-<p>Sandbox モード → Bridge モードの順にプレイし、ログとスクリーンショットを記録。
-レポートが <code>development_docs/game-play-reports/play-log-YYYY-MM-DD.md</code> に生成される。</p>
-<h3 id="step-3">Step 3: 分析（並列実行可）<a class="headerlink" href="#step-3" title="Permanent link">&para;</a></h3>
-<p>以下の3つは互いに独立しているため、<strong>並列実行</strong>が可能。</p>
-<div class="highlight"><pre><span></span><code>/game-bug-hunt
-/game-manual-review
-/game-fun-review
-</code></pre></div>
-<p>各スキルは Step 2 で生成されたプレイログを入力として使用する。</p>
-<h3 id="step-4">Step 4: 成果物確認<a class="headerlink" href="#step-4" title="Permanent link">&para;</a></h3>
-<p>全スキルの完了後、<code>development_docs/game-play-reports/</code> に以下が揃っていることを確認:</p>
-<ul>
-<li>[ ] <code>play-log-YYYY-MM-DD.md</code> — プレイログ</li>
-<li>[ ] <code>manual-review-YYYY-MM-DD.md</code> — マニュアルレビュー</li>
-<li>[ ] <code>fun-review-YYYY-MM-DD.md</code> — 面白さ評価</li>
-<li>[ ] <code>development_docs/issues/</code> に新規 Issue（バグがあった場合）</li>
-</ul>
-<hr />
-<h2 id="_6">共通情報<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<h3 id="_7">ゲーム概要<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
-<p><strong>Backcast</strong> = トヨタ自動車（7203）の株価を使った投資シミュレーション（marimo ノートブック上で動作）</p>
-<h3 id="_8">ゲームファイル<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>種別</th>
-<th>パス</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>プレイファイル</td>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-</tr>
-<tr>
-<td>ゲームロジック</td>
-<td><code>src-tauri/sample-notebooks/game_setup.py</code></td>
-</tr>
-<tr>
-<td>スキル発火</td>
-<td><code>src-tauri/sample-notebooks/skill_events.py</code></td>
-</tr>
-<tr>
-<td>スキル定義</td>
-<td><code>frontend/src/components/skill-tree/skill-data.ts</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="_9">操作コマンド<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>コマンド</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>bt.chart(code)</code></td>
-<td>銘柄チャート表示</td>
-</tr>
-<tr>
-<td><code>bt.buy()</code></td>
-<td>株購入</td>
-</tr>
-<tr>
-<td><code>bt.sell()</code></td>
-<td>株売却</td>
-</tr>
-<tr>
-<td><code>bt.step()</code></td>
-<td>次の日に進む</td>
-</tr>
-<tr>
-<td><code>bt.trades()</code></td>
-<td>保有株確認</td>
-</tr>
-<tr>
-<td><code>bt.reveal_data()</code></td>
-<td>データの正体確認</td>
-</tr>
-<tr>
-<td><code>bt.get_stock_daily(code)</code></td>
-<td>株価データ取得</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_10">スキルツリー前提条件チェーン<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>SANDBOX_001 → SANDBOX_002 → SANDBOX_003 ─┐
-                           → SANDBOX_004 ─┤→ SANDBOX_005 → SANDBOX_006
-                                          └─ FAIL_001
-                                             FAIL_002（SANDBOX_004 + FAIL_001）
-
-SANDBOX_006 → BRIDGE_001 → BRIDGE_002 → BRIDGE_003
-                                            ↓
-BRIDGE_003 → SETUP_001 → SETUP_002 ─→ SETUP_003 → SETUP_004
-                       └→ DATA_001 ─┘              → SETUP_005
-                            ↓
-                  DATA_002 → DATA_003
-                  DATA_004 → DATA_005
-                  DATA_006
-
-SETUP_003 + DATA_001 → SET_001 → SET_002
-                SET_001 + DATA_005 → SET_003
-
-SET_001 → TRADE_001 → TRADE_002
-                    → TRADE_003 → TRADE_004
-                               → TRADE_007 → TRADE_008
-                                           → RISK_005 → RISK_006 → RISK_007 → RISK_008
-                                                                  → RISK_010
-                    → TRADE_006
-                    → RISK_001 → RISK_002 → RISK_003 → RISK_004
-                    → RISK_009
-SET_001 → TRADE_009 → TRADE_010
-SET_001 → CHART_001 → CHART_002（+ TRADE_003）
-                    → CHART_003（+ IND_001）→ CHART_004
-
-DATA_002 → IND_001 → IND_002 → IND_003 → IND_004
-                             → IND_003 + IND_005 → IND_008
-                    → IND_005 → IND_006
-                    → IND_007
-                    → IND_009
-
-TRADE_001 → FAIL_003（資金0で発火）
-</code></pre></div>
-<h3 id="_11">マイルストーン<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>スキル数</th>
-<th>ボーナス</th>
-<th>称号/アイテム</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>10</td>
-<td>+50,000円</td>
-<td>「見習い投資家」</td>
-</tr>
-<tr>
-<td>20</td>
-<td>+100,000円</td>
-<td>「新進トレーダー」</td>
-</tr>
-<tr>
-<td>35</td>
-<td>+200,000円</td>
-<td>米国株ETF</td>
-</tr>
-<tr>
-<td>50</td>
-<td>+400,000円</td>
-<td>「Backcastエキスパート」</td>
-</tr>
-<tr>
-<td>58</td>
-<td>+600,000円</td>
-<td>「マスター投資家」</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_12">参照ドキュメント<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>ドキュメント</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>development_docs/game/game-e2e-review-system.md</code></td>
-<td>E2E テスト知見集（知見 1〜35）</td>
-</tr>
-<tr>
-<td><code>frontend/e2e-tests/game/helpers.ts</code></td>
-<td>共通ヘルパー関数</td>
-</tr>
-<tr>
-<td><code>frontend/e2e-tests/game/constants.ts</code></td>
-<td>テスト定数</td>
-</tr>
-<tr>
-<td><code>frontend/e2e-tests/game/sandbox.spec.ts</code></td>
-<td>テスト構造のリファレンス</td>
-</tr>
-<tr>
-<td><code>development_docs/issues/</code></td>
-<td>既知バグ一覧</td>
-</tr>
-</tbody>
-</table>
+<h3 id="_9">プレイログとの関係<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>2026-02-21 フルランの「カテゴリ E」として記録された唯一の UI 現金表示失敗（1件）。他のカテゴリ（A〜D）とは独立した原因である可能性が高い。</p>
+<p><code>ui.spec.ts</code> は 4 passed / 3 failed / 3 skipped（合計 10）のうちの 1 件として記録されている。</p>
+<h3 id="_10">単体実行での確認<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>前回ベースライン（2026-02-21 セッション開始時）では <code>ui.spec.ts</code> は 9 passed / 3 fixme / 0 failed だった。フルラン実行時のみ 3 failed が発生していることから、フルラン固有の状態汚染による可能性がある。</p>
+<h2 id="_11">推奨調査手順<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>ui.spec.ts</code> を単体実行（<code>npx playwright test e2e-tests/game/ui.spec.ts</code>）して :176 が通過するか確認する</li>
+<li>通過する場合 → フルラン特有の状態汚染が原因（<code>state-contamination-auto-instantiate-skill-leak.md</code> の再発）</li>
+<li>通過しない場合 → <code>backtest-hud.tsx</code> または <code>atoms.ts</code> のマイルストーン報酬ロジックに問題あり</li>
+</ol>
 
 
 

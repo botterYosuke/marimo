@@ -21,7 +21,7 @@
     
     
       
-        <title>Backcast ゲームプレイ — Skill Orchestration マニュアル - marimo Developer Docs</title>
+        <title>Issue: buy()/sell() ガード警告が実装されておらず guard-validation.spec.ts 全 3 件が依然失敗する - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#backcast-skill-orchestration" class="md-skip">
+        <a href="#issue-buysell-guard-validationspects-3" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Backcast ゲームプレイ — Skill Orchestration マニュアル
+              Issue: buy()/sell() ガード警告が実装されておらず guard-validation.spec.ts 全 3 件が依然失敗する
             
           </span>
         </div>
@@ -1210,66 +1210,32 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        アーキテクチャ
+        概要
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="アーキテクチャ">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        依存関係
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#skill" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Skill 一覧
+        再現手順
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Skill 一覧">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        オーケストレーター
+        期待される動作
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skill_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        個別 Skill
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1277,7 +1243,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        クイックスタート（推奨）
+        実際の動作
       
     </span>
   </a>
@@ -1288,19 +1254,19 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実行手順（手動実行の場合）
+        根本原因の仮説
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="実行手順（手動実行の場合）">
+    <nav class="md-nav" aria-label="根本原因の仮説">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#step-1" class="md-nav__link">
+  <a href="#1-syspath" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: 環境整備
+        仮説 1: sys.path 設定によるインポート失敗
       
     </span>
   </a>
@@ -1308,10 +1274,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2" class="md-nav__link">
+  <a href="#2-mooutputappend-playwright" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: ゲームプレイ
+        仮説 2: mo.output.append() の出力が Playwright で検索できない位置に表示される
       
     </span>
   </a>
@@ -1319,10 +1285,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-3" class="md-nav__link">
+  <a href="#3-bt" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 3: 分析（並列実行可）
+        仮説 3: bt インスタンスのスコープ問題
       
     </span>
   </a>
@@ -1330,10 +1296,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-4" class="md-nav__link">
+  <a href="#4-game_testpy-pythonpath-sample-notebooks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 4: 成果物確認
+        仮説 4: game_test.py の PYTHONPATH が sample-notebooks を含まない
       
     </span>
   </a>
@@ -1349,30 +1315,41 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        共通情報
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="共通情報">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ゲーム概要
+        調査手順
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        関連ファイル
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ゲームファイル
+        調査メモ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="調査メモ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        既存 Issue との関係
       
     </span>
   </a>
@@ -1383,40 +1360,7 @@
   <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        操作コマンド
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        スキルツリー前提条件チェーン
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        マイルストーン
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        参照ドキュメント
+        修正方針
       
     </span>
   </a>
@@ -1425,6 +1369,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        フルランでの失敗数推移
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1445,302 +1400,114 @@
 
 
 
-<h1 id="backcast-skill-orchestration">Backcast ゲームプレイ — Skill Orchestration マニュアル<a class="headerlink" href="#backcast-skill-orchestration" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-20
-<strong>更新日</strong>: 2026-02-21
-<strong>目的</strong>: 5つの Claude Code Skill を順序制御しながら実行し、ゲームの品質・面白さ・ドキュメント正確性を多角的に評価する</p>
+<h1 id="issue-buysell-guard-validationspects-3">Issue: buy()/sell() ガード警告が実装されておらず guard-validation.spec.ts 全 3 件が依然失敗する<a class="headerlink" href="#issue-buysell-guard-validationspects-3" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-21
+<strong>重要度</strong>: High
+<strong>カテゴリ</strong>: スキル発火 / UI
+<strong>ステータス</strong>: Open</p>
 <hr />
-<h2 id="_1">アーキテクチャ<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────┐
-│                 Orchestrator（人間）                    │
-│                                                       │
-│  Step 1:  /game-setup          → 環境 Ready            │
-│  Step 2:  /game-play           → プレイログ生成          │
-│  Step 3:  /game-bug-hunt       ┐                       │
-│           /game-manual-review  ├ 並列実行               │
-│           /game-fun-review     ┘                       │
-│  Step 4:  成果物確認                                    │
-└──────────────────────────────────────────────────────┘
-</code></pre></div>
-<h3 id="_2">依存関係<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-setup ──→ /game-play ──┬──→ /game-bug-hunt
-                             ├──→ /game-manual-review
-                             └──→ /game-fun-review
-</code></pre></div>
-<hr />
-<h2 id="skill">Skill 一覧<a class="headerlink" href="#skill" title="Permanent link">&para;</a></h2>
-<h3 id="_3">オーケストレーター<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Skill</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>/game-orchestrate</code></td>
-<td><strong>全自動</strong>: Step 1〜3 を順序実行（環境整備 → プレイ → 分析）</td>
-</tr>
-</tbody>
-</table>
-<h3 id="skill_1">個別 Skill<a class="headerlink" href="#skill_1" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Skill</th>
-<th>説明</th>
-<th>入力</th>
-<th>出力先</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td><code>/game-setup</code></td>
-<td>環境整備・起動・リセット</td>
-<td>なし</td>
-<td>(口頭: READY/FAILED)</td>
-</tr>
-<tr>
-<td>2</td>
-<td><code>/game-play</code></td>
-<td>ゲーム実プレイ・ログ記録</td>
-<td>setup READY</td>
-<td><code>game-play-reports/play-log-*.md</code></td>
-</tr>
-<tr>
-<td>3</td>
-<td><code>/game-bug-hunt</code></td>
-<td>バグ発見・Issue 記録</td>
-<td>プレイログ</td>
-<td><code>development_docs/issues/&lt;slug&gt;.md</code></td>
-</tr>
-<tr>
-<td>4</td>
-<td><code>/game-manual-review</code></td>
-<td>マニュアル正確性検証</td>
-<td>プレイログ</td>
-<td><code>game-play-reports/manual-review-*.md</code></td>
-</tr>
-<tr>
-<td>5</td>
-<td><code>/game-fun-review</code></td>
-<td>面白さ評価・改善提案</td>
-<td>プレイログ</td>
-<td><code>game-play-reports/fun-review-*.md</code></td>
-</tr>
-</tbody>
-</table>
-<p>Skill 定義ファイル: <code>.claude/skills/game-*/SKILL.md</code></p>
-<hr />
-<h2 id="_4">クイックスタート（推奨）<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p><strong>全ステップを一気に実行</strong>:</p>
-<div class="highlight"><pre><span></span><code>/game-orchestrate
-</code></pre></div>
-<p>このコマンドで Step 1〜3（環境整備 → プレイ → 分析）を自動実行します。</p>
-<p>詳細な手動実行手順は以下のセクションを参照してください。</p>
-<hr />
-<h2 id="_5">実行手順（手動実行の場合）<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<h3 id="step-1">Step 1: 環境整備<a class="headerlink" href="#step-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-setup
-</code></pre></div>
-<p>サーバー起動・ファイル配置・接続確認を行う。
-出力が <code>READY</code> になったら Step 2 へ進む。</p>
-<h3 id="step-2">Step 2: ゲームプレイ<a class="headerlink" href="#step-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-play
-</code></pre></div>
-<p>Sandbox モード → Bridge モードの順にプレイし、ログとスクリーンショットを記録。
-レポートが <code>development_docs/game-play-reports/play-log-YYYY-MM-DD.md</code> に生成される。</p>
-<h3 id="step-3">Step 3: 分析（並列実行可）<a class="headerlink" href="#step-3" title="Permanent link">&para;</a></h3>
-<p>以下の3つは互いに独立しているため、<strong>並列実行</strong>が可能。</p>
-<div class="highlight"><pre><span></span><code>/game-bug-hunt
-/game-manual-review
-/game-fun-review
-</code></pre></div>
-<p>各スキルは Step 2 で生成されたプレイログを入力として使用する。</p>
-<h3 id="step-4">Step 4: 成果物確認<a class="headerlink" href="#step-4" title="Permanent link">&para;</a></h3>
-<p>全スキルの完了後、<code>development_docs/game-play-reports/</code> に以下が揃っていることを確認:</p>
+<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p><code>guard-validation.spec.ts</code> の全 3 テストがフルラン（2026-02-21 PM）でも引き続き失敗している。</p>
+<p><code>guard-validation-warning-not-visible.md</code> では <code>waitForLoadState("networkidle")</code> の修正が実施され <code>✅ 修正済み</code> とされたが、networkidle の問題が解消された後も、<strong>ガード警告テキスト自体がセル出力に現れない</strong>という根本問題が未解決のまま残っている。</p>
+<p>つまり networkidle 修正は必要条件ではあったが、テストを通過させるには不十分だった。</p>
+<h2 id="_2">再現手順<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>npx playwright test e2e-tests/game/guard-validation.spec.ts --headed</code> を実行する</li>
+<li>全 3 テストが失敗する:</li>
+<li><code>guard-validation.spec.ts:50</code> — <code>text=/まず.*bt.chart/</code> が 5 秒以内に現れない</li>
+<li><code>guard-validation.spec.ts:82</code> — <code>.cm-content</code> クリックタイムアウト（セルが正常に追加されない）</li>
+<li><code>guard-validation.spec.ts:126</code> — <code>text=/保有中の株がありません/</code> が 5 秒以内に現れない</li>
+</ol>
+<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
-<li>[ ] <code>play-log-YYYY-MM-DD.md</code> — プレイログ</li>
-<li>[ ] <code>manual-review-YYYY-MM-DD.md</code> — マニュアルレビュー</li>
-<li>[ ] <code>fun-review-YYYY-MM-DD.md</code> — 面白さ評価</li>
-<li>[ ] <code>development_docs/issues/</code> に新規 Issue（バグがあった場合）</li>
+<li>データなしで <code>gs.buy()</code> を呼んだとき、セル出力に <code>mo.callout(mo.md("まず</code>bt.chart('7203')<code>でチャートを表示してください"), kind="warn")</code> が表示される</li>
+<li>ポジションなしで <code>gs.sell()</code> を呼んだとき、セル出力に <code>mo.callout(mo.md("保有中の株がありません。まず</code>bt.buy()<code>で株を購入してください"), kind="warn")</code> が表示される</li>
 </ul>
-<hr />
-<h2 id="_6">共通情報<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<h3 id="_7">ゲーム概要<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
-<p><strong>Backcast</strong> = トヨタ自動車（7203）の株価を使った投資シミュレーション（marimo ノートブック上で動作）</p>
-<h3 id="_8">ゲームファイル<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>種別</th>
-<th>パス</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>プレイファイル</td>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-</tr>
-<tr>
-<td>ゲームロジック</td>
-<td><code>src-tauri/sample-notebooks/game_setup.py</code></td>
-</tr>
-<tr>
-<td>スキル発火</td>
-<td><code>src-tauri/sample-notebooks/skill_events.py</code></td>
-</tr>
-<tr>
-<td>スキル定義</td>
-<td><code>frontend/src/components/skill-tree/skill-data.ts</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="_9">操作コマンド<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>コマンド</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>bt.chart(code)</code></td>
-<td>銘柄チャート表示</td>
-</tr>
-<tr>
-<td><code>bt.buy()</code></td>
-<td>株購入</td>
-</tr>
-<tr>
-<td><code>bt.sell()</code></td>
-<td>株売却</td>
-</tr>
-<tr>
-<td><code>bt.step()</code></td>
-<td>次の日に進む</td>
-</tr>
-<tr>
-<td><code>bt.trades()</code></td>
-<td>保有株確認</td>
-</tr>
-<tr>
-<td><code>bt.reveal_data()</code></td>
-<td>データの正体確認</td>
-</tr>
-<tr>
-<td><code>bt.get_stock_daily(code)</code></td>
-<td>株価データ取得</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_10">スキルツリー前提条件チェーン<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>SANDBOX_001 → SANDBOX_002 → SANDBOX_003 ─┐
-                           → SANDBOX_004 ─┤→ SANDBOX_005 → SANDBOX_006
-                                          └─ FAIL_001
-                                             FAIL_002（SANDBOX_004 + FAIL_001）
-
-SANDBOX_006 → BRIDGE_001 → BRIDGE_002 → BRIDGE_003
-                                            ↓
-BRIDGE_003 → SETUP_001 → SETUP_002 ─→ SETUP_003 → SETUP_004
-                       └→ DATA_001 ─┘              → SETUP_005
-                            ↓
-                  DATA_002 → DATA_003
-                  DATA_004 → DATA_005
-                  DATA_006
-
-SETUP_003 + DATA_001 → SET_001 → SET_002
-                SET_001 + DATA_005 → SET_003
-
-SET_001 → TRADE_001 → TRADE_002
-                    → TRADE_003 → TRADE_004
-                               → TRADE_007 → TRADE_008
-                                           → RISK_005 → RISK_006 → RISK_007 → RISK_008
-                                                                  → RISK_010
-                    → TRADE_006
-                    → RISK_001 → RISK_002 → RISK_003 → RISK_004
-                    → RISK_009
-SET_001 → TRADE_009 → TRADE_010
-SET_001 → CHART_001 → CHART_002（+ TRADE_003）
-                    → CHART_003（+ IND_001）→ CHART_004
-
-DATA_002 → IND_001 → IND_002 → IND_003 → IND_004
-                             → IND_003 + IND_005 → IND_008
-                    → IND_005 → IND_006
-                    → IND_007
-                    → IND_009
-
-TRADE_001 → FAIL_003（資金0で発火）
+<h2 id="_4">実際の動作<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<ul>
+<li>ガード警告テキストがセル出力に表示されない</li>
+<li>またはセル自体が正常に追加・実行されない（<code>.cm-content</code> クリックタイムアウト）</li>
+</ul>
+<h2 id="_5">根本原因の仮説<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="1-syspath">仮説 1: <code>sys.path</code> 設定によるインポート失敗<a class="headerlink" href="#1-syspath" title="Permanent link">&para;</a></h3>
+<p><code>guard-validation.spec.ts</code> は以下のように Python コードを注入している:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="n">sample_notebooks_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">/</span> <span class="s2">&quot;src-tauri&quot;</span> <span class="o">/</span> <span class="s2">&quot;sample-notebooks&quot;</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sample_notebooks_dir</span><span class="p">))</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">game_setup</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gs</span>
 </code></pre></div>
-<h3 id="_11">マイルストーン<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p><code>__file__</code> は実行中のノートブック（<code>game_test.py</code>）を指す。<code>game_test.py</code> の実際のパスが <code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\game_test.py</code> であれば、<code>.parents[3]</code> はパスを 4 階層上に上ったディレクトリを指し、<code>src-tauri/sample-notebooks</code> が存在しない場所になる可能性がある。</p>
+<p>この場合 <code>ImportError</code> が発生し、ガード警告テキストではなくエラー出力が表示される（または何も表示されない）。</p>
+<h3 id="2-mooutputappend-playwright">仮説 2: <code>mo.output.append()</code> の出力が Playwright で検索できない位置に表示される<a class="headerlink" href="#2-mooutputappend-playwright" title="Permanent link">&para;</a></h3>
+<p><code>game_setup.py</code> の <code>buy()</code> は <code>mo.output.append(mo.callout(...))</code> を使って警告を出力する。marimo の <code>output.append()</code> は現在のセルの出力エリアに追加されるが、Playwright の <code>page.getByText(...)</code> がそのセル出力エリアを検索できていない可能性がある。</p>
+<h3 id="3-bt">仮説 3: <code>bt</code> インスタンスのスコープ問題<a class="headerlink" href="#3-bt" title="Permanent link">&para;</a></h3>
+<p>テストがセルを複数追加する際、各セルが別の <code>bt</code> インスタンスを参照している可能性がある。Python のモジュールキャッシュ（<code>sys.modules</code>）が正しく機能していれば同一インスタンスだが、<code>game_setup.py</code> のパスが変わると別のモジュールとしてロードされる。</p>
+<h3 id="4-game_testpy-pythonpath-sample-notebooks">仮説 4: <code>game_test.py</code> の PYTHONPATH が <code>sample-notebooks</code> を含まない<a class="headerlink" href="#4-game_testpy-pythonpath-sample-notebooks" title="Permanent link">&para;</a></h3>
+<p>E2E テストは <code>PYTHONPATH=C:\Users\sasac\AppData\Roaming\marimo\notebooks</code> でサーバーを起動しているが、<code>game_setup.py</code> は <code>C:\Users\...\marimo\src-tauri\sample-notebooks\</code> にある。PYTHONPATH に含まれていない場合、<code>import game_setup as gs</code> が失敗する。</p>
+<h2 id="_6">調査手順<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>guard-validation.spec.ts</code> を <code>--headed</code> で実行し、ブラウザのコンソールと出力エリアを直接確認する</li>
+<li>セルが正常に追加・実行されているか確認する（実行後にエラーが表示されていないか）</li>
+<li>Python エラー出力（<code>ImportError</code> 等）がセル出力エリアに表示されていないか確認する</li>
+<li><code>game_test.py</code> に手動で <code>import game_setup as gs; gs.buy()</code> を実行するセルを追加し、ガード警告が表示されるか確認する</li>
+</ol>
+<h2 id="_7">関連ファイル<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>スキル数</th>
-<th>ボーナス</th>
-<th>称号/アイテム</th>
+<th>ファイル</th>
+<th>関連箇所</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>10</td>
-<td>+50,000円</td>
-<td>「見習い投資家」</td>
+<td><code>frontend/e2e-tests/game/guard-validation.spec.ts</code></td>
+<td>全 3 テスト — 失敗している</td>
 </tr>
 <tr>
-<td>20</td>
-<td>+100,000円</td>
-<td>「新進トレーダー」</td>
-</tr>
-<tr>
-<td>35</td>
-<td>+200,000円</td>
-<td>米国株ETF</td>
-</tr>
-<tr>
-<td>50</td>
-<td>+400,000円</td>
-<td>「Backcastエキスパート」</td>
-</tr>
-<tr>
-<td>58</td>
-<td>+600,000円</td>
-<td>「マスター投資家」</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_12">参照ドキュメント<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>ドキュメント</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>development_docs/game/game-e2e-review-system.md</code></td>
-<td>E2E テスト知見集（知見 1〜35）</td>
+<td><code>src-tauri/sample-notebooks/game_setup.py</code></td>
+<td><code>buy()</code> (83–90行目)、<code>sell()</code> (108–114行目) — <code>mo.callout()</code> 警告実装</td>
 </tr>
 <tr>
 <td><code>frontend/e2e-tests/game/helpers.ts</code></td>
-<td>共通ヘルパー関数</td>
+<td><code>runNewCellInGrid()</code> — セル追加・実行ヘルパー</td>
 </tr>
 <tr>
-<td><code>frontend/e2e-tests/game/constants.ts</code></td>
-<td>テスト定数</td>
+<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\game_test.py</code></td>
+<td>テスト対象ノートブック</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_8">調査メモ<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="issue">既存 Issue との関係<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h3>
+<p><code>guard-validation-warning-not-visible.md</code> は networkidle タイムアウトを修正対象として <code>✅ 修正済み</code> になっているが、本 Issue は networkidle が解消された後も残る「ガード機能警告テキストの未表示」を別問題として記録している。</p>
+<p>2026-02-21 フルランの結果（<code>guard-validation.spec.ts:50,82,126</code> 全 3 件失敗）はこの根本問題が未解決であることを示している。</p>
+<h3 id="_9">修正方針<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>guard-validation.spec.ts</code> の <code>sys.path</code> 設定を PYTHONPATH ベースに変更する（<code>Path(__file__)</code> 依存を排除）</li>
+<li>テスト内で <code>import game_setup as gs</code> が成功することを前提条件として検証するアサーションを追加する</li>
+<li><code>mo.output.append()</code> の出力が Playwright で検索可能な DOM 要素として現れることを確認する</li>
+</ol>
+<h2 id="_10">フルランでの失敗数推移<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>日時</th>
+<th>失敗件数</th>
+<th>備考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-02-21 AM（ベースライン）</td>
+<td>0</td>
+<td>ベースライン記録時はスイート自体なかった可能性</td>
 </tr>
 <tr>
-<td><code>frontend/e2e-tests/game/sandbox.spec.ts</code></td>
-<td>テスト構造のリファレンス</td>
-</tr>
-<tr>
-<td><code>development_docs/issues/</code></td>
-<td>既知バグ一覧</td>
+<td>2026-02-21 PM（フルラン）</td>
+<td>3</td>
+<td>全 3 件失敗（ガード機能テストとして新規追加）</td>
 </tr>
 </tbody>
 </table>

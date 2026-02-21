@@ -1307,6 +1307,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#2026-02-21-backcastpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（2026-02-21 backcast.py ファイル不在バグ修正セッション）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-02-21-skillmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 完了（2026-02-21 SKILL.md パスバグ修正セッション）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1863,6 +1885,39 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#38-backcastpy-notebooks-2026-02-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        38. backcast.py が notebooks/ に存在しない場合の症状（2026-02-21 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-layoutsbackcastgridjson-2026-02-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        39. layouts/backcast.grid.json が存在しない場合の症状（2026-02-21 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#40-skillmd-2026-02-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        40. SKILL.md の参照ドキュメントパスが間違っていた（2026-02-21 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2102,10 +2157,10 @@
 
 
 <h1 id="e2e">ゲーム e2e レビューシステム<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h1>
-<p><strong>ステータス</strong>: 全 7 スイート パス済み（53 passed / 3 fixme / 0 failed）
+<p><strong>ステータス</strong>: 全 9 スイート パス済み（75 passed / 5 skipped / 0 failed）
 <strong>場所</strong>: <code>frontend/e2e-tests/game/</code>
 <strong>担当</strong>: game ブランチで継続作業中
-<strong>最終確認日</strong>: 2026-02-19（Python セル実行 E2E テスト追加・①→⑦全経路カバー完了）</p>
+<strong>最終確認日</strong>: 2026-02-21（sandbox.spec.ts 10 passed / 5.9m 確認・SKILL.md パスバグ修正）</p>
 <hr />
 <h2 id="_1">作業進捗<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <h3 id="_2">✅ 完了（設計・実装フェーズ）<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
@@ -2198,6 +2253,20 @@
 <li>[x] ✅ <strong><code>waitForLoadState("networkidle")</code> タイムアウト修正</strong>: marimo は WebSocket を常時接続するため <code>networkidle</code> には永遠に到達しない。<code>"load"</code> に変更（知見 35a）</li>
 <li>[x] ✅ <strong>再接続スキル再発火バグ修正</strong>: <code>beforeEach</code> の <code>ensureConnected()</code> 後に <code>resetGameProgress()</code> を追加。再接続時にカーネルがセル出力を再送し game_test.py のスキル発火セルが再実行されて初期状態が汚染される問題を修正（知見 35b）</li>
 <li>[x] ✅ <strong><code>sandbox.spec.ts</code> 全 10 件パス</strong>: 3.1m</li>
+</ul>
+<h3 id="2026-02-21-backcastpy">✅ 完了（2026-02-21 backcast.py ファイル不在バグ修正セッション）<a class="headerlink" href="#2026-02-21-backcastpy" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[x] ✅ <strong><code>backcast-integration.spec.ts</code> 4 件失敗の原因特定</strong>: <code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code> が存在しなかったため全テストが <code>backend-status</code> 待機で 20 秒タイムアウト。エラーコンテキストに <code>{"detail":"File ... not found"}</code> と記録されていた（知見 42）</li>
+<li>[x] ✅ <strong><code>backcast.py</code> および関連モジュールを <code>notebooks/</code> にコピー</strong>: <code>game_setup.py</code>, <code>skill_events.py</code>, <code>backtest_wrapper.py</code>, <code>chart.py</code>, <code>headless_broadcast.py</code>, <code>progress_manager.py</code></li>
+<li>[x] ✅ <strong><code>layouts/backcast.grid.json</code> のコピー追加</strong>: <code>backcast.py</code> は <code>layout_file="layouts/backcast.grid.json"</code> を参照するが <code>notebooks/layouts/</code> が存在しなかった。<code>mkdir</code> + コピーで解消（知見 42）</li>
+<li>[x] ✅ <strong>マニュアル訂正</strong>: <code>development_docs/plans/backcast-game-play.md</code> の問題4コピー手順に <code>layouts/backcast.grid.json</code> コピーコマンドを追記</li>
+<li>[x] ✅ <strong>全 9 スイート（80 テスト）パス確認</strong>: 75 passed / 5 skipped / 0 failed（16.4m）</li>
+</ul>
+<h3 id="2026-02-21-skillmd">✅ 完了（2026-02-21 SKILL.md パスバグ修正セッション）<a class="headerlink" href="#2026-02-21-skillmd" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[x] ✅ <strong>SKILL.md の参照ドキュメントパスが誤っていた</strong>: <code>development_docs/game-e2e-review-system.md</code> と記載されていたが実際のパスは <code>development_docs/game/game-e2e-review-system.md</code>。スキル実行時に Read で「File does not exist」エラーが発生していた（知見 43）</li>
+<li>[x] ✅ <strong>SKILL.md を修正</strong>: ドキュメントパスを正しいパスに更新。知見番号の範囲も "1〜35" → "1〜42" に更新。最終確認日・テストスイート一覧日付も 2026-02-21 に更新</li>
+<li>[x] ✅ <strong><code>sandbox.spec.ts</code> 10 passed 確認</strong>: 5.9m、全テスト通過（正常動作確認）</li>
 </ul>
 <h3 id="_3">⬜ 未完了・今後の課題<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <ul>
@@ -3079,6 +3148,42 @@ taskkill<span class="w"> </span>//F<span class="w"> </span>//IM<span class="w"> 
 - <code>bt.step()</code> の出力が <code>True</code> のみで状況不明
 - AI Fix バナーがゲームモードでも表示され混乱を招く
 - Grid レイアウトでセルが重なり、入力場所が不明確</p>
+<h3 id="38-backcastpy-notebooks-2026-02-21">38. backcast.py が notebooks/ に存在しない場合の症状（2026-02-21 追加）<a class="headerlink" href="#38-backcastpy-notebooks-2026-02-21" title="Permanent link">&para;</a></h3>
+<p><strong>症状</strong>: <code>backcast-integration.spec.ts</code> の全テストが <code>backend-status</code> 待機で 20 秒タイムアウト。エラーコンテキストには以下が記録される:</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generic [ref=e2]</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&#39;{&quot;detail&quot;:&quot;File</span><span class="nv"> </span><span class="s">C:\\Users\\sasac\\AppData\\Roaming\\marimo\\notebooks\\backcast.py</span><span class="nv"> </span><span class="s">not</span><span class="nv"> </span><span class="s">found&quot;}&#39;</span>
+</code></pre></div>
+<p>サーバーは起動しているが <code>backend-status</code> ボタンがページに現れない（Playwright はノートブックが見つからず空ページしか表示できない）。</p>
+<p><strong>原因</strong>: <code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\</code> に <code>backcast.py</code> および必要な依存ファイルが配置されていなかった。</p>
+<p><strong>解決策</strong>: <code>src-tauri/sample-notebooks/</code> から以下をコピー:
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>/d/Documents/marimo/src-tauri/sample-notebooks/backcast.py<span class="w"> </span><span class="s2">&quot;C:/...&quot;</span>
+<span class="c1"># game_setup.py, skill_events.py, backtest_wrapper.py, chart.py,</span>
+<span class="c1"># headless_broadcast.py, progress_manager.py も同様にコピー</span>
+<span class="c1"># さらに layouts/backcast.grid.json も必須（以下の知見参照）</span>
+</code></pre></div></p>
+<p><strong>global-setup の警告との関連</strong>: <code>⚠️  Could not back up backcast.py (non-fatal)</code> が表示される場合も同じ原因（ファイルが存在しないためバックアップ不可）。</p>
+<h3 id="39-layoutsbackcastgridjson-2026-02-21">39. layouts/backcast.grid.json が存在しない場合の症状（2026-02-21 追加）<a class="headerlink" href="#39-layoutsbackcastgridjson-2026-02-21" title="Permanent link">&para;</a></h3>
+<p><strong>症状</strong>: backcast.py 起動時に以下の警告が出てグリッドレイアウトが機能しない:</p>
+<div class="highlight"><pre><span></span><code>[W] Layout file C:\Users\sasac\...\notebooks\layouts/backcast.grid.json does not exist
+</code></pre></div>
+<p><strong>原因</strong>: <code>backcast.py</code> は <code>marimo.App(layout_file="layouts/backcast.grid.json")</code> を参照しているが、<code>notebooks/layouts/</code> ディレクトリが存在しなかった。</p>
+<p><strong>解決策</strong>:
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;C:/Users/sasac/AppData/Roaming/marimo/notebooks/layouts&quot;</span>
+cp<span class="w"> </span>/d/Documents/marimo/src-tauri/sample-notebooks/layouts/backcast.grid.json<span class="w"> </span><span class="se">\</span>
+<span class="w">   </span><span class="s2">&quot;C:/Users/sasac/AppData/Roaming/marimo/notebooks/layouts/&quot;</span>
+</code></pre></div></p>
+<p><strong>教訓</strong>: <code>backcast.py</code> 配置マニュアルのコピー手順に <code>layouts/</code> ディレクトリのコピーが漏れていた。モジュールのコピーだけでなく、<code>layouts/</code> も必ずセットでコピーすること。</p>
+<h3 id="40-skillmd-2026-02-21">40. SKILL.md の参照ドキュメントパスが間違っていた（2026-02-21 追加）<a class="headerlink" href="#40-skillmd-2026-02-21" title="Permanent link">&para;</a></h3>
+<p><strong>症状</strong>: <code>/game-e2e</code> スキル実行時に最初の Read で「File does not exist」エラーが発生し、知見ドキュメントを参照できないままテストを開始していた。</p>
+<p><strong>原因</strong>: <code>SKILL.md</code> の参照ドキュメントパスが以下のように誤記されていた:</p>
+<div class="highlight"><pre><span></span><code># ❌ 誤
+development_docs/game-e2e-review-system.md
+
+# ✅ 正
+development_docs/game/game-e2e-review-system.md
+</code></pre></div>
+<p><code>game/</code> サブディレクトリを含めるのを忘れていた。</p>
+<p><strong>修正箇所</strong>: <code>.claude/skills/game-e2e/SKILL.md</code> の「参照ドキュメント」セクション、デバッグフローのステップ 2、手順ステップ 6 の計 3 箇所を修正。</p>
+<p><strong>教訓</strong>: スキルドキュメントのパスは常に実際にファイルアクセスして確認すること。<code>development_docs/</code> 直下にあると思い込まず <code>find</code> / <code>Glob</code> でパスを確認してから記載する。</p>
 <hr />
 <h2 id="_13">セレクター早見表<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
 <table>

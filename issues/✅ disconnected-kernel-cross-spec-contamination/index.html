@@ -21,7 +21,7 @@
     
     
       
-        <title>Backcast ゲームプレイ — Skill Orchestration マニュアル - marimo Developer Docs</title>
+        <title>Issue: フルラン実行時に複数スペックでカーネルが "disconnected" 状態になりテストが失敗する - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#backcast-skill-orchestration" class="md-skip">
+        <a href="#issue-disconnected" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Backcast ゲームプレイ — Skill Orchestration マニュアル
+              Issue: フルラン実行時に複数スペックでカーネルが "disconnected" 状態になりテストが失敗する
             
           </span>
         </div>
@@ -1210,66 +1210,43 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        アーキテクチャ
+        概要
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="アーキテクチャ">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        依存関係
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#skill" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Skill 一覧
+        再現手順
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Skill 一覧">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-02-21-e2e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-02-21 E2E テスト実行結果（最新: 再発・悪化確認）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        オーケストレーター
+        期待される動作
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skill_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        個別 Skill
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1277,7 +1254,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        クイックスタート（推奨）
+        実際の動作
       
     </span>
   </a>
@@ -1288,19 +1265,30 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実行手順（手動実行の場合）
+        関連ファイル
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="実行手順（手動実行の場合）">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        調査メモ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="調査メモ">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#step-1" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: 環境整備
+        原因
       
     </span>
   </a>
@@ -1308,10 +1296,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2" class="md-nav__link">
+  <a href="#issue" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: ゲームプレイ
+        既存 Issue との関係
       
     </span>
   </a>
@@ -1319,10 +1307,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-3" class="md-nav__link">
+  <a href="#helpersts-disconnected" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 3: 分析（並列実行可）
+        helpers.ts の disconnected 判定
       
     </span>
   </a>
@@ -1330,10 +1318,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-4" class="md-nav__link">
+  <a href="#disconnected" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 4: 成果物確認
+        カーネルが disconnected になるパターン
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正方針
       
     </span>
   </a>
@@ -1346,85 +1345,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        共通情報
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="共通情報">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ゲーム概要
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ゲームファイル
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        操作コマンド
+        修正内容
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        スキルツリー前提条件チェーン
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        マイルストーン
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        参照ドキュメント
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1445,305 +1372,150 @@
 
 
 
-<h1 id="backcast-skill-orchestration">Backcast ゲームプレイ — Skill Orchestration マニュアル<a class="headerlink" href="#backcast-skill-orchestration" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-20
-<strong>更新日</strong>: 2026-02-21
-<strong>目的</strong>: 5つの Claude Code Skill を順序制御しながら実行し、ゲームの品質・面白さ・ドキュメント正確性を多角的に評価する</p>
+<h1 id="issue-disconnected">Issue: フルラン実行時に複数スペックでカーネルが "disconnected" 状態になりテストが失敗する<a class="headerlink" href="#issue-disconnected" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-21
+<strong>重要度</strong>: High
+<strong>カテゴリ</strong>: 接続 / テスト
+<strong>ステータス</strong>: ✅ 修正済み</p>
 <hr />
-<h2 id="_1">アーキテクチャ<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────┐
-│                 Orchestrator（人間）                    │
-│                                                       │
-│  Step 1:  /game-setup          → 環境 Ready            │
-│  Step 2:  /game-play           → プレイログ生成          │
-│  Step 3:  /game-bug-hunt       ┐                       │
-│           /game-manual-review  ├ 並列実行               │
-│           /game-fun-review     ┘                       │
-│  Step 4:  成果物確認                                    │
-└──────────────────────────────────────────────────────┘
-</code></pre></div>
-<h3 id="_2">依存関係<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-setup ──→ /game-play ──┬──→ /game-bug-hunt
-                             ├──→ /game-manual-review
-                             └──→ /game-fun-review
-</code></pre></div>
-<hr />
-<h2 id="skill">Skill 一覧<a class="headerlink" href="#skill" title="Permanent link">&para;</a></h2>
-<h3 id="_3">オーケストレーター<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>全スイートをまとめて実行すると、前のテストスペックがカーネルを消耗させた後、次のスペックの <code>beforeEach</code> でカーネルが "disconnected" 状態になりテストが失敗する。単体スペックの実行では再現しない。</p>
+<h2 id="_2">再現手順<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>npx playwright test e2e-tests/game/ --headed --reporter=line</code> で全スイートを実行する</li>
+<li>以下のテストがカーネル "disconnected" エラーで失敗する:</li>
+<li><code>data.spec.ts:94</code></li>
+<li><code>integration.spec.ts:51,131,154,177</code></li>
+<li><code>sandbox.spec.ts:78</code></li>
+<li><code>setup.spec.ts:247,281</code></li>
+<li><code>z-python-e2e.spec.ts:136</code></li>
+<li>エラーメッセージに "disconnected" が含まれる（WebSocket 接続喪失）</li>
+</ol>
+<h2 id="2026-02-21-e2e">2026-02-21 E2E テスト実行結果（最新: 再発・悪化確認）<a class="headerlink" href="#2026-02-21-e2e" title="Permanent link">&para;</a></h2>
+<p>83テスト実行、50 passed / 28 failed / 5 skipped（1.2h）。以下の disconnected 関連失敗を確認：</p>
 <table>
 <thead>
 <tr>
-<th>Skill</th>
-<th>説明</th>
+<th>スペック</th>
+<th>失敗行</th>
+<th>前回記録との差</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>/game-orchestrate</code></td>
-<td><strong>全自動</strong>: Step 1〜3 を順序実行（環境整備 → プレイ → 分析）</td>
+<td><code>backcast-integration.spec.ts</code></td>
+<td>:348（Position表示テスト）</td>
+<td><strong>新規</strong> — 前回未記録</td>
+</tr>
+<tr>
+<td><code>data.spec.ts</code></td>
+<td>:83, :94, :111, :204</td>
+<td><strong>悪化</strong> — 前回は :94 のみ</td>
+</tr>
+<tr>
+<td><code>z-python-e2e.spec.ts</code></td>
+<td>:80, :112</td>
+<td><strong>悪化</strong> — 前回は :136 のみ</td>
 </tr>
 </tbody>
 </table>
-<h3 id="skill_1">個別 Skill<a class="headerlink" href="#skill_1" title="Permanent link">&para;</a></h3>
+<p><code>z-python-e2e.spec.ts:112</code> は "browserContext エラー" として報告されており、Playwright のブラウザコンテキストが無効化された（カーネル切断後にブラウザコンテキストが解放された可能性）。</p>
+<p><strong>影響範囲の拡大</strong>: 以前は同一スペック内の後半テストのみ影響を受けていたが、2026-02-21 実行では <code>data.spec.ts</code> の最初のテスト（:83）からも失敗しており、前スペックの実行によるカーネル汚染が広がっている。</p>
+<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>各スペックが独立した状態で実行され、前のスペックのカーネル状態に影響されない。</p>
+<h2 id="_4">実際の動作<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>前のスペック（または並列実行されるスペック）がカーネルを消耗させると、後続スペックの <code>ensureConnected()</code> や <code>waitForKernelHealthy()</code> でカーネルが "disconnected"（赤いステータス）のまま回復せず、テストが失敗する。</p>
+<p>フルランで 25 件の失敗のうち 9 件がこのカテゴリ（カテゴリ B）に分類された（初回記録時）。2026-02-21 実行では 28 件の失敗のうち disconnected 関連が最低 7 件確認された。</p>
+<h2 id="_5">関連ファイル<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>#</th>
-<th>Skill</th>
-<th>説明</th>
-<th>入力</th>
-<th>出力先</th>
+<th>ファイル</th>
+<th>関連箇所</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td><code>/game-setup</code></td>
-<td>環境整備・起動・リセット</td>
-<td>なし</td>
-<td>(口頭: READY/FAILED)</td>
+<td><code>frontend/e2e-tests/game/data.spec.ts</code></td>
+<td>94行目 — disconnected エラー</td>
 </tr>
 <tr>
-<td>2</td>
-<td><code>/game-play</code></td>
-<td>ゲーム実プレイ・ログ記録</td>
-<td>setup READY</td>
-<td><code>game-play-reports/play-log-*.md</code></td>
-</tr>
-<tr>
-<td>3</td>
-<td><code>/game-bug-hunt</code></td>
-<td>バグ発見・Issue 記録</td>
-<td>プレイログ</td>
-<td><code>development_docs/issues/&lt;slug&gt;.md</code></td>
-</tr>
-<tr>
-<td>4</td>
-<td><code>/game-manual-review</code></td>
-<td>マニュアル正確性検証</td>
-<td>プレイログ</td>
-<td><code>game-play-reports/manual-review-*.md</code></td>
-</tr>
-<tr>
-<td>5</td>
-<td><code>/game-fun-review</code></td>
-<td>面白さ評価・改善提案</td>
-<td>プレイログ</td>
-<td><code>game-play-reports/fun-review-*.md</code></td>
-</tr>
-</tbody>
-</table>
-<p>Skill 定義ファイル: <code>.claude/skills/game-*/SKILL.md</code></p>
-<hr />
-<h2 id="_4">クイックスタート（推奨）<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p><strong>全ステップを一気に実行</strong>:</p>
-<div class="highlight"><pre><span></span><code>/game-orchestrate
-</code></pre></div>
-<p>このコマンドで Step 1〜3（環境整備 → プレイ → 分析）を自動実行します。</p>
-<p>詳細な手動実行手順は以下のセクションを参照してください。</p>
-<hr />
-<h2 id="_5">実行手順（手動実行の場合）<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<h3 id="step-1">Step 1: 環境整備<a class="headerlink" href="#step-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-setup
-</code></pre></div>
-<p>サーバー起動・ファイル配置・接続確認を行う。
-出力が <code>READY</code> になったら Step 2 へ進む。</p>
-<h3 id="step-2">Step 2: ゲームプレイ<a class="headerlink" href="#step-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-play
-</code></pre></div>
-<p>Sandbox モード → Bridge モードの順にプレイし、ログとスクリーンショットを記録。
-レポートが <code>development_docs/game-play-reports/play-log-YYYY-MM-DD.md</code> に生成される。</p>
-<h3 id="step-3">Step 3: 分析（並列実行可）<a class="headerlink" href="#step-3" title="Permanent link">&para;</a></h3>
-<p>以下の3つは互いに独立しているため、<strong>並列実行</strong>が可能。</p>
-<div class="highlight"><pre><span></span><code>/game-bug-hunt
-/game-manual-review
-/game-fun-review
-</code></pre></div>
-<p>各スキルは Step 2 で生成されたプレイログを入力として使用する。</p>
-<h3 id="step-4">Step 4: 成果物確認<a class="headerlink" href="#step-4" title="Permanent link">&para;</a></h3>
-<p>全スキルの完了後、<code>development_docs/game-play-reports/</code> に以下が揃っていることを確認:</p>
-<ul>
-<li>[ ] <code>play-log-YYYY-MM-DD.md</code> — プレイログ</li>
-<li>[ ] <code>manual-review-YYYY-MM-DD.md</code> — マニュアルレビュー</li>
-<li>[ ] <code>fun-review-YYYY-MM-DD.md</code> — 面白さ評価</li>
-<li>[ ] <code>development_docs/issues/</code> に新規 Issue（バグがあった場合）</li>
-</ul>
-<hr />
-<h2 id="_6">共通情報<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<h3 id="_7">ゲーム概要<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
-<p><strong>Backcast</strong> = トヨタ自動車（7203）の株価を使った投資シミュレーション（marimo ノートブック上で動作）</p>
-<h3 id="_8">ゲームファイル<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>種別</th>
-<th>パス</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>プレイファイル</td>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-</tr>
-<tr>
-<td>ゲームロジック</td>
-<td><code>src-tauri/sample-notebooks/game_setup.py</code></td>
-</tr>
-<tr>
-<td>スキル発火</td>
-<td><code>src-tauri/sample-notebooks/skill_events.py</code></td>
-</tr>
-<tr>
-<td>スキル定義</td>
-<td><code>frontend/src/components/skill-tree/skill-data.ts</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="_9">操作コマンド<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>コマンド</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>bt.chart(code)</code></td>
-<td>銘柄チャート表示</td>
-</tr>
-<tr>
-<td><code>bt.buy()</code></td>
-<td>株購入</td>
-</tr>
-<tr>
-<td><code>bt.sell()</code></td>
-<td>株売却</td>
-</tr>
-<tr>
-<td><code>bt.step()</code></td>
-<td>次の日に進む</td>
-</tr>
-<tr>
-<td><code>bt.trades()</code></td>
-<td>保有株確認</td>
-</tr>
-<tr>
-<td><code>bt.reveal_data()</code></td>
-<td>データの正体確認</td>
-</tr>
-<tr>
-<td><code>bt.get_stock_daily(code)</code></td>
-<td>株価データ取得</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_10">スキルツリー前提条件チェーン<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>SANDBOX_001 → SANDBOX_002 → SANDBOX_003 ─┐
-                           → SANDBOX_004 ─┤→ SANDBOX_005 → SANDBOX_006
-                                          └─ FAIL_001
-                                             FAIL_002（SANDBOX_004 + FAIL_001）
-
-SANDBOX_006 → BRIDGE_001 → BRIDGE_002 → BRIDGE_003
-                                            ↓
-BRIDGE_003 → SETUP_001 → SETUP_002 ─→ SETUP_003 → SETUP_004
-                       └→ DATA_001 ─┘              → SETUP_005
-                            ↓
-                  DATA_002 → DATA_003
-                  DATA_004 → DATA_005
-                  DATA_006
-
-SETUP_003 + DATA_001 → SET_001 → SET_002
-                SET_001 + DATA_005 → SET_003
-
-SET_001 → TRADE_001 → TRADE_002
-                    → TRADE_003 → TRADE_004
-                               → TRADE_007 → TRADE_008
-                                           → RISK_005 → RISK_006 → RISK_007 → RISK_008
-                                                                  → RISK_010
-                    → TRADE_006
-                    → RISK_001 → RISK_002 → RISK_003 → RISK_004
-                    → RISK_009
-SET_001 → TRADE_009 → TRADE_010
-SET_001 → CHART_001 → CHART_002（+ TRADE_003）
-                    → CHART_003（+ IND_001）→ CHART_004
-
-DATA_002 → IND_001 → IND_002 → IND_003 → IND_004
-                             → IND_003 + IND_005 → IND_008
-                    → IND_005 → IND_006
-                    → IND_007
-                    → IND_009
-
-TRADE_001 → FAIL_003（資金0で発火）
-</code></pre></div>
-<h3 id="_11">マイルストーン<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>スキル数</th>
-<th>ボーナス</th>
-<th>称号/アイテム</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>10</td>
-<td>+50,000円</td>
-<td>「見習い投資家」</td>
-</tr>
-<tr>
-<td>20</td>
-<td>+100,000円</td>
-<td>「新進トレーダー」</td>
-</tr>
-<tr>
-<td>35</td>
-<td>+200,000円</td>
-<td>米国株ETF</td>
-</tr>
-<tr>
-<td>50</td>
-<td>+400,000円</td>
-<td>「Backcastエキスパート」</td>
-</tr>
-<tr>
-<td>58</td>
-<td>+600,000円</td>
-<td>「マスター投資家」</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_12">参照ドキュメント<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>ドキュメント</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>development_docs/game/game-e2e-review-system.md</code></td>
-<td>E2E テスト知見集（知見 1〜35）</td>
-</tr>
-<tr>
-<td><code>frontend/e2e-tests/game/helpers.ts</code></td>
-<td>共通ヘルパー関数</td>
-</tr>
-<tr>
-<td><code>frontend/e2e-tests/game/constants.ts</code></td>
-<td>テスト定数</td>
+<td><code>frontend/e2e-tests/game/integration.spec.ts</code></td>
+<td>51, 131, 154, 177行目</td>
 </tr>
 <tr>
 <td><code>frontend/e2e-tests/game/sandbox.spec.ts</code></td>
-<td>テスト構造のリファレンス</td>
+<td>78行目</td>
 </tr>
 <tr>
-<td><code>development_docs/issues/</code></td>
-<td>既知バグ一覧</td>
+<td><code>frontend/e2e-tests/game/setup.spec.ts</code></td>
+<td>247, 281行目</td>
+</tr>
+<tr>
+<td><code>frontend/e2e-tests/game/z-python-e2e.spec.ts</code></td>
+<td>136行目</td>
+</tr>
+<tr>
+<td><code>frontend/e2e-tests/game/helpers.ts</code></td>
+<td><code>waitForKernelHealthy()</code> — disconnected 判定ロジック（43-52行目）</td>
 </tr>
 </tbody>
 </table>
+<h2 id="_6">調査メモ<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="_7">原因<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>marimo edit モードでは 1 ファイルにつき 1 つのカーネルが共有される。全スイートを順次実行すると:</p>
+<ol>
+<li>前のスペックが <code>runNewCellInGrid()</code> でセルを追加し、カーネルに負荷をかける</li>
+<li>セルの auto_instantiate やノートブック書き込みがカーネルを不安定にする</li>
+<li>次のスペックの <code>beforeEach</code> 実行時にカーネルが "disconnected" 状態になっている</li>
+<li><code>waitForKernelHealthy()</code> は "disconnected" を検出するが、カーネルが自律的に回復するまで待機する仕組みがない</li>
+</ol>
+<h3 id="issue">既存 Issue との関係<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h3>
+<p><code>beforeeach-timeout-after-multiple-tests.md</code> は <code>backcast-integration.spec.ts</code> 固有の問題として記録されているが、本 Issue は <code>game_test.py</code> を使用する複数スペック（integration, data, sandbox, setup, z-python-e2e）でも同じパターンが発生していることを示す。スペックが異なっても同一カーネル（<code>game_test.py</code>）を共有するため影響が波及する。</p>
+<h3 id="helpersts-disconnected"><code>helpers.ts</code> の disconnected 判定<a class="headerlink" href="#helpersts-disconnected" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">waitForKernelHealthy</span><span class="p">(</span><span class="nx">page</span><span class="o">:</span><span class="w"> </span><span class="kt">Page</span><span class="p">,</span><span class="w"> </span><span class="nx">timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20</span><span class="nx">_000</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// ...</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">statusButton</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">((</span><span class="nx">el</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// ...</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">cls</span><span class="p">.</span><span class="nx">includes</span><span class="p">(</span><span class="s2">&quot;red&quot;</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s2">&quot;disconnected&quot;</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">cls</span><span class="p">.</span><span class="nx">includes</span><span class="p">(</span><span class="s2">&quot;green&quot;</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s2">&quot;healthy&quot;</span><span class="p">;</span>
+<span class="w">      </span><span class="c1">// ...</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">status</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s2">&quot;healthy&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}).</span><span class="nx">toPass</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="w"> </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>"disconnected"</code> 状態では <code>toPass()</code> が timeout（20 秒）まで失敗し続け、その後 <code>beforeEach</code> タイムアウトに到達する。</p>
+<h3 id="disconnected">カーネルが disconnected になるパターン<a class="headerlink" href="#disconnected" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>z-python-e2e.spec.ts</code> が <code>runNewCellInGrid()</code> を多用し、Python コードを実行する → セル蓄積でカーネルが不安定化</li>
+<li>前スペックで <code>page.waitForLoadState("networkidle")</code> タイムアウトが発生 → リソース消耗</li>
+<li><code>integration.spec.ts</code> の <code>emitSkillViaPython()</code> が Python セルを実行 → カーネル負荷</li>
+</ol>
+<h3 id="_8">修正方針<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>短期</strong>: 各スペックの <code>beforeEach</code> にカーネル回復待ち（最大 30 秒）を追加する
+   <div class="highlight"><pre><span></span><code><span class="c1">// カーネルが disconnected の場合はページをリロードして再接続を試みる</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">getKernelStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">status</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;disconnected&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">reload</span><span class="p">();</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForLoadState</span><span class="p">(</span><span class="s2">&quot;load&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">ensureConnected</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+</code></pre></div></li>
+<li><strong>根本</strong>: スペック実行順序を制御し、セルを大量追加するスペック（z-python-e2e）を最後に実行する</li>
+<li><strong>根本</strong>: <code>afterEach</code> でカーネルの状態をリセット（セル削除、カーネル再起動コマンドの実行）する</li>
+<li>単一カーネルを共有せず、スペックごとに独立したカーネルを使用できるかを検討する（Playwright の <code>--workers=1</code> と合わせて評価）</li>
+</ol>
+<h2 id="_9">修正内容<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<p><strong>修正日</strong>: 2026-02-21
+<strong>コミット</strong>: バグ修正オーケストレーション</p>
+<ol>
+<li><code>game_test.py</code> の蓄積テストセル（26セル）を削除し、初期状態（2セル）に戻した</li>
+<li><code>helpers.ts</code> の <code>ensureConnected()</code> に page reload フォールバックを追加: waitForKernelHealthy がタイムアウトした場合にページをリロードして再接続を試みる</li>
+<li><code>persistence.spec.ts</code> と <code>integration.spec.ts</code> の <code>beforeEach</code> に <code>resetGameProgress(page)</code> を追加（汚染イベントのクリア）</li>
+</ol>
 
 
 

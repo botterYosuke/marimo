@@ -21,7 +21,7 @@
     
     
       
-        <title>Backcast ゲームプレイ — Skill Orchestration マニュアル - marimo Developer Docs</title>
+        <title>Issue: 複数テスト連続実行後に ensureConnected() が 30 秒タイムアウトし beforeEach が失敗する - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#backcast-skill-orchestration" class="md-skip">
+        <a href="#issue-ensureconnected-30-beforeeach" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Backcast ゲームプレイ — Skill Orchestration マニュアル
+              Issue: 複数テスト連続実行後に ensureConnected() が 30 秒タイムアウトし beforeEach が失敗する
             
           </span>
         </div>
@@ -1210,66 +1210,32 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        アーキテクチャ
+        概要
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="アーキテクチャ">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        依存関係
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#skill" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Skill 一覧
+        再現手順
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Skill 一覧">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        オーケストレーター
+        期待される動作
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skill_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        個別 Skill
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1277,7 +1243,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        クイックスタート（推奨）
+        実際の動作
       
     </span>
   </a>
@@ -1288,19 +1254,30 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実行手順（手動実行の場合）
+        関連ファイル
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="実行手順（手動実行の場合）">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        調査メモ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="調査メモ">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#step-1" class="md-nav__link">
+  <a href="#ensureconnected" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: 環境整備
+        ensureConnected() の構造
       
     </span>
   </a>
@@ -1308,10 +1285,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: ゲームプレイ
+        問題の構造（推定）
       
     </span>
   </a>
@@ -1319,10 +1296,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-3" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 3: 分析（並列実行可）
+        セル蓄積との関係
       
     </span>
   </a>
@@ -1330,10 +1307,93 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-4" class="md-nav__link">
+  <a href="#aftereach" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 4: 成果物確認
+        afterEach が存在しないことの問題
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正方向性
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="修正方向性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-beforeeach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案1: beforeEach のタイムアウトを延長する
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-aftereach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案2: afterEach でセルをクリーンアップする
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-test-5-testsettimeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案3: test 5 に test.setTimeout() を追加する
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-needsnavigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案4: needsNavigation のロジックを変更し、常に再ナビゲーションする
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        推奨: 案3（即時）+ 案4（根本）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ensureconnected_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ensureConnected() の改善案
       
     </span>
   </a>
@@ -1346,85 +1406,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        共通情報
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="共通情報">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ゲーム概要
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ゲームファイル
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        操作コマンド
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
-        スキルツリー前提条件チェーン
+        修正内容
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        マイルストーン
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        参照ドキュメント
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1445,305 +1433,141 @@
 
 
 
-<h1 id="backcast-skill-orchestration">Backcast ゲームプレイ — Skill Orchestration マニュアル<a class="headerlink" href="#backcast-skill-orchestration" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-20
-<strong>更新日</strong>: 2026-02-21
-<strong>目的</strong>: 5つの Claude Code Skill を順序制御しながら実行し、ゲームの品質・面白さ・ドキュメント正確性を多角的に評価する</p>
+<h1 id="issue-ensureconnected-30-beforeeach">Issue: 複数テスト連続実行後に ensureConnected() が 30 秒タイムアウトし beforeEach が失敗する<a class="headerlink" href="#issue-ensureconnected-30-beforeeach" title="Permanent link">&para;</a></h1>
+<p><strong>作成日</strong>: 2026-02-21
+<strong>重要度</strong>: High
+<strong>カテゴリ</strong>: 接続・安定性 / テスト信頼性
+<strong>ステータス</strong>: ✅ 修正済み</p>
 <hr />
-<h2 id="_1">アーキテクチャ<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────┐
-│                 Orchestrator（人間）                    │
-│                                                       │
-│  Step 1:  /game-setup          → 環境 Ready            │
-│  Step 2:  /game-play           → プレイログ生成          │
-│  Step 3:  /game-bug-hunt       ┐                       │
-│           /game-manual-review  ├ 並列実行               │
-│           /game-fun-review     ┘                       │
-│  Step 4:  成果物確認                                    │
-└──────────────────────────────────────────────────────┘
+<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p><code>backcast-integration.spec.ts</code> の test 5（「SANDBOX_005 が重複送信される」）において、<code>beforeEach</code> の <code>ensureConnected(page)</code> が 30 秒以内に完了せずタイムアウトする。</p>
+<p>前のテスト（test 1〜4）の実行後にカーネルが不安定な状態になり、backcast.py のカーネルへの WebSocket 接続が正常に確立されない（または「Reconnected」バナーが断続的に出現し続ける）ことが原因と推定される。</p>
+<h2 id="_2">再現手順<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>npx playwright test e2e-tests/game/backcast-integration.spec.ts --reporter=line</code> を実行する</li>
+<li>test 1（完全プレイフロー）、test 2（fixme、スキップ）、test 3（BRIDGE_001 テスト）、test 4（Position 表示）を順に実行する</li>
+<li>test 5（SANDBOX_005 重複送信テスト）の <code>beforeEach</code> が実行される</li>
+<li><code>ensureConnected()</code> が <code>waitForKernelHealthy()</code> → Reconnected バナーループで 30 秒以上かかる</li>
+<li><code>beforeEach</code> がタイムアウト（デフォルト 30 秒）で失敗する</li>
+</ol>
+<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p><code>beforeEach</code> の <code>ensureConnected()</code> が 30 秒以内に完了し、test 5 が実行される。</p>
+<h2 id="_4">実際の動作<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>beforeEach タイムアウト（30s 超過）
+  at ensureConnected (helpers.ts)
 </code></pre></div>
-<h3 id="_2">依存関係<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-setup ──→ /game-play ──┬──→ /game-bug-hunt
-                             ├──→ /game-manual-review
-                             └──→ /game-fun-review
-</code></pre></div>
-<hr />
-<h2 id="skill">Skill 一覧<a class="headerlink" href="#skill" title="Permanent link">&para;</a></h2>
-<h3 id="_3">オーケストレーター<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>test 5 が実行されることなく失敗する。</p>
+<h2 id="_5">関連ファイル<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Skill</th>
-<th>説明</th>
+<th>ファイル</th>
+<th>関連箇所</th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><code>/game-orchestrate</code></td>
-<td><strong>全自動</strong>: Step 1〜3 を順序実行（環境整備 → プレイ → 分析）</td>
-</tr>
-</tbody>
-</table>
-<h3 id="skill_1">個別 Skill<a class="headerlink" href="#skill_1" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Skill</th>
-<th>説明</th>
-<th>入力</th>
-<th>出力先</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td><code>/game-setup</code></td>
-<td>環境整備・起動・リセット</td>
-<td>なし</td>
-<td>(口頭: READY/FAILED)</td>
-</tr>
-<tr>
-<td>2</td>
-<td><code>/game-play</code></td>
-<td>ゲーム実プレイ・ログ記録</td>
-<td>setup READY</td>
-<td><code>game-play-reports/play-log-*.md</code></td>
-</tr>
-<tr>
-<td>3</td>
-<td><code>/game-bug-hunt</code></td>
-<td>バグ発見・Issue 記録</td>
-<td>プレイログ</td>
-<td><code>development_docs/issues/&lt;slug&gt;.md</code></td>
-</tr>
-<tr>
-<td>4</td>
-<td><code>/game-manual-review</code></td>
-<td>マニュアル正確性検証</td>
-<td>プレイログ</td>
-<td><code>game-play-reports/manual-review-*.md</code></td>
-</tr>
-<tr>
-<td>5</td>
-<td><code>/game-fun-review</code></td>
-<td>面白さ評価・改善提案</td>
-<td>プレイログ</td>
-<td><code>game-play-reports/fun-review-*.md</code></td>
-</tr>
-</tbody>
-</table>
-<p>Skill 定義ファイル: <code>.claude/skills/game-*/SKILL.md</code></p>
-<hr />
-<h2 id="_4">クイックスタート（推奨）<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<p><strong>全ステップを一気に実行</strong>:</p>
-<div class="highlight"><pre><span></span><code>/game-orchestrate
-</code></pre></div>
-<p>このコマンドで Step 1〜3（環境整備 → プレイ → 分析）を自動実行します。</p>
-<p>詳細な手動実行手順は以下のセクションを参照してください。</p>
-<hr />
-<h2 id="_5">実行手順（手動実行の場合）<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<h3 id="step-1">Step 1: 環境整備<a class="headerlink" href="#step-1" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-setup
-</code></pre></div>
-<p>サーバー起動・ファイル配置・接続確認を行う。
-出力が <code>READY</code> になったら Step 2 へ進む。</p>
-<h3 id="step-2">Step 2: ゲームプレイ<a class="headerlink" href="#step-2" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>/game-play
-</code></pre></div>
-<p>Sandbox モード → Bridge モードの順にプレイし、ログとスクリーンショットを記録。
-レポートが <code>development_docs/game-play-reports/play-log-YYYY-MM-DD.md</code> に生成される。</p>
-<h3 id="step-3">Step 3: 分析（並列実行可）<a class="headerlink" href="#step-3" title="Permanent link">&para;</a></h3>
-<p>以下の3つは互いに独立しているため、<strong>並列実行</strong>が可能。</p>
-<div class="highlight"><pre><span></span><code>/game-bug-hunt
-/game-manual-review
-/game-fun-review
-</code></pre></div>
-<p>各スキルは Step 2 で生成されたプレイログを入力として使用する。</p>
-<h3 id="step-4">Step 4: 成果物確認<a class="headerlink" href="#step-4" title="Permanent link">&para;</a></h3>
-<p>全スキルの完了後、<code>development_docs/game-play-reports/</code> に以下が揃っていることを確認:</p>
-<ul>
-<li>[ ] <code>play-log-YYYY-MM-DD.md</code> — プレイログ</li>
-<li>[ ] <code>manual-review-YYYY-MM-DD.md</code> — マニュアルレビュー</li>
-<li>[ ] <code>fun-review-YYYY-MM-DD.md</code> — 面白さ評価</li>
-<li>[ ] <code>development_docs/issues/</code> に新規 Issue（バグがあった場合）</li>
-</ul>
-<hr />
-<h2 id="_6">共通情報<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<h3 id="_7">ゲーム概要<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
-<p><strong>Backcast</strong> = トヨタ自動車（7203）の株価を使った投資シミュレーション（marimo ノートブック上で動作）</p>
-<h3 id="_8">ゲームファイル<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>種別</th>
-<th>パス</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>プレイファイル</td>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-</tr>
-<tr>
-<td>ゲームロジック</td>
-<td><code>src-tauri/sample-notebooks/game_setup.py</code></td>
-</tr>
-<tr>
-<td>スキル発火</td>
-<td><code>src-tauri/sample-notebooks/skill_events.py</code></td>
-</tr>
-<tr>
-<td>スキル定義</td>
-<td><code>frontend/src/components/skill-tree/skill-data.ts</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="_9">操作コマンド<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>コマンド</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>bt.chart(code)</code></td>
-<td>銘柄チャート表示</td>
-</tr>
-<tr>
-<td><code>bt.buy()</code></td>
-<td>株購入</td>
-</tr>
-<tr>
-<td><code>bt.sell()</code></td>
-<td>株売却</td>
-</tr>
-<tr>
-<td><code>bt.step()</code></td>
-<td>次の日に進む</td>
-</tr>
-<tr>
-<td><code>bt.trades()</code></td>
-<td>保有株確認</td>
-</tr>
-<tr>
-<td><code>bt.reveal_data()</code></td>
-<td>データの正体確認</td>
-</tr>
-<tr>
-<td><code>bt.get_stock_daily(code)</code></td>
-<td>株価データ取得</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_10">スキルツリー前提条件チェーン<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>SANDBOX_001 → SANDBOX_002 → SANDBOX_003 ─┐
-                           → SANDBOX_004 ─┤→ SANDBOX_005 → SANDBOX_006
-                                          └─ FAIL_001
-                                             FAIL_002（SANDBOX_004 + FAIL_001）
-
-SANDBOX_006 → BRIDGE_001 → BRIDGE_002 → BRIDGE_003
-                                            ↓
-BRIDGE_003 → SETUP_001 → SETUP_002 ─→ SETUP_003 → SETUP_004
-                       └→ DATA_001 ─┘              → SETUP_005
-                            ↓
-                  DATA_002 → DATA_003
-                  DATA_004 → DATA_005
-                  DATA_006
-
-SETUP_003 + DATA_001 → SET_001 → SET_002
-                SET_001 + DATA_005 → SET_003
-
-SET_001 → TRADE_001 → TRADE_002
-                    → TRADE_003 → TRADE_004
-                               → TRADE_007 → TRADE_008
-                                           → RISK_005 → RISK_006 → RISK_007 → RISK_008
-                                                                  → RISK_010
-                    → TRADE_006
-                    → RISK_001 → RISK_002 → RISK_003 → RISK_004
-                    → RISK_009
-SET_001 → TRADE_009 → TRADE_010
-SET_001 → CHART_001 → CHART_002（+ TRADE_003）
-                    → CHART_003（+ IND_001）→ CHART_004
-
-DATA_002 → IND_001 → IND_002 → IND_003 → IND_004
-                             → IND_003 + IND_005 → IND_008
-                    → IND_005 → IND_006
-                    → IND_007
-                    → IND_009
-
-TRADE_001 → FAIL_003（資金0で発火）
-</code></pre></div>
-<h3 id="_11">マイルストーン<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>スキル数</th>
-<th>ボーナス</th>
-<th>称号/アイテム</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>10</td>
-<td>+50,000円</td>
-<td>「見習い投資家」</td>
-</tr>
-<tr>
-<td>20</td>
-<td>+100,000円</td>
-<td>「新進トレーダー」</td>
-</tr>
-<tr>
-<td>35</td>
-<td>+200,000円</td>
-<td>米国株ETF</td>
-</tr>
-<tr>
-<td>50</td>
-<td>+400,000円</td>
-<td>「Backcastエキスパート」</td>
-</tr>
-<tr>
-<td>58</td>
-<td>+600,000円</td>
-<td>「マスター投資家」</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_12">参照ドキュメント<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>ドキュメント</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>development_docs/game/game-e2e-review-system.md</code></td>
-<td>E2E テスト知見集（知見 1〜35）</td>
-</tr>
 <tr>
 <td><code>frontend/e2e-tests/game/helpers.ts</code></td>
-<td>共通ヘルパー関数</td>
+<td><code>ensureConnected()</code> — 最大 5 回のバナー安定化ループ（79-127行目）</td>
 </tr>
 <tr>
-<td><code>frontend/e2e-tests/game/constants.ts</code></td>
-<td>テスト定数</td>
+<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
+<td><code>beforeEach</code> — <code>ensureConnected()</code> + <code>resetGameProgress()</code> を実行（95-118行目）</td>
 </tr>
 <tr>
-<td><code>frontend/e2e-tests/game/sandbox.spec.ts</code></td>
-<td>テスト構造のリファレンス</td>
-</tr>
-<tr>
-<td><code>development_docs/issues/</code></td>
-<td>既知バグ一覧</td>
+<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
+<td>test 5（378行目〜）— タイムアウト発生テスト</td>
 </tr>
 </tbody>
 </table>
+<h2 id="_6">調査メモ<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="ensureconnected"><code>ensureConnected()</code> の構造<a class="headerlink" href="#ensureconnected" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">ensureConnected</span><span class="p">(</span><span class="nx">page</span><span class="o">:</span><span class="w"> </span><span class="kt">Page</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Phase 1: カーネルが healthy になるまで待機（最大 20 秒）</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">waitForKernelHealthy</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Phase 2: Reconnected バナーが出なくなるまでループ（最大 5 回）</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">maxAttempts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">5</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">stabilityWait</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1</span><span class="nx">_000</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">maxAttempts</span><span class="p">;</span><span class="w"> </span><span class="nx">attempt</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// バナー検出 → dismiss → 再確認のループ</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="nx">stabilityWait</span><span class="p">);</span><span class="w">  </span><span class="c1">// 毎回 1 秒待機</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="c1">// maxAttempts 後は警告 + 最終チェック（タイムアウトなし）</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>理論上の最大待機時間：
+- <code>waitForKernelHealthy()</code>: 最大 20 秒
+- バナーループ: 5 回 × 1 秒 = 最大 5 秒
+- 合計: 最大 25 秒</p>
+<p><code>beforeEach</code> のデフォルトタイムアウト 30 秒との差は 5 秒のみ。実際の環境では各操作に余分な時間がかかるため、容易に 30 秒を超過する。</p>
+<h3 id="_7">問題の構造（推定）<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>[test 3 実行後]
+  → emitSkillViaPython() が新しいセルを backcast.py に追加（runNewCellInGrid）
+  → backcast.py にセルが蓄積する
+  → カーネル状態が不安定になる可能性
+
+[test 4 実行]
+  → runNewCellInGrid(page, &quot;bt.buy()&quot;) でセルをさらに追加
+  → 各テスト後の cleanup なし（afterEach が存在しない）
+
+[test 5 beforeEach 開始]
+  → page.goto(BACKCAST_URL) は前回と同じ URL のため省略される（needsNavigation = false）
+  → ensureConnected() 開始
+  → カーネルが蓄積したセルを再処理中に不安定な状態
+  → Reconnected バナーが断続的に出現し続ける
+  → maxAttempts = 5 を超えても安定しない
+  → waitForKernelHealthy() が 20 秒以上かかる
+  → 合計 30 秒超過 → beforeEach タイムアウト
+</code></pre></div>
+<h3 id="_8">セル蓄積との関係<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>test 1〜4 の実行で <code>runNewCellInGrid()</code> が複数回呼ばれ、backcast.py にセルが追加される。セル蓄積（<code>bug-260221-cell-accumulation-in-notebook.md</code>）が進むにつれ、カーネルの auto_instantiate 処理が重くなり、WebSocket 接続の安定化に時間がかかるようになる可能性がある。</p>
+<h3 id="aftereach"><code>afterEach</code> が存在しないことの問題<a class="headerlink" href="#aftereach" title="Permanent link">&para;</a></h3>
+<p>現在の <code>backcast-integration.spec.ts</code> には <code>afterEach</code> フックが存在しない（<code>beforeEach</code> のみ）。テスト間でのセルクリーンアップが行われないため、テストが進むにつれて状態が蓄積する。</p>
+<h3 id="_9">修正方向性<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<h4 id="1-beforeeach">案1: <code>beforeEach</code> のタイムアウトを延長する<a class="headerlink" href="#1-beforeeach" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nx">test</span><span class="p">.</span><span class="nx">beforeEach</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">info</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">.</span><span class="nx">setTimeout</span><span class="p">(</span><span class="mf">60</span><span class="nx">_000</span><span class="p">);</span><span class="w">  </span><span class="c1">// 60 秒に延長</span>
+<span class="w">  </span><span class="p">...</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>根本対策ではないが、即時の回避策として有効。</p>
+<h4 id="2-aftereach">案2: <code>afterEach</code> でセルをクリーンアップする<a class="headerlink" href="#2-aftereach" title="Permanent link">&para;</a></h4>
+<p>各テスト後に追加されたセルを削除する <code>afterEach</code> を追加する。ただし、marimo のセル削除 API を E2E テストから呼び出す方法が複雑。</p>
+<h4 id="3-test-5-testsettimeout">案3: test 5 に <code>test.setTimeout()</code> を追加する<a class="headerlink" href="#3-test-5-testsettimeout" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nx">test</span><span class="p">(</span><span class="s2">&quot;SANDBOX_005 が重複送信される（バグ確認）&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">.</span><span class="nx">setTimeout</span><span class="p">(</span><span class="mf">120</span><span class="nx">_000</span><span class="p">);</span><span class="w">  </span><span class="c1">// 2 分に延長</span>
+<span class="w">  </span><span class="p">...</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>test 5 のみタイムアウトを延長する。最も局所的な修正。</p>
+<h4 id="4-needsnavigation">案4: <code>needsNavigation</code> のロジックを変更し、常に再ナビゲーションする<a class="headerlink" href="#4-needsnavigation" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// 現在</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">needsNavigation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="nx">page</span><span class="p">.</span><span class="nx">url</span><span class="p">().</span><span class="nx">includes</span><span class="p">(</span><span class="s2">&quot;backcast.py&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">info</span><span class="p">.</span><span class="nx">retry</span><span class="p">;</span>
+
+<span class="c1">// 変更案</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">needsNavigation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w">  </span><span class="c1">// 常に再ナビゲーション</span>
+</code></pre></div>
+<p>毎回 <code>page.goto()</code> することで WebSocket 接続をリセットし、安定した初期状態から開始する。ただしテスト速度が遅くなる。</p>
+<h4 id="3-4">推奨: 案3（即時）+ 案4（根本）<a class="headerlink" href="#3-4" title="Permanent link">&para;</a></h4>
+<p>短期的には test 5 の <code>test.setTimeout()</code> を延長し、長期的にはセル蓄積問題の解決と <code>afterEach</code> でのクリーンアップ追加を行う。</p>
+<h3 id="ensureconnected_1"><code>ensureConnected()</code> の改善案<a class="headerlink" href="#ensureconnected_1" title="Permanent link">&para;</a></h3>
+<p>現在の実装では <code>maxAttempts</code> 到達後も <code>waitForKernelHealthy()</code> を呼び続ける（タイムアウトは 20 秒）。明示的な上限タイムアウトを追加することで、<code>beforeEach</code> のタイムアウト内に制御が戻るようにできる：</p>
+<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">ensureConnected</span><span class="p">(</span>
+<span class="w">  </span><span class="nx">page</span><span class="o">:</span><span class="w"> </span><span class="kt">Page</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">25</span><span class="nx">_000</span><span class="w">  </span><span class="c1">// beforeEach タイムアウトより短く設定</span>
+<span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">deadline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">timeout</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// ... 既存の実装を deadline でガードする</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="_10">修正内容<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<p><strong>修正日</strong>: 2026-02-21
+<strong>コミット</strong>: バグ修正オーケストレーション</p>
+<p><code>backcast-integration.spec.ts</code> の <code>test.describe</code> に <code>test.describe.configure({ timeout: 120_000 })</code> を追加し、テストごとのタイムアウトを 30 秒から 120 秒に延長。またすべての <code>beforeEach</code> で（初回以外も）<code>page.reload()</code> を実行してカーネル接続を安定させた。</p>
 
 
 
