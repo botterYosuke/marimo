@@ -11,38 +11,60 @@ Restart the development environment from the project root `C:\Users\sasai\Docume
 
 ### Steps
 
-1. **Stop existing processes** on ports 2718 and 3000:
+1. **Stop any existing Claude background task** running the dev server:
+   - Use `TaskStop` if there is a background Bash task from a previous `/dev-start` or `/dev-restart`.
+
+2. **Kill processes on port 2718** (backend) using the cleanup script:
    ```bash
    cd /c/Users/sasai/Documents/marimo && node scripts/clean-processes.mjs
    ```
-   If `clean-processes.mjs` is unavailable, manually kill processes:
+
+3. **Kill processes on port 3000** (frontend) — the cleanup script only handles 2718:
    ```bash
-   # Find and kill backend (port 2718)
-   netstat -ano | grep ':2718' | awk '{print $5}' | sort -u | xargs -I{} taskkill /PID {} /F 2>/dev/null
-   # Find and kill frontend (port 3000)
-   netstat -ano | grep ':3000' | awk '{print $5}' | sort -u | xargs -I{} taskkill /PID {} /F 2>/dev/null
+   netstat -ano | grep ':3000.*LISTENING' | awk '{print $5}' | sort -u | while read pid; do
+     [ -n "$pid" ] && [ "$pid" != "0" ] && taskkill //PID $pid //F 2>/dev/null && echo "Killed frontend PID $pid"
+   done
+   echo "Frontend cleanup done"
    ```
 
-2. **Verify ports are free**:
+4. **Verify ports are free** (poll up to 5 seconds):
    ```bash
-   netstat -ano | grep -E ':(2718|3000)\s' || echo "Ports are free"
+   for i in $(seq 1 5); do
+     occupied=$(netstat -ano | grep -E ':(2718|3000).*LISTENING')
+     if [ -z "$occupied" ]; then echo "Ports are free"; break; fi
+     echo "Waiting for ports to free... ($i/5)"
+     sleep 1
+   done
    ```
-   Wait and retry if ports are still occupied (up to 5 seconds).
+   If ports are still occupied after 5 seconds, report the blocking PIDs and stop.
 
-3. **Start the dev server** (run in background):
+5. **Start the dev server** (run in background):
    ```bash
    cd /c/Users/sasai/Documents/marimo && pnpm run dev
    ```
-   Run in background using the Bash tool's `run_in_background` parameter.
+   Run with the Bash tool's `run_in_background: true` parameter.
 
-4. **Wait for servers to be ready** (about 10 seconds), then tail background output to confirm.
+6. **Poll for readiness** (max 30 seconds):
+   ```bash
+   for i in $(seq 1 30); do
+     backend=$(netstat -ano | grep ':2718.*LISTENING' | head -1)
+     frontend=$(netstat -ano | grep ':3000.*LISTENING' | head -1)
+     if [ -n "$backend" ] && [ -n "$frontend" ]; then
+       echo "Both servers ready"
+       break
+     fi
+     echo "Waiting... ($i/30)"
+     sleep 1
+   done
+   ```
 
-5. **Report the result** to the user:
+7. **Report the result** to the user:
    - Frontend: `http://localhost:3000/`
    - Backend: `http://127.0.0.1:2718`
+   - If either server failed to start, tail the background task output for error details.
 
 ### Notes
 
-- This always kills both frontend and backend, then restarts both.
-- The cleanup script `scripts/clean-processes.mjs` handles Windows-specific process killing.
-- If there is an active background task running the previous dev server, stop it first using TaskStop.
+- `scripts/clean-processes.mjs` only cleans port 2718. Port 3000 must be cleaned separately (Step 3).
+- `pnpm run dev` runs `scripts/dev-with-cleanup.mjs`, which uses `concurrently` to start both backend and frontend.
+- On Windows, use `//PID` and `//F` (double-slash) for `taskkill` flags inside Git Bash to avoid path interpretation.
