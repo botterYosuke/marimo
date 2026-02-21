@@ -62,7 +62,7 @@ test.describe("Python セル実行 E2E: レイヤー①→⑦", () => {
 
     if (needsNavigation) {
       await page.goto(getAppUrl(APP));
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("load");
     }
 
     await ensureConnected(page);

@@ -16,10 +16,10 @@ allowed-tools:
 
 ## 参照ドキュメント
 
-**最初に必ず読むこと**: `development_docs/game-e2e-review-system.md`
-知見 1〜39、セレクター早見表、設計思想がすべて記載されている。
+**最初に必ず読むこと**: `development_docs/game/game-e2e-review-system.md`
+知見 1〜40、セレクター早見表、設計思想がすべて記載されている。
 
-**最終確認日**: 2026-02-20（backcast.py 汚染防止・global-setup backup/restore 追加・2連続実行で全10スイート 75 passed / 5 skipped / 0 failed）
+**最終確認日**: 2026-02-21（sandbox.spec.ts 10 passed / 5.9m 確認）
 
 ## 実行手順
 
@@ -49,7 +49,7 @@ cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/$ARGUMENTS
 cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/ --headed
 ```
 
-#### テストスイート一覧（2026-02-20 時点）
+#### テストスイート一覧（2026-02-21 時点）
 
 | ファイル | テスト数 | 内容 |
 |---------|---------|------|
@@ -71,7 +71,7 @@ cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/ --headed
 テストが失敗した場合は以下の順に対処:
 
 1. **エラーメッセージを読む** — Playwright のエラー出力からどのアサーションが失敗したか特定
-2. **知見ドキュメントを確認** — `development_docs/game-e2e-review-system.md` の知見 1〜35 に同じ問題がないか検索
+2. **知見ドキュメントを確認** — `development_docs/game/game-e2e-review-system.md` の知見 1〜40 に同じ問題がないか検索
 3. **ページスナップショットを確認** — `frontend/test-results/` 内のエラーコンテキストを読む
 4. **原因別の対処**:
 
@@ -103,7 +103,7 @@ cd d:/Documents/marimo/frontend && pnpm turbo build && cp -R dist/* ../marimo/_s
 cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/sandbox.spec.ts --headed
 ```
 
-6. **知見ドキュメントを更新** — 新たな知見が得られたら `development_docs/game-e2e-review-system.md` に追記
+6. **知見ドキュメントを更新** — 新たな知見が得られたら `development_docs/game/game-e2e-review-system.md` に追記
 
 ## 重要な制約
 

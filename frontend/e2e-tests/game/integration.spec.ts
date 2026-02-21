@@ -33,7 +33,7 @@ test.describe("統合テスト: HTML パイプライン経由", () => {
 
     if (needsNavigation) {
       await page.goto(getAppUrl(APP));
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("load");
     }
 
     await ensureConnected(page);

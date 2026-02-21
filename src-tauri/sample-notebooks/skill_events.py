@@ -66,3 +66,8 @@ def _check_graduations() -> None:
 def sync_triggered_skills(skill_ids: list[str]) -> None:
     """フロントエンドの completedSkills を Python 側に同期"""
     _triggered_skills.update(skill_ids)
+
+
+def reset_triggered_skills() -> None:
+    """テスト用: _triggered_skills をクリアして dedup を無効化する"""
+    _triggered_skills.clear()

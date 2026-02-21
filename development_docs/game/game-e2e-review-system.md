@@ -3,7 +3,7 @@
 **ステータス**: 全 9 スイート パス済み（75 passed / 5 skipped / 0 failed）
 **場所**: `frontend/e2e-tests/game/`
 **担当**: game ブランチで継続作業中
-**最終確認日**: 2026-02-21（backcast-integration.spec.ts 追加・全 80 テスト実行確認）
+**最終確認日**: 2026-02-21（sandbox.spec.ts 10 passed / 5.9m 確認・SKILL.md パスバグ修正）
 
 ---
 
@@ -110,6 +110,12 @@ E2E テスト（案 E）がバイパスしていたレイヤー①③⑤をユ�
 - [x] ✅ **`layouts/backcast.grid.json` のコピー追加**: `backcast.py` は `layout_file="layouts/backcast.grid.json"` を参照するが `notebooks/layouts/` が存在しなかった。`mkdir` + コピーで解消（知見 42）
 - [x] ✅ **マニュアル訂正**: `development_docs/plans/backcast-game-play.md` の問題4コピー手順に `layouts/backcast.grid.json` コピーコマンドを追記
 - [x] ✅ **全 9 スイート（80 テスト）パス確認**: 75 passed / 5 skipped / 0 failed（16.4m）
+
+### ✅ 完了（2026-02-21 SKILL.md パスバグ修正セッション）
+
+- [x] ✅ **SKILL.md の参照ドキュメントパスが誤っていた**: `development_docs/game-e2e-review-system.md` と記載されていたが実際のパスは `development_docs/game/game-e2e-review-system.md`。スキル実行時に Read で「File does not exist」エラーが発生していた（知見 43）
+- [x] ✅ **SKILL.md を修正**: ドキュメントパスを正しいパスに更新。知見番号の範囲も "1〜35" → "1〜42" に更新。最終確認日・テストスイート一覧日付も 2026-02-21 に更新
+- [x] ✅ **`sandbox.spec.ts` 10 passed 確認**: 5.9m、全テスト通過（正常動作確認）
 
 ### ⬜ 未完了・今後の課題
 
@@ -1165,6 +1171,26 @@ cp /d/Documents/marimo/src-tauri/sample-notebooks/layouts/backcast.grid.json \
 ```
 
 **教訓**: `backcast.py` 配置マニュアルのコピー手順に `layouts/` ディレクトリのコピーが漏れていた。モジュールのコピーだけでなく、`layouts/` も必ずセットでコピーすること。
+
+### 40. SKILL.md の参照ドキュメントパスが間違っていた（2026-02-21 追加）
+
+**症状**: `/game-e2e` スキル実行時に最初の Read で「File does not exist」エラーが発生し、知見ドキュメントを参照できないままテストを開始していた。
+
+**原因**: `SKILL.md` の参照ドキュメントパスが以下のように誤記されていた:
+
+```
+# ❌ 誤
+development_docs/game-e2e-review-system.md
+
+# ✅ 正
+development_docs/game/game-e2e-review-system.md
+```
+
+`game/` サブディレクトリを含めるのを忘れていた。
+
+**修正箇所**: `.claude/skills/game-e2e/SKILL.md` の「参照ドキュメント」セクション、デバッグフローのステップ 2、手順ステップ 6 の計 3 箇所を修正。
+
+**教訓**: スキルドキュメントのパスは常に実際にファイルアクセスして確認すること。`development_docs/` 直下にあると思い込まず `find` / `Glob` でパスを確認してから記載する。
 
 ---
 

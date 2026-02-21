@@ -14,6 +14,7 @@
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { getAppUrl } from "../../playwright.config";
 import {
+  ensureConnected,
   openSkillTreePanel,
   emitSkillEvent,
   emitSkillSequence,
@@ -34,7 +35,8 @@ test.describe("スキルツリー UI", () => {
     if (info.retry) {
       await page.reload();
     }
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
+    await ensureConnected(page);
     await openSkillTreePanel(page);
   });
 

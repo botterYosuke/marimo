@@ -33,7 +33,7 @@ test.describe("buy()/sell() ガード処理", () => {
 
     if (needsNavigation) {
       await page.goto(getAppUrl(APP));
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("load");
     }
 
     await ensureConnected(page);

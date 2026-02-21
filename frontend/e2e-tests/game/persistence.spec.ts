@@ -18,6 +18,7 @@
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { getAppUrl } from "../../playwright.config";
 import {
+  ensureConnected,
   openSkillTreePanel,
   emitSkillEvent,
   emitSkillSequence,
@@ -38,7 +39,8 @@ test.describe("進捗の初期化・リセット", () => {
     if (info.retry) {
       await page.reload();
     }
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
+    await ensureConnected(page);
     await openSkillTreePanel(page);
   });
 
@@ -83,7 +85,8 @@ test.describe("進捗の初期化・リセット", () => {
 
     // ページリロード
     await page.reload();
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
+    await ensureConnected(page);
     await openSkillTreePanel(page);
 
     // Web モードでは plain atom のためリセットされる
@@ -142,7 +145,8 @@ test.describe("BroadcastChannel イベント処理", () => {
     if (info.retry) {
       await page.reload();
     }
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
+    await ensureConnected(page);
     await openSkillTreePanel(page);
   });
 
