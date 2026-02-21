@@ -90,17 +90,26 @@ async function dismissAllNotifications(page: Page): Promise<void> {
 // ---------------------------------------------------------------------------
 
 test.describe("backcast.py 統合テスト", () => {
+  // backcast.py はリアルカーネルを使用するため、ensureConnected() や
+  // auto_instantiate の待機で合計 30 秒を超えることがある。
+  // テストごとのタイムアウトを 120 秒に延長する。
+  test.describe.configure({ timeout: 120_000 });
+
   let context: BrowserContext;
 
   test.beforeEach(async ({ page }, info) => {
     context = page.context();
 
-    // backcast.py を開く（既に開いている場合は再ナビゲーション省略）
+    // backcast.py を開く（再ナビゲーションで常に新鮮な接続を確立）
     const needsNavigation =
       !page.url().includes("backcast.py") || info.retry;
 
     if (needsNavigation) {
       await page.goto(BACKCAST_URL);
+      await page.waitForLoadState("load");
+    } else {
+      // 同一ページでも、前テストでカーネルが不安定になっている場合があるためリロード
+      await page.reload();
       await page.waitForLoadState("load");
     }
 

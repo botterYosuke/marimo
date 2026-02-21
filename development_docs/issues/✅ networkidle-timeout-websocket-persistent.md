@@ -3,7 +3,7 @@
 **作成日**: 2026-02-21
 **重要度**: High
 **カテゴリ**: テスト / 接続
-**ステータス**: Open
+**ステータス**: ✅ 修正済み
 
 ---
 
@@ -63,3 +63,10 @@ await ensureConnected(page);
 ### 知見35a との関係
 
 `development_docs/game/game-e2e-review-system.md` の知見 35a に記載されているルールに違反している。`"networkidle"` は使用禁止であり、`"load"` を使用する。今回の全スイートで再度この違反が確認された。
+
+## 修正内容
+
+**修正日**: 2026-02-21
+**コミット**: bug-fix-orchestrate + バグ修正オーケストレーション
+
+`bridge.spec.ts`, `persistence.spec.ts`, `ui.spec.ts`, `z-python-e2e.spec.ts`, `guard-validation.spec.ts`, `integration.spec.ts` の全 `waitForLoadState("networkidle")` を `waitForLoadState("load")` に置換し、各箇所に `await ensureConnected(page)` を追加した。

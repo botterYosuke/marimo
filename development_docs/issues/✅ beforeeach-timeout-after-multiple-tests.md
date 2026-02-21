@@ -3,7 +3,7 @@
 **作成日**: 2026-02-21
 **重要度**: High
 **カテゴリ**: 接続・安定性 / テスト信頼性
-**ステータス**: Open
+**ステータス**: ✅ 修正済み
 
 ---
 
@@ -159,3 +159,10 @@ export async function ensureConnected(
   // ... 既存の実装を deadline でガードする
 }
 ```
+
+## 修正内容
+
+**修正日**: 2026-02-21
+**コミット**: バグ修正オーケストレーション
+
+`backcast-integration.spec.ts` の `test.describe` に `test.describe.configure({ timeout: 120_000 })` を追加し、テストごとのタイムアウトを 30 秒から 120 秒に延長。またすべての `beforeEach` で（初回以外も）`page.reload()` を実行してカーネル接続を安定させた。

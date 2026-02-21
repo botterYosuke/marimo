@@ -3,7 +3,7 @@
 **作成日**: 2026-02-21
 **重要度**: High
 **カテゴリ**: テスト / スキル発火 / データ
-**ステータス**: Open
+**ステータス**: ✅ 修正済み
 
 ---
 
@@ -94,3 +94,11 @@ export async function resetGameProgress(page: Page): Promise<void> {
 2. **スペック間分離の強化**: `beforeEach` で毎回 `page.goto()` を呼び（needsNavigation ロジックを常時 true にする）、ページリロードで BroadcastChannel リスナーを含む全フロントエンド状態をリセットする。ただし auto_instantiate によるスキル再発火は防げない
 3. **`game_test.py` の設計見直し**: ゲームテスト用ノートブックがスキルを自動発火しない設計にする（setup セルが `emit_skill()` を呼ばない）
 4. **afterEach での待機時間増加**: 現在の 300ms 待機では BroadcastChannel メッセージの処理が完了する前に次のテストが開始する可能性がある。待機時間を 1 秒以上に延ばす
+
+## 修正内容
+
+**修正日**: 2026-02-21
+**コミット**: バグ修正オーケストレーション
+
+1. `game_test.py` から蓄積テストセル 26 個を削除（根本原因の除去）
+2. `persistence.spec.ts` と `integration.spec.ts` の `beforeEach` に `waitForTimeout(500)` + `resetGameProgress(page)` を追加して汚染イベントをクリア

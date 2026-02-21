@@ -176,12 +176,13 @@ allowed-tools:
 
 ---
 
-#### Step 2.6: Issue ステータス更新
+#### Step 2.6: Issue ステータス更新とファイル名変更
 
-Issue ファイルを更新:
+Issue ファイルを更新してファイル名に✅を付ける:
 
-1. `**ステータス**: Open` → `**ステータス**: ✅ 修正済み` に変更
-2. 修正内容と修正日をIssue に追記:
+1. 元の Issue ファイルを読み込み
+2. `**ステータス**: Open` → `**ステータス**: ✅ 修正済み` に変更
+3. 修正内容と修正日を Issue に追記:
 
 ```markdown
 ## 修正内容
@@ -192,6 +193,11 @@ Issue ファイルを更新:
 
 <修正内容の簡潔な説明>
 ```
+
+4. **新しいファイル名で保存**: `development_docs/issues/✅<元のファイル名>.md`
+5. 元のファイルを削除（Bash で `rm` コマンド使用）
+
+例: `networkidle-timeout-websocket-persistent.md` → `✅networkidle-timeout-websocket-persistent.md`
 
 ---
 

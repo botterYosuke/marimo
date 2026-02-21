@@ -70,7 +70,17 @@ async function waitForKernelHealthy(
  */
 export async function ensureConnected(page: Page): Promise<void> {
   // Phase 1: カーネルが healthy になるまで待機
-  await waitForKernelHealthy(page);
+  // カーネルが disconnected（赤）の場合はページリロードで回復を試みる
+  try {
+    await waitForKernelHealthy(page);
+  } catch {
+    console.warn(
+      "[ensureConnected] waitForKernelHealthy タイムアウト — ページリロードで回復を試みます",
+    );
+    await page.reload();
+    await page.waitForLoadState("load");
+    await waitForKernelHealthy(page);
+  }
 
   // Phase 2: 接続安定化 — Reconnected バナーが出なくなるまでループ
   //   バナーが出現していれば dismiss → 再確認。

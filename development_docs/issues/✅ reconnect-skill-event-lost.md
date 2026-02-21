@@ -3,7 +3,7 @@
 **作成日**: 2026-02-21
 **重要度**: High
 **カテゴリ**: 接続・安定性 / スキル発火
-**ステータス**: Open
+**ステータス**: ✅ 修正済み
 
 ---
 
@@ -131,3 +131,9 @@ async function syncProgressFromPython(): Promise<void> {
 
 - `bug-260221-cell-accumulation-in-notebook.md` — セル蓄積によりノートブック起動時の auto_instantiate で意図しないスキル発火が発生し、この問題と複合する
 - `bridge001-python-dedup-blocks-e2e-test.md` — auto_instantiate による `_triggered_skills` 汚染が E2E テストを失敗させる（同一の根本原因）
+
+## 修正内容
+
+**修正日**: 以前のコミットで修正済み（2026-02-21 確認）
+
+`skill-complete-handler.ts` の `setupSkillEventListener()` 内で `replayBufferedMessages("skill_event_channel", handleMessage)` が呼ばれており、リスナー登録前に届いたメッセージをバッファから再生する仕組みが実装済み。本 Issue は修正済みと判定。

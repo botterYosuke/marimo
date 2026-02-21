@@ -3,7 +3,7 @@
 **作成日**: 2026-02-21
 **重要度**: High
 **カテゴリ**: スキル発火 / テスト信頼性
-**ステータス**: Open
+**ステータス**: ✅ 修正済み
 
 ---
 
@@ -126,3 +126,10 @@ def emit_skill(skill_id: str, context: dict | None = None, force: bool = False) 
 この問題は `bug-260221-cell-accumulation-in-notebook.md` で記録されたセル蓄積問題と複合している。backcast.py に不要なセル（`bt.reveal_data()` など）が残留していると auto_instantiate により `_triggered_skills` が不正な初期状態になる。
 
 セル蓄積問題を解決（ノートブックのリセット機能追加）することで、この問題の発生頻度は下がる可能性があるが、根本的には Python 側 `_triggered_skills` のリセット機能が必要。
+
+## 修正内容
+
+**修正日**: 2026-02-21
+**コミット**: バグ修正オーケストレーション
+
+`skill_events.py` に `reset_triggered_skills()` 関数を追加。また `emitSkillViaPython()` が既にインライン HTML（`emit_skill()` 非経由）を生成していることを確認済み。`game_test.py` の蓄積セルを削除したことで auto_instantiate 由来の重複発火も解消。

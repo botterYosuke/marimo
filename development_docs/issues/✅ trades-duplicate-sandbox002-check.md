@@ -3,7 +3,7 @@
 **作成日**: 2026-02-21
 **重要度**: Low
 **カテゴリ**: Game / Code Quality
-**ステータス**: 未修正
+**ステータス**: ✅ 修正済み
 
 ---
 
@@ -72,3 +72,9 @@ def trades():
 |---|---|
 | `src-tauri/sample-notebooks/game_setup.py` | `trades()` 141-151行目 — 修正対象 |
 | `development_docs/issues/sandbox003-skill-trigger-condition.md` | この重複が発生した可能性のある修正の記録 |
+
+## 修正内容
+
+**修正日**: 以前のコミットで修正済み（2026-02-21 確認）
+
+`game_setup.py` の `trades()` 関数を確認したところ、現在は正しくネストされた構造（`if "SANDBOX_002" in s: emit_skill("SANDBOX_003"); if ...: emit_skill("FAIL_001")`）になっており、重複チェックは存在しない。本 Issue は修正済みと判定。

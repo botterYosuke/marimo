@@ -2,7 +2,7 @@
 
 **報告日**: 2026-02-21
 **重要度**: P2
-**状態**: Open
+**状態**: ✅ 修正済み
 
 ## 症状
 
@@ -84,3 +84,12 @@ def reset_notebook():
 ## 関連 Issue
 
 - `development_docs/issues/progress-json-reset-incomplete.md` — ゲームリセット時の `.backcast.progress.json` 残留問題（セル蓄積とリセット不完全の複合問題）
+
+## 修正内容
+
+**修正日**: 2026-02-21
+**コミット**: バグ修正オーケストレーション
+
+1. `backcast.py` の蓄積テストセル（12セル）を削除し、初期状態（setup + markdown + chart + step の4セル）に戻した
+2. `game_test.py` の蓄積テストセル（26セル）を削除し、初期状態（import + markdown の2セル）に戻した
+3. `global-teardown.ts` がすでに `git restore` で game_test.py を、backup から backcast.py を復元する仕組みを確認。コミット済みの clean な状態に戻すことで次回実行時も初期状態から開始できるようになった

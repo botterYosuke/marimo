@@ -41,6 +41,9 @@ test.describe("進捗の初期化・リセット", () => {
     }
     await page.waitForLoadState("load");
     await ensureConnected(page);
+    // 並列実行や前テストから汚染されたセル出力イベントが届くのを待ってからリセット
+    await page.waitForTimeout(500);
+    await resetGameProgress(page);
     await openSkillTreePanel(page);
   });
 
@@ -147,6 +150,8 @@ test.describe("BroadcastChannel イベント処理", () => {
     }
     await page.waitForLoadState("load");
     await ensureConnected(page);
+    await page.waitForTimeout(500);
+    await resetGameProgress(page);
     await openSkillTreePanel(page);
   });
 

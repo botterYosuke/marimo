@@ -3,7 +3,7 @@
 **作成日**: 2026-02-21
 **重要度**: High
 **カテゴリ**: 接続 / テスト
-**ステータス**: Open
+**ステータス**: ✅ 修正済み
 
 ---
 
@@ -112,3 +112,12 @@ async function waitForKernelHealthy(page: Page, timeout = 20_000): Promise<void>
 2. **根本**: スペック実行順序を制御し、セルを大量追加するスペック（z-python-e2e）を最後に実行する
 3. **根本**: `afterEach` でカーネルの状態をリセット（セル削除、カーネル再起動コマンドの実行）する
 4. 単一カーネルを共有せず、スペックごとに独立したカーネルを使用できるかを検討する（Playwright の `--workers=1` と合わせて評価）
+
+## 修正内容
+
+**修正日**: 2026-02-21
+**コミット**: バグ修正オーケストレーション
+
+1. `game_test.py` の蓄積テストセル（26セル）を削除し、初期状態（2セル）に戻した
+2. `helpers.ts` の `ensureConnected()` に page reload フォールバックを追加: waitForKernelHealthy がタイムアウトした場合にページをリロードして再接続を試みる
+3. `persistence.spec.ts` と `integration.spec.ts` の `beforeEach` に `resetGameProgress(page)` を追加（汚染イベントのクリア）

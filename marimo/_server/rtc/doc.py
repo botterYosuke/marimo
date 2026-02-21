@@ -136,7 +136,8 @@ class LoroDocManager:
             if file_key not in self.loro_docs_clients:
                 return
 
-            self.loro_docs_clients[file_key].remove(update_queue)
+            if update_queue in self.loro_docs_clients[file_key]:
+                self.loro_docs_clients[file_key].remove(update_queue)
             # If no clients are connected, set up a cleaner task
             if len(self.loro_docs_clients[file_key]) == 0:
                 # Remove any existing cleaner

@@ -2,7 +2,7 @@
 
 **報告日**: 2026-02-21
 **重要度**: P2
-**状態**: Open
+**状態**: ✅ 修正済み
 
 ## 症状
 
@@ -60,3 +60,10 @@ marimo バックエンドの WebSocket セッション管理において、ク�
 エラー: ValueError: list.remove(x): x not in list
 状況: E2E テスト並列実行中、MCP ブラウザから window.__testResetProgress() 呼び出し後
 ```
+
+## 修正内容
+
+**修正日**: 2026-02-21
+**コミット**: バグ修正オーケストレーション
+
+`marimo/_server/rtc/doc.py` の `remove_client()` メソッドで、`self.loro_docs_clients[file_key].remove(update_queue)` の呼び出し前に `if update_queue in self.loro_docs_clients[file_key]:` チェックを追加。これにより同一 queue の二重削除による `ValueError` を防止。
