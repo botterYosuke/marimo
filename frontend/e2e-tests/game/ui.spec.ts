@@ -37,6 +37,8 @@ test.describe("スキルツリー UI", () => {
     }
     await page.waitForLoadState("load");
     await ensureConnected(page);
+    // 再接続時にカーネルが既存セル出力を再送してスキル発火が汚染される（知見 35b）
+    await resetGameProgress(page);
     await openSkillTreePanel(page);
   });
 

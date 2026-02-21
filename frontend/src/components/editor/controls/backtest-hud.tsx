@@ -95,6 +95,7 @@ export const BacktestHud: React.FC<BacktestHudProps> = ({ className }) => {
       <Badge
         variant={(state.status_variant as BadgeProps["variant"]) || "secondary"}
         className="gap-1"
+        data-testid="hud-status"
       >
         <ActivityIcon size={12} />
         {state.status_label || "Backtest"}

@@ -95,6 +95,7 @@ cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/ --headed
 | トースト X ボタンでスキルツリーが再オープン | 知見 38 | `toast.tsx` の `ToastClose` に `e.stopPropagation()` があるか確認 |
 | SANDBOX_002 が前提条件チェーンで "unlocked" のまま | 知見 40 | z-python-e2e の `emitSkillViaPython("SANDBOX_001")` の後、SANDBOX_001 が "completed" になることを `waitForSkillStatus` で確認してから SANDBOX_002 を発火する。確認前に発火すると前提条件チェックが競合で失敗する |
 | Python ボタンが 2 回目以降のテスト実行でタイムアウト | 知見 41 | `backcast.py` にテストが追加したセルが蓄積し auto_instantiate で多数のトーストが発生してボタンを遮蔽する。`global-setup.ts` で backup → `global-teardown.ts` で restore を実装。現在は自動対応済み |
+| カーネル disconnected から回復できない | 知見 35c | `ensureConnected()` の `waitForKernelHealthy()` タイムアウト時に `page.reload()` でリカバリーを試みる（内部実装済み）。`backcast-integration.spec.ts` は beforeEach で毎回 `page.reload()` して接続を安定化させる（timeout: 120秒） |
 
 5. **修正 → 再ビルド → 再テスト**: ソースを修正したら必ずビルドしてから再テスト
 
@@ -111,10 +112,11 @@ cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/sandbox.sp
 - ESM 環境: `__dirname` は使えない。`import.meta.dirname!` を使う（知見 13）
 - React Flow: `useNodesState` は初期値のみ。外部状態同期には `useEffect` 必須（知見 17）
 - テストフック: `window.__testCompleteSkill` / `window.__testResetProgress` は `setupSkillEventListener()` が mount 済みの場合のみ使用可能
-- テスト間リセット: `page.reload()` は使わない。`__testResetProgress` で atom を直接リセットし WebSocket 接続を維持する（知見 20）
+- テスト間リセット: 通常テストでは `page.reload()` を使わない。`__testResetProgress` で atom を直接リセットし WebSocket 接続を維持する（知見 20）。ただし `backcast-integration.spec.ts` は例外で、beforeEach に毎回 `page.reload()` を実行して接続を安定化させる（知見 35c）
 - 接続安定化: `ensureConnected(page)` が各テスト前に Kernel healthy 確認 → バナー dismiss → 1秒安定化待機 → 再確認の安定化ループを実行する（知見 19・21）
 - `waitForLoadState`: `"networkidle"` は使わない。`"load"` を使う（知見 35a）
 - 再接続後リセット: `ensureConnected()` の後に必ず `resetGameProgress()` を呼ぶ（知見 35b）
+- `page.reload()`: 通常テストでは使わない。`ensureConnected()` 内部のカーネル disconnected リカバリーと `backcast-integration.spec.ts` の beforeEach 安定化のみ使用（知見 35c）
 - `progress_channel` 抑制: `__testResetProgress()` 呼び出し後は `window.__testSuppressProgressSync = true` が自動設定され、Python の `broadcast_progress()` によるフロントエンド状態リセットを防ぐ（知見 39）
 - `game_test.py` 汚染: `z-python-e2e` はテストごとに Python セルを追加する。`global-teardown.ts` が `git restore` で実行後に復元する（知見 40）。前提条件チェーンには中間確認が必須（知見 40）
 - `backcast.py` 汚染: `backcast-integration` はテストごとに Python セルを追加する。`global-setup.ts` が backup を作成し、`global-teardown.ts` が復元・削除する（知見 41）

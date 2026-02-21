@@ -43,14 +43,7 @@ cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/sandbox.sp
 cd d:/Documents/marimo/frontend && npx playwright test e2e-tests/game/ --headed
 ```
 
-> **既知の失敗**: 以下の spec ファイルは `waitForLoadState("networkidle")` を使用しており、marimo の持続的 WebSocket 接続により `networkidle` に到達しないため常に失敗する（知見35a）。これらの失敗はカウントから除外して構わない:
-> - `bridge.spec.ts`
-> - `ui.spec.ts`
-> - `integration.spec.ts`
-> - `persistence.spec.ts`
-> - `z-python-e2e.spec.ts`
->
-> また `data.spec.ts` はカーネル切断により長時間実行後に失敗するケースがある（既知 Issue: `disconnected-kernel-cross-spec-contamination.md`）。
+> **期待結果**: 全スイート実行時は 75 passed / 5 skipped（`backcast-integration.spec.ts` の 2 skipped 含む）を目安とする。
 
 ### 方法B: Playwright 手動操作
 
@@ -127,8 +120,8 @@ E2E テスト / Playwright 手動 / ブラウザ手動
 - `waitForLoadState("load")` を使う（`"networkidle"` は永遠に到達しない・知見35a）
 - トースト通知がUIを遮る → `{ force: true }` オプション
 - Grid Layout では `create-cell-button` が存在しない → ツールバーの「Python」ボタンでセル作成
-- `page.reload()` は使わない（WebSocket 切断が起きる）
-- Python の `_triggered_skills`（モジュールレベルの `set`）はテストリセット後も残る。`window.__testResetProgress` はフロントエンド（Jotai atom）のみリセットし Python 側は残るため、同一スキルを同一プロセス内で再発火させることはできない
+- `page.reload()` は通常使わない（WebSocket 切断が起きる）。ただし `ensureConnected()` 内部でカーネル disconnected 時のリカバリーとして、および `backcast-integration.spec.ts` の beforeEach で接続安定化のために使用する（知見35c）
+- Python の `_triggered_skills`（モジュールレベルの `set`）はテストリセット後も残る。`window.__testResetProgress` はフロントエンド（Jotai atom）のみリセット。Python 側をリセットするには `skill_events.reset_triggered_skills()` を呼ぶか、marimo プロセスを再起動する
 - 全スイート実行後にカーネル切断が発生した場合、後続の spec ファイルのテストが連鎖的に失敗することがある
 
 ## スキル発火タイミング

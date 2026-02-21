@@ -49,26 +49,22 @@ allowed-tools:
 
 ### Phase 2: バグ修正ループ（各バグごとに実行）
 
-以下のバグを**優先度順**に処理:
+**バグリストの動的取得**:
 
-#### Critical (5) - 最優先
-1. `networkidle-timeout-websocket-persistent.md`
-2. `disconnected-kernel-cross-spec-contamination.md`
-3. `beforeeach-timeout-after-multiple-tests.md`
-4. `guard-validation-warning-not-visible.md`
-5. `reconnect-skill-event-lost.md`
+`development_docs/issues/` ディレクトリをスキャンして未解決の Issue を取得する（`✅` で始まるファイルは修正済みのためスキップ）:
 
-#### High (4)
-6. `bridge001-python-dedup-blocks-e2e-test.md`
-7. `state-contamination-auto-instantiate-skill-leak.md`
-8. `bug-260221-cell-accumulation-in-notebook.md`
-9. `bug-260221-skill-reward-negative-display.md`
+```bash
+ls development_docs/issues/ | grep -v "^✅"
+```
 
-#### Medium (1)
-10. `bug-260221-backend-list-remove-crash.md`
+各 Issue ファイルの `**重要度**` フィールドを読んで優先度を判定し、以下の順で処理:
 
-#### Low (1)
-11. `trades-duplicate-sandbox002-check.md`
+1. **Critical** — 最優先（E2E テスト全滅、クラッシュ等）
+2. **High** — 優先（機能動作に影響）
+3. **Medium** — 通常（動作するが不安定）
+4. **Low** — 後回し（コード品質・軽微）
+
+> **注意**: ハードコードされたバグリストは使わない。毎回 `ls` でディレクトリを確認し、その時点の未解決 Issue のみを処理する。
 
 ---
 
@@ -203,7 +199,7 @@ Issue ファイルを更新してファイル名に✅を付ける:
 
 ### Phase 3: 最終検証（全バグ修正後）
 
-全11バグの修正が完了（または「修正試行中」でスキップ）したら、最終検証を実行:
+全バグの修正が完了（または「修正試行中」でスキップ）したら、最終検証を実行:
 
 #### 3.1: フル E2E スイート実行
 
@@ -235,30 +231,23 @@ marimo で backcast.py を開き、全59スキルを取得できることを確�
 # バグ修正オーケストレーション完了
 
 **実行日**: YYYY-MM-DD
-**処理バグ数**: 11 件
+**処理バグ数**: <N> 件
 
 ## 修正完了バグ一覧
 
 | 優先度 | Issue | ステータス | テスト結果 | 備考 |
 |--------|-------|-----------|-----------|------|
-| Critical | networkidle-timeout | ✅ 修正済み | 9 tests now pass | |
-| Critical | disconnected-kernel | ✅ 修正済み | 28 failures → pass | |
-| Critical | beforeeach-timeout | ✅ 修正済み | 1 test fixed | |
-| Critical | guard-validation | ✅ 修正済み | 3 tests fixed | |
-| Critical | reconnect-skill-event | ✅ 修正済み | New test added | |
-| High | bridge001-dedup | ✅ 修正済み | Test 3 now pass | |
-| High | state-contamination | ✅ 修正済み | 3 failures → pass | |
-| High | cell-accumulation | ✅ 修正済み | New reset feature | |
-| High | skill-reward-negative | ✅ 修正済み | UI fixed | |
-| Medium | backend-list-remove | ✅ 修正済み | Crash prevented | |
-| Low | trades-duplicate | ✅ 修正済み | Code cleaned | |
+| Critical | <slug> | ✅ 修正済み | <テスト結果> | |
+| High | <slug> | ✅ 修正済み | <テスト結果> | |
+| Medium | <slug> | ✅ 修正済み | <テスト結果> | |
+| Low | <slug> | ✅ 修正済み | <テスト結果> | |
 
 ## 成果物
 
-- **修正プラン**: `development_docs/plans/fix-*.md` (11 files)
-- **レビュー**: `development_docs/reviews/fix-*.md` (11 files)
-- **テストプレイ**: `development_docs/testplay/fix-*.md` (6 files, High以上のみ)
-- **更新された Issue**: `development_docs/issues/*.md` (11 files)
+- **修正プラン**: `development_docs/plans/fix-*.md` (<N> files)
+- **レビュー**: `development_docs/reviews/fix-*.md` (<N> files)
+- **テストプレイ**: `development_docs/testplay/fix-*.md` (<M> files, High以上のみ)
+- **更新された Issue**: `development_docs/issues/*.md` (<N> files)
 
 ## 最終テスト結果
 
@@ -358,7 +347,7 @@ except MaxRetriesExceeded:
 
 オーケストレーション完了時に以下を達成:
 
-1. ✅ 全11 Issue ファイルが `✅ 修正済み` または「修正試行中」にマーク
+1. ✅ 取得した全 Issue ファイルが `✅ 修正済み` または「修正試行中」にマーク
 2. ✅ フル E2E スイート通過（80 tests）
 3. ✅ 全単体テスト通過
 4. ✅ 手動フルゲームプレイで全59スキル取得可能
@@ -376,30 +365,30 @@ except MaxRetriesExceeded:
 → env-agent: READY ✅
 → app-agent: Servers started ✅
 
-# Phase 2: Bug #1 (networkidle-timeout)
+# Phase 2: Bug #1 (Critical: <slug>)
 → plan-agent: Plan created ✅
-→ fix-agent: 4 files modified ✅
+→ fix-agent: N files modified ✅
 → review-agent: APPROVED ✅
-→ test-agent: 9 tests fixed ✅
-→ Issue updated: ✅ 修正済み
+→ test-agent: Tests fixed ✅
+→ Issue updated: ✅ 修正済み（ファイル名 ✅ プレフィックス付与）
 
-# Phase 2: Bug #2 (disconnected-kernel)
+# Phase 2: Bug #2 (High: <slug>)
 → plan-agent: Plan created ✅
-→ fix-agent: 2 files modified ✅
+→ fix-agent: N files modified ✅
 → review-agent: APPROVED ✅
-→ test-agent: 28 failures → pass ✅
+→ test-agent: Tests pass ✅
 → testplay-agent: Verified ✅
 → Issue updated: ✅ 修正済み
 
-... (continued for all 11 bugs)
+... (discovered N bugs, processed in priority order)
 
 # Phase 3: Final validation
-→ Full E2E suite: 80 passed ✅
+→ Full E2E suite: 75 passed / 5 skipped ✅
 → Unit tests: All pass ✅
 → Full gameplay: 59 skills ✅
 
 # Phase 4: Summary
 → Summary report: development_docs/bug-fix-orchestrate-summary.md ✅
 
-🎉 All 11 bugs fixed successfully!
+🎉 All N bugs fixed successfully!
 ```
