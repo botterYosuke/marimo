@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない - marimo Developer Docs</title>
+        <title>BUG-003: sell() ガード警告メッセージのテキストが見つからない - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-hud-finished-e2e" class="md-skip">
+        <a href="#bug-003-sell" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない
+              BUG-003: sell() ガード警告メッセージのテキストが見つからない
             
           </span>
         </div>
@@ -1210,7 +1210,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        概要
+        再現手順
       
     </span>
   </a>
@@ -1221,7 +1221,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        背景
+        期待動作
       
     </span>
   </a>
@@ -1232,7 +1232,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        期待される動作
+        実際の動作
       
     </span>
   </a>
@@ -1243,7 +1243,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        対象ファイル
+        原因推定
       
     </span>
   </a>
@@ -1254,18 +1254,7 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装案
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        実装試行記録
+        影響範囲
       
     </span>
   </a>
@@ -1277,6 +1266,28 @@
     <span class="md-ellipsis">
       
         関連 Issue
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        調査手順
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        関連ファイル
       
     </span>
   </a>
@@ -1300,70 +1311,78 @@
 
 
 
-<h1 id="issue-hud-finished-e2e">Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない<a class="headerlink" href="#issue-hud-finished-e2e" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-21
-<strong>重要度</strong>: Medium
-<strong>カテゴリ</strong>: テストカバレッジ / UI
-<strong>ステータス</strong>: ⬜ 未対応</p>
-<hr />
-<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正（ゲーム終了後に HUD ステータスを "Trading" → "Finished" に変更）は実装済みだが、UI ラベルが正しく "Finished" になることを明示的に検証する E2E テストが存在しない。</p>
-<p><code>backcast-integration.spec.ts</code> の全テストは <code>bt.step()</code> の複数回実行を含むが、ゲーム終了（<code>step()</code> が <code>False</code> を返す状態）後の HUD ステータス表示を確認しているケースはない。</p>
-<h2 id="_2">背景<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正内容:
-- <code>step()</code> の戻り値が <code>False</code>（＝バックテスト終了）のとき、HUD ステータスを "Finished" に更新する
-- 修正前は終了後も "Trading" のまま表示されていた</p>
-<p>現在の <code>backcast-integration.spec.ts</code> は長期プレイフロー（ <code>bt.buy()</code> → <code>bt.step()</code> × N 回）を実行するが、<strong>ゲーム終了（全データ消化）後に "Finished" ラベルが表示されることを assert していない</strong>。</p>
-<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>以下のシナリオが E2E テストで検証されること:</p>
+<h1 id="bug-003-sell">BUG-003: sell() ガード警告メッセージのテキストが見つからない<a class="headerlink" href="#bug-003-sell" title="Permanent link">&para;</a></h1>
+<p><strong>優先度</strong>: Medium
+<strong>発見元</strong>: play-log-2026-02-21.md
+<strong>テスト</strong>: frontend/e2e-tests/game/guard-validation.spec.ts:151
+<strong>ステータス</strong>: 修正試行中（ブロッカー: guard-validation テスト環境不安定）</p>
+<h2 id="_1">再現手順<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <ol>
-<li><code>bt.step()</code> を繰り返しデータ末尾まで進める（または直接終了状態にする）</li>
-<li>HUD の status 要素が <code>"Finished"</code> を表示する</li>
-<li>"Trading" 文字列が残っていないことを確認する</li>
+<li><code>npx playwright test e2e-tests/game/guard-validation.spec.ts --headed</code> を実行する</li>
+<li>テスト "ポジションなしで sell() を呼ぶと警告メッセージが表示される" を確認する</li>
+<li>テスト内で以下の Python コードが実行される:
+   <div class="highlight"><pre><span></span><code><span class="n">_gs</span><span class="o">.</span><span class="n">chart</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+<span class="n">_gs</span><span class="o">.</span><span class="n">sell</span><span class="p">()</span>
+</code></pre></div></li>
+<li><code>page.locator("text=/保有中の株がありません/")</code> で警告メッセージを検索する</li>
 </ol>
-<h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h2 id="_2">期待動作<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li>ポジションなしで <code>sell()</code> を呼ぶと、セル出力に「保有中の株がありません。まず <code>bt.buy()</code> で株を購入してください」という <code>mo.callout()</code> 警告が表示される</li>
+<li>Playwright の <code>text=/保有中の株がありません/</code> ロケーターがマッチする</li>
+</ul>
+<h2 id="_3">実際の動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>locator "text=/保有中の株がありません/" not found</code></li>
+<li>警告メッセージがセル出力に表示されていない、またはテキスト内容が変更されている</li>
+</ul>
+<h2 id="_4">原因推定<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>警告テキストが変更された</strong>: <code>game_setup.py</code> の <code>sell()</code> ガード処理のメッセージテキストが更新され、テストの正規表現 <code>/保有中の株がありません/</code> にマッチしなくなった</li>
+<li><strong>ガード処理が未実装/削除された</strong>: <code>sell()</code> のガード条件 (<code>bt.position.size == 0</code>) が変更され、警告が表示されなくなった</li>
+<li><strong><code>mo.output.append()</code> の出力が DOM に反映されない</strong>: <code>mo.callout()</code> の出力が Playwright で検索可能な DOM 要素として現れていない（<code>mo.output.append</code> と <code>page.locator("text=...")</code> の不整合）</li>
+<li><strong><code>import game_setup</code> の失敗</strong>: PYTHONPATH 問題で <code>game_setup</code> モジュールのインポート自体が失敗し、<code>sell()</code> が呼べていない（既存 Issue の仮説と同様）</li>
+</ol>
+<h2 id="_5">影響範囲<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>guard-validation.spec.ts のテスト 3（1件）</li>
+<li>ユーザーがポジションなしで <code>sell()</code> を呼んだ際の UX（警告なしでエラーが発生する可能性）</li>
+</ul>
+<h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>guard-validation-buy-sell-warning-not-implemented.md</code> — 同テストスイートの全体的な失敗を扱う既存 Issue。既存 Issue はテスト行番号 <code>:50, :82, :126</code> を対象としており、本 Issue は <code>:151</code> の失敗を対象。原因が PYTHONPATH 問題の場合は既存 Issue と同一の根本原因</li>
+<li><code>guard-validation-warning-not-visible.md</code> (修正済み) — networkidle タイムアウトの修正は完了しているが、テキスト不一致は別問題</li>
+</ul>
+<h2 id="_6">調査手順<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>game_setup.py</code> の <code>sell()</code> 関数の現在のガードメッセージテキストを確認する</li>
+<li>テストを <code>--headed</code> で実行し、セル出力に何が表示されているか目視確認する</li>
+<li>ブラウザコンソールで <code>ImportError</code> や <code>ModuleNotFoundError</code> が出ていないか確認する</li>
+<li><code>mo.output.append(mo.callout(...))</code> の出力が DOM のどこに現れるか確認する</li>
+</ol>
+<h2 id="_7">関連ファイル<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>ファイル</th>
-<th>対応箇所</th>
+<th>関連箇所</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
-<td>新規テストケース追加先</td>
+<td><code>frontend/e2e-tests/game/guard-validation.spec.ts</code></td>
+<td>L151-169 — 失敗テスト</td>
 </tr>
 <tr>
-<td><code>frontend/src/components/backtest-hud.tsx</code></td>
-<td>ステータスラベルの実装箇所</td>
+<td><code>src-tauri/sample-notebooks/game_setup.py</code></td>
+<td><code>sell()</code> L108-114 — ガード警告実装</td>
 </tr>
 <tr>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-<td><code>step()</code> 終了判定箇所</td>
+<td><code>frontend/e2e-tests/game/helpers.ts</code></td>
+<td><code>runNewCellInGrid()</code> — セル追加・実行</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// backcast-integration.spec.ts に追加</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;ゲーム終了後に HUD ステータスが Finished になる&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// データを末尾まで step() する</span>
-<span class="w">  </span><span class="c1">// 最後の step() が False を返した後</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">statusEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;hud-status&quot;]&#39;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Finished&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">not</span><span class="p">.</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Trading&quot;</span><span class="p">);</span>
-<span class="p">});</span>
-</code></pre></div>
-<p><code>data-testid="hud-status"</code> が <code>backtest-hud.tsx</code> に存在しない場合は追加が必要。</p>
-<h2 id="_6">実装試行記録<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p><strong>試行日</strong>: 2026-02-21
-<strong>ブロッカー</strong>: <code>bt.step()</code> をデータ末尾まで進めるには backcast.py + BackcastPro エンジン + 実株価データが必要。E2E テスト環境（game_test.py）ではゲームエンジンが未初期化。backcast-integration.spec.ts は backcast.py を使うが、全データ消化（数百〜数千 step）は時間的に非現実的。
-<strong>試行内容</strong>: data-testid="hud-status" の存在確認を試みたが、backtest-hud.tsx が game_test.py 上では render されないため検証不可。
-<strong>推奨</strong>: backcast-integration.spec.ts で短いデータセット（10ステップ程度）を使った終了テストを追加する。要: テスト用短縮データの準備。</p>
-<h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>step-end-status-label-wrong.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
-</ul>
 
 
 

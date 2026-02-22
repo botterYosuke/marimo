@@ -1221,7 +1221,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        環境準備メモ
+        テスト結果サマリー
       
     </span>
   </a>
@@ -1232,19 +1232,74 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        テスト結果サマリー
+        スイート別結果
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="テスト結果サマリー">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        スイート別結果
+        失敗テスト詳細
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="失敗テスト詳細">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-bridgespects81-sandbox_006-bridge_001-unlocked" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. bridge.spec.ts:81 - SANDBOX_006 完了後、BRIDGE_001 が unlocked になる
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-guard-validationspects120-buy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. guard-validation.spec.ts:120 - ポジション保有中に buy() を再度呼ぶと警告メッセージが表示される
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-guard-validationspects151-sell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. guard-validation.spec.ts:151 - ポジションなしで sell() を呼ぶと警告メッセージが表示される
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-8-integrationspects-5-html" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4-8. integration.spec.ts (5件) - HTML パイプライン経由テスト
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-persistencespects74-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. persistence.spec.ts:74 - スキル完了後リロードすると進捗が 0 にリセットされる
       
     </span>
   </a>
@@ -1253,17 +1308,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#backcast-integrationspects" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        スキル発火記録（backcast-integration.spec.ts より）
-      
-    </span>
-  </a>
   
 </li>
       
@@ -1271,60 +1315,10 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        確認されたバグ
+        スキル発火記録
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="確認されたバグ">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#bug-1-bridge_001" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        BUG-1: BRIDGE_001 フロントエンドカウント未反映
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bug-2-guard-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        BUG-2: guard-validation 警告メッセージ未実装
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bug-3-networkidle-regression" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        BUG-3: networkidle タイムアウト（regression）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bug-4-kernel-disconnecteddataspects" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        BUG-4: kernel disconnected（data.spec.ts 固有）
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1332,7 +1326,7 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        良好だった点
+        最終ステータス
       
     </span>
   </a>
@@ -1343,341 +1337,7 @@
   <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        最終ステータス
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        環境情報
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        手動プレイ観察記録
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="手動プレイ観察記録">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        初期画面（ゲーム起動時）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ui" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        スキルツリー UI 観察
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        スキル発火記録
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="スキル発火記録">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        発火されなかった/確認できなかったスキル
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        発見されたバグ・問題
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="発見されたバグ・問題">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#bug-p1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        BUG-P1: 再接続時スキルイベント消失（既知、再現確認）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bug-new-1-valueerror-listremove" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        BUG-NEW-1: バックエンドクラッシュ（ValueError: list.remove）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bug-new-2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        BUG-NEW-2: ノートブックへのセル蓄積
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bug-known-p5-ai-fix" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        BUG-KNOWN-P5: AI Fix バナーがゲームモードで表示される
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ux" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        その他の UX 観察
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="その他の UX 観察">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        良い点
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_15" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        改善が必要な点
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#e2e" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        E2E テスト結果
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="E2E テスト結果">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#2026-02-21_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        前回ベースライン（2026-02-21 セッション開始時）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2026-02-21-orchestrate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        今回フルラン（2026-02-21 orchestrate セッション 全スイート）
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="今回フルラン（2026-02-21 orchestrate セッション 全スイート）">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        失敗カテゴリ
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#backcastpy-backcast-integrationspects-6-pass" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        backcast.py 完全プレイフロー（backcast-integration.spec.ts）— ✅ 全 6 テスト PASS
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#sandboxspects-2026-02-21" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        今セッション（sandbox.spec.ts のみ、2026-02-21）
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="今セッション（sandbox.spec.ts のみ、2026-02-21）">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        実行コマンド
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_18" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        結果
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_19" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        最終ステータス
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="最終ステータス">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_20" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        手動プレイ（前セッション）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#e2e_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        E2E テスト（今セッション）
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_21" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        スクリーンショット
+        エラー・異常
       
     </span>
   </a>
@@ -1703,485 +1363,14 @@
 
 <h1 id="2026-02-21">プレイログ 2026-02-21<a class="headerlink" href="#2026-02-21" title="Permanent link">&para;</a></h1>
 <h2 id="_1">実行方法<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>E2E テスト（Playwright）— <code>npx playwright test e2e-tests/game/ --headed</code></p>
-<h2 id="_2">環境準備メモ<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>E2E テスト（全スイート: <code>e2e-tests/game/</code>）— <code>npx playwright test e2e-tests/game/ --headed</code></p>
+<h2 id="_2">テスト結果サマリー<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <ul>
-<li>port 2718 は既存 Python プロセス (PID 4732) が稼働中で再利用</li>
-<li>port 2724 (<code>output.py --base-url=/foo</code>) が未起動のため タイムアウト → <code>MSYS_NO_PATHCONV=1</code> 付きで手動起動で解決（知見: Git Bash が <code>/foo</code> を Windows パスに変換する）</li>
-<li><code>.backcast.progress.json</code> リセット済み</li>
+<li>合計: <strong>69 passed / 9 failed / 5 skipped</strong></li>
+<li>実行時間: <strong>18.1m</strong></li>
+<li>テストスイート数: 11</li>
 </ul>
-<h2 id="_3">テスト結果サマリー<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>項目</th>
-<th>数</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>合計</td>
-<td>83</td>
-</tr>
-<tr>
-<td>passed</td>
-<td>50</td>
-</tr>
-<tr>
-<td>failed</td>
-<td>28</td>
-</tr>
-<tr>
-<td>skipped</td>
-<td>5</td>
-</tr>
-<tr>
-<td>実行時間</td>
-<td>1.2h</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_4">スイート別結果<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>スイート</th>
-<th>passed</th>
-<th>failed</th>
-<th>主な失敗原因</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>backcast-integration.spec.ts</td>
-<td>4</td>
-<td>2</td>
-<td>BRIDGE_001 unlocked のまま / kernel disconnected</td>
-</tr>
-<tr>
-<td>bridge.spec.ts</td>
-<td>9</td>
-<td>1</td>
-<td>networkidle タイムアウト (BRIDGE_003 全完了テスト)</td>
-</tr>
-<tr>
-<td>data.spec.ts</td>
-<td>8</td>
-<td>4</td>
-<td>kernel disconnected (新規ファイルの beforeEach 問題)</td>
-</tr>
-<tr>
-<td>guard-validation.spec.ts</td>
-<td>0</td>
-<td>3</td>
-<td>警告メッセージが表示されない (機能未実装)</td>
-</tr>
-<tr>
-<td>integration.spec.ts</td>
-<td>3</td>
-<td>6</td>
-<td>networkidle タイムアウト / 状態汚染</td>
-</tr>
-<tr>
-<td>persistence.spec.ts</td>
-<td>4</td>
-<td>4</td>
-<td>networkidle タイムアウト / スキルツリー表示失敗</td>
-</tr>
-<tr>
-<td>sandbox.spec.ts</td>
-<td>10</td>
-<td>0</td>
-<td><strong>全パス</strong></td>
-</tr>
-<tr>
-<td>setup.spec.ts</td>
-<td>10</td>
-<td>0</td>
-<td><strong>全パス</strong></td>
-</tr>
-<tr>
-<td>ui.spec.ts</td>
-<td>7</td>
-<td>6</td>
-<td>networkidle タイムアウト / 状態汚染</td>
-</tr>
-<tr>
-<td>z-python-e2e.spec.ts</td>
-<td>2</td>
-<td>2</td>
-<td>networkidle タイムアウト / browserContext エラー</td>
-</tr>
-</tbody>
-</table>
-<h2 id="backcast-integrationspects">スキル発火記録（backcast-integration.spec.ts より）<a class="headerlink" href="#backcast-integrationspects" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>スキルID</th>
-<th>操作</th>
-<th>結果</th>
-<th>備考</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>SANDBOX_001</td>
-<td><code>bt.chart("7203")</code></td>
-<td>✅ OK</td>
-<td>completed</td>
-</tr>
-<tr>
-<td>SANDBOX_002</td>
-<td><code>bt.buy()</code></td>
-<td>✅ OK</td>
-<td>completed</td>
-</tr>
-<tr>
-<td>SANDBOX_003</td>
-<td><code>bt.trades()</code></td>
-<td>✅ OK</td>
-<td>completed</td>
-</tr>
-<tr>
-<td>SANDBOX_004</td>
-<td><code>bt.sell()</code></td>
-<td>✅ OK</td>
-<td>completed</td>
-</tr>
-<tr>
-<td>SANDBOX_005</td>
-<td><code>bt.chart("7203")</code> 2回目</td>
-<td>✅ OK</td>
-<td>completed</td>
-</tr>
-<tr>
-<td>SANDBOX_006</td>
-<td>自動発火</td>
-<td>✅ OK</td>
-<td>completed</td>
-</tr>
-<tr>
-<td>BRIDGE_001</td>
-<td><code>bt.reveal_data()</code></td>
-<td>❌ NG</td>
-<td>unlocked のまま（バグ）</td>
-</tr>
-<tr>
-<td>BRIDGE_002</td>
-<td><code>bt.get_stock_daily()</code></td>
-<td>✅ OK</td>
-<td>completed（完全プレイフローでは動作）</td>
-</tr>
-<tr>
-<td>BRIDGE_003</td>
-<td>自動発火</td>
-<td>✅ OK</td>
-<td>completed（完全プレイフローでは動作）</td>
-</tr>
-</tbody>
-</table>
-<p>※ 完全プレイフロー（test 1）では BRIDGE_001〜003 全て completed。単独テスト（test 3）では BRIDGE_001 が unlocked のまま残る矛盾あり。</p>
-<h2 id="_5">確認されたバグ<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<h3 id="bug-1-bridge_001">BUG-1: BRIDGE_001 フロントエンドカウント未反映<a class="headerlink" href="#bug-1-bridge_001" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>テスト</strong>: <code>backcast-integration.spec.ts:271</code></li>
-<li><strong>症状</strong>: BRIDGE_001 を Python 経由で発火後、フロントエンドのステータスが "unlocked" のまま</li>
-<li><strong>メモ</strong>: 完全プレイフローでは正常動作するが、単独テストでは失敗</li>
-</ul>
-<h3 id="bug-2-guard-validation">BUG-2: guard-validation 警告メッセージ未実装<a class="headerlink" href="#bug-2-guard-validation" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>テスト</strong>: <code>guard-validation.spec.ts</code> 全 3 テスト</li>
-<li><strong>症状</strong>: <code>bt.buy()</code>（データなし）で「まず bt.chart()...」が表示されない</li>
-<li><strong>原因</strong>: <code>backcast.py</code> にガードロジックが実装されていない可能性</li>
-</ul>
-<h3 id="bug-3-networkidle-regression">BUG-3: networkidle タイムアウト（regression）<a class="headerlink" href="#bug-3-networkidle-regression" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>テスト</strong>: bridge.spec.ts / integration.spec.ts / persistence.spec.ts / ui.spec.ts / z-python-e2e.spec.ts</li>
-<li><strong>症状</strong>: <code>page.waitForLoadState("networkidle")</code> が 10s でタイムアウト</li>
-<li><strong>知見</strong>: marimo は WebSocket を常時接続するため networkidle に到達しない（知見 35a）</li>
-</ul>
-<h3 id="bug-4-kernel-disconnecteddataspects">BUG-4: kernel disconnected（data.spec.ts 固有）<a class="headerlink" href="#bug-4-kernel-disconnecteddataspects" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>テスト</strong>: <code>data.spec.ts:83,94,111,204</code></li>
-<li><strong>症状</strong>: <code>ensureConnected</code> で "disconnected" → タイムアウト</li>
-<li><strong>原因</strong>: backcast.py での重い処理後に切断状態になる</li>
-</ul>
-<h2 id="_6">良好だった点<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>sandbox.spec.ts 全 10 件パス</strong> — サンドボックストラックのコア機能は正常</li>
-<li><strong>setup.spec.ts 全 10 件パス</strong> — セットアップトラックも正常</li>
-<li><strong>bridge.spec.ts 9/10 パス</strong> — ブリッジトラックはほぼ正常</li>
-<li><strong>backcast.py 完全プレイフロー</strong> — SANDBOX_001〜006 + BRIDGE_001〜003 が順次完了（最終カウント: 9）</li>
-</ul>
-<h2 id="_7">最終ステータス<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
-<ul>
-<li>取得スキル数（完全プレイフロー）: <strong>9/59</strong> (SANDBOX_001〜006 + BRIDGE_001〜003)</li>
-<li>Equity: 未確認</li>
-</ul>
-<hr />
-<p><em>（旧内容は以下に続く）</em>
-- <strong>方法B</strong>: Playwright MCP ブラウザによる手動操作（backcast.py 直接プレイ）</p>
-<hr />
-<h2 id="_8">環境情報<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>URL</strong>: <code>http://localhost:3000/?file=C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></li>
-<li><strong>サーバー</strong>: <code>pnpm dev</code>（marimo backend port 2718、Vite frontend port 3000）</li>
-<li><strong>Python PYTHONPATH</strong>: <code>%APPDATA%\marimo\notebooks</code></li>
-<li><strong>初期資産</strong>: ¥100,000</li>
-</ul>
-<hr />
-<h2 id="_9">手動プレイ観察記録<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
-<h3 id="_10">初期画面（ゲーム起動時）<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>項目</th>
-<th>状態</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>TradingView チャート</td>
-<td>トヨタ(7203) ローソク足チャート表示 ✅</td>
-</tr>
-<tr>
-<td>3D キャラクター</td>
-<td>sci-fi ドローンが板上に表示 ✅</td>
-</tr>
-<tr>
-<td>ステータスバー</td>
-<td><code>Trading \| Time: 2001-01-04 \| Progress: 0.0% \| Equity: ¥100,000 \| Cash: ¥100,000 \| Position: 0 shares \| Trades: 0</code></td>
-</tr>
-<tr>
-<td>スキルツリーボタン</td>
-<td>右下に表示（<code>data-testid="skill-tree-button"</code>） ✅</td>
-</tr>
-<tr>
-<td>スキルツリー内容</td>
-<td>0/59 スキル、SANDBOX_001「マーケットへようこそ」unlocked、SANDBOX_002「初めての購入」locked</td>
-</tr>
-</tbody>
-</table>
-<p><strong>スクリーンショット</strong>: <code>game-play-initial-state.png</code></p>
-<h3 id="ui">スキルツリー UI 観察<a class="headerlink" href="#ui" title="Permanent link">&para;</a></h3>
-<p>スキルツリーを開いた際の観察事項:</p>
-<table>
-<thead>
-<tr>
-<th>項目</th>
-<th>観察内容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>スキル数表示</td>
-<td>0/59 スキル（正常）</td>
-</tr>
-<tr>
-<td>最初のスキル</td>
-<td>「マーケットへようこそ」— ◯アイコン（unlocked）、報酬「-30,000円 ·1」表示</td>
-</tr>
-<tr>
-<td>2番目のスキル</td>
-<td>「初めての購入」— 🔒アイコン（locked）、報酬「-20,000円」表示</td>
-</tr>
-<tr>
-<td><strong>⚠️ 報酬表示</strong></td>
-<td>マイナス表記「-30,000円」が表示されるが、実際には報酬のはずで表示が逆になっている可能性あり</td>
-</tr>
-</tbody>
-</table>
-<p><strong>スクリーンショット</strong>: <code>game-play-skill-tree.png</code></p>
-<hr />
-<h2 id="_11">スキル発火記録<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>スキルID</th>
-<th>操作</th>
-<th>Python側</th>
-<th>フロントエンド</th>
-<th>備考</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>SANDBOX_001</td>
-<td><code>bt.chart("7203")</code></td>
-<td>emit_skill() 呼び出し確認</td>
-<td>BroadcastChannel受信確認（console: <code>[SkillHandler] Received skill event: SANDBOX_...</code>）</td>
-<td><strong>但し再接続時のため進捗には反映されず（P1バグ）</strong></td>
-</tr>
-<tr>
-<td>SANDBOX_002</td>
-<td><code>bt.buy()</code></td>
-<td>emit_skill("SANDBOX_002") 推定</td>
-<td>同上</td>
-<td>同上</td>
-</tr>
-<tr>
-<td>BRIDGE_001</td>
-<td>前回セッションの残留セル</td>
-<td>emit_skill呼び出し</td>
-<td><code>[SkillHandler] Received skill event: BRIDGE_001</code> 確認</td>
-<td>前回セルの残留問題</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_12">発火されなかった/確認できなかったスキル<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>スキルID</th>
-<th>理由</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>SANDBOX_003</td>
-<td>bt.trades() 未実行（セルなし）</td>
-</tr>
-<tr>
-<td>SANDBOX_004</td>
-<td>bt.sell() 未実行（セルなし）</td>
-</tr>
-<tr>
-<td>SANDBOX_005</td>
-<td>前提スキル未完了</td>
-</tr>
-<tr>
-<td>SANDBOX_006</td>
-<td>前提スキル未完了</td>
-</tr>
-<tr>
-<td>BRIDGE_002</td>
-<td>bt.get_stock_daily() 未実行</td>
-</tr>
-<tr>
-<td>BRIDGE_003</td>
-<td>前提スキル未完了</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="_13">発見されたバグ・問題<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
-<h3 id="bug-p1">BUG-P1: 再接続時スキルイベント消失（既知、再現確認）<a class="headerlink" href="#bug-p1" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>症状</strong>: ページを再接続（Reconnect）すると、再接続時に発火したスキルイベントが進捗に反映されない（0/59 のまま）</li>
-<li><strong>再現手順</strong>:</li>
-<li>marimo server 起動後、backcast.py を開く</li>
-<li>既存セッションに Reconnect</li>
-<li>セルが自動実行され <code>[SkillHandler] Received skill event: SANDBOX_001</code> がコンソールに出力される</li>
-<li>スキルツリーを確認すると 0/59 のまま</li>
-<li><strong>原因</strong>: Jotai atom（非永続化）が新しいブラウザセッションでリセットされるタイミングと、再接続時のスキルイベント受信タイミングがずれる</li>
-<li><strong>影響度</strong>: P1（ゲームプレイで必ず発生）</li>
-<li><strong>ステータス</strong>: <code>development_docs/game/game-e2e-review-system.md</code> で既知問題として記録済み</li>
-</ul>
-<h3 id="bug-new-1-valueerror-listremove">BUG-NEW-1: バックエンドクラッシュ（ValueError: list.remove）<a class="headerlink" href="#bug-new-1-valueerror-listremove" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>症状</strong>: <code>ValueError: list.remove(x): x not in list</code> でマリモバックエンドがクラッシュ</li>
-<li><strong>タイムスタンプ</strong>: 2026-02-21 10:59 頃</li>
-<li><strong>状況</strong>: 複数の WebSocket クライアント（Playwright MCP ブラウザ + E2E テスト）が同時接続中</li>
-<li><strong>影響</strong>: ゲームセッションが切断、カーネル再起動が必要</li>
-<li><strong>再現条件</strong>: E2E テスト並列実行中に Playwright MCP ブラウザから <code>window.__testResetProgress()</code> を呼んだ際に発生の可能性</li>
-<li><strong>ログ</strong>: <code>[backend] ValueError: list.remove(x): x not in list</code></li>
-</ul>
-<h3 id="bug-new-2">BUG-NEW-2: ノートブックへのセル蓄積<a class="headerlink" href="#bug-new-2" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>症状</strong>: プレイ中に作成した新規セル（cell-7, cell-4の BRIDGE_001 HTML 等）がバックキャスト.py に永続保存される</li>
-<li><strong>観察</strong>: backcast.py が 7+ セルに増加（本来は 2-3 セル = setup + markdown + chart）</li>
-<li><strong>問題</strong>: 次回起動時に不要なセルが auto-execute され、スキルが意図せず発火する可能性</li>
-<li><strong>セル内容</strong>:</li>
-<li>cell-4: 前回テストセッション由来の BRIDGE_001 イベント直接発火コード</li>
-<li>cell-5: bt.buy() — 前回セッション由来</li>
-<li>cell-6/7: bt.chart("7203") × 2 — 重複</li>
-</ul>
-<h3 id="bug-known-p5-ai-fix">BUG-KNOWN-P5: AI Fix バナーがゲームモードで表示される<a class="headerlink" href="#bug-known-p5-ai-fix" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>症状</strong>: 各セルに「Fix generated / Showing fix / Accept / Reject」バナーが表示される</li>
-<li><strong>影響</strong>: ゲームプレイの UX を著しく損なう</li>
-<li><strong>ステータス</strong>: 既知問題（development_docs/game/game-e2e-review-system.md の UX プレイテスト P5）</li>
-</ul>
-<hr />
-<h2 id="ux">その他の UX 観察<a class="headerlink" href="#ux" title="Permanent link">&para;</a></h2>
-<h3 id="_14">良い点<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>項目</th>
-<th>評価</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>TradingView チャート</td>
-<td>本格的なローソク足チャートで視覚的に魅力的</td>
-</tr>
-<tr>
-<td>3D ドローンキャラクター</td>
-<td>ゲームらしさを演出、ユニーク</td>
-</tr>
-<tr>
-<td>ステータスバー</td>
-<td>重要な情報（残高・時間・ポジション）を一目で確認可能</td>
-</tr>
-<tr>
-<td>スキルツリーダイアログ</td>
-<td>きれいにデザインされた React Flow グラフ</td>
-</tr>
-<tr>
-<td>スキル前提条件グラフ</td>
-<td>視覚的なスキルツリーで進行が分かりやすい</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_15">改善が必要な点<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>項目</th>
-<th>問題</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>bt.buy() の出力</td>
-<td><code>Order object</code> 表示で意味不明（P2 既知問題）</td>
-</tr>
-<tr>
-<td>bt.step() の出力</td>
-<td><code>True</code> のみで情報が乏しい（P3 既知問題）</td>
-</tr>
-<tr>
-<td>報酬表示</td>
-<td>「-30,000円」表示がマイナスに見える（正しくは報酬のプラス）</td>
-</tr>
-<tr>
-<td>グリッドセル重なり</td>
-<td>複数セル窓が重なって操作しにくい</td>
-</tr>
-<tr>
-<td>セル名</td>
-<td>cell-1, cell-2... ではなく意味のある名前にすると良い</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="e2e">E2E テスト結果<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h2>
-<h3 id="2026-02-21_1">前回ベースライン（2026-02-21 セッション開始時）<a class="headerlink" href="#2026-02-21_1" title="Permanent link">&para;</a></h3>
-<p>全スイート: <code>npx playwright test e2e-tests/game/ --reporter=list</code>
-- sandbox.spec.ts: 10 passed
-- ui.spec.ts: 9 passed / 3 fixme
-- persistence.spec.ts: 8 passed
-- bridge.spec.ts: 10 passed
-- integration.spec.ts: 9 passed
-- z-python-e2e.spec.ts: 4 passed
-- backcast-integration.spec.ts: 4 passed（要 backcast.py ファイル配置）
-- <strong>合計</strong>: 75 passed / 5 skipped / 0 failed（前回ベースライン）</p>
-<h3 id="2026-02-21-orchestrate">今回フルラン（2026-02-21 orchestrate セッション 全スイート）<a class="headerlink" href="#2026-02-21-orchestrate" title="Permanent link">&para;</a></h3>
-<p><code>npx playwright test e2e-tests/game/ --headed --reporter=line</code>（実行時間: 1.1h）</p>
-<p><strong>合計: 53 passed / 25 failed / 5 skipped（83 テスト）</strong></p>
+<h2 id="_3">スイート別結果<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -2189,6 +1378,7 @@
 <th>passed</th>
 <th>failed</th>
 <th>skipped</th>
+<th>備考</th>
 </tr>
 </thead>
 <tbody>
@@ -2197,173 +1387,197 @@
 <td>6</td>
 <td>0</td>
 <td>0</td>
+<td>完全プレイフロー含む</td>
 </tr>
 <tr>
 <td>bridge.spec.ts</td>
 <td>9</td>
 <td>1</td>
 <td>0</td>
+<td>SANDBOX_006→BRIDGE_001チェーン失敗</td>
 </tr>
 <tr>
 <td>data.spec.ts</td>
-<td>9</td>
-<td>1</td>
+<td>11</td>
 <td>0</td>
+<td>0</td>
+<td>全テスト通過</td>
 </tr>
 <tr>
 <td>guard-validation.spec.ts</td>
+<td>1</td>
+<td>2</td>
 <td>0</td>
-<td>3</td>
-<td>0</td>
+<td>buy/sell ガード処理に問題</td>
 </tr>
 <tr>
 <td>integration.spec.ts</td>
-<td>3</td>
+<td>4</td>
 <td>5</td>
 <td>0</td>
+<td>HTML パイプライン経由が不安定</td>
 </tr>
 <tr>
 <td>persistence.spec.ts</td>
-<td>4</td>
-<td>6</td>
+<td>7</td>
+<td>1</td>
 <td>0</td>
+<td>リロード後の進捗リセット問題</td>
 </tr>
 <tr>
 <td>sandbox.spec.ts</td>
-<td>8</td>
-<td>1</td>
+<td>10</td>
 <td>0</td>
+<td>0</td>
+<td>全テスト通過</td>
 </tr>
 <tr>
 <td>setup.spec.ts</td>
-<td>9</td>
-<td>2</td>
+<td>10</td>
 <td>0</td>
+<td>0</td>
+<td>全テスト通過</td>
 </tr>
 <tr>
 <td>ui.spec.ts</td>
-<td>4</td>
+<td>7</td>
+<td>0</td>
 <td>3</td>
-<td>3</td>
+<td>fixme 3件（トラック切り替え・報酬サマリー）</td>
 </tr>
 <tr>
 <td>z-python-e2e.spec.ts</td>
-<td>1</td>
-<td>3</td>
-<td>2</td>
-</tr>
-</tbody>
-</table>
-<h4 id="_16">失敗カテゴリ<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h4>
-<p><strong>カテゴリ A: <code>waitForLoadState("networkidle")</code> タイムアウト（9件）— 知見35a 違反</strong></p>
-<p><code>bridge.spec.ts:227</code>, <code>persistence.spec.ts:53,98,153,180</code>, <code>ui.spec.ts:54,204</code>, <code>z-python-e2e.spec.ts:80,91</code>
-- marimo は WebSocket を常時保持するため <code>"networkidle"</code> に到達しない
-- → 該当ファイルで <code>"networkidle"</code> → <code>"load"</code> に変更が必要</p>
-<p><strong>カテゴリ B: カーネル "disconnected"（9件）— テスト間のカーネル回復待ち不足</strong></p>
-<p><code>data.spec.ts:94</code>, <code>integration.spec.ts:51,131,154,177</code>, <code>sandbox.spec.ts:78</code>, <code>setup.spec.ts:247,281</code>, <code>z-python-e2e.spec.ts:136</code>
-- 前のテストがカーネルを消耗させ、次のテストで再接続できない</p>
-<p><strong>カテゴリ C: 状態汚染（3件）— auto_instantiate によるスキルリーク</strong></p>
-<p><code>integration.spec.ts:118</code> (Expected 0, Received 2), <code>persistence.spec.ts:58</code> (Expected "unlocked", Received "completed"), <code>persistence.spec.ts:69</code> (Expected 0, Received 2)</p>
-<p><strong>カテゴリ D: ガード機能テスト失敗（3件）— 新規</strong></p>
-<p><code>guard-validation.spec.ts:50,82,126</code>
-- <code>まず.*bt.chart</code> テキストが表示されない（buy() ガード警告）
-- <code>保有中の株がありません</code> テキストが表示されない（sell() ガード警告）
-- <code>.cm-content</code> クリックタイムアウト
-- → ガード警告メッセージのテキストが実装と一致しないか、機能自体が未実装</p>
-<p><strong>カテゴリ E: UI 現金表示（1件）</strong></p>
-<p><code>ui.spec.ts:176</code>: Expected &gt; 50000, Received 50000（初期値がすでにマイルストーン到達額に達していた）</p>
-<h4 id="backcastpy-backcast-integrationspects-6-pass">backcast.py 完全プレイフロー（backcast-integration.spec.ts）— ✅ 全 6 テスト PASS<a class="headerlink" href="#backcastpy-backcast-integrationspects-6-pass" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>テスト名</th>
-<th>結果</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>backcast.py 完全プレイフロー（SANDBOX_001〜006 + BRIDGE_001〜003）</td>
-<td>✅ passed</td>
-</tr>
-<tr>
-<td>2</td>
-<td>SANDBOX_003 は buy() 後の trades() で即座に取得</td>
-<td>✅ passed</td>
-</tr>
-<tr>
-<td>3</td>
-<td>BRIDGE_001 がフロントエンドで正常にカウント（バグ修正済み）</td>
-<td>✅ passed</td>
-</tr>
-<tr>
 <td>4</td>
-<td>Position が正常表示（バグ修正済み）</td>
-<td>✅ passed</td>
-</tr>
-<tr>
-<td>5</td>
-<td>SANDBOX_005 重複送信は dedup で防止</td>
-<td>✅ passed</td>
-</tr>
-<tr>
-<td>6</td>
-<td>backcast.py のセル構造が正しいシーケンス</td>
-<td>✅ passed</td>
+<td>0</td>
+<td>0</td>
+<td>全テスト通過</td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="sandboxspects-2026-02-21">今セッション（sandbox.spec.ts のみ、2026-02-21）<a class="headerlink" href="#sandboxspects-2026-02-21" title="Permanent link">&para;</a></h2>
-<h3 id="_17">実行コマンド<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/sandbox.spec.ts<span class="w"> </span>--headed
-</code></pre></div>
-<h3 id="_18">結果<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
+<h2 id="_4">失敗テスト詳細<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="1-bridgespects81-sandbox_006-bridge_001-unlocked">1. bridge.spec.ts:81 - SANDBOX_006 完了後、BRIDGE_001 が unlocked になる<a class="headerlink" href="#1-bridgespects81-sandbox_006-bridge_001-unlocked" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>合計</strong>: 10 passed / 0 failed / 0 skipped</li>
-<li><strong>実行時間</strong>: 3.7m</li>
-<li>全10件パス（初回実行から連続パス）</li>
-<li>Reconnected バナー自動 dismiss 正常動作</li>
+<li><strong>エラー</strong>: Expected "completed" but received "locked"</li>
+<li><strong>原因推定</strong>: SANDBOX_001〜006 の連続発火で SANDBOX_006 の完了が propagate される前に BRIDGE_001 のステータスチェックが走っている可能性。タイミング/待機時間の問題。</li>
 </ul>
-<hr />
-<h2 id="_19">最終ステータス<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h2>
-<h3 id="_20">手動プレイ（前セッション）<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
+<h3 id="2-guard-validationspects120-buy">2. guard-validation.spec.ts:120 - ポジション保有中に buy() を再度呼ぶと警告メッセージが表示される<a class="headerlink" href="#2-guard-validationspects120-buy" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>取得スキル数</strong>: 0/59（再接続バグにより進捗未反映）</li>
-<li><strong>確認された発火スキル</strong>: SANDBOX_001, SANDBOX_002, BRIDGE_001（コンソールログより）</li>
-<li><strong>Equity</strong>: ¥100,000（bt.buy() の注文は翌日決済待ち）</li>
+<li><strong>エラー</strong>: Expected count 2 but received 1</li>
+<li><strong>原因推定</strong>: buy() 実行後のスキル発火（SANDBOX_002）が正しくカウントされていない</li>
 </ul>
-<h3 id="e2e_1">E2E テスト（今セッション）<a class="headerlink" href="#e2e_1" title="Permanent link">&para;</a></h3>
+<h3 id="3-guard-validationspects151-sell">3. guard-validation.spec.ts:151 - ポジションなしで sell() を呼ぶと警告メッセージが表示される<a class="headerlink" href="#3-guard-validationspects151-sell" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>完全プレイフロー取得スキル数</strong>: 9/59（SANDBOX_001〜006 + BRIDGE_001〜003）</li>
-<li><strong>Position 表示</strong>: "0 shares" 正常確認</li>
-<li><strong>カーネル状態</strong>: Ready</li>
+<li><strong>エラー</strong>: locator "text=/保有中の株がありません/" not found</li>
+<li><strong>原因推定</strong>: sell() の警告メッセージテキストが変更されている、またはガード処理が未実装/変更</li>
 </ul>
-<hr />
-<h2 id="_21">スクリーンショット<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h2>
+<h3 id="4-8-integrationspects-5-html">4-8. integration.spec.ts (5件) - HTML パイプライン経由テスト<a class="headerlink" href="#4-8-integrationspects-5-html" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>エラー</strong>: 全て Expected "completed" but received "unlocked"</li>
+<li><strong>原因推定</strong>: <code>__testInjectBroadcastHTML</code> フックが正しく動作していない。HTML注入→BroadcastChannel→リスナー経路の問題</li>
+<li><strong>影響テスト</strong>:</li>
+<li>HTML 注入でスキルが完了する</li>
+<li>前提条件チェーンが HTML 経由でも動作する</li>
+<li>進捗バッジが HTML 経由でも更新される</li>
+<li>重複発火が防止される</li>
+<li>HTML 経由の 6 スキル連続完了でブリッジトラックが解放される</li>
+</ul>
+<h3 id="9-persistencespects74-0">9. persistence.spec.ts:74 - スキル完了後リロードすると進捗が 0 にリセットされる<a class="headerlink" href="#9-persistencespects74-0" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>エラー</strong>: Expected 0 but received 2</li>
+<li><strong>原因推定</strong>: リロード後にカーネルがセル出力を再送し、スキルが再発火している（知見35bと関連）</li>
+</ul>
+<h2 id="_5">スキル発火記録<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>ファイル名</th>
-<th>説明</th>
+<th>スキルID</th>
+<th>操作</th>
+<th>結果</th>
+<th>備考</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>game-play-initial-state.png</code></td>
-<td>ゲーム起動直後の状態（チャート + 3D キャラクター + セル）</td>
+<td>SANDBOX_001</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td>全テストで正常動作</td>
 </tr>
 <tr>
-<td><code>game-play-skill-tree.png</code></td>
-<td>スキルツリーダイアログ（0/59 スキル）</td>
+<td>SANDBOX_002</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td>前提条件チェーン正常</td>
 </tr>
 <tr>
-<td><code>game-play-final-state.png</code></td>
-<td>カーネル再起動後の状態（Ready, 値未取得）</td>
+<td>SANDBOX_003</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td></td>
+</tr>
+<tr>
+<td>SANDBOX_004</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td></td>
+</tr>
+<tr>
+<td>SANDBOX_005</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td></td>
+</tr>
+<tr>
+<td>SANDBOX_006</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td>bridge.spec.tsでチェーン問題あり</td>
+</tr>
+<tr>
+<td>BRIDGE_001</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td>backcast-integration では正常</td>
+</tr>
+<tr>
+<td>BRIDGE_002</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td></td>
+</tr>
+<tr>
+<td>BRIDGE_003</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td></td>
+</tr>
+<tr>
+<td>SETUP_001〜005</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td>全テスト通過</td>
+</tr>
+<tr>
+<td>DATA_001〜006</td>
+<td>emitSkillEvent</td>
+<td>OK</td>
+<td>全テスト通過</td>
 </tr>
 </tbody>
 </table>
+<h2 id="_6">最終ステータス<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>取得スキル数: 完全プレイフローで 9/59（SANDBOX + BRIDGE トラック）</li>
+<li>新規トラック（SETUP, DATA）も全テスト通過</li>
+<li>全トラックで前提条件チェーン動作確認済み</li>
+</ul>
+<h2 id="_7">エラー・異常<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<ol>
+<li>integration.spec.ts の HTML パイプラインテストが全面的に不安定（<code>__testInjectBroadcastHTML</code> 経由のスキル完了が反映されない）</li>
+<li>persistence.spec.ts のリロードテストでカーネル再送による状態汚染</li>
+<li>guard-validation.spec.ts のガードメッセージテキスト不一致</li>
+<li>全テストで「Reconnected バナー検出」が発生（ensureConnected で自動 dismiss）</li>
+</ol>
 
 
 

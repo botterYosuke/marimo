@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない - marimo Developer Docs</title>
+        <title>Issue: フルラン時のスペック間カーネル汚染を検出する E2E テストがない - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-hud-finished-e2e" class="md-skip">
+        <a href="#issue-e2e" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない
+              Issue: フルラン時のスペック間カーネル汚染を検出する E2E テストがない
             
           </span>
         </div>
@@ -1221,10 +1221,38 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        背景
+        問題の詳細
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="問題の詳細">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#disconnected-kernel-cross-spec-contamination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        disconnected-kernel-cross-spec-contamination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#state-contamination-auto-instantiate-skill-leak" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        state-contamination-auto-instantiate-skill-leak
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1259,13 +1287,63 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="実装案">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-global-setupts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案 A: global-setup.ts にアサーション追加
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-persistencespects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案 B: persistence.spec.ts の最初のテストに追加アサーション
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案 C: CI 専用フルランテスト
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装試行記録
+        推奨アクション
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#e2e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E2E テスト追加
       
     </span>
   </a>
@@ -1300,26 +1378,44 @@
 
 
 
-<h1 id="issue-hud-finished-e2e">Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない<a class="headerlink" href="#issue-hud-finished-e2e" title="Permanent link">&para;</a></h1>
+<h1 id="issue-e2e">Issue: フルラン時のスペック間カーネル汚染を検出する E2E テストがない<a class="headerlink" href="#issue-e2e" title="Permanent link">&para;</a></h1>
 <p><strong>作成日</strong>: 2026-02-21
 <strong>重要度</strong>: Medium
-<strong>カテゴリ</strong>: テストカバレッジ / UI
-<strong>ステータス</strong>: ⬜ 未対応</p>
+<strong>カテゴリ</strong>: テストカバレッジ / テスト信頼性
+<strong>ステータス</strong>: ✅ テスト追加済み</p>
 <hr />
 <h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正（ゲーム終了後に HUD ステータスを "Trading" → "Finished" に変更）は実装済みだが、UI ラベルが正しく "Finished" になることを明示的に検証する E2E テストが存在しない。</p>
-<p><code>backcast-integration.spec.ts</code> の全テストは <code>bt.step()</code> の複数回実行を含むが、ゲーム終了（<code>step()</code> が <code>False</code> を返す状態）後の HUD ステータス表示を確認しているケースはない。</p>
-<h2 id="_2">背景<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正内容:
-- <code>step()</code> の戻り値が <code>False</code>（＝バックテスト終了）のとき、HUD ステータスを "Finished" に更新する
-- 修正前は終了後も "Trading" のまま表示されていた</p>
-<p>現在の <code>backcast-integration.spec.ts</code> は長期プレイフロー（ <code>bt.buy()</code> → <code>bt.step()</code> × N 回）を実行するが、<strong>ゲーム終了（全データ消化）後に "Finished" ラベルが表示されることを assert していない</strong>。</p>
+<p>以下 2 件の修正済み Issue はいずれも「フルラン（全スペック連続実行）時の汚染」を防ぐ修正だが、汚染が発生していないことを検証するテストが存在しない。</p>
+<table>
+<thead>
+<tr>
+<th>修正済み Issue</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>disconnected-kernel-cross-spec-contamination.md</code></td>
+<td>前スペック終了後にカーネルが disconnected になり後スペックが失敗</td>
+</tr>
+<tr>
+<td><code>state-contamination-auto-instantiate-skill-leak.md</code></td>
+<td>auto_instantiate でスキル状態がスペック間に漏洩し進捗が汚染される</td>
+</tr>
+</tbody>
+</table>
+<p>現在の修正（<code>ensureConnected()</code> 強化・<code>resetGameProgress()</code> 追加・セル蓄積対策）は「汚染を防ぐ」実装だが、「汚染が実際に起きていないこと」を CI で継続的に検証する仕組みがない。</p>
+<h2 id="_2">問題の詳細<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="disconnected-kernel-cross-spec-contamination">disconnected-kernel-cross-spec-contamination<a class="headerlink" href="#disconnected-kernel-cross-spec-contamination" title="Permanent link">&para;</a></h3>
+<p>フルラン実行時に <code>sandbox.spec.ts</code> → <code>persistence.spec.ts</code> → <code>bridge.spec.ts</code> ... の順で実行されると、前スペックが残したカーネル状態（蓄積されたセル・WebSocket 再接続バーストなど）により、後スペックの <code>beforeEach</code> でカーネルが "disconnected" になる。</p>
+<h3 id="state-contamination-auto-instantiate-skill-leak">state-contamination-auto-instantiate-skill-leak<a class="headerlink" href="#state-contamination-auto-instantiate-skill-leak" title="Permanent link">&para;</a></h3>
+<p><code>game_test.py</code> に <code>emitSkillViaPython()</code> が追加したセルが auto_instantiate で再実行され、次のスペックの初期状態でスキルが意図せず "completed" になる（例: <code>persistence.spec.ts:58</code> で SANDBOX_001 が completed）。</p>
 <h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>以下のシナリオが E2E テストで検証されること:</p>
+<p>以下を検証するテストがあること:</p>
 <ol>
-<li><code>bt.step()</code> を繰り返しデータ末尾まで進める（または直接終了状態にする）</li>
-<li>HUD の status 要素が <code>"Finished"</code> を表示する</li>
-<li>"Trading" 文字列が残っていないことを確認する</li>
+<li>全スペック実行後も各スペックの先頭テストで <code>completedSkills</code> が <code>0</code> であること</li>
+<li>フルラン後に次の sandbox.spec.ts を実行したとき <code>SANDBOX_001</code> が初期状態（<code>unlocked</code>）であること</li>
+<li>スペック間でカーネルが健全（<code>[data-testid="backend-status"]</code> が緑）であること</li>
 </ol>
 <h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <table>
@@ -1331,38 +1427,59 @@
 </thead>
 <tbody>
 <tr>
-<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
-<td>新規テストケース追加先</td>
+<td><code>frontend/e2e-tests/game/helpers.ts</code></td>
+<td><code>ensureConnected()</code> / <code>resetGameProgress()</code></td>
 </tr>
 <tr>
-<td><code>frontend/src/components/backtest-hud.tsx</code></td>
-<td>ステータスラベルの実装箇所</td>
+<td><code>frontend/playwright.config.ts</code></td>
+<td><code>globalSetup</code> / <code>globalTeardown</code></td>
 </tr>
 <tr>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-<td><code>step()</code> 終了判定箇所</td>
+<td><code>frontend/e2e-tests/game/global-setup.ts</code></td>
+<td>フルラン前のクリーンアップ確認ポイント</td>
+</tr>
+<tr>
+<td><code>frontend/e2e-tests/game/global-teardown.ts</code></td>
+<td>フルラン後の復元確認ポイント</td>
 </tr>
 </tbody>
 </table>
 <h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// backcast-integration.spec.ts に追加</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;ゲーム終了後に HUD ステータスが Finished になる&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// データを末尾まで step() する</span>
-<span class="w">  </span><span class="c1">// 最後の step() が False を返した後</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">statusEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;hud-status&quot;]&#39;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Finished&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">not</span><span class="p">.</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Trading&quot;</span><span class="p">);</span>
+<h3 id="a-global-setupts">案 A: <code>global-setup.ts</code> にアサーション追加<a class="headerlink" href="#a-global-setupts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// global-setup.ts</span>
+<span class="c1">// 全スペック開始前に game_test.py のセル数が想定値であることを確認</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cell_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">__cellCount</span><span class="p">);</span>
+<span class="nx">expect</span><span class="p">(</span><span class="nx">cell_count</span><span class="p">).</span><span class="nx">toBeLessThanOrEqual</span><span class="p">(</span><span class="nx">EXPECTED_CELL_COUNT</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="b-persistencespects">案 B: <code>persistence.spec.ts</code> の最初のテストに追加アサーション<a class="headerlink" href="#b-persistencespects" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// persistence.spec.ts - 最初のテスト</span>
+<span class="c1">// 他スペック実行後でも completedSkills が 0 であることを確認（汚染検出）</span>
+<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;スペック開始時点で completedSkills は 0（他スペックからの汚染なし）&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">getCompletedSkillCount</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">count</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
 <span class="p">});</span>
 </code></pre></div>
-<p><code>data-testid="hud-status"</code> が <code>backtest-hud.tsx</code> に存在しない場合は追加が必要。</p>
-<h2 id="_6">実装試行記録<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p><strong>試行日</strong>: 2026-02-21
-<strong>ブロッカー</strong>: <code>bt.step()</code> をデータ末尾まで進めるには backcast.py + BackcastPro エンジン + 実株価データが必要。E2E テスト環境（game_test.py）ではゲームエンジンが未初期化。backcast-integration.spec.ts は backcast.py を使うが、全データ消化（数百〜数千 step）は時間的に非現実的。
-<strong>試行内容</strong>: data-testid="hud-status" の存在確認を試みたが、backtest-hud.tsx が game_test.py 上では render されないため検証不可。
-<strong>推奨</strong>: backcast-integration.spec.ts で短いデータセット（10ステップ程度）を使った終了テストを追加する。要: テスト用短縮データの準備。</p>
+<h3 id="c-ci">案 C: CI 専用フルランテスト<a class="headerlink" href="#c-ci" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># CI で全スペックを実行し、最後に状態検証スペックを実行</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/<span class="w"> </span>--reporter<span class="o">=</span>line
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/contamination-check.spec.ts
+</code></pre></div>
+<h2 id="_6">推奨アクション<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>短期</strong>: 案 B（<code>persistence.spec.ts</code> の先頭テストを汚染検出テストとして位置付ける）</li>
+<li><strong>長期</strong>: 案 C（フルラン後専用の contamination-check.spec.ts 新規作成）</li>
+</ul>
+<h2 id="e2e">E2E テスト追加<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h2>
+<p><strong>追加日</strong>: 2026-02-21
+<strong>追加先</strong>: <code>frontend/e2e-tests/game/persistence.spec.ts</code>
+<strong>テスト名</strong>: "ページ初回ロード時、完了スキル数は 0（他スペックからの汚染なし）"
+<strong>テスト結果</strong>: ✅ passed</p>
+<p>案B（<code>persistence.spec.ts</code> の先頭テストに汚染検出アサーション追加）を採用。
+テスト名を明示的に変更し、汚染検出テストとして位置付けた。</p>
 <h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>step-end-status-label-wrong.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
+<li><code>disconnected-kernel-cross-spec-contamination.md</code> — 修正済み Issue</li>
+<li><code>state-contamination-auto-instantiate-skill-leak.md</code> — 修正済み Issue</li>
 </ul>
 
 

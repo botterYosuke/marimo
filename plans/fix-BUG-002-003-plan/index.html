@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない - marimo Developer Docs</title>
+        <title>BUG-002 / BUG-003 修正計画 - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-hud-finished-e2e" class="md-skip">
+        <a href="#bug-002-bug-003" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない
+              BUG-002 / BUG-003 修正計画
             
           </span>
         </div>
@@ -1210,39 +1210,6 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        概要
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        背景
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        期待される動作
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
         対象ファイル
       
     </span>
@@ -1251,21 +1218,110 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#bug-002-buy-line-120-145" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BUG-002: ポジション保有中の buy() 再呼び出しテスト (line 120-145)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BUG-002: ポジション保有中の buy() 再呼び出しテスト (line 120-145)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        症状
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        根本原因
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正内容
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bug-003-sell-line-151-175" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BUG-003: ポジションなしで sell() を呼ぶと警告メッセージが表示されない (line 151-175)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BUG-003: ポジションなしで sell() を呼ぶと警告メッセージが表示されない (line 151-175)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装案
+        症状
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装試行記録
+        根本原因
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正内容
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        追加修正（予防的）
       
     </span>
   </a>
@@ -1273,13 +1329,63 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#issue" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        関連 Issue
+        全テストに共通する修正パターン
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        技術的知見
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="技術的知見">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#broadcastchannel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BroadcastChannel パイプライン
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mooutputappend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mo.output.append() の蓄積動作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#completeskillwithrewardatom-pending" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        completeSkillWithRewardAtom の pending キュー
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1300,70 +1406,128 @@
 
 
 
-<h1 id="issue-hud-finished-e2e">Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない<a class="headerlink" href="#issue-hud-finished-e2e" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-21
-<strong>重要度</strong>: Medium
-<strong>カテゴリ</strong>: テストカバレッジ / UI
-<strong>ステータス</strong>: ⬜ 未対応</p>
-<hr />
-<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正（ゲーム終了後に HUD ステータスを "Trading" → "Finished" に変更）は実装済みだが、UI ラベルが正しく "Finished" になることを明示的に検証する E2E テストが存在しない。</p>
-<p><code>backcast-integration.spec.ts</code> の全テストは <code>bt.step()</code> の複数回実行を含むが、ゲーム終了（<code>step()</code> が <code>False</code> を返す状態）後の HUD ステータス表示を確認しているケースはない。</p>
-<h2 id="_2">背景<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正内容:
-- <code>step()</code> の戻り値が <code>False</code>（＝バックテスト終了）のとき、HUD ステータスを "Finished" に更新する
-- 修正前は終了後も "Trading" のまま表示されていた</p>
-<p>現在の <code>backcast-integration.spec.ts</code> は長期プレイフロー（ <code>bt.buy()</code> → <code>bt.step()</code> × N 回）を実行するが、<strong>ゲーム終了（全データ消化）後に "Finished" ラベルが表示されることを assert していない</strong>。</p>
-<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>以下のシナリオが E2E テストで検証されること:</p>
+<h1 id="bug-002-bug-003">BUG-002 / BUG-003 修正計画<a class="headerlink" href="#bug-002-bug-003" title="Permanent link">&para;</a></h1>
+<h2 id="_1">対象ファイル<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>frontend/e2e-tests/game/guard-validation.spec.ts</code></li>
+</ul>
+<h2 id="bug-002-buy-line-120-145">BUG-002: ポジション保有中の buy() 再呼び出しテスト (line 120-145)<a class="headerlink" href="#bug-002-buy-line-120-145" title="Permanent link">&para;</a></h2>
+<h3 id="_2">症状<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p><code>chart("7203")</code> -&gt; <code>buy()</code> -&gt; <code>buy()</code> のテストで、完了スキル数が 2 を期待するが 1 を取得。</p>
+<h3 id="_3">根本原因<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>BroadcastChannel の非同期配信タイミングとスキル依存関係（prerequisites）に起因するレースコンディション。</p>
+<p><strong>詳細フロー:</strong></p>
 <ol>
-<li><code>bt.step()</code> を繰り返しデータ末尾まで進める（または直接終了状態にする）</li>
-<li>HUD の status 要素が <code>"Finished"</code> を表示する</li>
-<li>"Trading" 文字列が残っていないことを確認する</li>
+<li><code>chart("7203")</code> が <code>emit_skill("SANDBOX_001")</code> を発火 -&gt; <code>mo.output.append()</code> -&gt; WebSocket -&gt; <code>extractAndSendBroadcastMessages()</code> -&gt; <code>BroadcastChannel.postMessage()</code></li>
+<li><code>buy()</code> (1回目) が <code>emit_skill("SANDBOX_002")</code> を発火 -&gt; 同上</li>
+<li>SANDBOX_002 は <code>prerequisites: ["SANDBOX_001"]</code> を持つ</li>
+<li>BroadcastChannel 配信は非同期（イベントループのマイクロタスクキュー経由）</li>
+<li><code>completeSkillWithRewardAtom</code> は prerequisites チェックを行い、未達なら pending キューに追加</li>
+<li>pending キューは他スキル完了時にドレインされる</li>
 </ol>
-<h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p><strong>問題:</strong> テストは <code>getCompletedCount(page)</code> を即座に呼び出し（ポーリングなし）、Jotai atom 更新 -&gt; React 再レンダリング -&gt; DOM 反映のサイクルが完了する前にバッジテキストを読み取ってしまう。</p>
+<h3 id="_4">修正内容<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p><code>expect(count).toBe(2)</code> を <code>expect().toPass()</code> ポーリングパターンに変更:</p>
+<div class="highlight"><pre><span></span><code><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">getCompletedCount</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">count</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="mf">2</span><span class="p">);</span>
+<span class="p">}).</span><span class="nx">toPass</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">10_000</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<h2 id="bug-003-sell-line-151-175">BUG-003: ポジションなしで sell() を呼ぶと警告メッセージが表示されない (line 151-175)<a class="headerlink" href="#bug-003-sell-line-151-175" title="Permanent link">&para;</a></h2>
+<h3 id="_5">症状<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p><code>chart("7203")</code> -&gt; <code>sell()</code> のテストで、<code>text=/保有中の株がありません/</code> ロケーターが DOM 内に見つからない。</p>
+<h3 id="_6">根本原因<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<p>marimo の callout プラグイン（<code>&lt;marimo-callout-output&gt;</code>）は Web Components + Shadow DOM でレンダリングされる。<code>registerReactComponent.tsx</code> で <code>attachShadow({ mode: "open" })</code> を使用してオープンシャドウルートを作成する。</p>
+<p>Playwright の <code>text=/regex/</code> ロケーターはオープンシャドウルートをピアスするが、正規表現マッチングとシャドウ DOM 内テキストの組み合わせで検出に失敗するケースがある。</p>
+<p><strong>Python 側の出力:</strong>
+<div class="highlight"><pre><span></span><code><span class="n">mo</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mo</span><span class="o">.</span><span class="n">callout</span><span class="p">(</span>
+    <span class="n">mo</span><span class="o">.</span><span class="n">md</span><span class="p">(</span><span class="s2">&quot;保有中の株がありません。まず `bt.buy()` で株を購入してください&quot;</span><span class="p">),</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;warn&quot;</span><span class="p">,</span>
+<span class="p">))</span>
+</code></pre></div></p>
+<p><strong>DOM 構造:</strong>
+<div class="highlight"><pre><span></span><code>&lt;marimo-callout-output data-initial-value=&quot;...&quot;&gt;
+  #shadow-root (open)
+    &lt;div class=&quot;callout warn&quot;&gt;
+      &lt;p&gt;保有中の株がありません。まず &lt;code&gt;bt.buy()&lt;/code&gt; で株を購入してください&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/marimo-callout-output&gt;
+</code></pre></div></p>
+<h3 id="_7">修正内容<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><code>page.locator("text=/保有中の株がありません/")</code> を <code>page.getByText("保有中の株がありません")</code> に変更。<code>getByText()</code> はシャドウ DOM を確実にピアスする。</p>
+</li>
+<li>
+<p>タイムアウトを 5_000ms から 10_000ms に延長（セル実行 + WebSocket 配信 + React レンダリング + Shadow DOM 構築の全サイクルを考慮）。</p>
+</li>
+<li>
+<p>スキル数チェックも <code>expect().toPass()</code> ポーリングパターンに変更。</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span>
+<span class="w">  </span><span class="nx">page</span><span class="p">.</span><span class="nx">getByText</span><span class="p">(</span><span class="s2">&quot;保有中の株がありません&quot;</span><span class="p">).</span><span class="nx">first</span><span class="p">(),</span>
+<span class="p">).</span><span class="nx">toBeVisible</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">10_000</span><span class="p">,</span>
+<span class="p">});</span>
+
+<span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">getCompletedCount</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">count</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="mf">1</span><span class="p">);</span>
+<span class="p">}).</span><span class="nx">toPass</span><span class="p">({</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">10_000</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<h2 id="_8">追加修正（予防的）<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<p>テスト 1（データなしで buy() を呼ぶ）のロケーターも同様に <code>getByText()</code> に統一:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Before: page.locator(&quot;text=/まず.*bt.chart/&quot;)</span>
+<span class="c1">// After:  page.getByText(&quot;bt.chart&quot;)</span>
+</code></pre></div>
+<h2 id="_9">全テストに共通する修正パターン<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>ファイル</th>
-<th>対応箇所</th>
+<th>テスト</th>
+<th>ロケーター修正</th>
+<th>カウントチェック修正</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
-<td>新規テストケース追加先</td>
+<td>1. データなし buy()</td>
+<td><code>text=</code> -&gt; <code>getByText()</code></td>
+<td>なし（count=0 は即座に確定）</td>
 </tr>
 <tr>
-<td><code>frontend/src/components/backtest-hud.tsx</code></td>
-<td>ステータスラベルの実装箇所</td>
+<td>2. 二重 buy()</td>
+<td><code>text=</code> -&gt; <code>getByText()</code></td>
+<td>即時 -&gt; <code>toPass()</code> ポーリング</td>
 </tr>
 <tr>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-<td><code>step()</code> 終了判定箇所</td>
+<td>3. ポジションなし sell()</td>
+<td><code>text=</code> -&gt; <code>getByText()</code></td>
+<td>即時 -&gt; <code>toPass()</code> ポーリング</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// backcast-integration.spec.ts に追加</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;ゲーム終了後に HUD ステータスが Finished になる&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// データを末尾まで step() する</span>
-<span class="w">  </span><span class="c1">// 最後の step() が False を返した後</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">statusEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;hud-status&quot;]&#39;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Finished&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">not</span><span class="p">.</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Trading&quot;</span><span class="p">);</span>
-<span class="p">});</span>
+<h2 id="_10">技術的知見<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<h3 id="broadcastchannel">BroadcastChannel パイプライン<a class="headerlink" href="#broadcastchannel" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>Python emit_skill()
+  -&gt; mo.output.append(Html(&lt;marimo-broadcast&gt;))
+  -&gt; WebSocket cell-op message
+  -&gt; handleCellNotificationeration()
+  -&gt; extractAndSendBroadcastMessages() [HTML パース]
+  -&gt; sendBroadcastMessage() [BroadcastChannel.postMessage()]
+  -&gt; async delivery to listener
+  -&gt; setupSkillEventListener.handleMessage()
+  -&gt; onSkillComplete callback
+  -&gt; set(completeSkillWithRewardAtom, skillId)
+  -&gt; Jotai atom update
+  -&gt; React re-render
+  -&gt; DOM 更新
 </code></pre></div>
-<p><code>data-testid="hud-status"</code> が <code>backtest-hud.tsx</code> に存在しない場合は追加が必要。</p>
-<h2 id="_6">実装試行記録<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p><strong>試行日</strong>: 2026-02-21
-<strong>ブロッカー</strong>: <code>bt.step()</code> をデータ末尾まで進めるには backcast.py + BackcastPro エンジン + 実株価データが必要。E2E テスト環境（game_test.py）ではゲームエンジンが未初期化。backcast-integration.spec.ts は backcast.py を使うが、全データ消化（数百〜数千 step）は時間的に非現実的。
-<strong>試行内容</strong>: data-testid="hud-status" の存在確認を試みたが、backtest-hud.tsx が game_test.py 上では render されないため検証不可。
-<strong>推奨</strong>: backcast-integration.spec.ts で短いデータセット（10ステップ程度）を使った終了テストを追加する。要: テスト用短縮データの準備。</p>
-<h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>step-end-status-label-wrong.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
-</ul>
+<h3 id="mooutputappend">mo.output.append() の蓄積動作<a class="headerlink" href="#mooutputappend" title="Permanent link">&para;</a></h3>
+<p>各 <code>mo.output.append()</code> 呼び出しは <code>ctx.execution_context.output</code> リストに追加し、<code>vstack(accumulated_output)</code> として全蓄積出力を WebSocket で即座に送信する。後続の <code>append()</code> は前回の出力を含む完全な vstack を再送する。</p>
+<h3 id="completeskillwithrewardatom-pending">completeSkillWithRewardAtom の pending キュー<a class="headerlink" href="#completeskillwithrewardatom-pending" title="Permanent link">&para;</a></h3>
+<p>prerequisites 未達のスキルは <code>pendingSkillsAtom</code> に追加され、他スキルの完了時に自動リトライされる。これにより SANDBOX_001 -&gt; SANDBOX_002 の順序依存は解決されるが、全体のパイプラインが非同期であるためテスト側でのポーリングが必要。</p>
 
 
 

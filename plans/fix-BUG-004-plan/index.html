@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない - marimo Developer Docs</title>
+        <title>BUG-004: HTML パイプライン経由のスキル完了が反映されない問題 - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-hud-finished-e2e" class="md-skip">
+        <a href="#bug-004-html" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない
+              BUG-004: HTML パイプライン経由のスキル完了が反映されない問題
             
           </span>
         </div>
@@ -1210,7 +1210,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        概要
+        ステータス: 修正完了
       
     </span>
   </a>
@@ -1221,7 +1221,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        背景
+        問題の概要
       
     </span>
   </a>
@@ -1232,21 +1232,38 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        期待される動作
+        根本原因
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="根本原因">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#suppressbroadcast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        suppressBroadcast フラグのタイミング競合
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        対象ファイル
+        影響経路の違い
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1254,18 +1271,57 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装案
+        修正内容
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="修正内容">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装試行記録
+        変更ファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更箇所
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正の理由
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        検証
       
     </span>
   </a>
@@ -1273,10 +1329,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#issue" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
-        関連 Issue
+        レイヤー図（参考）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計知見
       
     </span>
   </a>
@@ -1300,69 +1367,83 @@
 
 
 
-<h1 id="issue-hud-finished-e2e">Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない<a class="headerlink" href="#issue-hud-finished-e2e" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-21
-<strong>重要度</strong>: Medium
-<strong>カテゴリ</strong>: テストカバレッジ / UI
-<strong>ステータス</strong>: ⬜ 未対応</p>
-<hr />
-<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正（ゲーム終了後に HUD ステータスを "Trading" → "Finished" に変更）は実装済みだが、UI ラベルが正しく "Finished" になることを明示的に検証する E2E テストが存在しない。</p>
-<p><code>backcast-integration.spec.ts</code> の全テストは <code>bt.step()</code> の複数回実行を含むが、ゲーム終了（<code>step()</code> が <code>False</code> を返す状態）後の HUD ステータス表示を確認しているケースはない。</p>
-<h2 id="_2">背景<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正内容:
-- <code>step()</code> の戻り値が <code>False</code>（＝バックテスト終了）のとき、HUD ステータスを "Finished" に更新する
-- 修正前は終了後も "Trading" のまま表示されていた</p>
-<p>現在の <code>backcast-integration.spec.ts</code> は長期プレイフロー（ <code>bt.buy()</code> → <code>bt.step()</code> × N 回）を実行するが、<strong>ゲーム終了（全データ消化）後に "Finished" ラベルが表示されることを assert していない</strong>。</p>
-<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>以下のシナリオが E2E テストで検証されること:</p>
-<ol>
-<li><code>bt.step()</code> を繰り返しデータ末尾まで進める（または直接終了状態にする）</li>
-<li>HUD の status 要素が <code>"Finished"</code> を表示する</li>
-<li>"Trading" 文字列が残っていないことを確認する</li>
-</ol>
-<h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>ファイル</th>
-<th>対応箇所</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
-<td>新規テストケース追加先</td>
-</tr>
-<tr>
-<td><code>frontend/src/components/backtest-hud.tsx</code></td>
-<td>ステータスラベルの実装箇所</td>
-</tr>
-<tr>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-<td><code>step()</code> 終了判定箇所</td>
-</tr>
-</tbody>
-</table>
-<h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// backcast-integration.spec.ts に追加</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;ゲーム終了後に HUD ステータスが Finished になる&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// データを末尾まで step() する</span>
-<span class="w">  </span><span class="c1">// 最後の step() が False を返した後</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">statusEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;hud-status&quot;]&#39;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Finished&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">not</span><span class="p">.</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Trading&quot;</span><span class="p">);</span>
-<span class="p">});</span>
-</code></pre></div>
-<p><code>data-testid="hud-status"</code> が <code>backtest-hud.tsx</code> に存在しない場合は追加が必要。</p>
-<h2 id="_6">実装試行記録<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p><strong>試行日</strong>: 2026-02-21
-<strong>ブロッカー</strong>: <code>bt.step()</code> をデータ末尾まで進めるには backcast.py + BackcastPro エンジン + 実株価データが必要。E2E テスト環境（game_test.py）ではゲームエンジンが未初期化。backcast-integration.spec.ts は backcast.py を使うが、全データ消化（数百〜数千 step）は時間的に非現実的。
-<strong>試行内容</strong>: data-testid="hud-status" の存在確認を試みたが、backtest-hud.tsx が game_test.py 上では render されないため検証不可。
-<strong>推奨</strong>: backcast-integration.spec.ts で短いデータセット（10ステップ程度）を使った終了テストを追加する。要: テスト用短縮データの準備。</p>
-<h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
+<h1 id="bug-004-html">BUG-004: HTML パイプライン経由のスキル完了が反映されない問題<a class="headerlink" href="#bug-004-html" title="Permanent link">&para;</a></h1>
+<h2 id="_1">ステータス: 修正完了<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h2 id="_2">問題の概要<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p><code>integration.spec.ts</code> の全 5 テストが失敗。<code>__testInjectBroadcastHTML</code> フック経由で HTML を注入しても、スキルのステータスが <code>unlocked</code> のまま <code>completed</code> に遷移しない。一方、<code>sandbox.spec.ts</code> の <code>__testCompleteSkill</code> 経由のテストは全て通過していた。</p>
+<h2 id="_3">根本原因<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="suppressbroadcast">suppressBroadcast フラグのタイミング競合<a class="headerlink" href="#suppressbroadcast" title="Permanent link">&para;</a></h3>
+<p><code>setupSkillEventListener()</code> 内の <code>__testResetProgress</code> は、リセット後に BroadcastChannel 経由の遅延カーネルメッセージを抑制するため <code>suppressBroadcast = true</code> を 1000ms 間セットする。</p>
+<p>テストの <code>beforeEach</code> は以下の順序で実行される:
+1. <code>ensureConnected(page)</code> -- 接続安定化
+2. <code>page.waitForTimeout(500)</code> -- 追加待機
+3. <code>resetGameProgress(page)</code> -- <strong>ここで suppressBroadcast = true, 1000msタイマー開始</strong>
+4. <code>openSkillTreePanel(page)</code> -- UI操作（~200-500ms）
+5. テスト本体開始 -- <code>emitSkillEventViaHTML</code> 呼び出し</p>
+<p>ステップ 3 で <code>suppressBroadcast</code> が <code>true</code> になり、1000ms のタイマーが開始される。ステップ 4〜5 にかかる時間は約 500-800ms で、1000ms 未満であるため、テスト本体が <code>emitSkillEventViaHTML</code> を呼び出した時点でまだ <code>suppressBroadcast = true</code> のまま。</p>
+<h3 id="_4">影響経路の違い<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>step-end-status-label-wrong.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
+<li><code>__testCompleteSkill</code>: <code>onSkillComplete(skillId)</code> を直接呼び出す。<code>suppressBroadcast</code> フラグを<strong>一切経由しない</strong>。=&gt; テスト通過</li>
+<li><code>__testInjectBroadcastHTML</code>: <code>extractAndSendBroadcastMessages()</code> -&gt; <code>sendBroadcastMessage()</code> -&gt; BroadcastChannel -&gt; <code>handleMessage()</code> を経由。<code>handleMessage()</code> 先頭の <code>if (suppressBroadcast) return;</code> で<strong>メッセージが破棄</strong>される。=&gt; テスト失敗</li>
+</ul>
+<h2 id="_5">修正内容<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="_6">変更ファイル<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<p><code>frontend/src/components/skill-tree/skill-complete-handler.ts</code></p>
+<h3 id="_7">変更箇所<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p><code>__testInjectBroadcastHTML</code> コールバック内で、<code>extractAndSendBroadcastMessages(html)</code> を呼ぶ前に <code>suppressBroadcast = false</code> にリセットし、suppress タイマーもクリアするようにした。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 修正前</span>
+<span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">unknown</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">unknown</span><span class="o">&gt;</span><span class="p">).</span><span class="nx">__testInjectBroadcastHTML</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="nx">html</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">extractAndSendBroadcastMessages</span><span class="p">(</span><span class="nx">html</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="c1">// 修正後</span>
+<span class="p">(</span><span class="nb">window</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">unknown</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">unknown</span><span class="o">&gt;</span><span class="p">).</span><span class="nx">__testInjectBroadcastHTML</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="nx">html</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">suppressBroadcast</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">suppressTimer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">suppressTimer</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">suppressTimer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nx">extractAndSendBroadcastMessages</span><span class="p">(</span><span class="nx">html</span><span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="_8">修正の理由<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p><code>suppressBroadcast</code> の目的は「リセット後にカーネルが再送するセル出力由来のスキルイベントを無視する」こと。<code>__testInjectBroadcastHTML</code> はテストが<strong>意図的に</strong>発火する注入であり、抑制対象の「遅延カーネルメッセージ」ではない。呼び出し時に suppress をクリアすることで、テストの意図通りに BroadcastChannel 経由のメッセージが <code>handleMessage</code> で処理されるようになる。</p>
+<h2 id="_9">検証<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<ul>
+<li>TypeScript コンパイルエラーなし（<code>tsc --noEmit</code> 通過）</li>
+<li><code>skill-complete-handler.test.ts</code>: 全 11 テスト通過</li>
+<li><code>extractBroadcast.test.ts</code>: 全 10 テスト通過</li>
+<li><code>sandbox.spec.ts</code> への影響なし（<code>__testCompleteSkill</code> 経路は変更なし）</li>
+</ul>
+<h2 id="_10">レイヤー図（参考）<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>  Python emit_skill()                  __testInjectBroadcastHTML
+       |                                        |
+  [1] WebSocket                          [3] extractAndSendBroadcastMessages()
+       |                                        |
+  [2] handleCellNotificationeration      [4] sendBroadcastMessage()
+       |                                        |
+  [3] extractAndSendBroadcastMessages()  [5] BroadcastChannel.postMessage()
+       |                                        |
+  [4] sendBroadcastMessage()             [5] handleMessage() &lt;-- suppressBroadcast が true だった!
+       |                                        |
+  [5] BroadcastChannel                   [6] onSkillComplete()
+       |                                        |
+  [5] handleMessage()                    [7] completeSkillWithRewardAtom
+       |                                        |
+  [6] onSkillComplete()                  [7] UI 更新
+       |
+  [7] completeSkillWithRewardAtom
+       |
+  [7] UI 更新
+</code></pre></div>
+<h2 id="_11">設計知見<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>suppressBroadcast</code> は本番コードのリセットフローでも使われる可能性があるため、本番の BroadcastChannel 受信経路（<code>handleMessage</code>）自体は変更しない</li>
+<li>テスト専用フック（<code>__test*</code>）内でフラグを制御することで、テストの明示的な意図とリセット後の自動抑制を両立させる</li>
 </ul>
 
 

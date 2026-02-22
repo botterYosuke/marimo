@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない - marimo Developer Docs</title>
+        <title>ゲーミフィケーション改善オーケストレーション完了 - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-hud-finished-e2e" class="md-skip">
+        <a href="#_1" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない
+              ゲーミフィケーション改善オーケストレーション完了
             
           </span>
         </div>
@@ -1207,21 +1207,60 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        概要
+        実装完了項目
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装完了項目">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p2-1-helpcontent-markdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P2-1: helpContent の Markdown レンダリング
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#p2-2-35-50" class="md-nav__link">
     <span class="md-ellipsis">
       
-        背景
+        P2-2: マイルストーン 35-50 の空白解消
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p2-4-skilldetailpanel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P2-4: SkillDetailPanel の前提スキル完了状態表示
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#p1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P1 項目の対応状況（バグ修正フェーズで解決済み）
       
     </span>
   </a>
@@ -1232,7 +1271,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        期待される動作
+        変更ファイル一覧
       
     </span>
   </a>
@@ -1240,43 +1279,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#fun-review" class="md-nav__link">
     <span class="md-ellipsis">
       
-        対象ファイル
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        実装案
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        実装試行記録
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#issue" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        関連 Issue
+        予想される Fun-Review スコア変化
       
     </span>
   </a>
@@ -1300,69 +1306,75 @@
 
 
 
-<h1 id="issue-hud-finished-e2e">Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない<a class="headerlink" href="#issue-hud-finished-e2e" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-21
-<strong>重要度</strong>: Medium
-<strong>カテゴリ</strong>: テストカバレッジ / UI
-<strong>ステータス</strong>: ⬜ 未対応</p>
-<hr />
-<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正（ゲーム終了後に HUD ステータスを "Trading" → "Finished" に変更）は実装済みだが、UI ラベルが正しく "Finished" になることを明示的に検証する E2E テストが存在しない。</p>
-<p><code>backcast-integration.spec.ts</code> の全テストは <code>bt.step()</code> の複数回実行を含むが、ゲーム終了（<code>step()</code> が <code>False</code> を返す状態）後の HUD ステータス表示を確認しているケースはない。</p>
-<h2 id="_2">背景<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正内容:
-- <code>step()</code> の戻り値が <code>False</code>（＝バックテスト終了）のとき、HUD ステータスを "Finished" に更新する
-- 修正前は終了後も "Trading" のまま表示されていた</p>
-<p>現在の <code>backcast-integration.spec.ts</code> は長期プレイフロー（ <code>bt.buy()</code> → <code>bt.step()</code> × N 回）を実行するが、<strong>ゲーム終了（全データ消化）後に "Finished" ラベルが表示されることを assert していない</strong>。</p>
-<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>以下のシナリオが E2E テストで検証されること:</p>
-<ol>
-<li><code>bt.step()</code> を繰り返しデータ末尾まで進める（または直接終了状態にする）</li>
-<li>HUD の status 要素が <code>"Finished"</code> を表示する</li>
-<li>"Trading" 文字列が残っていないことを確認する</li>
-</ol>
-<h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h1 id="_1">ゲーミフィケーション改善オーケストレーション完了<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<p><strong>実行日</strong>: 2026-02-21
+<strong>完了改善項目</strong>: 3 件（P2-1, P2-2, P2-4）
+<strong>スキップ項目</strong>: P2-3（未着手）、P2-5（BUG-001 修正で不要）</p>
+<h2 id="_2">実装完了項目<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="p2-1-helpcontent-markdown">P2-1: helpContent の Markdown レンダリング<a class="headerlink" href="#p2-1-helpcontent-markdown" title="Permanent link">&para;</a></h3>
+<p><strong>修正ファイル</strong>: <code>frontend/src/components/skill-tree/skill-detail-panel.tsx</code>
+<strong>変更内容</strong>: <code>&lt;pre className="whitespace-pre-wrap"&gt;</code> を <code>&lt;Markdown&gt;</code> コンポーネント（react-markdown）に置換。Tailwind の <code>prose</code> クラスで適切なスタイリングを適用。
+<strong>効果</strong>: skill-data.ts の helpContent に記述された Markdown（見出し、太字、コードブロック、リスト）が正しくレンダリングされるようになった。</p>
+<h3 id="p2-2-35-50">P2-2: マイルストーン 35-50 の空白解消<a class="headerlink" href="#p2-2-35-50" title="Permanent link">&para;</a></h3>
+<p><strong>修正ファイル</strong>: <code>frontend/src/components/skill-tree/skill-data.ts</code>
+<strong>変更内容</strong>: <code>milestones</code> 配列に <code>{ skillCount: 42, bonus: 150000, title: "中堅トレーダー" }</code> を追加。
+<strong>効果</strong>: 35-&gt;50 の 15 スキル空白区間を 35-&gt;42（7スキル）+ 42-&gt;50（8スキル）に分割。インジケーター系高難易度スキル群通過中の報酬フィードバック途切れを解消。</p>
+<h3 id="p2-4-skilldetailpanel">P2-4: SkillDetailPanel の前提スキル完了状態表示<a class="headerlink" href="#p2-4-skilldetailpanel" title="Permanent link">&para;</a></h3>
+<p><strong>修正ファイル</strong>: <code>frontend/src/components/skill-tree/skill-detail-panel.tsx</code>
+<strong>変更内容</strong>: 前提スキルの Badge に完了/未完了のカラーコーディングを追加。
+- 完了: 緑バッジ（<code>bg-green-100 text-green-800</code>）+ チェックマークアイコン
+- 未完了: グレーバッジ（<code>bg-gray-100 text-gray-500</code>）
+<strong>効果</strong>: ロックされたスキルの「何を先にやるべきか」が一目で分かるようになった。</p>
+<h2 id="p1">P1 項目の対応状況（バグ修正フェーズで解決済み）<a class="headerlink" href="#p1" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>ファイル</th>
-<th>対応箇所</th>
+<th>項目</th>
+<th>解決方法</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
-<td>新規テストケース追加先</td>
+<td>進捗永続化</td>
+<td>BUG-005: リロード後の <code>resetGameProgress()</code> 追加</td>
 </tr>
 <tr>
-<td><code>frontend/src/components/backtest-hud.tsx</code></td>
-<td>ステータスラベルの実装箇所</td>
+<td>HTML パイプライン</td>
+<td>BUG-004: <code>suppressBroadcast</code> タイミング修正</td>
 </tr>
 <tr>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-<td><code>step()</code> 終了判定箇所</td>
+<td>guard-validation</td>
+<td>BUG-002/003: 修正試行中（ブロッカー）</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// backcast-integration.spec.ts に追加</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;ゲーム終了後に HUD ステータスが Finished になる&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// データを末尾まで step() する</span>
-<span class="w">  </span><span class="c1">// 最後の step() が False を返した後</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">statusEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;hud-status&quot;]&#39;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Finished&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">not</span><span class="p">.</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Trading&quot;</span><span class="p">);</span>
-<span class="p">});</span>
-</code></pre></div>
-<p><code>data-testid="hud-status"</code> が <code>backtest-hud.tsx</code> に存在しない場合は追加が必要。</p>
-<h2 id="_6">実装試行記録<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p><strong>試行日</strong>: 2026-02-21
-<strong>ブロッカー</strong>: <code>bt.step()</code> をデータ末尾まで進めるには backcast.py + BackcastPro エンジン + 実株価データが必要。E2E テスト環境（game_test.py）ではゲームエンジンが未初期化。backcast-integration.spec.ts は backcast.py を使うが、全データ消化（数百〜数千 step）は時間的に非現実的。
-<strong>試行内容</strong>: data-testid="hud-status" の存在確認を試みたが、backtest-hud.tsx が game_test.py 上では render されないため検証不可。
-<strong>推奨</strong>: backcast-integration.spec.ts で短いデータセット（10ステップ程度）を使った終了テストを追加する。要: テスト用短縮データの準備。</p>
-<h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
+<h2 id="_3">変更ファイル一覧<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>改善項目</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frontend/src/components/skill-tree/skill-detail-panel.tsx</code></td>
+<td>P2-1 + P2-4</td>
+</tr>
+<tr>
+<td><code>frontend/src/components/skill-tree/skill-data.ts</code></td>
+<td>P2-2</td>
+</tr>
+</tbody>
+</table>
+<h2 id="fun-review">予想される Fun-Review スコア変化<a class="headerlink" href="#fun-review" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>step-end-status-label-wrong.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
+<li><strong>改善前</strong>: ★3.5/5</li>
+<li><strong>改善後（予測）</strong>: ★3.8/5</li>
+<li>UI/UX: ★3.5 → ★4.0（helpContent レンダリング + 前提スキル状態表示）</li>
+<li>報酬デザイン: ★3.5 → ★3.8（マイルストーン空白解消）</li>
+<li>フロー体験: ★4.0 → 変化なし</li>
+<li>進捗感: ★3.0 → ★3.2（BUG-004/005 修正による安定化）</li>
 </ul>
 
 

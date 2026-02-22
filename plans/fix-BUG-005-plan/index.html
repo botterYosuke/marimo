@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない - marimo Developer Docs</title>
+        <title>BUG-005: リロード後にカーネル再送でスキルが再発火し、進捗が 0 にリセットされない問題 - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-hud-finished-e2e" class="md-skip">
+        <a href="#bug-005-0" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない
+              BUG-005: リロード後にカーネル再送でスキルが再発火し、進捗が 0 にリセットされない問題
             
           </span>
         </div>
@@ -1210,7 +1210,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        概要
+        ステータス: 修正完了
       
     </span>
   </a>
@@ -1221,7 +1221,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        背景
+        問題
       
     </span>
   </a>
@@ -1232,32 +1232,49 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        期待される動作
+        根本原因
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="根本原因">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        対象ファイル
+        データフロー
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装案
+        リロード時の再発火
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        なぜ 2 なのか
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1265,18 +1282,57 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装試行記録
+        修正内容
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="修正内容">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更ファイル
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#issue" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
-        関連 Issue
+        変更内容
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        なぜテスト側の修正が最も安全か
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        関連知見
       
     </span>
   </a>
@@ -1300,69 +1356,61 @@
 
 
 
-<h1 id="issue-hud-finished-e2e">Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない<a class="headerlink" href="#issue-hud-finished-e2e" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-21
-<strong>重要度</strong>: Medium
-<strong>カテゴリ</strong>: テストカバレッジ / UI
-<strong>ステータス</strong>: ⬜ 未対応</p>
-<hr />
-<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正（ゲーム終了後に HUD ステータスを "Trading" → "Finished" に変更）は実装済みだが、UI ラベルが正しく "Finished" になることを明示的に検証する E2E テストが存在しない。</p>
-<p><code>backcast-integration.spec.ts</code> の全テストは <code>bt.step()</code> の複数回実行を含むが、ゲーム終了（<code>step()</code> が <code>False</code> を返す状態）後の HUD ステータス表示を確認しているケースはない。</p>
-<h2 id="_2">背景<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正内容:
-- <code>step()</code> の戻り値が <code>False</code>（＝バックテスト終了）のとき、HUD ステータスを "Finished" に更新する
-- 修正前は終了後も "Trading" のまま表示されていた</p>
-<p>現在の <code>backcast-integration.spec.ts</code> は長期プレイフロー（ <code>bt.buy()</code> → <code>bt.step()</code> × N 回）を実行するが、<strong>ゲーム終了（全データ消化）後に "Finished" ラベルが表示されることを assert していない</strong>。</p>
-<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>以下のシナリオが E2E テストで検証されること:</p>
-<ol>
-<li><code>bt.step()</code> を繰り返しデータ末尾まで進める（または直接終了状態にする）</li>
-<li>HUD の status 要素が <code>"Finished"</code> を表示する</li>
-<li>"Trading" 文字列が残っていないことを確認する</li>
-</ol>
-<h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>ファイル</th>
-<th>対応箇所</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
-<td>新規テストケース追加先</td>
-</tr>
-<tr>
-<td><code>frontend/src/components/backtest-hud.tsx</code></td>
-<td>ステータスラベルの実装箇所</td>
-</tr>
-<tr>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-<td><code>step()</code> 終了判定箇所</td>
-</tr>
-</tbody>
-</table>
-<h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// backcast-integration.spec.ts に追加</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;ゲーム終了後に HUD ステータスが Finished になる&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// データを末尾まで step() する</span>
-<span class="w">  </span><span class="c1">// 最後の step() が False を返した後</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">statusEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;hud-status&quot;]&#39;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Finished&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">not</span><span class="p">.</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Trading&quot;</span><span class="p">);</span>
-<span class="p">});</span>
-</code></pre></div>
-<p><code>data-testid="hud-status"</code> が <code>backtest-hud.tsx</code> に存在しない場合は追加が必要。</p>
-<h2 id="_6">実装試行記録<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p><strong>試行日</strong>: 2026-02-21
-<strong>ブロッカー</strong>: <code>bt.step()</code> をデータ末尾まで進めるには backcast.py + BackcastPro エンジン + 実株価データが必要。E2E テスト環境（game_test.py）ではゲームエンジンが未初期化。backcast-integration.spec.ts は backcast.py を使うが、全データ消化（数百〜数千 step）は時間的に非現実的。
-<strong>試行内容</strong>: data-testid="hud-status" の存在確認を試みたが、backtest-hud.tsx が game_test.py 上では render されないため検証不可。
-<strong>推奨</strong>: backcast-integration.spec.ts で短いデータセット（10ステップ程度）を使った終了テストを追加する。要: テスト用短縮データの準備。</p>
-<h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
+<h1 id="bug-005-0">BUG-005: リロード後にカーネル再送でスキルが再発火し、進捗が 0 にリセットされない問題<a class="headerlink" href="#bug-005-0" title="Permanent link">&para;</a></h1>
+<h2 id="_1">ステータス: 修正完了<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h2 id="_2">問題<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p><code>persistence.spec.ts:74</code> のテスト「スキル完了後リロードすると進捗が 0 にリセットされる（Web モード仕様）」が失敗。</p>
 <ul>
-<li><code>step-end-status-label-wrong.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
+<li><strong>期待値</strong>: <code>countAfterReload === 0</code></li>
+<li><strong>実際の値</strong>: <code>countAfterReload === 2</code></li>
+</ul>
+<h2 id="_3">根本原因<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_4">データフロー<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>game_test.py</code> のセルが <code>gs.chart("7203")</code>, <code>gs.buy()</code>, <code>gs.sell()</code> を実行</li>
+<li>これらの関数内部で <code>emit_skill("SANDBOX_001")</code>, <code>emit_skill("SANDBOX_002")</code>, <code>emit_skill("SANDBOX_004")</code> が呼ばれる</li>
+<li><code>emit_skill()</code> は <code>mo.output.append(Html('&lt;marimo-broadcast ...&gt;'))</code> でセルのコンソール出力に <code>&lt;marimo-broadcast&gt;</code> タグを含む HTML を出力</li>
+<li>この HTML はカーネルのセル出力として保持される</li>
+</ol>
+<h3 id="_5">リロード時の再発火<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>page.reload()</code> でページがリロードされる</li>
+<li>React の atom (playerProgressAtom) は plain atom のため初期状態 (0 completed) にリセットされる -- ここまでは期待通り</li>
+<li>しかし、カーネルはセル出力を WebSocket で再送する</li>
+<li><code>handleCellNotificationeration()</code> (handlers.ts:269) がセル出力を処理</li>
+<li><code>extractAndSendBroadcastMessages()</code> が HTML 内の <code>&lt;marimo-broadcast&gt;</code> タグを検出</li>
+<li><code>sendBroadcastMessage()</code> → BroadcastChannel → <code>setupSkillEventListener</code> の handleMessage → <code>onSkillComplete</code> → atom 更新</li>
+<li>結果: リロード直後に 2 つのスキルが再完了してしまう</li>
+</ol>
+<h3 id="2">なぜ 2 なのか<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<p><code>game_test.py</code> のセルが生成する <code>emit_skill()</code> 出力のうち、カーネルが再送するものが 2 つあるため。
+(<code>emit_skill</code> は Python 側で dedup するが、カーネル再送は HTML をそのまま送るため、フロントエンド側の dedup がリセット後に効かない)</p>
+<h2 id="_6">修正内容<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<p><strong>採用した方針</strong>: 案A + 案C の組み合わせ（テスト側の修正）</p>
+<h3 id="_7">変更ファイル<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>frontend/e2e-tests/game/persistence.spec.ts</code> (L89-103)</li>
+</ul>
+<h3 id="_8">変更内容<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>リロード後に以下の手順を追加:</p>
+<ol>
+<li><code>waitForTimeout(500)</code> -- カーネル再送の到着を待つ</li>
+<li><code>resetGameProgress(page)</code> -- atom をクリアし、<code>suppressBroadcast</code> フラグを 1 秒間有効にして後続のカーネル再送メッセージを抑制</li>
+<li><code>openSkillTreePanel(page)</code> -- パネルを再度開く</li>
+<li>アサート -- この時点で completedCount は 0</li>
+</ol>
+<p>これは <code>beforeEach</code> (L36-48) と同じパターンであり、リロード後にも同じ安定化手順が必要であることを明示的にしている。</p>
+<h3 id="_9">なぜテスト側の修正が最も安全か<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>プロダクションコード変更不要</strong>: カーネル再送は marimo の正常な動作であり、変更すると他の機能に影響する可能性がある</li>
+<li><strong>suppressBroadcast 機構が既に存在</strong>: <code>resetGameProgress()</code> が呼ぶ <code>__testResetProgress</code> は既に 1 秒間の BroadcastChannel 抑制を行う</li>
+<li><strong>beforeEach と同じパターン</strong>: テストの <code>beforeEach</code> も同様の問題に対処しており、一貫性がある</li>
+</ul>
+<h2 id="_10">関連知見<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>setupSkillEventListener</code> の <code>suppressBroadcast</code> フラグは <code>__testResetProgress</code> 呼び出し後 1 秒間有効</li>
+<li><code>__testSuppressProgressSync</code> は <code>progress_channel</code> のみを抑制し、<code>skill_event_channel</code> は <code>suppressBroadcast</code> が担当</li>
+<li>marimo edit モードは 1 ファイル 1 カーネルを永続するため、リロード後に既存セッションへの再接続とセル出力の再送が発生する</li>
 </ul>
 
 

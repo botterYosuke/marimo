@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: FAIL_002 スキル（損切り判定）の E2E テストが存在しない - marimo Developer Docs</title>
+        <title>BUG-004: HTML パイプライン経由のスキル完了が反映されない（integration.spec.ts 全面失敗） - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-fail_002-e2e" class="md-skip">
+        <a href="#bug-004-html-integrationspects" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: FAIL_002 スキル（損切り判定）の E2E テストが存在しない
+              BUG-004: HTML パイプライン経由のスキル完了が反映されない（integration.spec.ts 全面失敗）
             
           </span>
         </div>
@@ -1210,7 +1210,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        概要
+        再現手順
       
     </span>
   </a>
@@ -1221,7 +1221,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        背景
+        期待動作
       
     </span>
   </a>
@@ -1232,7 +1232,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        期待される動作
+        実際の動作
       
     </span>
   </a>
@@ -1243,10 +1243,60 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        対象ファイル
+        原因推定
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="原因推定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-__testinjectbroadcasthtml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        仮説 1: __testInjectBroadcastHTML フックが未登録または変更された
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-extractandsendbroadcastmessages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        仮説 2: extractAndSendBroadcastMessages のパース処理の変更
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-broadcastchannel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        仮説 3: BroadcastChannel のコンテキスト不一致
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-resetgameprogress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        仮説 4: resetGameProgress の影響
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1254,7 +1304,7 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装案
+        影響範囲
       
     </span>
   </a>
@@ -1262,10 +1312,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#issue" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        関連 Issue
+        調査手順
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        関連ファイル
       
     </span>
   </a>
@@ -1289,65 +1350,91 @@
 
 
 
-<h1 id="issue-fail_002-e2e">Issue: FAIL_002 スキル（損切り判定）の E2E テストが存在しない<a class="headerlink" href="#issue-fail_002-e2e" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-21
-<strong>重要度</strong>: High
-<strong>カテゴリ</strong>: テストカバレッジ / スキルロジック
-<strong>ステータス</strong>: ⬜ 未対応</p>
-<hr />
-<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>fail002-wrong-timing-in-sell.md</code> の修正（FAIL_002 損切り判定を <code>sell()</code> → <code>step()</code> 内に移動）は実装済みだが、その動作を検証する E2E テストが存在しない。</p>
-<p><code>fail002-wrong-timing-in-sell.md</code> に記録された修正が将来リグレッションしても、自動テストでは検出できない状態。</p>
-<h2 id="_2">背景<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p><code>fail002-wrong-timing-in-sell.md</code> の修正内容:
-- <code>_check_stop_loss()</code> を <code>sell()</code> から <code>step()</code> 内に移動
-- <code>step()</code> ごとにポジション価値を評価し、10% 下落で FAIL_002 発火</p>
-<p>現在の sandbox.spec.ts / z-python-e2e.spec.ts は成功系スキル（SANDBOX_001〜006 など）のみを検証しており、失敗系スキル（FAIL_002）は一切テストされていない。</p>
-<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>以下のシナリオが E2E テストで検証されること:</p>
+<h1 id="bug-004-html-integrationspects">BUG-004: HTML パイプライン経由のスキル完了が反映されない（integration.spec.ts 全面失敗）<a class="headerlink" href="#bug-004-html-integrationspects" title="Permanent link">&para;</a></h1>
+<p><strong>優先度</strong>: Critical
+<strong>発見元</strong>: play-log-2026-02-21.md
+<strong>テスト</strong>: frontend/e2e-tests/game/integration.spec.ts (5件失敗)
+<strong>ステータス</strong>: ✅ 修正済み</p>
+<h2 id="_1">再現手順<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <ol>
-<li><code>bt.buy()</code> でポジションを取得する</li>
-<li>価格が 10% 以上下落した状態で <code>bt.step()</code> を呼ぶ</li>
-<li>FAIL_002 スキルが <code>completed</code> になる</li>
-<li>FAIL_002 ノードが <code>completed</code> 状態に UI 反映される</li>
+<li><code>npx playwright test e2e-tests/game/integration.spec.ts --headed</code> を実行する</li>
+<li>以下の 5 テストが全て失敗する:</li>
+<li>L54: "HTML 注入でスキルが完了する"</li>
+<li>L63: "前提条件チェーンが HTML 経由でも動作する"</li>
+<li>L75: "進捗バッジが HTML 経由でも更新される"</li>
+<li>L104: "重複発火が防止される"</li>
+<li>L180: "HTML 経由の 6 スキル連続完了でブリッジトラックが解放される"</li>
 </ol>
-<h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h2 id="_2">期待動作<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>__testInjectBroadcastHTML</code> フック経由で HTML を注入すると、以下の経路でスキルが完了する:</li>
+<li>HTML パース (<code>extractAndSendBroadcastMessages</code>) -&gt; BroadcastChannel 送信 (<code>sendBroadcastMessage</code>) -&gt; リスナー受信 -&gt; atom 更新 -&gt; UI 反映</li>
+<li><code>waitForSkillStatus(page, "SANDBOX_001", "completed")</code> が成功する</li>
+</ul>
+<h2 id="_3">実際の動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>全テストで <code>Expected "completed" but received "unlocked"</code></li>
+<li>HTML 注入後もスキルのステータスが <code>"unlocked"</code> のまま変化しない</li>
+<li>レイヤー 3→7 の経路のどこかでイベントが途絶えている</li>
+</ul>
+<h2 id="_4">原因推定<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="1-__testinjectbroadcasthtml">仮説 1: <code>__testInjectBroadcastHTML</code> フックが未登録または変更された<a class="headerlink" href="#1-__testinjectbroadcasthtml" title="Permanent link">&para;</a></h3>
+<p><code>SkillTreeButton</code> コンポーネントのマウント時に <code>window.__testInjectBroadcastHTML</code> が登録されるはずだが、コンポーネントの構造変更やマウントタイミングの変更で登録されていない可能性。ただし、フックが見つからない場合は <code>throw new Error("__testInjectBroadcastHTML not found")</code> で即座にエラーになるため、フック自体は存在している可能性が高い。</p>
+<h3 id="2-extractandsendbroadcastmessages">仮説 2: <code>extractAndSendBroadcastMessages</code> のパース処理の変更<a class="headerlink" href="#2-extractandsendbroadcastmessages" title="Permanent link">&para;</a></h3>
+<p>HTML 内の <code>&lt;marimo-broadcast&gt;</code> タグのパース処理が変更され、<code>channel</code>, <code>type</code>, <code>payload</code> 属性の読み取りに失敗している可能性。</p>
+<h3 id="3-broadcastchannel">仮説 3: BroadcastChannel のコンテキスト不一致<a class="headerlink" href="#3-broadcastchannel" title="Permanent link">&para;</a></h3>
+<p>テストページと BroadcastChannel リスナーが異なるコンテキスト（iframe, worker 等）で動作しており、メッセージが配信されない。<code>sandbox.spec.ts</code> の <code>__testCompleteSkill</code>（レイヤー 6→7 のみ）は正常に動作しているため、問題はレイヤー 3→5（HTML パース → BroadcastChannel 送信 → リスナー受信）にある。</p>
+<h3 id="4-resetgameprogress">仮説 4: <code>resetGameProgress</code> の影響<a class="headerlink" href="#4-resetgameprogress" title="Permanent link">&para;</a></h3>
+<p><code>beforeEach</code> で <code>resetGameProgress</code> を実行した後、BroadcastChannel リスナーが再登録されていない可能性。</p>
+<h2 id="_5">影響範囲<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li>integration.spec.ts の 9 テスト中 5 テストが失敗（通過しているのは「不正 base64 でクラッシュしない」等のネガティブテスト）</li>
+<li>HTML パイプラインはカーネルからのセル出力をフロントエンドで受信する主要経路であり、この経路が壊れるとリアルタイムのスキル完了通知が機能しない</li>
+<li><code>sandbox.spec.ts</code>（<code>__testCompleteSkill</code> 経由）は全テスト通過のため、atom → UI の経路は正常</li>
+</ul>
+<h2 id="_6">調査手順<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ol>
+<li>ブラウザコンソールで <code>__testInjectBroadcastHTML</code> 呼び出し後のログを確認する</li>
+<li><code>extractAndSendBroadcastMessages</code> が呼ばれているか、パースが成功しているか確認する</li>
+<li>BroadcastChannel にメッセージが送信されているか <code>postMessage</code> の呼び出しを確認する</li>
+<li>BroadcastChannel リスナー側でメッセージを受信しているか確認する</li>
+<li><code>sandbox.spec.ts</code> の <code>__testCompleteSkill</code> と比較して、経路の違いを特定する</li>
+</ol>
+<h2 id="_7">関連ファイル<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>ファイル</th>
-<th>対応箇所</th>
+<th>関連箇所</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>frontend/e2e-tests/game/z-python-e2e.spec.ts</code></td>
-<td>FAIL_002 テストケース追加先（候補）</td>
+<td><code>frontend/e2e-tests/game/integration.spec.ts</code></td>
+<td>全体 — 5 テスト失敗</td>
 </tr>
 <tr>
 <td><code>frontend/e2e-tests/game/helpers.ts</code></td>
-<td><code>emitSkillViaPython()</code> — 既存ヘルパーを活用</td>
+<td><code>emitSkillEventViaHTML</code> L237-261 — HTML 注入ヘルパー</td>
 </tr>
 <tr>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\game_setup.py</code></td>
-<td><code>_check_stop_loss()</code> の実装箇所</td>
+<td>フロントエンドの SkillTreeButton</td>
+<td><code>__testInjectBroadcastHTML</code> フック登録</td>
+</tr>
+<tr>
+<td>フロントエンドの broadcast 処理</td>
+<td><code>extractAndSendBroadcastMessages</code> — HTML パース</td>
+</tr>
+<tr>
+<td>フロントエンドの broadcast 処理</td>
+<td><code>sendBroadcastMessage</code> — BroadcastChannel 送信</td>
+</tr>
+<tr>
+<td>フロントエンドのスキルイベントリスナー</td>
+<td>BroadcastChannel 受信 → atom 更新</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// z-python-e2e.spec.ts に追加</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;FAIL_002: step() で損切り判定が発火する&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// 1. データ取得・buy()</span>
-<span class="w">  </span><span class="c1">// 2. 価格下落をモックまたは step() を繰り返す</span>
-<span class="w">  </span><span class="c1">// 3. FAIL_002 が completed になることを確認</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;FAIL_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">);</span>
-<span class="p">});</span>
-</code></pre></div>
-<p>ただし「価格 10% 下落」を E2E テストでどう再現するか（実データ依存 vs モック）は要検討。</p>
-<h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>fail002-wrong-timing-in-sell.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
-</ul>
 
 
 

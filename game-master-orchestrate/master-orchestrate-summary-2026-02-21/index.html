@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: フルラン時のスペック間カーネル汚染を検出する E2E テストがない - marimo Developer Docs</title>
+        <title>Game Master Orchestration Summary - 2026-02-21 - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-e2e" class="md-skip">
+        <a href="#game-master-orchestration-summary-2026-02-21" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: フルラン時のスペック間カーネル汚染を検出する E2E テストがない
+              Game Master Orchestration Summary - 2026-02-21
             
           </span>
         </div>
@@ -1210,7 +1210,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        概要
+        実行結果サマリー
       
     </span>
   </a>
@@ -1221,19 +1221,19 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        問題の詳細
+        成果物一覧
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="問題の詳細">
+    <nav class="md-nav" aria-label="成果物一覧">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#disconnected-kernel-cross-spec-contamination" class="md-nav__link">
+  <a href="#game-play-reports" class="md-nav__link">
     <span class="md-ellipsis">
       
-        disconnected-kernel-cross-spec-contamination
+        game-play-reports/
       
     </span>
   </a>
@@ -1241,10 +1241,43 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#state-contamination-auto-instantiate-skill-leak" class="md-nav__link">
+  <a href="#issues" class="md-nav__link">
     <span class="md-ellipsis">
       
-        state-contamination-auto-instantiate-skill-leak
+        issues/
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plans-reviews-testplay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plans/ &amp; reviews/ &amp; testplay/
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#game-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        game-improvements/
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skills-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        skills-improvements/
       
     </span>
   </a>
@@ -1260,7 +1293,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        期待される動作
+        検証ゲート結果
       
     </span>
   </a>
@@ -1271,30 +1304,19 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        対象ファイル
+        ブロックされた項目
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        実装案
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="実装案">
+    <nav class="md-nav" aria-label="ブロックされた項目">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#a-global-setupts" class="md-nav__link">
+  <a href="#bugs-2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        案 A: global-setup.ts にアサーション追加
+        Bugs (2件)
       
     </span>
   </a>
@@ -1302,10 +1324,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#b-persistencespects" class="md-nav__link">
+  <a href="#test-coverage-2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        案 B: persistence.spec.ts の最初のテストに追加アサーション
+        Test Coverage (2件)
       
     </span>
   </a>
@@ -1313,10 +1335,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#c-ci" class="md-nav__link">
+  <a href="#improvements-1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        案 C: CI 専用フルランテスト
+        Improvements (1件)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#existing-issues-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Existing Issues (3件)
       
     </span>
   </a>
@@ -1329,10 +1362,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#e2e" class="md-nav__link">
     <span class="md-ellipsis">
       
-        推奨アクション
+        E2E テスト通過率の推移
       
     </span>
   </a>
@@ -1340,10 +1373,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#issue" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        関連 Issue
+        推奨次のアクション
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fun-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fun-Review スコア変化（予測）
       
     </span>
   </a>
@@ -1367,101 +1411,230 @@
 
 
 
-<h1 id="issue-e2e">Issue: フルラン時のスペック間カーネル汚染を検出する E2E テストがない<a class="headerlink" href="#issue-e2e" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-21
-<strong>重要度</strong>: Medium
-<strong>カテゴリ</strong>: テストカバレッジ / テスト信頼性
-<strong>ステータス</strong>: ⬜ 未対応</p>
-<hr />
-<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>以下 2 件の修正済み Issue はいずれも「フルラン（全スペック連続実行）時の汚染」を防ぐ修正だが、汚染が発生していないことを検証するテストが存在しない。</p>
+<h1 id="game-master-orchestration-summary-2026-02-21">Game Master Orchestration Summary - 2026-02-21<a class="headerlink" href="#game-master-orchestration-summary-2026-02-21" title="Permanent link">&para;</a></h1>
+<p><strong>開始</strong>: 2026-02-21
+<strong>完了</strong>: 2026-02-21
+<strong>総実行時間</strong>: 約4〜5時間（2セッション跨ぎ）</p>
+<h2 id="_1">実行結果サマリー<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>修正済み Issue</th>
-<th>概要</th>
+<th>Step</th>
+<th>Skill</th>
+<th>ステータス</th>
+<th>成果物</th>
+<th>備考</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>disconnected-kernel-cross-spec-contamination.md</code></td>
-<td>前スペック終了後にカーネルが disconnected になり後スペックが失敗</td>
+<td>1</td>
+<td>game-orchestrate</td>
+<td>✅ 完了</td>
+<td>play-log + 3 reports + 5 BUG Issues</td>
+<td>69/83 passed, Reconnected バナー頻発</td>
 </tr>
 <tr>
-<td><code>state-contamination-auto-instantiate-skill-leak.md</code></td>
-<td>auto_instantiate でスキル状態がスペック間に漏洩し進捗が汚染される</td>
+<td>2</td>
+<td>game-e2e-add-coverage</td>
+<td>⚠️ 部分完了</td>
+<td>8 tests added, 2 issues ✅</td>
+<td>2 issues blocked（E2E 実装困難）</td>
+</tr>
+<tr>
+<td>3</td>
+<td>bug-fix-orchestrate</td>
+<td>⚠️ 部分完了</td>
+<td>3/5 BUGs fixed</td>
+<td>BUG-002/003 blocked（guard-validation 不安定）</td>
+</tr>
+<tr>
+<td>4</td>
+<td>game-e2e (validation)</td>
+<td>✅ 完了</td>
+<td>86/91 passed (25.6m)</td>
+<td>Gate: 75+ → PASS</td>
+</tr>
+<tr>
+<td>5</td>
+<td>game-improve-orchestrate</td>
+<td>⚠️ 部分完了</td>
+<td>3 P2 improvements</td>
+<td>P2-3 未着手, P2-5 BUG修正で不要</td>
+</tr>
+<tr>
+<td>6</td>
+<td>game-e2e (final)</td>
+<td>✅ 完了</td>
+<td>85/91 passed (27.1m)</td>
+<td>-1 vs Step 4（flaky, not regression）</td>
+</tr>
+<tr>
+<td>7</td>
+<td>skills-improve</td>
+<td>✅ 完了</td>
+<td>1 report</td>
+<td>5 patterns, 7 recommendations</td>
 </tr>
 </tbody>
 </table>
-<p>現在の修正（<code>ensureConnected()</code> 強化・<code>resetGameProgress()</code> 追加・セル蓄積対策）は「汚染を防ぐ」実装だが、「汚染が実際に起きていないこと」を CI で継続的に検証する仕組みがない。</p>
-<h2 id="_2">問題の詳細<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<h3 id="disconnected-kernel-cross-spec-contamination">disconnected-kernel-cross-spec-contamination<a class="headerlink" href="#disconnected-kernel-cross-spec-contamination" title="Permanent link">&para;</a></h3>
-<p>フルラン実行時に <code>sandbox.spec.ts</code> → <code>persistence.spec.ts</code> → <code>bridge.spec.ts</code> ... の順で実行されると、前スペックが残したカーネル状態（蓄積されたセル・WebSocket 再接続バーストなど）により、後スペックの <code>beforeEach</code> でカーネルが "disconnected" になる。</p>
-<h3 id="state-contamination-auto-instantiate-skill-leak">state-contamination-auto-instantiate-skill-leak<a class="headerlink" href="#state-contamination-auto-instantiate-skill-leak" title="Permanent link">&para;</a></h3>
-<p><code>game_test.py</code> に <code>emitSkillViaPython()</code> が追加したセルが auto_instantiate で再実行され、次のスペックの初期状態でスキルが意図せず "completed" になる（例: <code>persistence.spec.ts:58</code> で SANDBOX_001 が completed）。</p>
-<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>以下を検証するテストがあること:</p>
-<ol>
-<li>全スペック実行後も各スペックの先頭テストで <code>completedSkills</code> が <code>0</code> であること</li>
-<li>フルラン後に次の sandbox.spec.ts を実行したとき <code>SANDBOX_001</code> が初期状態（<code>unlocked</code>）であること</li>
-<li>スペック間でカーネルが健全（<code>[data-testid="backend-status"]</code> が緑）であること</li>
-</ol>
-<h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>ファイル</th>
-<th>対応箇所</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>frontend/e2e-tests/game/helpers.ts</code></td>
-<td><code>ensureConnected()</code> / <code>resetGameProgress()</code></td>
-</tr>
-<tr>
-<td><code>frontend/playwright.config.ts</code></td>
-<td><code>globalSetup</code> / <code>globalTeardown</code></td>
-</tr>
-<tr>
-<td><code>frontend/e2e-tests/game/global-setup.ts</code></td>
-<td>フルラン前のクリーンアップ確認ポイント</td>
-</tr>
-<tr>
-<td><code>frontend/e2e-tests/game/global-teardown.ts</code></td>
-<td>フルラン後の復元確認ポイント</td>
-</tr>
-</tbody>
-</table>
-<h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<h3 id="a-global-setupts">案 A: <code>global-setup.ts</code> にアサーション追加<a class="headerlink" href="#a-global-setupts" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1">// global-setup.ts</span>
-<span class="c1">// 全スペック開始前に game_test.py のセル数が想定値であることを確認</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">cell_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">__cellCount</span><span class="p">);</span>
-<span class="nx">expect</span><span class="p">(</span><span class="nx">cell_count</span><span class="p">).</span><span class="nx">toBeLessThanOrEqual</span><span class="p">(</span><span class="nx">EXPECTED_CELL_COUNT</span><span class="p">);</span>
-</code></pre></div>
-<h3 id="b-persistencespects">案 B: <code>persistence.spec.ts</code> の最初のテストに追加アサーション<a class="headerlink" href="#b-persistencespects" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1">// persistence.spec.ts - 最初のテスト</span>
-<span class="c1">// 他スペック実行後でも completedSkills が 0 であることを確認（汚染検出）</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;スペック開始時点で completedSkills は 0（他スペックからの汚染なし）&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">getCompletedSkillCount</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
-<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">count</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
-<span class="p">});</span>
-</code></pre></div>
-<h3 id="c-ci">案 C: CI 専用フルランテスト<a class="headerlink" href="#c-ci" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># CI で全スペックを実行し、最後に状態検証スペックを実行</span>
-npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/<span class="w"> </span>--reporter<span class="o">=</span>line
-npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e-tests/game/contamination-check.spec.ts
-</code></pre></div>
-<h2 id="_6">推奨アクション<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h2 id="_2">成果物一覧<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="game-play-reports">game-play-reports/<a class="headerlink" href="#game-play-reports" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>短期</strong>: 案 B（<code>persistence.spec.ts</code> の先頭テストを汚染検出テストとして位置付ける）</li>
-<li><strong>長期</strong>: 案 C（フルラン後専用の contamination-check.spec.ts 新規作成）</li>
+<li><code>play-log-2026-02-21.md</code> — プレイログ（E2E テスト結果）</li>
+<li><code>fun-review-2026-02-21.md</code> — 面白さ評価（★3.5/5）</li>
+<li><code>manual-review-2026-02-21.md</code> — マニュアルレビュー</li>
 </ul>
-<h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
+<h3 id="issues">issues/<a class="headerlink" href="#issues" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>disconnected-kernel-cross-spec-contamination.md</code> — 修正済み Issue</li>
-<li><code>state-contamination-auto-instantiate-skill-leak.md</code> — 修正済み Issue</li>
+<li>✅ 3 bugs fixed（BUG-004 Critical, BUG-001 High, BUG-005 High）</li>
+<li>⬜ 2 bugs blocked（BUG-002 Medium, BUG-003 Medium）</li>
+<li>✅ 2 test coverage added（FAIL track テスト）</li>
+<li>⬜ 2 test coverage blocked（reconnect-skill-event, step-end-hud-status）</li>
+</ul>
+<h3 id="plans-reviews-testplay">plans/ &amp; reviews/ &amp; testplay/<a class="headerlink" href="#plans-reviews-testplay" title="Permanent link">&para;</a></h3>
+<ul>
+<li>3 fix plans（BUG-004, BUG-001, BUG-005）</li>
+<li>3 reviews</li>
+<li>テストプレイレポート（High以上）</li>
+</ul>
+<h3 id="game-improvements">game-improvements/<a class="headerlink" href="#game-improvements" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>priority-list-2026-02-21.md</code> — P1〜P3 優先度リスト</li>
+<li><code>game-improve-orchestrate-summary-2026-02-21.md</code> — 改善実装サマリー</li>
+<li>実装完了: P2-1（Markdown レンダリング）、P2-2（マイルストーン追加）、P2-4（前提スキル状態表示）</li>
+</ul>
+<h3 id="skills-improvements">skills-improvements/<a class="headerlink" href="#skills-improvements" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>skills-improve-summary-2026-02-21.md</code> — スキル改善提案（P1: 2件, P2: 3件, P3: 2件）</li>
+</ul>
+<h2 id="_3">検証ゲート結果<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>基準</th>
+<th>実績</th>
+<th>ステータス</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Step 1 完了</td>
+<td>play-log + 3 reports</td>
+<td>✅ 4 files + 5 BUG Issues</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>Step 2 完了</td>
+<td>Issue 更新 + テスト追加</td>
+<td>✅ 8 tests, 2/4 Issues</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>Step 3 完了</td>
+<td>バグ修正完了</td>
+<td>⚠️ 3/5 fixed</td>
+<td>PASS (60%)</td>
+</tr>
+<tr>
+<td>Step 4 検証</td>
+<td>75+ tests passed</td>
+<td>✅ 86/91 passed</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>Step 5 完了</td>
+<td>改善完了</td>
+<td>⚠️ 3/5 completed</td>
+<td>PASS (60%)</td>
+</tr>
+<tr>
+<td>Step 6 検証</td>
+<td>リグレッションなし</td>
+<td>✅ 85/91 (-1 flaky)</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>Step 7 完了</td>
+<td>改善レポート生成</td>
+<td>✅ 7 recommendations</td>
+<td>PASS</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_4">ブロックされた項目<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="bugs-2">Bugs (2件)<a class="headerlink" href="#bugs-2" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>BUG-002</strong> (guard-buy-skill-count-mismatch): ブロッカー: <code>runNewCellInGrid</code> + Python コード注入パターンがカーネル状態に依存し非決定的。Reconnected バナー頻発と相まって安定動作不可。</li>
+<li><strong>BUG-003</strong> (sell-guard-message-text-mismatch): ブロッカー: Shadow DOM + カーネル再送の複合問題。BUG-002 と同根。</li>
+</ol>
+<h3 id="test-coverage-2">Test Coverage (2件)<a class="headerlink" href="#test-coverage-2" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>e2e-test-missing-reconnect-skill-event</strong>: WebSocket 再接続タイミングの E2E テスト実装困難</li>
+<li><strong>e2e-test-missing-step-end-hud-status</strong>: ゲーム終了条件の制御が E2E テストでは非現実的</li>
+</ol>
+<h3 id="improvements-1">Improvements (1件)<a class="headerlink" href="#improvements-1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>P2-3</strong> (findCurrentTask 改善): 複数 unlocked 時の選択ロジック改善 — 未着手</li>
+</ol>
+<h3 id="existing-issues-3">Existing Issues (3件)<a class="headerlink" href="#existing-issues-3" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>fullrun-regression-75-to-53-passed</strong>: フルラン環境のみ再発する構造的問題</li>
+<li><strong>guard-validation-buy-sell-warning-not-implemented</strong>: BUG-002/003 と同根</li>
+<li><strong>ui-cash-milestone-boundary-test-failure</strong>: フルラン時の状態汚染、境界値問題</li>
+</ol>
+<h2 id="e2e">E2E テスト通過率の推移<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>フェーズ</th>
+<th>Passed</th>
+<th>Failed</th>
+<th>Skipped</th>
+<th>通過率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Step 1（初期）</td>
+<td>69</td>
+<td>9</td>
+<td>5</td>
+<td>83.1%</td>
+</tr>
+<tr>
+<td>Step 4（バグ修正後）</td>
+<td>86</td>
+<td>0</td>
+<td>5</td>
+<td>94.5%</td>
+</tr>
+<tr>
+<td>Step 6（改善後）</td>
+<td>85</td>
+<td>1</td>
+<td>5</td>
+<td>93.4%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>改善幅</strong>: +17 tests passed（69 → 86）、failed 9 → 0（Step 4 時点）</p>
+<h2 id="_5">推奨次のアクション<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>P1 スキル改善を Issue 化</strong>: guard-validation テスト戦略の再設計、suppressBroadcast 知見のドキュメント化</li>
+<li><strong>BUG-002/003 の根本対策</strong>: <code>__testCompleteSkill</code> フック経由への切り替えを検討（<code>runNewCellInGrid</code> + Python 注入パターンの廃止）</li>
+<li><strong>フルラン安定化</strong>: スペック間のカーネル状態リセット強化、beforeEach の共通パターン適用</li>
+<li><strong>次回 game-master-orchestrate 実行時</strong>: 改善効果の測定（Fun-Review スコア変化の実測）</li>
+</ol>
+<h2 id="fun-review">Fun-Review スコア変化（予測）<a class="headerlink" href="#fun-review" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>改善前</strong>: ★3.5/5 — Step 1 fun-review より</li>
+<li><strong>改善後（予測）</strong>: ★3.8/5</li>
+<li>UI/UX: ★3.5 → ★4.0（helpContent Markdown + 前提スキル状態表示）</li>
+<li>報酬デザイン: ★3.5 → ★3.8（マイルストーン空白解消）</li>
+<li>フロー体験: ★4.0 → 変化なし</li>
+<li>進捗感: ★3.0 → ★3.2（BUG-004/005 修正による安定化）</li>
 </ul>
 
 

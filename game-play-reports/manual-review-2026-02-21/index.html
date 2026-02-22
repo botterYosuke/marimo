@@ -21,7 +21,7 @@
     
     
       
-        <title>マニュアル正確性レビュー - marimo Developer Docs</title>
+        <title>マニュアルレビュー 2026-02-21 - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
+        <a href="#2026-02-21" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              マニュアル正確性レビュー
+              マニュアルレビュー 2026-02-21
             
           </span>
         </div>
@@ -1207,10 +1207,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        対象ドキュメント
+        検証対象ドキュメント
       
     </span>
   </a>
@@ -1218,22 +1218,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        発見した誤り
+        発見事項
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="発見した誤り">
+    <nav class="md-nav" aria-label="発見事項">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-backcast-game-playmd" class="md-nav__link">
+  <a href="#1-game-e2e-review-systemmd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        誤り 1: backcast-game-play.md — 参照ドキュメントセクション「知見番号範囲」
+        1. game-e2e-review-system.md ヘッダーのテスト数・スイート数が古い
       
     </span>
   </a>
@@ -1241,10 +1241,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-game-play-skillmd-35c" class="md-nav__link">
+  <a href="#2-game-e2e-review-systemmd-4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        誤り 2: game-play SKILL.md — 「注意事項」内の「知見35c」参照
+        2. game-e2e-review-system.md ファイル構成リストに新規スペック 4 件が未記載
       
     </span>
   </a>
@@ -1252,10 +1252,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-game-play-skillmd" class="md-nav__link">
+  <a href="#3-game-e2e-review-systemmd-4243" class="md-nav__link">
     <span class="md-ellipsis">
       
-        誤り 3: game-play SKILL.md — 全スイート期待結果の注釈
+        3. game-e2e-review-system.md 知見番号 42・43 の参照が本文に未存在
       
     </span>
   </a>
@@ -1263,10 +1263,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-game-play-skillmd-bridge_002" class="md-nav__link">
+  <a href="#4-game-e2e-review-systemmd-34-35" class="md-nav__link">
     <span class="md-ellipsis">
       
-        誤り 4: game-play SKILL.md — BRIDGE_002 操作コマンドの引数
+        4. game-e2e-review-system.md 知見の掲載順序が入れ替わっている（34 と 35）
       
     </span>
   </a>
@@ -1274,10 +1274,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-game-e2e-review-systemmd-4243" class="md-nav__link">
+  <a href="#5-game-e2e-review-systemmd-networkidle" class="md-nav__link">
     <span class="md-ellipsis">
       
-        誤り 5: game-e2e-review-system.md — 知見番号 42・43 の参照が本文に未存在
+        5. game-e2e-review-system.md テスト分離戦略のサンプルコードに "networkidle" が残存
       
     </span>
   </a>
@@ -1285,10 +1285,126 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#6-game-e2e-review-systemmd-waitforloadstate" class="md-nav__link">
+  <a href="#6-game-play-skillmd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        誤り 6: game-e2e-review-system.md — テスト分離戦略サンプルコードの waitForLoadState
+        6. game-play SKILL.md の全スイート所要時間が大幅に過大
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-game-play-skillmd-75-passed-5-skipped" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. game-play SKILL.md の期待結果「75 passed / 5 skipped」が現状と不一致
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-backcast-game-playmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. backcast-game-play.md の知見番号範囲が古い
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-game-play-skillmd-35c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. game-play SKILL.md の知見 35c 参照が存在しない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-game-play-skillmd-bridge_002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. game-play SKILL.md の BRIDGE_002 操作コマンド引数が固定値
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. プレイログのテストスイート数が実際と不一致
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-uispects-skipped" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. プレイログ ui.spec.ts の skipped 数がテーブルとサマリーで不整合の可能性
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        サマリー
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="サマリー">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High 事項（即時修正推奨）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#medium" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Medium 事項
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#low" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Low 事項
       
     </span>
   </a>
@@ -1304,90 +1420,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        曖昧・不足している記述
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="曖昧・不足している記述">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-game-setup-skillmd-port-27192723" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        不足 1: game-setup SKILL.md — port 2719〜2723 の起動要否
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-game-play-skillmd-sandbox_003" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        不足 2: game-play SKILL.md — SANDBOX_003 の発火条件
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-game-play-skillmd-guard-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        不足 3: game-play SKILL.md — guard-validation テストスペックの存在
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-game-e2e-review-systemmd" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        不足 4: game-e2e-review-system.md — ファイル構成に新規スペック未記載
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-backcast-game-playmd" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        不足 5: backcast-game-play.md — 最新テスト結果の期待値が旧状態
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
         正確であることを確認した項目
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#issue" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        補足: Issue ステータス更新要否
       
     </span>
   </a>
@@ -1411,184 +1444,277 @@
 
 
 
-<h1 id="_1">マニュアル正確性レビュー<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h1 id="2026-02-21">マニュアルレビュー 2026-02-21<a class="headerlink" href="#2026-02-21" title="Permanent link">&para;</a></h1>
 <p><strong>レビュー日</strong>: 2026-02-21
-<strong>レビュアー</strong>: game-manual-review エージェント</p>
-<h2 id="_2">対象ドキュメント<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>development_docs/game-play-reports/play-log-2026-02-21.md</code>（プレイログ）</li>
-<li><code>development_docs/plans/backcast-game-play.md</code>（オーケストレーションマニュアル）</li>
-<li><code>development_docs/game/game-e2e-review-system.md</code>（E2E レビューシステム）</li>
-<li><code>.claude/skills/game-setup/SKILL.md</code></li>
-<li><code>.claude/skills/game-play/SKILL.md</code></li>
-<li><code>frontend/e2e-tests/game/helpers.ts</code>（ソースコード）</li>
-<li><code>frontend/src/components/skill-tree/skill-data.ts</code>（ソースコード）</li>
-<li><code>src-tauri/sample-notebooks/game_setup.py</code>（ソースコード）</li>
-<li><code>development_docs/issues/</code>（Issue ステータス）</li>
-</ul>
-<hr />
-<h2 id="_3">発見した誤り<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<h3 id="1-backcast-game-playmd">誤り 1: backcast-game-play.md — 参照ドキュメントセクション「知見番号範囲」<a class="headerlink" href="#1-backcast-game-playmd" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>: <code>| development_docs/game/game-e2e-review-system.md | E2E テスト知見集（知見 1〜35） |</code></li>
-<li><strong>実際の動作</strong>: <code>game-e2e-review-system.md</code> には知見 36〜40 が追加されており（知見 36: リセット後のイベント抑制、知見 37: UX プレイテストでのスキルイベント消失問題、知見 38: backcast.py 不在時の症状、知見 39: layouts/ 不在時の症状、知見 40: SKILL.md パスバグ）、最新の知見番号は 40 番まで存在する。さらに <code>game-e2e-review-system.md</code> の完了セクションには「知見 42」「知見 43」の参照記述があるが、対応する本文が存在しない（知見番号の最大は 40）。</li>
-<li><strong>修正案</strong>: <code>| development_docs/game/game-e2e-review-system.md | E2E テスト知見集（知見 1〜40） |</code> に更新する。</li>
-</ul>
-<hr />
-<h3 id="2-game-play-skillmd-35c">誤り 2: game-play SKILL.md — 「注意事項」内の「知見35c」参照<a class="headerlink" href="#2-game-play-skillmd-35c" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>: <code>page.reload()</code> は通常使わない（WebSocket 切断が起きる）。ただし <code>ensureConnected()</code> 内部でカーネル disconnected 時のリカバリーとして、および <code>backcast-integration.spec.ts</code> の beforeEach で接続安定化のために使用する（知見35c）</li>
-<li><strong>実際の動作</strong>: <code>game-e2e-review-system.md</code> に「知見 35c」という番号は存在しない。知見 35 は a（networkidle タイムアウト）と b（再接続スキル再発火）のサブ項目のみ。<code>page.reload()</code> のリカバリー利用に関する記述は知見 35 の本文内に含まれてはいるが、サブ番号「35c」は付与されていない。</li>
-<li><strong>修正案</strong>: 「知見35c」を「知見35」に修正する。</li>
-</ul>
-<hr />
-<h3 id="3-game-play-skillmd">誤り 3: game-play SKILL.md — 全スイート期待結果の注釈<a class="headerlink" href="#3-game-play-skillmd" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>: <code>&gt; **期待結果**: 全スイート実行時は 75 passed / 5 skipped（</code>backcast-integration.spec.ts<code>の 2 skipped 含む）を目安とする。</code></li>
-<li><strong>実際の動作</strong>: game-e2e-review-system.md の「完了（2026-02-21 backcast.py ファイル不在バグ修正セッション）」に「全 9 スイート（80 テスト）パス確認: 75 passed / 5 skipped / 0 failed」と記録されている。今回のフルランでは計 83 テストが実行されており総テスト数が増加している。また「<code>backcast-integration.spec.ts</code> の 2 skipped」という注釈は不正確で、実際の最新実行では skipped が 0（6 passed）となっている（プレイログ backcast-integration.spec.ts: 6 passed / 0 failed）。</li>
-<li><strong>修正案</strong>: 注釈「<code>backcast-integration.spec.ts</code> の 2 skipped 含む」を削除し、「最新の詳細は <code>game-e2e-review-system.md</code> の実行確認レポートを参照」と記載する。</li>
-</ul>
-<hr />
-<h3 id="4-game-play-skillmd-bridge_002">誤り 4: game-play SKILL.md — BRIDGE_002 操作コマンドの引数<a class="headerlink" href="#4-game-play-skillmd-bridge_002" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>: <code>| 8 | BRIDGE_002 | bt.get_stock_daily("7203") | 株価データ取得 + スキル発火 |</code></li>
-<li><strong>実際の動作</strong>: <code>backcast-game-play.md</code> の操作コマンド一覧では <code>bt.get_stock_daily(code)</code> と表記されており、固定値ではない。<code>game_setup.py</code> の <code>get_stock_daily</code> 関数は <code>code: str</code> を受け取り任意の銘柄コードを受け付ける。また <code>skill-data.ts</code> の BRIDGE_002 の <code>helpContent</code> では <code>get_stock_daily("6758")</code> （ソニー）を例示しており、「別銘柄を自分で取得する」が BRIDGE_002 の趣旨。固定値 "7203" の記載はミスリーディング。</li>
-<li><strong>修正案</strong>: <code>bt.get_stock_daily("7203")</code> を <code>bt.get_stock_daily(code)</code> に変更し、備考に「例: "7203" や "6758"（別銘柄推奨）」と追記する。</li>
-</ul>
-<hr />
-<h3 id="5-game-e2e-review-systemmd-4243">誤り 5: game-e2e-review-system.md — 知見番号 42・43 の参照が本文に未存在<a class="headerlink" href="#5-game-e2e-review-systemmd-4243" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>: 完了セクションに「（知見 42）」「（知見 43）」として参照されている。またタイトルセクションで「SKILL.md を修正: 知見番号の範囲も "1〜35" → "1〜42" に更新」と記載されている。</li>
-<li><strong>実際の動作</strong>: <code>game-e2e-review-system.md</code> の「実装上の知見と落とし穴」セクションに「### 41.」「### 42.」「### 43.」は存在せず、最大は「### 40.」。「（知見 42）」と参照されている backcast.py 不在バグ修正の知見本文は「### 38.」「### 39.」として記録されており、番号が一致しない。</li>
-<li><strong>修正案</strong>: 完了セクションの「（知見 42）」「（知見 43）」という参照を「（知見 38・39）」「（知見 40）」に修正する。または知見 41〜43 の本文を実際に追記する。「知見番号の範囲も "1〜35" → "1〜42" に更新」という記述は「"1〜35" → "1〜40" に更新」に訂正する。</li>
-</ul>
-<hr />
-<h3 id="6-game-e2e-review-systemmd-waitforloadstate">誤り 6: game-e2e-review-system.md — テスト分離戦略サンプルコードの <code>waitForLoadState</code><a class="headerlink" href="#6-game-e2e-review-systemmd-waitforloadstate" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>（「テスト分離戦略」コードスニペット内）:
-  <div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">needsNavigation</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="nx">getAppUrl</span><span class="p">(</span><span class="nx">APP</span><span class="p">));</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForLoadState</span><span class="p">(</span><span class="s2">&quot;networkidle&quot;</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></li>
-<li><strong>実際の動作</strong>: 知見 35a で「<code>waitForLoadState("networkidle")</code> は marimo WebSocket 常時接続のため永遠に到達しない」と明記されているが、同ドキュメント内の設計思想セクションのサンプルコードには <code>"networkidle"</code> がそのまま残っている。実際の <code>helpers.ts</code> では <code>"networkidle"</code> は一切使用されず <code>"load"</code> を使用している。</li>
-<li><strong>修正案</strong>: サンプルコード内の <code>waitForLoadState("networkidle")</code> を <code>waitForLoadState("load")</code> に修正する（知見 35a との整合性確保）。</li>
-</ul>
-<hr />
-<h2 id="_4">曖昧・不足している記述<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<h3 id="1-game-setup-skillmd-port-27192723">不足 1: game-setup SKILL.md — port 2719〜2723 の起動要否<a class="headerlink" href="#1-game-setup-skillmd-port-27192723" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>: 手順 5 で「port 2718 に加えて 2719〜2724 のサーバーも使用する」「port 2724 だけは手動起動が必要なことが多い」と記載。</li>
-<li><strong>問題点</strong>: port 2719〜2723 を手動起動すべきかどうかの判断基準が不明確。<code>playwright.config.ts</code> の <code>webServer</code> に自動起動設定があるのか手動が必要なのかの区別が書かれていない。</li>
-<li><strong>修正案</strong>: 「2719〜2723 は Playwright が自動起動するため手動操作不要」または「2719〜2723 も確認が必要な場合は <code>playwright.config.ts</code> の <code>webServer</code> 設定を参照」と明記する。</li>
-</ul>
-<h3 id="2-game-play-skillmd-sandbox_003">不足 2: game-play SKILL.md — SANDBOX_003 の発火条件<a class="headerlink" href="#2-game-play-skillmd-sandbox_003" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>: 「スキル発火タイミング」セクションに SANDBOX_003 の条件記載なし。</li>
-<li><strong>実際の実装</strong> (<code>game_setup.py</code> の <code>trades()</code> 関数):
-  <div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="s2">&quot;SANDBOX_002&quot;</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
-    <span class="n">emit_skill</span><span class="p">(</span><span class="s2">&quot;SANDBOX_003&quot;</span><span class="p">)</span>
-</code></pre></div>
-  <code>bt.buy()</code> による SANDBOX_002 完了後に <code>bt.trades()</code> を呼ぶことが必須。</li>
-<li><strong>修正案</strong>: 「SANDBOX_003 は <code>bt.trades()</code> 実行かつ SANDBOX_002 完了済みで発火（<code>bt.buy()</code> 後に呼ぶこと）」を追記する。</li>
-</ul>
-<h3 id="3-game-play-skillmd-guard-validation">不足 3: game-play SKILL.md — guard-validation テストスペックの存在<a class="headerlink" href="#3-game-play-skillmd-guard-validation" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>: 注意事項に <code>auto_instantiate = true</code> や接続関連の知見が記載されているが <code>guard-validation.spec.ts</code> への言及がない。</li>
-<li><strong>問題点</strong>: プレイログで <code>guard-validation.spec.ts</code> 全 3 件が失敗しており、ガード機能（<code>buy()</code> / <code>sell()</code> の警告 callout）の期待動作がテストされているが SKILL.md には未記載。</li>
-<li><strong>修正案</strong>: 注意事項に「<code>guard-validation.spec.ts</code> はガード警告メッセージ（<code>callout</code>）のテキスト一致を検証する。テキストが変更された場合はテストも更新が必要」を追記する。</li>
-</ul>
-<h3 id="4-game-e2e-review-systemmd">不足 4: game-e2e-review-system.md — ファイル構成に新規スペック未記載<a class="headerlink" href="#4-game-e2e-review-systemmd" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>: <code>frontend/e2e-tests/game/</code> のファイルリストに <code>data.spec.ts</code>、<code>guard-validation.spec.ts</code>、<code>backcast-integration.spec.ts</code> が含まれていない。</li>
-<li><strong>実際の状態</strong>: プレイログによれば上記 3 ファイルが存在しテストが実行されている。</li>
-<li><strong>修正案</strong>: ファイル構成リストに 3 ファイルを追加する（用途の説明も含めて）。</li>
-</ul>
-<h3 id="5-backcast-game-playmd">不足 5: backcast-game-play.md — 最新テスト結果の期待値が旧状態<a class="headerlink" href="#5-backcast-game-playmd" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>記載内容</strong>: 全スイート実行時の目安が「75 passed / 5 skipped」（backcast-integration.spec.ts 追加前の値）のみ。</li>
-<li><strong>問題点</strong>: フルランで現在 83 テストが実行されること、<code>guard-validation.spec.ts</code> はガード機能が未実装のため 3 件が常時失敗する既知状態であることが記載されていない。</li>
-<li><strong>修正案</strong>: 「既知の失敗テスト（guard-validation.spec.ts 3件：ガード機能未実装）を除いた期待値は最新の <code>game-e2e-review-system.md</code> を参照」という形式で最新実態を反映する。</li>
-</ul>
-<hr />
-<h2 id="_5">正確であることを確認した項目<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<ol>
-<li>
-<p><strong>game-setup SKILL.md のコピー手順</strong>: backcast.py・関連モジュール・<code>layouts/backcast.grid.json</code> の全ファイルコピーコマンドが記載されており、game-e2e-review-system.md「完了（2026-02-21 backcast.py ファイル不在バグ修正セッション）」の内容と一致。</p>
-</li>
-<li>
-<p><strong>game-setup SKILL.md の <code>MSYS_NO_PATHCONV=1</code> 説明</strong>: port 2724 起動コマンドの <code>MSYS_NO_PATHCONV=1</code> フラグの説明（Git Bash が <code>/foo</code> を Windows パスに変換する問題）が正確で、プレイログ記載の知見と一致している。</p>
-</li>
-<li>
-<p><strong>game-play SKILL.md のスキル発火順序（方法B: 手動操作）</strong>: <code>SANDBOX_001 → 002 → 003 → 004 → 005 → 006 → BRIDGE_001 → 002 → 003</code> の順序は <code>game_setup.py</code> の実装と <code>backcast-integration.spec.ts</code> の完全プレイフロー（全 6 テスト PASS）と一致している。</p>
-</li>
-<li>
-<p><strong>game-play SKILL.md の <code>openSkillTreePanel()</code> / <code>runNewCellInGrid()</code> ヘルパー名</strong>: 実際の <code>helpers.ts</code> に同名の関数が存在し、説明と実装が一致している。</p>
-</li>
-<li>
-<p><strong>game-setup SKILL.md のトラブルシューティング表</strong>: <code>ModuleNotFoundError: BackcastPro</code> の解決策として <code>export PYTHONPATH="/d/Documents/BackcastPro:$PYTHONPATH"</code> が記載されており、プロジェクト構造（<code>d:\Documents\BackcastPro</code>）と一致している。</p>
-</li>
-<li>
-<p><strong>skill-data.ts のスキル総数</strong>: プレイログ・SKILL.md・ドキュメント全体で「59 スキル」と記載されており正確。</p>
-</li>
-<li>
-<p><strong>game_setup.py のガードロジック実装</strong>: <code>buy()</code> に「まず <code>bt.chart('7203')</code> でチャートを表示してください」callout、<code>sell()</code> に「保有中の株がありません」callout が実装済みであり、backcast-game-play.md の操作コマンド説明と対応している。ガード機能は実装済み。</p>
-</li>
-<li>
-<p><strong>game-play SKILL.md の <code>waitForLoadState("load")</code> 記述</strong>: 知見 35a と一致しており正確。</p>
-</li>
-<li>
-<p><strong>backcast-game-play.md のスキルツリー前提条件チェーン</strong>: SANDBOX_003・SANDBOX_004 はともに SANDBOX_002 を前提とし、SANDBOX_005 は SANDBOX_003・SANDBOX_004 の両方を前提とする記述が <code>skill-data.ts</code> の <code>prerequisites</code> 配列と一致。</p>
-</li>
-<li>
-<p><strong>Issue ステータス（4件の未対応 Issue）</strong>: <code>e2e-test-missing-fail002-skill.md</code>、<code>e2e-test-missing-fullrun-contamination.md</code>、<code>e2e-test-missing-reconnect-skill-event.md</code>、<code>e2e-test-missing-step-end-hud-status.md</code> はいずれも「⬜ 未対応」と記載されており、対応するテストコードが存在しないことを確認した。ステータス表記は正確で更新不要。</p>
-</li>
-<li>
-<p><strong>game-setup SKILL.md の pnpm dev コマンド</strong>: <code>cd /d/Documents/marimo &amp;&amp; pnpm dev</code> でバックエンド port 2718・フロントエンド port 3000 という記述は、プレイログの実行環境と一致している。</p>
-</li>
-<li>
-<p><strong>helpers.ts の主要ヘルパー関数名</strong>: <code>ensureConnected</code>、<code>dismissReconnectedBanner</code>、<code>emitSkillEvent</code>、<code>emitSkillEventViaHTML</code>、<code>emitSkillViaPython</code>、<code>openSkillTreePanel</code>、<code>getSkillStatus</code>、<code>waitForSkillStatus</code>、<code>getProgressText</code>、<code>getCompletedCount</code>、<code>runNewCell</code>、<code>runNewCellInGrid</code>、<code>resetGameProgress</code> — いずれも実際に <code>helpers.ts</code> に定義されており、ドキュメントの参照と一致している。</p>
-</li>
-</ol>
-<hr />
-<h2 id="issue">補足: Issue ステータス更新要否<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
+<strong>レビュアー</strong>: game-manual-review エージェント
+<strong>入力</strong>: <code>development_docs/game-play-reports/play-log-2026-02-21.md</code></p>
+<h2 id="_1">検証対象ドキュメント<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
+<th>#</th>
 <th>ファイル</th>
-<th>現ステータス</th>
-<th>実装状況</th>
-<th>要更新</th>
+<th>概要</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>e2e-test-missing-fail002-skill.md</code></td>
-<td>⬜ 未対応</td>
-<td>未実装</td>
-<td>不要</td>
+<td>1</td>
+<td><code>development_docs/game/game-e2e-review-system.md</code></td>
+<td>E2E レビューシステム全体ドキュメント（知見 1-40、設計思想、セレクター早見表）</td>
 </tr>
 <tr>
-<td><code>e2e-test-missing-fullrun-contamination.md</code></td>
-<td>⬜ 未対応</td>
-<td>未実装</td>
-<td>不要</td>
+<td>2</td>
+<td><code>.claude/skills/game-play/SKILL.md</code></td>
+<td>ゲームプレイスキル定義（実行方法・期待結果・注意事項）</td>
 </tr>
 <tr>
-<td><code>e2e-test-missing-reconnect-skill-event.md</code></td>
-<td>⬜ 未対応</td>
-<td>未実装</td>
-<td>不要</td>
+<td>3</td>
+<td><code>.claude/skills/game-setup/SKILL.md</code></td>
+<td>ゲーム環境整備スキル定義（ファイル配置・サーバー起動手順）</td>
 </tr>
 <tr>
-<td><code>e2e-test-missing-step-end-hud-status.md</code></td>
-<td>⬜ 未対応</td>
-<td>未実装</td>
-<td>不要</td>
+<td>4</td>
+<td><code>development_docs/plans/backcast-game-play.md</code></td>
+<td>Skill Orchestration マニュアル（全体アーキテクチャ・共通情報）</td>
 </tr>
 </tbody>
 </table>
-<p>4 件すべての Issue は「未対応」と正しく記録されており、修正は不要。</p>
+<hr />
+<h2 id="_2">発見事項<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="1-game-e2e-review-systemmd">1. game-e2e-review-system.md ヘッダーのテスト数・スイート数が古い<a class="headerlink" href="#1-game-e2e-review-systemmd" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>development_docs/game/game-e2e-review-system.md</code> 行 3</li>
+<li><strong>該当箇所</strong>: <code>**ステータス**: 全 9 スイート パス済み（75 passed / 5 skipped / 0 failed）</code></li>
+<li><strong>問題</strong>: プレイログの結果は <strong>10 スイート</strong>（backcast-integration, bridge, data, guard-validation, integration, persistence, sandbox, setup, ui, z-python-e2e）で <strong>69 passed / 9 failed / 5 skipped</strong>（合計 83 テスト）。ヘッダーの「9 スイート」「75 passed」「0 failed」はいずれも古い。新規追加された <code>data.spec.ts</code>（11 テスト）、<code>guard-validation.spec.ts</code>（3 テスト）、<code>setup.spec.ts</code>（10 テスト）が反映されていない。</li>
+<li><strong>推奨修正</strong>: ヘッダーを <code>全 10 スイート（69 passed / 9 failed / 5 skipped — guard-validation 3件・integration 5件・bridge/persistence 各1件が既知失敗）</code> に更新する。安定通過時は <code>75 passed / 5 skipped</code> ではなく最新のテスト総数に基づく値を記載する。</li>
+<li><strong>重要度</strong>: High</li>
+</ul>
+<h3 id="2-game-e2e-review-systemmd-4">2. game-e2e-review-system.md ファイル構成リストに新規スペック 4 件が未記載<a class="headerlink" href="#2-game-e2e-review-systemmd-4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>development_docs/game/game-e2e-review-system.md</code> 行 190-198</li>
+<li><strong>該当箇所</strong>:
+  <div class="highlight"><pre><span></span><code>frontend/e2e-tests/game/
+├── helpers.ts
+├── constants.ts
+├── sandbox.spec.ts
+├── ui.spec.ts
+├── persistence.spec.ts
+├── bridge.spec.ts
+├── integration.spec.ts
+└── z-python-e2e.spec.ts
+</code></pre></div></li>
+<li><strong>問題</strong>: 実際には <code>backcast-integration.spec.ts</code>、<code>data.spec.ts</code>、<code>guard-validation.spec.ts</code>、<code>setup.spec.ts</code> の 4 ファイルも存在し、プレイログで全てテスト結果が記録されている。ファイル構成リストが 6 spec + 2 support のみで不完全。</li>
+<li><strong>推奨修正</strong>: 以下を追記する:
+  <div class="highlight"><pre><span></span><code>├── backcast-integration.spec.ts  # backcast.py 統合テスト（6ケース）
+├── data.spec.ts                  # データ取得トラック DATA_001〜006（11ケース）
+├── guard-validation.spec.ts      # buy()/sell() ガード処理テスト（3ケース）
+├── setup.spec.ts                 # セットアップトラック SETUP_001〜005（10ケース）
+</code></pre></div></li>
+<li><strong>重要度</strong>: High</li>
+</ul>
+<h3 id="3-game-e2e-review-systemmd-4243">3. game-e2e-review-system.md 知見番号 42・43 の参照が本文に未存在<a class="headerlink" href="#3-game-e2e-review-systemmd-4243" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>development_docs/game/game-e2e-review-system.md</code> 行 108, 110, 116</li>
+<li><strong>該当箇所</strong>:</li>
+<li><code>（知見 42）</code> — backcast.py ファイル不在バグ修正セッション内で 2 回参照</li>
+<li><code>（知見 43）</code> — SKILL.md パスバグ修正セッション内で 1 回参照</li>
+<li><strong>問題</strong>: 知見の本文は <code>### 38.</code>（backcast.py 不在）、<code>### 39.</code>（layouts 不在）、<code>### 40.</code>（SKILL.md パスバグ）までしか存在しない。知見 41/42/43 の見出しは存在しない。完了セクションの「知見 42」は実際には知見 38/39 に、「知見 43」は知見 40 に対応すると推定される。番号の不整合がある。</li>
+<li><strong>推奨修正</strong>: 完了セクションの <code>（知見 42）</code> を <code>（知見 38・39）</code> に、<code>（知見 43）</code> を <code>（知見 40）</code> に修正する。または知見 41-43 を新たに追記して番号を一致させる。</li>
+<li><strong>重要度</strong>: Medium</li>
+</ul>
+<h3 id="4-game-e2e-review-systemmd-34-35">4. game-e2e-review-system.md 知見の掲載順序が入れ替わっている（34 と 35）<a class="headerlink" href="#4-game-e2e-review-systemmd-34-35" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>development_docs/game/game-e2e-review-system.md</code> 行 998, 1044</li>
+<li><strong>該当箇所</strong>: <code>### 35.</code>（行 998）の後に <code>### 34.</code>（行 1044）が掲載されている</li>
+<li><strong>問題</strong>: 知見 35 が知見 34 より先に掲載されており、番号順になっていない。読者が知見番号で検索した際に混乱する。</li>
+<li><strong>推奨修正</strong>: 知見 34 と 35 の掲載順序を入れ替え、番号昇順に統一する。</li>
+<li><strong>重要度</strong>: Low</li>
+</ul>
+<h3 id="5-game-e2e-review-systemmd-networkidle">5. game-e2e-review-system.md テスト分離戦略のサンプルコードに <code>"networkidle"</code> が残存<a class="headerlink" href="#5-game-e2e-review-systemmd-networkidle" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>development_docs/game/game-e2e-review-system.md</code> 行 335-336</li>
+<li><strong>該当箇所</strong>:
+  <div class="highlight"><pre><span></span><code><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForLoadState</span><span class="p">(</span><span class="s2">&quot;networkidle&quot;</span><span class="p">);</span>
+</code></pre></div></li>
+<li><strong>問題</strong>: 知見 35a で「<code>waitForLoadState("networkidle")</code> は marimo の WebSocket 常時接続のため永遠に到達しない」と明記されている。しかし同ドキュメント内の「テスト分離戦略」セクションのサンプルコードには <code>"networkidle"</code> がそのまま残っている。実際の全 spec ファイルでは <code>"load"</code> が使用されており、サンプルコードが実態と矛盾している。</li>
+<li><strong>推奨修正</strong>: <code>await page.waitForLoadState("networkidle");</code> を <code>await page.waitForLoadState("load");</code> に修正する。</li>
+<li><strong>重要度</strong>: Medium</li>
+</ul>
+<h3 id="6-game-play-skillmd">6. game-play SKILL.md の全スイート所要時間が大幅に過大<a class="headerlink" href="#6-game-play-skillmd" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>.claude/skills/game-play/SKILL.md</code> 行 40</li>
+<li><strong>該当箇所</strong>: <code>全スイート実行（**所要時間: 約1.2時間**）</code></li>
+<li><strong>問題</strong>: プレイログの実行時間は <strong>18.1 分</strong>。game-e2e-review-system.md の過去実績でも最大 16.4 分。「約 1.2 時間」は実態の約 4 倍であり、スキル実行者に不要な待機を強いるか、タイムアウト設定を過大にする原因になる。</li>
+<li><strong>推奨修正</strong>: <code>**所要時間: 約20分**</code> に修正する（マシン性能によるばらつきを考慮し余裕を持たせた値）。</li>
+<li><strong>重要度</strong>: Medium</li>
+</ul>
+<h3 id="7-game-play-skillmd-75-passed-5-skipped">7. game-play SKILL.md の期待結果「75 passed / 5 skipped」が現状と不一致<a class="headerlink" href="#7-game-play-skillmd-75-passed-5-skipped" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>.claude/skills/game-play/SKILL.md</code> 行 46</li>
+<li><strong>該当箇所</strong>: <code>&gt; **期待結果**: 全スイート実行時は 75 passed / 5 skipped（</code>backcast-integration.spec.ts<code>の 2 skipped 含む）を目安とする。</code></li>
+<li><strong>問題</strong>:</li>
+<li>現在のテスト総数は <strong>83</strong>（regular 78 + fixme 5）で、75 は古い値。</li>
+<li><code>backcast-integration.spec.ts の 2 skipped</code> という注釈は、プレイログでは backcast-integration が 6 passed / 0 skipped と記録されている。<code>test.fixme()</code> 2 件は Playwright で "skipped" と表示されるはずだが、プレイログの記載と一致しない。</li>
+<li>現状 9 件が failed（guard-validation 2件、integration 5件、bridge 1件、persistence 1件）であり「0 failed」は期待できない状態。</li>
+<li><strong>推奨修正</strong>: 期待結果を「全スイート実行時はテスト総数約 83 件。既知の不安定テスト（integration.spec.ts 5件、guard-validation.spec.ts 2件等）を除き 69+ passed を目安とする。最新の詳細は <code>game-e2e-review-system.md</code> を参照」に更新する。</li>
+<li><strong>重要度</strong>: High</li>
+</ul>
+<h3 id="8-backcast-game-playmd">8. backcast-game-play.md の知見番号範囲が古い<a class="headerlink" href="#8-backcast-game-playmd" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>development_docs/plans/backcast-game-play.md</code> 行 195</li>
+<li><strong>該当箇所</strong>: <code>| development_docs/game/game-e2e-review-system.md | E2E テスト知見集（知見 1〜35） |</code></li>
+<li><strong>問題</strong>: 実際の知見は 1-40 まで存在する。知見 36（BroadcastChannel イベント抑制）、37（UX プレイテスト問題）、38-39（backcast.py/layouts 不在症状）、40（SKILL.md パスバグ）が含まれていない。</li>
+<li><strong>推奨修正</strong>: <code>（知見 1〜40）</code> に更新する。</li>
+<li><strong>重要度</strong>: Medium</li>
+</ul>
+<h3 id="9-game-play-skillmd-35c">9. game-play SKILL.md の知見 35c 参照が存在しない<a class="headerlink" href="#9-game-play-skillmd-35c" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>.claude/skills/game-play/SKILL.md</code> 行 123</li>
+<li><strong>該当箇所</strong>: <code>page.reload()</code> は通常使わない（WebSocket 切断が起きる）。ただし ... 接続安定化のために使用する（知見35c）</li>
+<li><strong>問題</strong>: <code>game-e2e-review-system.md</code> の知見 35 にはサブ項目 a（networkidle タイムアウト）と b（再接続スキル再発火）のみが存在し、「35c」は付番されていない。<code>page.reload()</code> のリカバリー利用に関する記述は知見 35 の本文に含まれるが、明示的なサブ番号は付与されていない。</li>
+<li><strong>推奨修正</strong>: <code>（知見35c）</code> を <code>（知見35）</code> に修正する。</li>
+<li><strong>重要度</strong>: Low</li>
+</ul>
+<h3 id="10-game-play-skillmd-bridge_002">10. game-play SKILL.md の BRIDGE_002 操作コマンド引数が固定値<a class="headerlink" href="#10-game-play-skillmd-bridge_002" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>.claude/skills/game-play/SKILL.md</code> 行 68</li>
+<li><strong>該当箇所</strong>: <code>| 8 | BRIDGE_002 | bt.get_stock_daily("7203") | 株価データ取得 + スキル発火 |</code></li>
+<li><strong>問題</strong>: <code>skill-data.ts</code> の BRIDGE_002 の <code>helpContent</code> では <code>get_stock_daily("6758")</code> （ソニー）を例示しており、「別銘柄を自分で取得する」が BRIDGE_002 の趣旨。トヨタ（7203）を固定値で記載するのはスキルの教育目的と矛盾する。</li>
+<li><strong>推奨修正</strong>: <code>bt.get_stock_daily("7203")</code> を <code>bt.get_stock_daily(code)</code> に変更し、備考に「例: "6758" など SANDBOX で使った銘柄以外を推奨」と追記する。</li>
+<li><strong>重要度</strong>: Low</li>
+</ul>
+<h3 id="11">11. プレイログのテストスイート数が実際と不一致<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>development_docs/game-play-reports/play-log-2026-02-21.md</code> 行 9</li>
+<li><strong>該当箇所</strong>: <code>テストスイート数: 11</code></li>
+<li><strong>問題</strong>: プレイログのスイート別結果テーブルには <strong>10 行</strong>しかない（backcast-integration, bridge, data, guard-validation, integration, persistence, sandbox, setup, ui, z-python-e2e）。実際の spec ファイル数も 10。「11」はカウントミス。</li>
+<li><strong>推奨修正</strong>: <code>テストスイート数: 10</code> に修正する。</li>
+<li><strong>重要度</strong>: Medium</li>
+</ul>
+<h3 id="12-uispects-skipped">12. プレイログ ui.spec.ts の skipped 数がテーブルとサマリーで不整合の可能性<a class="headerlink" href="#12-uispects-skipped" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ファイル</strong>: <code>development_docs/game-play-reports/play-log-2026-02-21.md</code> 行 7, 23</li>
+<li><strong>該当箇所</strong>: サマリー <code>5 skipped</code>、ui.spec.ts <code>skipped: 3</code></li>
+<li><strong>問題</strong>: テーブルで skipped が記載されているのは ui.spec.ts の 3 件のみ。合計が 5 になるには残り 2 件の skipped がどこかにあるはずだが、テーブル上の他スイートは全て skipped 0。backcast-integration.spec.ts には <code>test.fixme()</code> が 2 件あり、Playwright は fixme を skipped としてカウントするため、backcast-integration の行は「4 passed / 0 failed / 2 skipped」であるべき（テーブルの「6 passed / 0 failed / 0 skipped」は誤り）。</li>
+<li><strong>推奨修正</strong>: backcast-integration.spec.ts の行を <code>passed: 4, failed: 0, skipped: 2</code> に修正する。これでサマリーの 5 skipped（ui 3 + backcast-integration 2）と整合する。</li>
+<li><strong>重要度</strong>: Medium</li>
+</ul>
+<hr />
+<h2 id="_3">サマリー<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>検証ドキュメント数: 4（+ プレイログ自体の検証）</li>
+<li>発見事項: <strong>12 件</strong>（High: 3, Medium: 6, Low: 3）</li>
+</ul>
+<h3 id="high">High 事項（即時修正推奨）<a class="headerlink" href="#high" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>対象</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>game-e2e-review-system.md ヘッダー</td>
+<td>テスト数・スイート数が古い（9 スイート/75 passed → 10 スイート/83 テスト）</td>
+</tr>
+<tr>
+<td>2</td>
+<td>game-e2e-review-system.md ファイル構成</td>
+<td>新規 spec 4 件（data, guard-validation, setup, backcast-integration）が未記載</td>
+</tr>
+<tr>
+<td>7</td>
+<td>game-play SKILL.md 期待結果</td>
+<td>「75 passed / 5 skipped」が現状と乖離。テスト総数 83、既知失敗 9 件あり</td>
+</tr>
+</tbody>
+</table>
+<h3 id="medium">Medium 事項<a class="headerlink" href="#medium" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>対象</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>game-e2e-review-system.md 知見番号</td>
+<td>完了セクションで「知見 42/43」を参照するが本文は知見 40 まで</td>
+</tr>
+<tr>
+<td>5</td>
+<td>game-e2e-review-system.md サンプルコード</td>
+<td>テスト分離戦略の <code>"networkidle"</code> が知見 35a と矛盾</td>
+</tr>
+<tr>
+<td>6</td>
+<td>game-play SKILL.md 所要時間</td>
+<td>「約1.2時間」→ 実測 18 分。約 4 倍の過大見積もり</td>
+</tr>
+<tr>
+<td>8</td>
+<td>backcast-game-play.md 知見範囲</td>
+<td>「知見 1-35」→ 実際は 1-40</td>
+</tr>
+<tr>
+<td>11</td>
+<td>プレイログ スイート数</td>
+<td>「11」→ 実際は 10</td>
+</tr>
+<tr>
+<td>12</td>
+<td>プレイログ backcast-integration</td>
+<td>passed/skipped カウントがテーブルとサマリーで不整合</td>
+</tr>
+</tbody>
+</table>
+<h3 id="low">Low 事項<a class="headerlink" href="#low" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>対象</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4</td>
+<td>game-e2e-review-system.md 知見順序</td>
+<td>知見 34 と 35 の掲載順が入れ替わっている</td>
+</tr>
+<tr>
+<td>9</td>
+<td>game-play SKILL.md 知見参照</td>
+<td>「知見35c」は存在しない。「知見35」が正しい</td>
+</tr>
+<tr>
+<td>10</td>
+<td>game-play SKILL.md BRIDGE_002</td>
+<td>固定値 "7203" ではなく可変引数 <code>code</code> が教育目的に適切</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_4">正確であることを確認した項目<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>game-setup SKILL.md のコピー手順</strong>: backcast.py・関連モジュール・<code>layouts/backcast.grid.json</code> の全ファイルコピーコマンドが記載されており、game-e2e-review-system.md の完了セクション内容と一致。</li>
+<li><strong>game-setup SKILL.md の <code>MSYS_NO_PATHCONV=1</code> 説明</strong>: port 2724 起動コマンドの説明が正確。</li>
+<li><strong>game-play SKILL.md のスキル発火順序（方法B: 手動操作）</strong>: SANDBOX_001-006 → BRIDGE_001-003 の順序が <code>game_setup.py</code> 実装と一致。</li>
+<li><strong>game-play SKILL.md の <code>waitForLoadState("load")</code> 記述</strong>: 知見 35a と一致しており正確。全 spec ファイルでも <code>"load"</code> を使用。</li>
+<li><strong>backcast-game-play.md のスキルツリー前提条件チェーン</strong>: <code>skill-data.ts</code> の <code>prerequisites</code> 配列と一致。</li>
+<li><strong>skill-data.ts のスキル総数 59</strong>: プレイログ・SKILL.md・ドキュメント全体で統一されており正確。</li>
+<li><strong>game-setup SKILL.md のトラブルシューティング表</strong>: 6 項目全てが実際の環境・知見と一致。</li>
+<li><strong>helpers.ts の主要ヘルパー関数名</strong>: ドキュメント記載の全関数が実際に <code>helpers.ts</code> に定義されている。</li>
+<li><strong>backcast-game-play.md のマイルストーン報酬表</strong>: <code>skill-data.ts</code> の <code>milestones</code> 定義と一致。</li>
+</ol>
 
 
 

@@ -1273,6 +1273,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装試行記録
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#issue" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1284,7 +1295,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
         備考
@@ -1374,11 +1385,16 @@
 <span class="p">});</span>
 </code></pre></div>
 <p><strong>課題</strong>: 再接続タイミングとイベント発火の競合状態を E2E テストで制御するのが難しい。<code>waitForTimeout</code> 依存にならないよう状態ベース待機を使う必要がある。</p>
+<h2 id="_7">実装試行記録<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p><strong>試行日</strong>: 2026-02-21
+<strong>ブロッカー</strong>: WebSocket 切断→再接続のタイミング制御が E2E テストで困難。page.reload() でリカバリーされるが、切断中のバッファ蓄積→再接続後の再生という競合状態を安定的に再現できない。
+<strong>試行内容</strong>: persistence.spec.ts のリロードテストが類似シナリオを部分的にカバーしているが、BroadcastChannel バッファの再生を明示的に検証するテストは実装困難。
+<strong>推奨</strong>: replayBufferedMessages() のユニットテスト（skill-complete-handler.test.ts）で代替カバーし、E2E は将来的な CI 改善時に検討。</p>
 <h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>reconnect-skill-event-lost.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
 </ul>
-<h2 id="_7">備考<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h2 id="_8">備考<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
 <p>UX プレイテストレポート（<code>ux-playtest-report.md</code>）では P1 問題として記録されているが、「まだ未解決」とも記載されている（<code>development_docs/game/game-e2e-review-system.md</code> の未完了セクション参照）。修正実装の有効性を E2E テストで確認することが重要。</p>
 
 

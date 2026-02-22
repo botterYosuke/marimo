@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない - marimo Developer Docs</title>
+        <title>Skills Improvement Summary - 2026-02-21 - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-hud-finished-e2e" class="md-skip">
+        <a href="#skills-improvement-summary-2026-02-21" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない
+              Skills Improvement Summary - 2026-02-21
             
           </span>
         </div>
@@ -1210,7 +1210,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        概要
+        実行メトリクス
       
     </span>
   </a>
@@ -1221,10 +1221,71 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        背景
+        パターン分析
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="パターン分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-guard-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        パターン 1: guard-validation テストの構造的不安定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-suppressbroadcast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        パターン 2: suppressBroadcast ウィンドウの知識不足
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-vs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        パターン 3: フルラン vs 単体実行の乖離
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-fun-review-p1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        パターン 4: fun-review の P1 とバグ修正の重複
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-e2e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        パターン 5: E2E テスト追加の困難さ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1232,54 +1293,49 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        期待される動作
+        改善提案サマリー
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="改善提案サマリー">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P1（次回実行で必須）
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#p2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        対象ファイル
+        P2（推奨）
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#p3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装案
+        P3（将来）
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        実装試行記録
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#issue" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        関連 Issue
-      
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1300,70 +1356,151 @@
 
 
 
-<h1 id="issue-hud-finished-e2e">Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない<a class="headerlink" href="#issue-hud-finished-e2e" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-21
-<strong>重要度</strong>: Medium
-<strong>カテゴリ</strong>: テストカバレッジ / UI
-<strong>ステータス</strong>: ⬜ 未対応</p>
-<hr />
-<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正（ゲーム終了後に HUD ステータスを "Trading" → "Finished" に変更）は実装済みだが、UI ラベルが正しく "Finished" になることを明示的に検証する E2E テストが存在しない。</p>
-<p><code>backcast-integration.spec.ts</code> の全テストは <code>bt.step()</code> の複数回実行を含むが、ゲーム終了（<code>step()</code> が <code>False</code> を返す状態）後の HUD ステータス表示を確認しているケースはない。</p>
-<h2 id="_2">背景<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正内容:
-- <code>step()</code> の戻り値が <code>False</code>（＝バックテスト終了）のとき、HUD ステータスを "Finished" に更新する
-- 修正前は終了後も "Trading" のまま表示されていた</p>
-<p>現在の <code>backcast-integration.spec.ts</code> は長期プレイフロー（ <code>bt.buy()</code> → <code>bt.step()</code> × N 回）を実行するが、<strong>ゲーム終了（全データ消化）後に "Finished" ラベルが表示されることを assert していない</strong>。</p>
-<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>以下のシナリオが E2E テストで検証されること:</p>
-<ol>
-<li><code>bt.step()</code> を繰り返しデータ末尾まで進める（または直接終了状態にする）</li>
-<li>HUD の status 要素が <code>"Finished"</code> を表示する</li>
-<li>"Trading" 文字列が残っていないことを確認する</li>
-</ol>
-<h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h1 id="skills-improvement-summary-2026-02-21">Skills Improvement Summary - 2026-02-21<a class="headerlink" href="#skills-improvement-summary-2026-02-21" title="Permanent link">&para;</a></h1>
+<p><strong>分析元</strong>: game-master-orchestrate 全 7 ステップの実行結果</p>
+<h2 id="_1">実行メトリクス<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>ファイル</th>
-<th>対応箇所</th>
+<th>ステップ</th>
+<th>スキル</th>
+<th>成果</th>
+<th>問題点</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
-<td>新規テストケース追加先</td>
+<td>Step 1</td>
+<td>game-orchestrate</td>
+<td>69/83 passed → play-log + 3 reports</td>
+<td>Reconnected バナー頻発</td>
 </tr>
 <tr>
-<td><code>frontend/src/components/backtest-hud.tsx</code></td>
-<td>ステータスラベルの実装箇所</td>
+<td>Step 2</td>
+<td>game-e2e-add-coverage</td>
+<td>8 tests added, 2 issues ✅</td>
+<td>2 issues blocked (E2E 実装困難)</td>
 </tr>
 <tr>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-<td><code>step()</code> 終了判定箇所</td>
+<td>Step 3</td>
+<td>bug-fix-orchestrate</td>
+<td>3/5 BUGs fixed</td>
+<td>BUG-002/003 blocked (guard-validation 不安定)</td>
+</tr>
+<tr>
+<td>Step 4</td>
+<td>game-e2e (validation)</td>
+<td>86/91 passed</td>
+<td>完全通過</td>
+</tr>
+<tr>
+<td>Step 5</td>
+<td>game-improve-orchestrate</td>
+<td>3 P2 improvements</td>
+<td>P2-3 未着手</td>
+</tr>
+<tr>
+<td>Step 6</td>
+<td>game-e2e (final)</td>
+<td>85/91 passed</td>
+<td>1 flaky (-1 vs Step 4)</td>
+</tr>
+<tr>
+<td>Step 7</td>
+<td>skills-improve</td>
+<td>本レポート</td>
+<td>-</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// backcast-integration.spec.ts に追加</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;ゲーム終了後に HUD ステータスが Finished になる&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// データを末尾まで step() する</span>
-<span class="w">  </span><span class="c1">// 最後の step() が False を返した後</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">statusEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;hud-status&quot;]&#39;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Finished&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">not</span><span class="p">.</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Trading&quot;</span><span class="p">);</span>
-<span class="p">});</span>
-</code></pre></div>
-<p><code>data-testid="hud-status"</code> が <code>backtest-hud.tsx</code> に存在しない場合は追加が必要。</p>
-<h2 id="_6">実装試行記録<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p><strong>試行日</strong>: 2026-02-21
-<strong>ブロッカー</strong>: <code>bt.step()</code> をデータ末尾まで進めるには backcast.py + BackcastPro エンジン + 実株価データが必要。E2E テスト環境（game_test.py）ではゲームエンジンが未初期化。backcast-integration.spec.ts は backcast.py を使うが、全データ消化（数百〜数千 step）は時間的に非現実的。
-<strong>試行内容</strong>: data-testid="hud-status" の存在確認を試みたが、backtest-hud.tsx が game_test.py 上では render されないため検証不可。
-<strong>推奨</strong>: backcast-integration.spec.ts で短いデータセット（10ステップ程度）を使った終了テストを追加する。要: テスト用短縮データの準備。</p>
-<h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>step-end-status-label-wrong.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
-</ul>
+<h2 id="_2">パターン分析<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="1-guard-validation">パターン 1: guard-validation テストの構造的不安定<a class="headerlink" href="#1-guard-validation" title="Permanent link">&para;</a></h3>
+<p><strong>観察</strong>: BUG-002/003 の修正が 3 回のリトライ後もテストを通過させられなかった。<code>runNewCellInGrid</code> + Python コード注入パターンはカーネル状態に強く依存し、Reconnected バナーの頻発と相まって非決定的な動作になる。</p>
+<p><strong>推奨 (P1)</strong>: guard-validation.spec.ts のテスト戦略を <code>__testCompleteSkill</code> フック経由に再設計するスキル改善項目を game-e2e スキルに追加。</p>
+<h3 id="2-suppressbroadcast">パターン 2: suppressBroadcast ウィンドウの知識不足<a class="headerlink" href="#2-suppressbroadcast" title="Permanent link">&para;</a></h3>
+<p><strong>観察</strong>: BUG-004 の根本原因は、<code>__testInjectBroadcastHTML</code> が <code>suppressBroadcast</code> ウィンドウ内で実行されることだった。この相互作用はドキュメント化されておらず、新しいテスト作成者が同じ罠にはまる可能性が高い。</p>
+<p><strong>推奨 (P1)</strong>: game-e2e-review-system.md に「知見 44: suppressBroadcast と __testInjectBroadcastHTML の相互作用」を追加。</p>
+<h3 id="3-vs">パターン 3: フルラン vs 単体実行の乖離<a class="headerlink" href="#3-vs" title="Permanent link">&para;</a></h3>
+<p><strong>観察</strong>: 単体実行では通過するが、フルランで失敗するテストが複数存在する（fullrun-regression issue）。スペック間のカーネル状態リセットが不完全。</p>
+<p><strong>推奨 (P2)</strong>: game-setup スキルに「フルラン前のカーネル完全リセット」手順を追加。各スペックの beforeEach を強化する指針を game-e2e スキルに追加。</p>
+<h3 id="4-fun-review-p1">パターン 4: fun-review の P1 とバグ修正の重複<a class="headerlink" href="#4-fun-review-p1" title="Permanent link">&para;</a></h3>
+<p><strong>観察</strong>: fun-review が P1 として挙げた「進捗永続化」「HTML パイプライン」は、bug-fix-orchestrate が修正した BUG-005/BUG-004 と完全に重複していた。バグ修正が改善提案を先取りする形で効率的に解消された。</p>
+<p><strong>推奨 (P2)</strong>: game-master-orchestrate スキルの Step 5 (game-improve-orchestrate) で「P1 項目のバグ修正フェーズ解決済みチェック」を追加し、重複作業を防止。</p>
+<h3 id="5-e2e">パターン 5: E2E テスト追加の困難さ<a class="headerlink" href="#5-e2e" title="Permanent link">&para;</a></h3>
+<p><strong>観察</strong>: <code>e2e-test-missing-reconnect-skill-event</code> と <code>e2e-test-missing-step-end-hud-status</code> は E2E テスト実装が困難で blocked のまま。WebSocket 再接続タイミングやゲーム終了条件の制御が E2E テストでは非現実的。</p>
+<p><strong>推奨 (P2)</strong>: game-e2e-add-coverage スキルに「E2E 実装困難な場合はユニットテスト代替を検討」のガイダンスを追加。</p>
+<h2 id="_3">改善提案サマリー<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="p1">P1（次回実行で必須）<a class="headerlink" href="#p1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>対象スキル</th>
+<th>改善内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>game-e2e</td>
+<td>guard-validation テスト戦略の再設計ガイドライン追加</td>
+</tr>
+<tr>
+<td>2</td>
+<td>game-e2e-review-system.md</td>
+<td>知見 44: suppressBroadcast と テストフックの相互作用</td>
+</tr>
+</tbody>
+</table>
+<h3 id="p2">P2（推奨）<a class="headerlink" href="#p2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>対象スキル</th>
+<th>改善内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>game-setup</td>
+<td>フルラン前のカーネル完全リセット手順追加</td>
+</tr>
+<tr>
+<td>4</td>
+<td>game-master-orchestrate</td>
+<td>P1 項目のバグ修正フェーズ解決済みチェック</td>
+</tr>
+<tr>
+<td>5</td>
+<td>game-e2e-add-coverage</td>
+<td>ユニットテスト代替ガイダンス追加</td>
+</tr>
+</tbody>
+</table>
+<h3 id="p3">P3（将来）<a class="headerlink" href="#p3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>対象スキル</th>
+<th>改善内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6</td>
+<td>bug-fix-orchestrate</td>
+<td>BUG-002/003 のような複合問題の自動判別ロジック</td>
+</tr>
+<tr>
+<td>7</td>
+<td>game-fun-review</td>
+<td>テスト通過率変化を自動取得して v 更新を省略</td>
+</tr>
+</tbody>
+</table>
 
 
 

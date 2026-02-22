@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない - marimo Developer Docs</title>
+        <title>BUG-001: SANDBOX_006 完了後 BRIDGE_001 が unlocked にならない問題 - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-hud-finished-e2e" class="md-skip">
+        <a href="#bug-001-sandbox_006-bridge_001-unlocked" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない
+              BUG-001: SANDBOX_006 完了後 BRIDGE_001 が unlocked にならない問題
             
           </span>
         </div>
@@ -1210,7 +1210,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        概要
+        ステータス: 修正完了
       
     </span>
   </a>
@@ -1221,7 +1221,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        背景
+        問題
       
     </span>
   </a>
@@ -1232,10 +1232,49 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        期待される動作
+        根本原因
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="根本原因">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#progress_channel-playerprogressatom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        progress_channel による playerProgressAtom の上書き
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backcast-integrationspects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        backcast-integration.spec.ts で成功する理由
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bridgespects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bridge.spec.ts で失敗する理由
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1243,7 +1282,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        対象ファイル
+        修正内容
       
     </span>
   </a>
@@ -1254,7 +1293,7 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装案
+        修正ファイル
       
     </span>
   </a>
@@ -1265,7 +1304,7 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装試行記録
+        関連知見
       
     </span>
   </a>
@@ -1273,10 +1312,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#issue" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        関連 Issue
+        影響範囲
       
     </span>
   </a>
@@ -1300,70 +1339,72 @@
 
 
 
-<h1 id="issue-hud-finished-e2e">Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない<a class="headerlink" href="#issue-hud-finished-e2e" title="Permanent link">&para;</a></h1>
-<p><strong>作成日</strong>: 2026-02-21
-<strong>重要度</strong>: Medium
-<strong>カテゴリ</strong>: テストカバレッジ / UI
-<strong>ステータス</strong>: ⬜ 未対応</p>
-<hr />
-<h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正（ゲーム終了後に HUD ステータスを "Trading" → "Finished" に変更）は実装済みだが、UI ラベルが正しく "Finished" になることを明示的に検証する E2E テストが存在しない。</p>
-<p><code>backcast-integration.spec.ts</code> の全テストは <code>bt.step()</code> の複数回実行を含むが、ゲーム終了（<code>step()</code> が <code>False</code> を返す状態）後の HUD ステータス表示を確認しているケースはない。</p>
-<h2 id="_2">背景<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正内容:
-- <code>step()</code> の戻り値が <code>False</code>（＝バックテスト終了）のとき、HUD ステータスを "Finished" に更新する
-- 修正前は終了後も "Trading" のまま表示されていた</p>
-<p>現在の <code>backcast-integration.spec.ts</code> は長期プレイフロー（ <code>bt.buy()</code> → <code>bt.step()</code> × N 回）を実行するが、<strong>ゲーム終了（全データ消化）後に "Finished" ラベルが表示されることを assert していない</strong>。</p>
-<h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>以下のシナリオが E2E テストで検証されること:</p>
+<h1 id="bug-001-sandbox_006-bridge_001-unlocked">BUG-001: SANDBOX_006 完了後 BRIDGE_001 が unlocked にならない問題<a class="headerlink" href="#bug-001-sandbox_006-bridge_001-unlocked" title="Permanent link">&para;</a></h1>
+<h2 id="_1">ステータス: 修正完了<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h2 id="_2">問題<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p><code>bridge.spec.ts:81</code> のテスト「SANDBOX_006 完了後、BRIDGE_001 が unlocked になる」で、
+<code>emitSkillSequence</code> で SANDBOX_001-006 を連続発火した後、BRIDGE_001 が <code>locked</code> のまま
+<code>unlocked</code> に遷移しない。</p>
+<h2 id="_3">根本原因<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="progress_channel-playerprogressatom">progress_channel による playerProgressAtom の上書き<a class="headerlink" href="#progress_channel-playerprogressatom" title="Permanent link">&para;</a></h3>
+<p><code>useProgressSync.ts</code> が <code>progress_channel</code> BroadcastChannel を監視しており、
+Python バックエンドの <code>broadcast_progress()</code> (auto_instantiate 経由) が送信する
+<code>progress_init</code> メッセージを受け取ると、<code>initProgressFromFileAtom</code> 経由で
+<code>playerProgressAtom</code> を <strong>完全に上書き</strong> する。</p>
+<p>テストでは <code>__testCompleteSkill</code> を使ってフロントエンド側のみでスキルを完了させるが、
+Python バックエンドはそれらの完了を知らない。そのため:</p>
 <ol>
-<li><code>bt.step()</code> を繰り返しデータ末尾まで進める（または直接終了状態にする）</li>
-<li>HUD の status 要素が <code>"Finished"</code> を表示する</li>
-<li>"Trading" 文字列が残っていないことを確認する</li>
+<li>テストが <code>emitSkillSequence</code> で SANDBOX_001-006 をフロントエンドで完了</li>
+<li>auto_instantiate の <code>broadcast_progress()</code> が遅延して progress_channel 経由で到着</li>
+<li><code>useProgressSync</code> がメッセージを受信し、Python バックエンドの状態（空または部分的）で <code>playerProgressAtom</code> を上書き</li>
+<li>SANDBOX_006 の完了情報が消え、BRIDGE_001 が <code>locked</code> に戻る</li>
 </ol>
-<h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>ファイル</th>
-<th>対応箇所</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
-<td>新規テストケース追加先</td>
-</tr>
-<tr>
-<td><code>frontend/src/components/backtest-hud.tsx</code></td>
-<td>ステータスラベルの実装箇所</td>
-</tr>
-<tr>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-<td><code>step()</code> 終了判定箇所</td>
-</tr>
-</tbody>
-</table>
-<h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// backcast-integration.spec.ts に追加</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;ゲーム終了後に HUD ステータスが Finished になる&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// データを末尾まで step() する</span>
-<span class="w">  </span><span class="c1">// 最後の step() が False を返した後</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">statusEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;hud-status&quot;]&#39;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Finished&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">not</span><span class="p">.</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Trading&quot;</span><span class="p">);</span>
-<span class="p">});</span>
-</code></pre></div>
-<p><code>data-testid="hud-status"</code> が <code>backtest-hud.tsx</code> に存在しない場合は追加が必要。</p>
-<h2 id="_6">実装試行記録<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p><strong>試行日</strong>: 2026-02-21
-<strong>ブロッカー</strong>: <code>bt.step()</code> をデータ末尾まで進めるには backcast.py + BackcastPro エンジン + 実株価データが必要。E2E テスト環境（game_test.py）ではゲームエンジンが未初期化。backcast-integration.spec.ts は backcast.py を使うが、全データ消化（数百〜数千 step）は時間的に非現実的。
-<strong>試行内容</strong>: data-testid="hud-status" の存在確認を試みたが、backtest-hud.tsx が game_test.py 上では render されないため検証不可。
-<strong>推奨</strong>: backcast-integration.spec.ts で短いデータセット（10ステップ程度）を使った終了テストを追加する。要: テスト用短縮データの準備。</p>
-<h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
+<h3 id="backcast-integrationspects">backcast-integration.spec.ts で成功する理由<a class="headerlink" href="#backcast-integrationspects" title="Permanent link">&para;</a></h3>
+<p><code>backcast-integration.spec.ts</code> は <code>beforeEach</code> で <code>resetGameProgress()</code> を呼び出しており、
+この関数が <code>__testSuppressProgressSync = true</code> フラグを設定する。
+このフラグが <code>useProgressSync</code> の <code>handleMessage</code> で参照され、
+<code>progress_channel</code> のメッセージが無視される（知見 39）。</p>
+<h3 id="bridgespects">bridge.spec.ts で失敗する理由<a class="headerlink" href="#bridgespects" title="Permanent link">&para;</a></h3>
+<p><code>bridge.spec.ts</code> は <code>resetGameProgress()</code> を <code>afterEach</code> でのみ呼び出し、
+<code>beforeEach</code> では呼び出していなかった。そのため:</p>
 <ul>
-<li><code>step-end-status-label-wrong.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
+<li>初回テスト実行時: <code>__testSuppressProgressSync</code> が未設定（フラグなし）</li>
+<li>2回目以降: 前テストの <code>afterEach</code> で設定されるが、次テストの <code>beforeEach</code> で
+  <code>page.goto()</code> により新しいページが読み込まれ、フラグがリセットされる</li>
 </ul>
+<p>いずれの場合も、<code>progress_channel</code> のメッセージが処理されてしまう。</p>
+<h2 id="_4">修正内容<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p><code>bridge.spec.ts</code> の <code>beforeEach</code> に以下を追加:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// auto_instantiate イベントを受け取ってからリセット</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">2000</span><span class="p">);</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">resetGameProgress</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+
+<span class="c1">// リセット後の安定化</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForTimeout</span><span class="p">(</span><span class="mf">500</span><span class="p">);</span>
+</code></pre></div>
+<p>これにより:
+1. <code>page.waitForTimeout(2000)</code>: auto_instantiate の broadcast イベントが到着するのを待つ
+2. <code>resetGameProgress()</code>: playerProgressAtom をリセットし、<code>__testSuppressProgressSync = true</code> を設定
+3. <code>page.waitForTimeout(500)</code>: 残留イベントの処理を待つ</p>
+<p>この順序は <code>backcast-integration.spec.ts</code> の <code>beforeEach</code> と同じパターン。</p>
+<h2 id="_5">修正ファイル<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>frontend/e2e-tests/game/bridge.spec.ts</code> (beforeEach に wait + resetGameProgress を追加)</li>
+</ul>
+<h2 id="_6">関連知見<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ul>
+<li>知見 38: emitSkillSequence（300ms間隔）ではなく各スキルを emit 後に waitForSkillStatus で確認する方式</li>
+<li>知見 39: <code>__testSuppressProgressSync</code> フラグで auto_instantiate の broadcast_progress() を抑制</li>
+<li>知見 41: while ループで新着トーストも含めて完全に除去する</li>
+</ul>
+<h2 id="_7">影響範囲<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p>bridge.spec.ts 内の全テストに影響。特に <code>emitSkillSequence</code> 後に状態を検証するテストが安定する:
+- 「SANDBOX_006 完了後、BRIDGE_001 が unlocked になる」(L94)
+- 「BRIDGE_001 完了で BRIDGE_002 が unlocked になる」(L125)
+- 「BRIDGE_001 完了後に現金が増える」(L133)
+- 「BRIDGE_002 完了で BRIDGE_003 が unlocked になる」(L162)
+- 「BRIDGE_003 完了でブリッジトラック全完了」(L177)
+- 「BRIDGE_003 完了後の現金は全スキル報酬の合計以上」(L194)</p>
 
 
 

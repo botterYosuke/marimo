@@ -1207,33 +1207,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#2026-02-21-pm" class="md-nav__link">
     <span class="md-ellipsis">
       
-        修正完了バグ一覧
+        本セッション（2026-02-21 PM）の修正結果
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        変更ファイル一覧
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="変更ファイル一覧">
+    <nav class="md-nav" aria-label="本セッション（2026-02-21 PM）の修正結果">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#e2e-frontende2e-testsgame" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        E2E テストファイル（frontend/e2e-tests/game/）
+        修正完了バグ
       
     </span>
   </a>
@@ -1241,21 +1230,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#python" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python ソースファイル
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ノートブックファイル（クリーンアップ）
+        修正試行中（ブロッカー）
       
     </span>
   </a>
@@ -1264,6 +1242,67 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正内容の詳細
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="修正内容の詳細">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bug-004-critical-suppressbroadcast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BUG-004 (Critical): suppressBroadcast タイミング衝突
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-001-high-progress_channel-atom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BUG-001 (High): progress_channel による atom 上書き
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-005-high" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BUG-005 (High): カーネル再送によるスキル再発火
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        既存未解決 Issue
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1271,60 +1310,10 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        根本原因と修正の全体像
+        前回セッションの修正結果（参考）
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="根本原因と修正の全体像">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-networkidle" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        根本原因 1: networkidle タイムアウト
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        根本原因 2: テストセル蓄積による状態汚染
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-beforeeach" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        根本原因 3: beforeEach のタイムアウト不足
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-disconnected" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        根本原因 4: disconnected カーネルへの対処不足
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1332,57 +1321,7 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        技術的知見
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="技術的知見">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#a-game_testpy-backcastpy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        知見 A: game_test.py / backcast.py の蓄積防止
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#b-resetgameprogress" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        知見 B: resetGameProgress の呼び出しタイミング
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#c-ensureconnected" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        知見 C: ensureConnected の改善
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        残課題
+        推奨事項
       
     </span>
   </a>
@@ -1408,8 +1347,121 @@
 
 <h1 id="_1">バグ修正オーケストレーション完了<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
 <p><strong>実行日</strong>: 2026-02-21
-<strong>処理バグ数</strong>: 11 件</p>
-<h2 id="_2">修正完了バグ一覧<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<strong>処理バグ数</strong>: 5 件（BUG-001〜005、本セッション新規）+ 既存 11 件</p>
+<h2 id="2026-02-21-pm">本セッション（2026-02-21 PM）の修正結果<a class="headerlink" href="#2026-02-21-pm" title="Permanent link">&para;</a></h2>
+<h3 id="_2">修正完了バグ<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>優先度</th>
+<th>Issue</th>
+<th>ステータス</th>
+<th>修正内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Critical</td>
+<td>BUG-004 (HTML パイプライン)</td>
+<td>✅ 修正済み</td>
+<td><code>suppressBroadcast</code> タイミング修正（skill-complete-handler.ts）</td>
+</tr>
+<tr>
+<td>High</td>
+<td>BUG-001 (BRIDGE 解放レース)</td>
+<td>✅ 修正済み</td>
+<td><code>beforeEach</code> に <code>resetGameProgress()</code> 追加（bridge.spec.ts）</td>
+</tr>
+<tr>
+<td>High</td>
+<td>BUG-005 (リロード再送)</td>
+<td>✅ 修正済み</td>
+<td>リロード後に <code>resetGameProgress()</code> 追加（persistence.spec.ts）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_3">修正試行中（ブロッカー）<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>優先度</th>
+<th>Issue</th>
+<th>ステータス</th>
+<th>ブロッカー</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Medium</td>
+<td>BUG-002 (guard カウント不一致)</td>
+<td>修正試行中</td>
+<td>カーネル再送汚染 + テスト環境不安定</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>BUG-003 (sell テキスト不一致)</td>
+<td>修正試行中</td>
+<td>Shadow DOM + カーネル再送の複合問題</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_4">修正内容の詳細<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="bug-004-critical-suppressbroadcast">BUG-004 (Critical): <code>suppressBroadcast</code> タイミング衝突<a class="headerlink" href="#bug-004-critical-suppressbroadcast" title="Permanent link">&para;</a></h3>
+<p><strong>修正ファイル</strong>: <code>frontend/src/components/skill-tree/skill-complete-handler.ts</code>
+<strong>根本原因</strong>: <code>resetGameProgress()</code> が <code>suppressBroadcast = true</code> を 1 秒間セットするが、テストの <code>__testInjectBroadcastHTML</code> がその抑制ウィンドウ内で呼ばれるとイベントが破棄される。
+<strong>修正内容</strong>: <code>__testInjectBroadcastHTML</code> コールバック内で <code>suppressBroadcast = false</code> + タイマークリアを実行してから <code>extractAndSendBroadcastMessages(html)</code> を呼ぶように変更。</p>
+<h3 id="bug-001-high-progress_channel-atom">BUG-001 (High): <code>progress_channel</code> による atom 上書き<a class="headerlink" href="#bug-001-high-progress_channel-atom" title="Permanent link">&para;</a></h3>
+<p><strong>修正ファイル</strong>: <code>frontend/e2e-tests/game/bridge.spec.ts</code>
+<strong>根本原因</strong>: <code>game_test.py</code> の <code>auto_instantiate</code> が <code>broadcast_progress()</code> を実行し、<code>progress_channel</code> 経由で <code>playerProgressAtom</code> を上書き。<code>bridge.spec.ts</code> は <code>beforeEach</code> で <code>resetGameProgress()</code> を呼んでいなかった。
+<strong>修正内容</strong>: <code>beforeEach</code> に <code>waitForTimeout(2000)</code> + <code>resetGameProgress()</code> + <code>waitForTimeout(500)</code> を追加。</p>
+<h3 id="bug-005-high">BUG-005 (High): カーネル再送によるスキル再発火<a class="headerlink" href="#bug-005-high" title="Permanent link">&para;</a></h3>
+<p><strong>修正ファイル</strong>: <code>frontend/e2e-tests/game/persistence.spec.ts</code>
+<strong>根本原因</strong>: <code>page.reload()</code> 後にカーネルがセル出力を WebSocket で再送し、<code>&lt;marimo-broadcast&gt;</code> タグが再処理されてスキルが再発火。
+<strong>修正内容</strong>: <code>page.reload()</code> 後に <code>waitForTimeout(500)</code> + <code>resetGameProgress()</code> + <code>openSkillTreePanel()</code> を追加（<code>beforeEach</code> と同じ安定化パターン）。</p>
+<h2 id="issue">既存未解決 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>優先度</th>
+<th>Issue</th>
+<th>ステータス</th>
+<th>備考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>High</td>
+<td>fullrun-regression-75-to-53-passed</td>
+<td>Open</td>
+<td>フルラン環境のみ再発する構造的問題</td>
+</tr>
+<tr>
+<td>High</td>
+<td>guard-validation-buy-sell-warning-not-implemented</td>
+<td>Open</td>
+<td>BUG-002/003 と同根</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>ui-cash-milestone-boundary-test-failure</td>
+<td>Open</td>
+<td>フルラン時の状態汚染、境界値問題</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>e2e-test-missing-reconnect-skill-event</td>
+<td>Open</td>
+<td>E2E テスト実装困難</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>e2e-test-missing-step-end-hud-status</td>
+<td>Open</td>
+<td>E2E テスト実装困難</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">前回セッションの修正結果（参考）<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -1424,185 +1476,76 @@
 <td>Critical</td>
 <td>networkidle-timeout</td>
 <td>✅ 修正済み</td>
-<td><code>networkidle</code> → <code>load</code> 置換 + <code>ensureConnected</code> 追加（bridge/persistence/ui/z-python/guard/integration）</td>
+<td><code>networkidle</code> → <code>load</code> 置換</td>
 </tr>
 <tr>
 <td>Critical</td>
 <td>disconnected-kernel</td>
 <td>✅ 修正済み</td>
-<td><code>ensureConnected</code> に reload fallback 追加 + game_test.py 蓄積セル削除 + beforeEach リセット追加</td>
+<td><code>ensureConnected</code> reload fallback</td>
 </tr>
 <tr>
 <td>Critical</td>
 <td>beforeeach-timeout</td>
 <td>✅ 修正済み</td>
-<td>timeout 120秒延長 + backcast-integration.spec.ts で毎回 reload</td>
+<td>timeout 120秒延長</td>
 </tr>
 <tr>
 <td>Critical</td>
 <td>guard-validation</td>
 <td>✅ 修正済み</td>
-<td>networkidle 修正 + path 計算は正しいことを確認済み</td>
+<td>networkidle 修正</td>
 </tr>
 <tr>
 <td>Critical</td>
 <td>reconnect-skill-event</td>
-<td>✅ 修正済み（既存実装確認）</td>
-<td><code>replayBufferedMessages</code> が既に実装されていた</td>
+<td>✅ 修正済み</td>
+<td><code>replayBufferedMessages</code> 確認</td>
 </tr>
 <tr>
 <td>High</td>
 <td>bridge001-dedup</td>
 <td>✅ 修正済み</td>
-<td><code>skill_events.py</code> に <code>reset_triggered_skills()</code> 追加 + game_test.py 初期化</td>
+<td><code>reset_triggered_skills()</code> 追加</td>
 </tr>
 <tr>
 <td>High</td>
 <td>state-contamination</td>
 <td>✅ 修正済み</td>
-<td>game_test.py 初期化 + beforeEach に resetGameProgress 追加</td>
+<td>beforeEach resetGameProgress 追加</td>
 </tr>
 <tr>
 <td>High</td>
 <td>cell-accumulation</td>
 <td>✅ 修正済み</td>
-<td>backcast.py（12セル削除）と game_test.py（26セル削除）を初期状態に戻した</td>
+<td>蓄積セル削除</td>
 </tr>
 <tr>
 <td>High</td>
 <td>skill-reward-negative</td>
-<td>✅ 修正済み（既存実装確認）</td>
-<td>skill-data.ts の全値が正 (+30000 等)、表示も正常</td>
+<td>✅ 修正済み</td>
+<td>既存実装確認</td>
 </tr>
 <tr>
 <td>Medium</td>
 <td>backend-list-remove</td>
 <td>✅ 修正済み</td>
-<td><code>rtc/doc.py</code> の <code>list.remove()</code> に存在チェック追加</td>
+<td>list.remove() 存在チェック追加</td>
 </tr>
 <tr>
 <td>Low</td>
 <td>trades-duplicate</td>
-<td>✅ 修正済み（既存実装確認）</td>
-<td><code>trades()</code> は既に正しくネストされていた</td>
+<td>✅ 修正済み</td>
+<td>既存実装確認</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_3">変更ファイル一覧<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<h3 id="e2e-frontende2e-testsgame">E2E テストファイル（frontend/e2e-tests/game/）<a class="headerlink" href="#e2e-frontende2e-testsgame" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>ファイル</th>
-<th>変更内容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>helpers.ts</code></td>
-<td><code>ensureConnected()</code> に page reload フォールバック追加（waitForKernelHealthy タイムアウト時）</td>
-</tr>
-<tr>
-<td><code>backcast-integration.spec.ts</code></td>
-<td><code>test.describe.configure({ timeout: 120_000 })</code> 追加 + 毎回 reload</td>
-</tr>
-<tr>
-<td><code>integration.spec.ts</code></td>
-<td>beforeEach に <code>waitForTimeout(500)</code> + <code>resetGameProgress()</code> 追加</td>
-</tr>
-<tr>
-<td><code>persistence.spec.ts</code></td>
-<td>beforeEach に <code>waitForTimeout(500)</code> + <code>resetGameProgress()</code> 追加</td>
-</tr>
-<tr>
-<td><code>bridge.spec.ts</code></td>
-<td><code>networkidle</code> → <code>load</code> + <code>ensureConnected</code> 追加（HEAD コミット済み）</td>
-</tr>
-<tr>
-<td><code>guard-validation.spec.ts</code></td>
-<td><code>networkidle</code> → <code>load</code> （HEAD コミット済み）</td>
-</tr>
-<tr>
-<td><code>ui.spec.ts</code></td>
-<td><code>networkidle</code> → <code>load</code> + <code>ensureConnected</code> 追加（HEAD コミット済み）</td>
-</tr>
-<tr>
-<td><code>z-python-e2e.spec.ts</code></td>
-<td><code>networkidle</code> → <code>load</code> （HEAD コミット済み）</td>
-</tr>
-</tbody>
-</table>
-<h3 id="python">Python ソースファイル<a class="headerlink" href="#python" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>ファイル</th>
-<th>変更内容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>src-tauri/sample-notebooks/skill_events.py</code></td>
-<td><code>reset_triggered_skills()</code> 関数追加</td>
-</tr>
-<tr>
-<td><code>marimo/_server/rtc/doc.py</code></td>
-<td><code>remove_client()</code> の <code>list.remove()</code> に存在チェック追加</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_4">ノートブックファイル（クリーンアップ）<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>ファイル</th>
-<th>変更内容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>frontend/e2e-tests/py/game_test.py</code></td>
-<td>蓄積テストセル 26 個を削除し、初期状態（2セル）に戻した</td>
-</tr>
-<tr>
-<td><code>C:/Users/.../backcast.py</code></td>
-<td>蓄積テストセル 12 個を削除し、初期状態（4セル）に戻した</td>
-</tr>
-</tbody>
-</table>
-<h2 id="_5">根本原因と修正の全体像<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<h3 id="1-networkidle">根本原因 1: <code>networkidle</code> タイムアウト<a class="headerlink" href="#1-networkidle" title="Permanent link">&para;</a></h3>
-<p>marimo は WebSocket を常時保持するため <code>networkidle</code> に到達しない。全テストファイルで <code>load</code> + <code>ensureConnected()</code> パターンに統一した。</p>
-<h3 id="2">根本原因 2: テストセル蓄積による状態汚染<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
-<p><code>runNewCellInGrid()</code> で追加されたセルが <code>game_test.py</code> と <code>backcast.py</code> に蓄積し、次回起動時の auto_instantiate で意図しないスキルイベントが発火していた。両ファイルを初期状態に戻し、<code>global-teardown.ts</code> の復元機能（<code>git restore</code> と backup）が正しく機能するようにした。</p>
-<h3 id="3-beforeeach">根本原因 3: beforeEach のタイムアウト不足<a class="headerlink" href="#3-beforeeach" title="Permanent link">&para;</a></h3>
-<p><code>backcast-integration.spec.ts</code> は実カーネルを使用するため、<code>ensureConnected()</code> と <code>waitForTimeout()</code> の合計時間が 30 秒を超えることがある。120 秒に延長し、また各テスト前に <code>page.reload()</code> することでカーネル接続を安定させた。</p>
-<h3 id="4-disconnected">根本原因 4: disconnected カーネルへの対処不足<a class="headerlink" href="#4-disconnected" title="Permanent link">&para;</a></h3>
-<p><code>ensureConnected()</code> がカーネル disconnected 状態から回復できない場合があった。<code>waitForKernelHealthy()</code> タイムアウト時にページをリロードして再接続を試みるフォールバックを追加した。</p>
-<h2 id="_6">技術的知見<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<h3 id="a-game_testpy-backcastpy">知見 A: game_test.py / backcast.py の蓄積防止<a class="headerlink" href="#a-game_testpy-backcastpy" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>global-teardown.ts</code> が <code>git restore</code> (game_test.py) と backup restore (backcast.py) で自動クリーンアップする</li>
-<li>コミットする game_test.py は常に最小限のセルのみ持つこと</li>
-<li>テストが終了する前にセルが蓄積すると、同一テストランの後続テストも汚染される</li>
-</ul>
-<h3 id="b-resetgameprogress">知見 B: resetGameProgress の呼び出しタイミング<a class="headerlink" href="#b-resetgameprogress" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>beforeEach</code> で <code>ensureConnected()</code> 後に <code>waitForTimeout(500)</code> を置いてから <code>resetGameProgress()</code> を呼ぶ</li>
-<li>これにより auto_instantiate 由来の遅延イベントを先に受け取ってからリセットできる</li>
-<li><code>suppressBroadcast</code> 機構（1秒）により、リセット後のイベントを抑制</li>
-</ul>
-<h3 id="c-ensureconnected">知見 C: ensureConnected の改善<a class="headerlink" href="#c-ensureconnected" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>waitForKernelHealthy()</code> がタイムアウトした場合（カーネル disconnected）は <code>page.reload()</code> で回復を試みる</li>
-<li><code>backcast-integration.spec.ts</code> では毎回 <code>page.reload()</code> することでカーネル接続をリフレッシュ</li>
-</ul>
-<h2 id="_7">残課題<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
-<p>なし（全 11 件の Issue に対して修正済みまたは既存実装確認完了）</p>
-<p>次のステップとして以下を推奨:
-1. E2E テストフルスイートを実行して通過確認
-2. <code>game_test.py</code> の変更をコミット（蓄積セルの削除）
-3. CI/CD パイプラインへの組み込み検討</p>
+<h2 id="_6">推奨事項<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>guard-validation テストのアーキテクチャ見直し</strong>: <code>runNewCellInGrid</code> + Python コード注入は非決定的。<code>__testCompleteSkill</code> フック経由に切り替えを検討</li>
+<li><strong>フルラン環境の安定化</strong>: スペック間のカーネル状態リセット強化</li>
+<li><strong><code>suppressBroadcast</code> 機構のドキュメント化</strong>: テスト記述者向けに抑制ウィンドウの注意事項を明文化</li>
+</ol>
 
 
 

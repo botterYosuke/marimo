@@ -21,7 +21,7 @@
     
     
       
-        <title>Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない - marimo Developer Docs</title>
+        <title>Issue: FAIL_002 スキル（損切り判定）の E2E テストが存在しない - marimo Developer Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issue-hud-finished-e2e" class="md-skip">
+        <a href="#issue-fail_002-e2e" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない
+              Issue: FAIL_002 スキル（損切り判定）の E2E テストが存在しない
             
           </span>
         </div>
@@ -1262,10 +1262,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#e2e" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実装試行記録
+        E2E テスト追加
       
     </span>
   </a>
@@ -1300,26 +1300,27 @@
 
 
 
-<h1 id="issue-hud-finished-e2e">Issue: ゲーム終了後の HUD ステータスラベル（"Finished"）を検証する E2E テストがない<a class="headerlink" href="#issue-hud-finished-e2e" title="Permanent link">&para;</a></h1>
+<h1 id="issue-fail_002-e2e">Issue: FAIL_002 スキル（損切り判定）の E2E テストが存在しない<a class="headerlink" href="#issue-fail_002-e2e" title="Permanent link">&para;</a></h1>
 <p><strong>作成日</strong>: 2026-02-21
-<strong>重要度</strong>: Medium
-<strong>カテゴリ</strong>: テストカバレッジ / UI
-<strong>ステータス</strong>: ⬜ 未対応</p>
+<strong>重要度</strong>: High
+<strong>カテゴリ</strong>: テストカバレッジ / スキルロジック
+<strong>ステータス</strong>: ✅ テスト追加済み</p>
 <hr />
 <h2 id="_1">概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正（ゲーム終了後に HUD ステータスを "Trading" → "Finished" に変更）は実装済みだが、UI ラベルが正しく "Finished" になることを明示的に検証する E2E テストが存在しない。</p>
-<p><code>backcast-integration.spec.ts</code> の全テストは <code>bt.step()</code> の複数回実行を含むが、ゲーム終了（<code>step()</code> が <code>False</code> を返す状態）後の HUD ステータス表示を確認しているケースはない。</p>
+<p><code>fail002-wrong-timing-in-sell.md</code> の修正（FAIL_002 損切り判定を <code>sell()</code> → <code>step()</code> 内に移動）は実装済みだが、その動作を検証する E2E テストが存在しない。</p>
+<p><code>fail002-wrong-timing-in-sell.md</code> に記録された修正が将来リグレッションしても、自動テストでは検出できない状態。</p>
 <h2 id="_2">背景<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p><code>step-end-status-label-wrong.md</code> の修正内容:
-- <code>step()</code> の戻り値が <code>False</code>（＝バックテスト終了）のとき、HUD ステータスを "Finished" に更新する
-- 修正前は終了後も "Trading" のまま表示されていた</p>
-<p>現在の <code>backcast-integration.spec.ts</code> は長期プレイフロー（ <code>bt.buy()</code> → <code>bt.step()</code> × N 回）を実行するが、<strong>ゲーム終了（全データ消化）後に "Finished" ラベルが表示されることを assert していない</strong>。</p>
+<p><code>fail002-wrong-timing-in-sell.md</code> の修正内容:
+- <code>_check_stop_loss()</code> を <code>sell()</code> から <code>step()</code> 内に移動
+- <code>step()</code> ごとにポジション価値を評価し、10% 下落で FAIL_002 発火</p>
+<p>現在の sandbox.spec.ts / z-python-e2e.spec.ts は成功系スキル（SANDBOX_001〜006 など）のみを検証しており、失敗系スキル（FAIL_002）は一切テストされていない。</p>
 <h2 id="_3">期待される動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <p>以下のシナリオが E2E テストで検証されること:</p>
 <ol>
-<li><code>bt.step()</code> を繰り返しデータ末尾まで進める（または直接終了状態にする）</li>
-<li>HUD の status 要素が <code>"Finished"</code> を表示する</li>
-<li>"Trading" 文字列が残っていないことを確認する</li>
+<li><code>bt.buy()</code> でポジションを取得する</li>
+<li>価格が 10% 以上下落した状態で <code>bt.step()</code> を呼ぶ</li>
+<li>FAIL_002 スキルが <code>completed</code> になる</li>
+<li>FAIL_002 ノードが <code>completed</code> 状態に UI 反映される</li>
 </ol>
 <h2 id="_4">対象ファイル<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <table>
@@ -1331,38 +1332,39 @@
 </thead>
 <tbody>
 <tr>
-<td><code>frontend/e2e-tests/game/backcast-integration.spec.ts</code></td>
-<td>新規テストケース追加先</td>
+<td><code>frontend/e2e-tests/game/z-python-e2e.spec.ts</code></td>
+<td>FAIL_002 テストケース追加先（候補）</td>
 </tr>
 <tr>
-<td><code>frontend/src/components/backtest-hud.tsx</code></td>
-<td>ステータスラベルの実装箇所</td>
+<td><code>frontend/e2e-tests/game/helpers.ts</code></td>
+<td><code>emitSkillViaPython()</code> — 既存ヘルパーを活用</td>
 </tr>
 <tr>
-<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code></td>
-<td><code>step()</code> 終了判定箇所</td>
+<td><code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\game_setup.py</code></td>
+<td><code>_check_stop_loss()</code> の実装箇所</td>
 </tr>
 </tbody>
 </table>
 <h2 id="_5">実装案<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="c1">// backcast-integration.spec.ts に追加</span>
-<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;ゲーム終了後に HUD ステータスが Finished になる&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// データを末尾まで step() する</span>
-<span class="w">  </span><span class="c1">// 最後の step() が False を返した後</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">statusEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;[data-testid=&quot;hud-status&quot;]&#39;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Finished&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">statusEl</span><span class="p">).</span><span class="nx">not</span><span class="p">.</span><span class="nx">toHaveText</span><span class="p">(</span><span class="s2">&quot;Trading&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="c1">// z-python-e2e.spec.ts に追加</span>
+<span class="nx">test</span><span class="p">(</span><span class="s2">&quot;FAIL_002: step() で損切り判定が発火する&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 1. データ取得・buy()</span>
+<span class="w">  </span><span class="c1">// 2. 価格下落をモックまたは step() を繰り返す</span>
+<span class="w">  </span><span class="c1">// 3. FAIL_002 が completed になることを確認</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">waitForSkillStatus</span><span class="p">(</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;FAIL_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">);</span>
 <span class="p">});</span>
 </code></pre></div>
-<p><code>data-testid="hud-status"</code> が <code>backtest-hud.tsx</code> に存在しない場合は追加が必要。</p>
-<h2 id="_6">実装試行記録<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p><strong>試行日</strong>: 2026-02-21
-<strong>ブロッカー</strong>: <code>bt.step()</code> をデータ末尾まで進めるには backcast.py + BackcastPro エンジン + 実株価データが必要。E2E テスト環境（game_test.py）ではゲームエンジンが未初期化。backcast-integration.spec.ts は backcast.py を使うが、全データ消化（数百〜数千 step）は時間的に非現実的。
-<strong>試行内容</strong>: data-testid="hud-status" の存在確認を試みたが、backtest-hud.tsx が game_test.py 上では render されないため検証不可。
-<strong>推奨</strong>: backcast-integration.spec.ts で短いデータセット（10ステップ程度）を使った終了テストを追加する。要: テスト用短縮データの準備。</p>
+<p>ただし「価格 10% 下落」を E2E テストでどう再現するか（実データ依存 vs モック）は要検討。</p>
+<h2 id="e2e">E2E テスト追加<a class="headerlink" href="#e2e" title="Permanent link">&para;</a></h2>
+<p><strong>追加日</strong>: 2026-02-21
+<strong>追加先</strong>: <code>frontend/e2e-tests/game/fail.spec.ts</code>
+<strong>テスト名</strong>: 8ケース（初期状態・FAIL_001 unlock/complete・FAIL_002 unlock/complete・ガード2件・全完了）
+<strong>テスト結果</strong>: ✅ 8 passed (2.4m)</p>
+<p>スキルツリー UI の反応テスト（emitSkillEvent 経由）。FAIL_001/002 の前提条件チェーン、ガード処理、報酬を検証。
+NOTE: Python 側の <code>_check_stop_loss</code> ロジック（実データ依存）は別途対応が必要。</p>
 <h2 id="issue">関連 Issue<a class="headerlink" href="#issue" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>step-end-status-label-wrong.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
+<li><code>fail002-wrong-timing-in-sell.md</code> — 修正済み Issue（修正内容の詳細はこちら）</li>
 </ul>
 
 
