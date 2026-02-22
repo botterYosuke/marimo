@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
+import Markdown from "react-markdown";
 import type { Skill } from "./types";
 import { categoryColors } from "./skill-node";
 
@@ -164,8 +165,21 @@ export function SkillDetailPanel({
             <div className="flex flex-wrap gap-1.5">
               {skill.prerequisites.map((prereqId) => {
                 const prereqSkill = skillMap.get(prereqId);
+                const isCompleted = prereqSkill?.status === "completed";
                 return (
-                  <Badge key={prereqId} variant="secondary" className="text-xs">
+                  <Badge
+                    key={prereqId}
+                    variant="secondary"
+                    className={cn(
+                      "text-xs",
+                      isCompleted
+                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                    )}
+                  >
+                    {isCompleted && (
+                      <CheckCircle2Icon className="w-3 h-3 mr-1 inline" />
+                    )}
                     {prereqSkill?.title ?? prereqId}
                   </Badge>
                 );
@@ -181,10 +195,8 @@ export function SkillDetailPanel({
               <BookOpenIcon className="w-4 h-4" />
               ヘルプ
             </h4>
-            <div className="text-sm bg-muted/30 rounded-md p-3 max-h-64 overflow-y-auto">
-              <pre className="whitespace-pre-wrap font-sans text-xs leading-relaxed">
-                {skill.helpContent}
-              </pre>
+            <div className="text-sm bg-muted/30 rounded-md p-3 max-h-64 overflow-y-auto prose prose-sm dark:prose-invert prose-pre:bg-muted prose-pre:text-xs prose-code:text-xs max-w-none">
+              <Markdown>{skill.helpContent}</Markdown>
             </div>
             {onInsertHelp && skill.status === "unlocked" && (
               <Button

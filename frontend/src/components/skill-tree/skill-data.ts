@@ -950,6 +950,7 @@ export const milestones: Milestone[] = [
   { skillCount: 10, bonus: 50000, title: "見習い投資家" },
   { skillCount: 20, bonus: 100000, title: "新進トレーダー" },
   { skillCount: 35, bonus: 200000, item: "米国株ETF" },
+  { skillCount: 42, bonus: 150000, title: "中堅トレーダー" },
   { skillCount: 50, bonus: 400000, title: "Backcastエキスパート" },
   {
     skillCount: 58,

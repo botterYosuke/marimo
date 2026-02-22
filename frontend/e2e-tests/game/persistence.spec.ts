@@ -55,7 +55,7 @@ test.describe("進捗の初期化・リセット", () => {
   // 初期状態の確認
   // -------------------------------------------------------------------------
 
-  test("ページ初回ロード時、完了スキル数は 0", async ({ page }) => {
+  test("ページ初回ロード時、完了スキル数は 0（他スペックからの汚染なし）", async ({ page }) => {
     const count = await getCompletedCount(page);
     expect(count).toBe(0);
   });
@@ -90,9 +90,17 @@ test.describe("進捗の初期化・リセット", () => {
     await page.reload();
     await page.waitForLoadState("load");
     await ensureConnected(page);
+
+    // カーネルがセル出力を WebSocket で再送し、
+    // <marimo-broadcast> タグ由来のスキルイベントが再発火するのを待つ。
+    // その後 resetGameProgress() で atom をクリアして、
+    // suppressBroadcast ウィンドウ (1s) 内にさらなるカーネル再送を抑制する。
+    await page.waitForTimeout(500);
+    await resetGameProgress(page);
     await openSkillTreePanel(page);
 
     // Web モードでは plain atom のためリセットされる
+    // （カーネル再送由来のイベントは resetGameProgress で抑制済み）
     const countAfterReload = await getCompletedCount(page);
     expect(countAfterReload).toBe(0);
   });

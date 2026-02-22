@@ -148,9 +148,19 @@ export function setupSkillEventListener(
   }
   // e2e 統合テスト用フック: emit_skill() 形式の HTML を本番パイプライン（③→⑦）経由で処理する
   // extractAndSendBroadcastMessages() → sendBroadcastMessage() → BroadcastChannel → listener → atom → UI
+  //
+  // BUG-004 修正: __testInjectBroadcastHTML はテストが意図的に発火する注入であり、
+  // リセット後の遅延カーネルメッセージ（suppressBroadcast の抑制対象）ではない。
+  // 呼び出し時に suppressBroadcast をクリアし、BroadcastChannel 経由のメッセージが
+  // handleMessage で抑制されないようにする。
   (window as unknown as Record<string, unknown>).__testInjectBroadcastHTML = (
     html: string,
   ) => {
+    suppressBroadcast = false;
+    if (suppressTimer) {
+      clearTimeout(suppressTimer);
+      suppressTimer = null;
+    }
     extractAndSendBroadcastMessages(html);
   };
 

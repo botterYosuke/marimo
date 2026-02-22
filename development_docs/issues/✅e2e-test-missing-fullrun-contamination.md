@@ -3,7 +3,7 @@
 **作成日**: 2026-02-21
 **重要度**: Medium
 **カテゴリ**: テストカバレッジ / テスト信頼性
-**ステータス**: ⬜ 未対応
+**ステータス**: ✅ テスト追加済み
 
 ---
 
@@ -79,6 +79,16 @@ npx playwright test e2e-tests/game/contamination-check.spec.ts
 
 - **短期**: 案 B（`persistence.spec.ts` の先頭テストを汚染検出テストとして位置付ける）
 - **長期**: 案 C（フルラン後専用の contamination-check.spec.ts 新規作成）
+
+## E2E テスト追加
+
+**追加日**: 2026-02-21
+**追加先**: `frontend/e2e-tests/game/persistence.spec.ts`
+**テスト名**: "ページ初回ロード時、完了スキル数は 0（他スペックからの汚染なし）"
+**テスト結果**: ✅ passed
+
+案B（`persistence.spec.ts` の先頭テストに汚染検出アサーション追加）を採用。
+テスト名を明示的に変更し、汚染検出テストとして位置付けた。
 
 ## 関連 Issue
 

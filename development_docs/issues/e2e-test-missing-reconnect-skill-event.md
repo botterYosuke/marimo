@@ -60,6 +60,13 @@ test("再接続後もスキルイベントが消失せず反映される", async
 
 **課題**: 再接続タイミングとイベント発火の競合状態を E2E テストで制御するのが難しい。`waitForTimeout` 依存にならないよう状態ベース待機を使う必要がある。
 
+## 実装試行記録
+
+**試行日**: 2026-02-21
+**ブロッカー**: WebSocket 切断→再接続のタイミング制御が E2E テストで困難。page.reload() でリカバリーされるが、切断中のバッファ蓄積→再接続後の再生という競合状態を安定的に再現できない。
+**試行内容**: persistence.spec.ts のリロードテストが類似シナリオを部分的にカバーしているが、BroadcastChannel バッファの再生を明示的に検証するテストは実装困難。
+**推奨**: replayBufferedMessages() のユニットテスト（skill-complete-handler.test.ts）で代替カバーし、E2E は将来的な CI 改善時に検討。
+
 ## 関連 Issue
 
 - `reconnect-skill-event-lost.md` — 修正済み Issue（修正内容の詳細はこちら）

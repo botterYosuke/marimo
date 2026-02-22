@@ -1,152 +1,187 @@
-# マニュアル正確性レビュー
+# マニュアルレビュー 2026-02-21
 
 **レビュー日**: 2026-02-21
 **レビュアー**: game-manual-review エージェント
+**入力**: `development_docs/game-play-reports/play-log-2026-02-21.md`
 
-## 対象ドキュメント
+## 検証対象ドキュメント
 
-- `development_docs/game-play-reports/play-log-2026-02-21.md`（プレイログ）
-- `development_docs/plans/backcast-game-play.md`（オーケストレーションマニュアル）
-- `development_docs/game/game-e2e-review-system.md`（E2E レビューシステム）
-- `.claude/skills/game-setup/SKILL.md`
-- `.claude/skills/game-play/SKILL.md`
-- `frontend/e2e-tests/game/helpers.ts`（ソースコード）
-- `frontend/src/components/skill-tree/skill-data.ts`（ソースコード）
-- `src-tauri/sample-notebooks/game_setup.py`（ソースコード）
-- `development_docs/issues/`（Issue ステータス）
+| # | ファイル | 概要 |
+|---|---------|------|
+| 1 | `development_docs/game/game-e2e-review-system.md` | E2E レビューシステム全体ドキュメント（知見 1-40、設計思想、セレクター早見表） |
+| 2 | `.claude/skills/game-play/SKILL.md` | ゲームプレイスキル定義（実行方法・期待結果・注意事項） |
+| 3 | `.claude/skills/game-setup/SKILL.md` | ゲーム環境整備スキル定義（ファイル配置・サーバー起動手順） |
+| 4 | `development_docs/plans/backcast-game-play.md` | Skill Orchestration マニュアル（全体アーキテクチャ・共通情報） |
 
 ---
 
-## 発見した誤り
+## 発見事項
 
-### 誤り 1: backcast-game-play.md — 参照ドキュメントセクション「知見番号範囲」
+### 1. game-e2e-review-system.md ヘッダーのテスト数・スイート数が古い
 
-- **記載内容**: `| development_docs/game/game-e2e-review-system.md | E2E テスト知見集（知見 1〜35） |`
-- **実際の動作**: `game-e2e-review-system.md` には知見 36〜40 が追加されており（知見 36: リセット後のイベント抑制、知見 37: UX プレイテストでのスキルイベント消失問題、知見 38: backcast.py 不在時の症状、知見 39: layouts/ 不在時の症状、知見 40: SKILL.md パスバグ）、最新の知見番号は 40 番まで存在する。さらに `game-e2e-review-system.md` の完了セクションには「知見 42」「知見 43」の参照記述があるが、対応する本文が存在しない（知見番号の最大は 40）。
-- **修正案**: `| development_docs/game/game-e2e-review-system.md | E2E テスト知見集（知見 1〜40） |` に更新する。
+- **ファイル**: `development_docs/game/game-e2e-review-system.md` 行 3
+- **該当箇所**: `**ステータス**: 全 9 スイート パス済み（75 passed / 5 skipped / 0 failed）`
+- **問題**: プレイログの結果は **10 スイート**（backcast-integration, bridge, data, guard-validation, integration, persistence, sandbox, setup, ui, z-python-e2e）で **69 passed / 9 failed / 5 skipped**（合計 83 テスト）。ヘッダーの「9 スイート」「75 passed」「0 failed」はいずれも古い。新規追加された `data.spec.ts`（11 テスト）、`guard-validation.spec.ts`（3 テスト）、`setup.spec.ts`（10 テスト）が反映されていない。
+- **推奨修正**: ヘッダーを `全 10 スイート（69 passed / 9 failed / 5 skipped — guard-validation 3件・integration 5件・bridge/persistence 各1件が既知失敗）` に更新する。安定通過時は `75 passed / 5 skipped` ではなく最新のテスト総数に基づく値を記載する。
+- **重要度**: High
 
----
+### 2. game-e2e-review-system.md ファイル構成リストに新規スペック 4 件が未記載
 
-### 誤り 2: game-play SKILL.md — 「注意事項」内の「知見35c」参照
+- **ファイル**: `development_docs/game/game-e2e-review-system.md` 行 190-198
+- **該当箇所**:
+  ```
+  frontend/e2e-tests/game/
+  ├── helpers.ts
+  ├── constants.ts
+  ├── sandbox.spec.ts
+  ├── ui.spec.ts
+  ├── persistence.spec.ts
+  ├── bridge.spec.ts
+  ├── integration.spec.ts
+  └── z-python-e2e.spec.ts
+  ```
+- **問題**: 実際には `backcast-integration.spec.ts`、`data.spec.ts`、`guard-validation.spec.ts`、`setup.spec.ts` の 4 ファイルも存在し、プレイログで全てテスト結果が記録されている。ファイル構成リストが 6 spec + 2 support のみで不完全。
+- **推奨修正**: 以下を追記する:
+  ```
+  ├── backcast-integration.spec.ts  # backcast.py 統合テスト（6ケース）
+  ├── data.spec.ts                  # データ取得トラック DATA_001〜006（11ケース）
+  ├── guard-validation.spec.ts      # buy()/sell() ガード処理テスト（3ケース）
+  ├── setup.spec.ts                 # セットアップトラック SETUP_001〜005（10ケース）
+  ```
+- **重要度**: High
 
-- **記載内容**: `page.reload()` は通常使わない（WebSocket 切断が起きる）。ただし `ensureConnected()` 内部でカーネル disconnected 時のリカバリーとして、および `backcast-integration.spec.ts` の beforeEach で接続安定化のために使用する（知見35c）
-- **実際の動作**: `game-e2e-review-system.md` に「知見 35c」という番号は存在しない。知見 35 は a（networkidle タイムアウト）と b（再接続スキル再発火）のサブ項目のみ。`page.reload()` のリカバリー利用に関する記述は知見 35 の本文内に含まれてはいるが、サブ番号「35c」は付与されていない。
-- **修正案**: 「知見35c」を「知見35」に修正する。
+### 3. game-e2e-review-system.md 知見番号 42・43 の参照が本文に未存在
 
----
+- **ファイル**: `development_docs/game/game-e2e-review-system.md` 行 108, 110, 116
+- **該当箇所**:
+  - `（知見 42）` — backcast.py ファイル不在バグ修正セッション内で 2 回参照
+  - `（知見 43）` — SKILL.md パスバグ修正セッション内で 1 回参照
+- **問題**: 知見の本文は `### 38.`（backcast.py 不在）、`### 39.`（layouts 不在）、`### 40.`（SKILL.md パスバグ）までしか存在しない。知見 41/42/43 の見出しは存在しない。完了セクションの「知見 42」は実際には知見 38/39 に、「知見 43」は知見 40 に対応すると推定される。番号の不整合がある。
+- **推奨修正**: 完了セクションの `（知見 42）` を `（知見 38・39）` に、`（知見 43）` を `（知見 40）` に修正する。または知見 41-43 を新たに追記して番号を一致させる。
+- **重要度**: Medium
 
-### 誤り 3: game-play SKILL.md — 全スイート期待結果の注釈
+### 4. game-e2e-review-system.md 知見の掲載順序が入れ替わっている（34 と 35）
 
-- **記載内容**: `> **期待結果**: 全スイート実行時は 75 passed / 5 skipped（`backcast-integration.spec.ts` の 2 skipped 含む）を目安とする。`
-- **実際の動作**: game-e2e-review-system.md の「完了（2026-02-21 backcast.py ファイル不在バグ修正セッション）」に「全 9 スイート（80 テスト）パス確認: 75 passed / 5 skipped / 0 failed」と記録されている。今回のフルランでは計 83 テストが実行されており総テスト数が増加している。また「`backcast-integration.spec.ts` の 2 skipped」という注釈は不正確で、実際の最新実行では skipped が 0（6 passed）となっている（プレイログ backcast-integration.spec.ts: 6 passed / 0 failed）。
-- **修正案**: 注釈「`backcast-integration.spec.ts` の 2 skipped 含む」を削除し、「最新の詳細は `game-e2e-review-system.md` の実行確認レポートを参照」と記載する。
+- **ファイル**: `development_docs/game/game-e2e-review-system.md` 行 998, 1044
+- **該当箇所**: `### 35.`（行 998）の後に `### 34.`（行 1044）が掲載されている
+- **問題**: 知見 35 が知見 34 より先に掲載されており、番号順になっていない。読者が知見番号で検索した際に混乱する。
+- **推奨修正**: 知見 34 と 35 の掲載順序を入れ替え、番号昇順に統一する。
+- **重要度**: Low
 
----
+### 5. game-e2e-review-system.md テスト分離戦略のサンプルコードに `"networkidle"` が残存
 
-### 誤り 4: game-play SKILL.md — BRIDGE_002 操作コマンドの引数
-
-- **記載内容**: `| 8 | BRIDGE_002 | bt.get_stock_daily("7203") | 株価データ取得 + スキル発火 |`
-- **実際の動作**: `backcast-game-play.md` の操作コマンド一覧では `bt.get_stock_daily(code)` と表記されており、固定値ではない。`game_setup.py` の `get_stock_daily` 関数は `code: str` を受け取り任意の銘柄コードを受け付ける。また `skill-data.ts` の BRIDGE_002 の `helpContent` では `get_stock_daily("6758")` （ソニー）を例示しており、「別銘柄を自分で取得する」が BRIDGE_002 の趣旨。固定値 "7203" の記載はミスリーディング。
-- **修正案**: `bt.get_stock_daily("7203")` を `bt.get_stock_daily(code)` に変更し、備考に「例: "7203" や "6758"（別銘柄推奨）」と追記する。
-
----
-
-### 誤り 5: game-e2e-review-system.md — 知見番号 42・43 の参照が本文に未存在
-
-- **記載内容**: 完了セクションに「（知見 42）」「（知見 43）」として参照されている。またタイトルセクションで「SKILL.md を修正: 知見番号の範囲も "1〜35" → "1〜42" に更新」と記載されている。
-- **実際の動作**: `game-e2e-review-system.md` の「実装上の知見と落とし穴」セクションに「### 41.」「### 42.」「### 43.」は存在せず、最大は「### 40.」。「（知見 42）」と参照されている backcast.py 不在バグ修正の知見本文は「### 38.」「### 39.」として記録されており、番号が一致しない。
-- **修正案**: 完了セクションの「（知見 42）」「（知見 43）」という参照を「（知見 38・39）」「（知見 40）」に修正する。または知見 41〜43 の本文を実際に追記する。「知見番号の範囲も "1〜35" → "1〜42" に更新」という記述は「"1〜35" → "1〜40" に更新」に訂正する。
-
----
-
-### 誤り 6: game-e2e-review-system.md — テスト分離戦略サンプルコードの `waitForLoadState`
-
-- **記載内容**（「テスト分離戦略」コードスニペット内）:
+- **ファイル**: `development_docs/game/game-e2e-review-system.md` 行 335-336
+- **該当箇所**:
   ```typescript
-  if (needsNavigation) {
-    await page.goto(getAppUrl(APP));
-    await page.waitForLoadState("networkidle");
-  }
+  await page.waitForLoadState("networkidle");
   ```
-- **実際の動作**: 知見 35a で「`waitForLoadState("networkidle")` は marimo WebSocket 常時接続のため永遠に到達しない」と明記されているが、同ドキュメント内の設計思想セクションのサンプルコードには `"networkidle"` がそのまま残っている。実際の `helpers.ts` では `"networkidle"` は一切使用されず `"load"` を使用している。
-- **修正案**: サンプルコード内の `waitForLoadState("networkidle")` を `waitForLoadState("load")` に修正する（知見 35a との整合性確保）。
+- **問題**: 知見 35a で「`waitForLoadState("networkidle")` は marimo の WebSocket 常時接続のため永遠に到達しない」と明記されている。しかし同ドキュメント内の「テスト分離戦略」セクションのサンプルコードには `"networkidle"` がそのまま残っている。実際の全 spec ファイルでは `"load"` が使用されており、サンプルコードが実態と矛盾している。
+- **推奨修正**: `await page.waitForLoadState("networkidle");` を `await page.waitForLoadState("load");` に修正する。
+- **重要度**: Medium
+
+### 6. game-play SKILL.md の全スイート所要時間が大幅に過大
+
+- **ファイル**: `.claude/skills/game-play/SKILL.md` 行 40
+- **該当箇所**: `全スイート実行（**所要時間: 約1.2時間**）`
+- **問題**: プレイログの実行時間は **18.1 分**。game-e2e-review-system.md の過去実績でも最大 16.4 分。「約 1.2 時間」は実態の約 4 倍であり、スキル実行者に不要な待機を強いるか、タイムアウト設定を過大にする原因になる。
+- **推奨修正**: `**所要時間: 約20分**` に修正する（マシン性能によるばらつきを考慮し余裕を持たせた値）。
+- **重要度**: Medium
+
+### 7. game-play SKILL.md の期待結果「75 passed / 5 skipped」が現状と不一致
+
+- **ファイル**: `.claude/skills/game-play/SKILL.md` 行 46
+- **該当箇所**: `> **期待結果**: 全スイート実行時は 75 passed / 5 skipped（`backcast-integration.spec.ts` の 2 skipped 含む）を目安とする。`
+- **問題**:
+  1. 現在のテスト総数は **83**（regular 78 + fixme 5）で、75 は古い値。
+  2. `backcast-integration.spec.ts の 2 skipped` という注釈は、プレイログでは backcast-integration が 6 passed / 0 skipped と記録されている。`test.fixme()` 2 件は Playwright で "skipped" と表示されるはずだが、プレイログの記載と一致しない。
+  3. 現状 9 件が failed（guard-validation 2件、integration 5件、bridge 1件、persistence 1件）であり「0 failed」は期待できない状態。
+- **推奨修正**: 期待結果を「全スイート実行時はテスト総数約 83 件。既知の不安定テスト（integration.spec.ts 5件、guard-validation.spec.ts 2件等）を除き 69+ passed を目安とする。最新の詳細は `game-e2e-review-system.md` を参照」に更新する。
+- **重要度**: High
+
+### 8. backcast-game-play.md の知見番号範囲が古い
+
+- **ファイル**: `development_docs/plans/backcast-game-play.md` 行 195
+- **該当箇所**: `| development_docs/game/game-e2e-review-system.md | E2E テスト知見集（知見 1〜35） |`
+- **問題**: 実際の知見は 1-40 まで存在する。知見 36（BroadcastChannel イベント抑制）、37（UX プレイテスト問題）、38-39（backcast.py/layouts 不在症状）、40（SKILL.md パスバグ）が含まれていない。
+- **推奨修正**: `（知見 1〜40）` に更新する。
+- **重要度**: Medium
+
+### 9. game-play SKILL.md の知見 35c 参照が存在しない
+
+- **ファイル**: `.claude/skills/game-play/SKILL.md` 行 123
+- **該当箇所**: `page.reload()` は通常使わない（WebSocket 切断が起きる）。ただし ... 接続安定化のために使用する（知見35c）
+- **問題**: `game-e2e-review-system.md` の知見 35 にはサブ項目 a（networkidle タイムアウト）と b（再接続スキル再発火）のみが存在し、「35c」は付番されていない。`page.reload()` のリカバリー利用に関する記述は知見 35 の本文に含まれるが、明示的なサブ番号は付与されていない。
+- **推奨修正**: `（知見35c）` を `（知見35）` に修正する。
+- **重要度**: Low
+
+### 10. game-play SKILL.md の BRIDGE_002 操作コマンド引数が固定値
+
+- **ファイル**: `.claude/skills/game-play/SKILL.md` 行 68
+- **該当箇所**: `| 8 | BRIDGE_002 | bt.get_stock_daily("7203") | 株価データ取得 + スキル発火 |`
+- **問題**: `skill-data.ts` の BRIDGE_002 の `helpContent` では `get_stock_daily("6758")` （ソニー）を例示しており、「別銘柄を自分で取得する」が BRIDGE_002 の趣旨。トヨタ（7203）を固定値で記載するのはスキルの教育目的と矛盾する。
+- **推奨修正**: `bt.get_stock_daily("7203")` を `bt.get_stock_daily(code)` に変更し、備考に「例: "6758" など SANDBOX で使った銘柄以外を推奨」と追記する。
+- **重要度**: Low
+
+### 11. プレイログのテストスイート数が実際と不一致
+
+- **ファイル**: `development_docs/game-play-reports/play-log-2026-02-21.md` 行 9
+- **該当箇所**: `テストスイート数: 11`
+- **問題**: プレイログのスイート別結果テーブルには **10 行**しかない（backcast-integration, bridge, data, guard-validation, integration, persistence, sandbox, setup, ui, z-python-e2e）。実際の spec ファイル数も 10。「11」はカウントミス。
+- **推奨修正**: `テストスイート数: 10` に修正する。
+- **重要度**: Medium
+
+### 12. プレイログ ui.spec.ts の skipped 数がテーブルとサマリーで不整合の可能性
+
+- **ファイル**: `development_docs/game-play-reports/play-log-2026-02-21.md` 行 7, 23
+- **該当箇所**: サマリー `5 skipped`、ui.spec.ts `skipped: 3`
+- **問題**: テーブルで skipped が記載されているのは ui.spec.ts の 3 件のみ。合計が 5 になるには残り 2 件の skipped がどこかにあるはずだが、テーブル上の他スイートは全て skipped 0。backcast-integration.spec.ts には `test.fixme()` が 2 件あり、Playwright は fixme を skipped としてカウントするため、backcast-integration の行は「4 passed / 0 failed / 2 skipped」であるべき（テーブルの「6 passed / 0 failed / 0 skipped」は誤り）。
+- **推奨修正**: backcast-integration.spec.ts の行を `passed: 4, failed: 0, skipped: 2` に修正する。これでサマリーの 5 skipped（ui 3 + backcast-integration 2）と整合する。
+- **重要度**: Medium
 
 ---
 
-## 曖昧・不足している記述
+## サマリー
 
-### 不足 1: game-setup SKILL.md — port 2719〜2723 の起動要否
+- 検証ドキュメント数: 4（+ プレイログ自体の検証）
+- 発見事項: **12 件**（High: 3, Medium: 6, Low: 3）
 
-- **記載内容**: 手順 5 で「port 2718 に加えて 2719〜2724 のサーバーも使用する」「port 2724 だけは手動起動が必要なことが多い」と記載。
-- **問題点**: port 2719〜2723 を手動起動すべきかどうかの判断基準が不明確。`playwright.config.ts` の `webServer` に自動起動設定があるのか手動が必要なのかの区別が書かれていない。
-- **修正案**: 「2719〜2723 は Playwright が自動起動するため手動操作不要」または「2719〜2723 も確認が必要な場合は `playwright.config.ts` の `webServer` 設定を参照」と明記する。
+### High 事項（即時修正推奨）
 
-### 不足 2: game-play SKILL.md — SANDBOX_003 の発火条件
+| # | 対象 | 概要 |
+|---|------|------|
+| 1 | game-e2e-review-system.md ヘッダー | テスト数・スイート数が古い（9 スイート/75 passed → 10 スイート/83 テスト） |
+| 2 | game-e2e-review-system.md ファイル構成 | 新規 spec 4 件（data, guard-validation, setup, backcast-integration）が未記載 |
+| 7 | game-play SKILL.md 期待結果 | 「75 passed / 5 skipped」が現状と乖離。テスト総数 83、既知失敗 9 件あり |
 
-- **記載内容**: 「スキル発火タイミング」セクションに SANDBOX_003 の条件記載なし。
-- **実際の実装** (`game_setup.py` の `trades()` 関数):
-  ```python
-  if "SANDBOX_002" in s:
-      emit_skill("SANDBOX_003")
-  ```
-  `bt.buy()` による SANDBOX_002 完了後に `bt.trades()` を呼ぶことが必須。
-- **修正案**: 「SANDBOX_003 は `bt.trades()` 実行かつ SANDBOX_002 完了済みで発火（`bt.buy()` 後に呼ぶこと）」を追記する。
+### Medium 事項
 
-### 不足 3: game-play SKILL.md — guard-validation テストスペックの存在
+| # | 対象 | 概要 |
+|---|------|------|
+| 3 | game-e2e-review-system.md 知見番号 | 完了セクションで「知見 42/43」を参照するが本文は知見 40 まで |
+| 5 | game-e2e-review-system.md サンプルコード | テスト分離戦略の `"networkidle"` が知見 35a と矛盾 |
+| 6 | game-play SKILL.md 所要時間 | 「約1.2時間」→ 実測 18 分。約 4 倍の過大見積もり |
+| 8 | backcast-game-play.md 知見範囲 | 「知見 1-35」→ 実際は 1-40 |
+| 11 | プレイログ スイート数 | 「11」→ 実際は 10 |
+| 12 | プレイログ backcast-integration | passed/skipped カウントがテーブルとサマリーで不整合 |
 
-- **記載内容**: 注意事項に `auto_instantiate = true` や接続関連の知見が記載されているが `guard-validation.spec.ts` への言及がない。
-- **問題点**: プレイログで `guard-validation.spec.ts` 全 3 件が失敗しており、ガード機能（`buy()` / `sell()` の警告 callout）の期待動作がテストされているが SKILL.md には未記載。
-- **修正案**: 注意事項に「`guard-validation.spec.ts` はガード警告メッセージ（`callout`）のテキスト一致を検証する。テキストが変更された場合はテストも更新が必要」を追記する。
+### Low 事項
 
-### 不足 4: game-e2e-review-system.md — ファイル構成に新規スペック未記載
-
-- **記載内容**: `frontend/e2e-tests/game/` のファイルリストに `data.spec.ts`、`guard-validation.spec.ts`、`backcast-integration.spec.ts` が含まれていない。
-- **実際の状態**: プレイログによれば上記 3 ファイルが存在しテストが実行されている。
-- **修正案**: ファイル構成リストに 3 ファイルを追加する（用途の説明も含めて）。
-
-### 不足 5: backcast-game-play.md — 最新テスト結果の期待値が旧状態
-
-- **記載内容**: 全スイート実行時の目安が「75 passed / 5 skipped」（backcast-integration.spec.ts 追加前の値）のみ。
-- **問題点**: フルランで現在 83 テストが実行されること、`guard-validation.spec.ts` はガード機能が未実装のため 3 件が常時失敗する既知状態であることが記載されていない。
-- **修正案**: 「既知の失敗テスト（guard-validation.spec.ts 3件：ガード機能未実装）を除いた期待値は最新の `game-e2e-review-system.md` を参照」という形式で最新実態を反映する。
+| # | 対象 | 概要 |
+|---|------|------|
+| 4 | game-e2e-review-system.md 知見順序 | 知見 34 と 35 の掲載順が入れ替わっている |
+| 9 | game-play SKILL.md 知見参照 | 「知見35c」は存在しない。「知見35」が正しい |
+| 10 | game-play SKILL.md BRIDGE_002 | 固定値 "7203" ではなく可変引数 `code` が教育目的に適切 |
 
 ---
 
 ## 正確であることを確認した項目
 
-1. **game-setup SKILL.md のコピー手順**: backcast.py・関連モジュール・`layouts/backcast.grid.json` の全ファイルコピーコマンドが記載されており、game-e2e-review-system.md「完了（2026-02-21 backcast.py ファイル不在バグ修正セッション）」の内容と一致。
-
-2. **game-setup SKILL.md の `MSYS_NO_PATHCONV=1` 説明**: port 2724 起動コマンドの `MSYS_NO_PATHCONV=1` フラグの説明（Git Bash が `/foo` を Windows パスに変換する問題）が正確で、プレイログ記載の知見と一致している。
-
-3. **game-play SKILL.md のスキル発火順序（方法B: 手動操作）**: `SANDBOX_001 → 002 → 003 → 004 → 005 → 006 → BRIDGE_001 → 002 → 003` の順序は `game_setup.py` の実装と `backcast-integration.spec.ts` の完全プレイフロー（全 6 テスト PASS）と一致している。
-
-4. **game-play SKILL.md の `openSkillTreePanel()` / `runNewCellInGrid()` ヘルパー名**: 実際の `helpers.ts` に同名の関数が存在し、説明と実装が一致している。
-
-5. **game-setup SKILL.md のトラブルシューティング表**: `ModuleNotFoundError: BackcastPro` の解決策として `export PYTHONPATH="/d/Documents/BackcastPro:$PYTHONPATH"` が記載されており、プロジェクト構造（`d:\Documents\BackcastPro`）と一致している。
-
-6. **skill-data.ts のスキル総数**: プレイログ・SKILL.md・ドキュメント全体で「59 スキル」と記載されており正確。
-
-7. **game_setup.py のガードロジック実装**: `buy()` に「まず `bt.chart('7203')` でチャートを表示してください」callout、`sell()` に「保有中の株がありません」callout が実装済みであり、backcast-game-play.md の操作コマンド説明と対応している。ガード機能は実装済み。
-
-8. **game-play SKILL.md の `waitForLoadState("load")` 記述**: 知見 35a と一致しており正確。
-
-9. **backcast-game-play.md のスキルツリー前提条件チェーン**: SANDBOX_003・SANDBOX_004 はともに SANDBOX_002 を前提とし、SANDBOX_005 は SANDBOX_003・SANDBOX_004 の両方を前提とする記述が `skill-data.ts` の `prerequisites` 配列と一致。
-
-10. **Issue ステータス（4件の未対応 Issue）**: `e2e-test-missing-fail002-skill.md`、`e2e-test-missing-fullrun-contamination.md`、`e2e-test-missing-reconnect-skill-event.md`、`e2e-test-missing-step-end-hud-status.md` はいずれも「⬜ 未対応」と記載されており、対応するテストコードが存在しないことを確認した。ステータス表記は正確で更新不要。
-
-11. **game-setup SKILL.md の pnpm dev コマンド**: `cd /d/Documents/marimo && pnpm dev` でバックエンド port 2718・フロントエンド port 3000 という記述は、プレイログの実行環境と一致している。
-
-12. **helpers.ts の主要ヘルパー関数名**: `ensureConnected`、`dismissReconnectedBanner`、`emitSkillEvent`、`emitSkillEventViaHTML`、`emitSkillViaPython`、`openSkillTreePanel`、`getSkillStatus`、`waitForSkillStatus`、`getProgressText`、`getCompletedCount`、`runNewCell`、`runNewCellInGrid`、`resetGameProgress` — いずれも実際に `helpers.ts` に定義されており、ドキュメントの参照と一致している。
-
----
-
-## 補足: Issue ステータス更新要否
-
-| ファイル | 現ステータス | 実装状況 | 要更新 |
-|---------|------------|--------|-------|
-| `e2e-test-missing-fail002-skill.md` | ⬜ 未対応 | 未実装 | 不要 |
-| `e2e-test-missing-fullrun-contamination.md` | ⬜ 未対応 | 未実装 | 不要 |
-| `e2e-test-missing-reconnect-skill-event.md` | ⬜ 未対応 | 未実装 | 不要 |
-| `e2e-test-missing-step-end-hud-status.md` | ⬜ 未対応 | 未実装 | 不要 |
-
-4 件すべての Issue は「未対応」と正しく記録されており、修正は不要。
+1. **game-setup SKILL.md のコピー手順**: backcast.py・関連モジュール・`layouts/backcast.grid.json` の全ファイルコピーコマンドが記載されており、game-e2e-review-system.md の完了セクション内容と一致。
+2. **game-setup SKILL.md の `MSYS_NO_PATHCONV=1` 説明**: port 2724 起動コマンドの説明が正確。
+3. **game-play SKILL.md のスキル発火順序（方法B: 手動操作）**: SANDBOX_001-006 → BRIDGE_001-003 の順序が `game_setup.py` 実装と一致。
+4. **game-play SKILL.md の `waitForLoadState("load")` 記述**: 知見 35a と一致しており正確。全 spec ファイルでも `"load"` を使用。
+5. **backcast-game-play.md のスキルツリー前提条件チェーン**: `skill-data.ts` の `prerequisites` 配列と一致。
+6. **skill-data.ts のスキル総数 59**: プレイログ・SKILL.md・ドキュメント全体で統一されており正確。
+7. **game-setup SKILL.md のトラブルシューティング表**: 6 項目全てが実際の環境・知見と一致。
+8. **helpers.ts の主要ヘルパー関数名**: ドキュメント記載の全関数が実際に `helpers.ts` に定義されている。
+9. **backcast-game-play.md のマイルストーン報酬表**: `skill-data.ts` の `milestones` 定義と一致。

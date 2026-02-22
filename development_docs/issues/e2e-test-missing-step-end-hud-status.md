@@ -52,6 +52,13 @@ test("ゲーム終了後に HUD ステータスが Finished になる", async ({
 
 `data-testid="hud-status"` が `backtest-hud.tsx` に存在しない場合は追加が必要。
 
+## 実装試行記録
+
+**試行日**: 2026-02-21
+**ブロッカー**: `bt.step()` をデータ末尾まで進めるには backcast.py + BackcastPro エンジン + 実株価データが必要。E2E テスト環境（game_test.py）ではゲームエンジンが未初期化。backcast-integration.spec.ts は backcast.py を使うが、全データ消化（数百〜数千 step）は時間的に非現実的。
+**試行内容**: data-testid="hud-status" の存在確認を試みたが、backtest-hud.tsx が game_test.py 上では render されないため検証不可。
+**推奨**: backcast-integration.spec.ts で短いデータセット（10ステップ程度）を使った終了テストを追加する。要: テスト用短縮データの準備。
+
 ## 関連 Issue
 
 - `step-end-status-label-wrong.md` — 修正済み Issue（修正内容の詳細はこちら）

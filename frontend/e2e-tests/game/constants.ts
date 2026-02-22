@@ -40,6 +40,11 @@ export const DATA_SKILL_IDS = skillDefinitions
   .filter((s) => s.category === "data")
   .map((s) => s.id);
 
+/** 失敗経験トラックのスキル ID 一覧 */
+export const FAIL_SKILL_IDS = skillDefinitions
+  .filter((s) => s.category === "fail")
+  .map((s) => s.id);
+
 /** データセットトラックのスキル ID 一覧 */
 export const SET_SKILL_IDS = skillDefinitions
   .filter((s) => s.category === "set")

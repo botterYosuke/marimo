@@ -103,8 +103,9 @@ _gs.buy()
 
     // 警告メッセージの確認（.first() で strict mode 回避）
     // ページ内の React Flow ノードや他セルに同テキストが複数存在する可能性があるため
-    await expect(page.locator("text=/まず.*bt.chart/").first()).toBeVisible({
-      timeout: 5_000,
+    // callout プラグインは shadow DOM 内にレンダリングされるため getByText() を使用
+    await expect(page.getByText("bt.chart").first()).toBeVisible({
+      timeout: 10_000,
     });
 
     // スキルが発火しないことを確認
@@ -134,14 +135,19 @@ _gs.buy()   # 2回目: ガードで弾かれる → "すでに株を保有中" �
     await page.waitForTimeout(2_000);
 
     // 警告メッセージの確認
-    await expect(page.locator("text=/すでに株を保有中/").first()).toBeVisible({
-      timeout: 5_000,
+    // callout プラグインは shadow DOM 内にレンダリングされるため getByText() を使用
+    await expect(page.getByText("すでに株を保有中").first()).toBeVisible({
+      timeout: 10_000,
     });
 
     // スキル数が 2 のまま（SANDBOX_001 + SANDBOX_002 のみ、二重カウントなし）
+    // BroadcastChannel 配信は非同期のため、SANDBOX_002 の prerequisites（SANDBOX_001）が
+    // atom に反映されるまでのラグを考慮してポーリングで待機する（BUG-002 修正）
     await openSkillTreePanel(page);
-    const count = await getCompletedCount(page);
-    expect(count).toBe(2);
+    await expect(async () => {
+      const count = await getCompletedCount(page);
+      expect(count).toBe(2);
+    }).toPass({ timeout: 10_000 });
   });
 
   // -------------------------------------------------------------------------
@@ -162,15 +168,20 @@ _gs.sell()
     await page.waitForTimeout(2_000);
 
     // 警告メッセージの確認
+    // callout プラグインは shadow DOM 内にレンダリングされるため、
+    // text=/regex/ ロケーターでは検出できない場合がある。
+    // getByText() は open shadow root を確実にピアスする（BUG-003 修正）
     await expect(
-      page.locator("text=/保有中の株がありません/").first(),
+      page.getByText("保有中の株がありません").first(),
     ).toBeVisible({
-      timeout: 5_000,
+      timeout: 10_000,
     });
 
     // SANDBOX_004 が発火しないことを確認（SANDBOX_001 のみ）
     await openSkillTreePanel(page);
-    const count = await getCompletedCount(page);
-    expect(count).toBe(1);
+    await expect(async () => {
+      const count = await getCompletedCount(page);
+      expect(count).toBe(1);
+    }).toPass({ timeout: 10_000 });
   });
 });

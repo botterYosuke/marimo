@@ -60,6 +60,19 @@ test.describe("ブリッジトラック", () => {
     }
     await page.waitForLoadState("load");
     await ensureConnected(page);
+
+    // ⚠️ 順序重要: wait(2000) → resetGameProgress() の順で実行する。
+    // auto_instantiate の broadcast_progress() が progress_channel 経由で
+    // playerProgressAtom を上書きするのを防ぐため、resetGameProgress() で
+    // __testSuppressProgressSync フラグを立てる必要がある（知見 39）。
+    // wait を先にすることで、auto_instantiate イベントの大部分を受け取ってから
+    // リセットすることで、テスト開始時のカウントを確実に 0 にする。
+    await page.waitForTimeout(2000);
+    await resetGameProgress(page);
+
+    // リセット後の安定化（残留イベント処理を待つ）
+    await page.waitForTimeout(500);
+
     await openSkillTreePanel(page);
   });
 
