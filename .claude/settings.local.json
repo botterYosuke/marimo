@@ -7,7 +7,10 @@
       "Bash(.venv/Scripts/python.exe:*)",
       "Bash(python:*)",
       "Bash(.venv/Scripts/python:*)",
-      "WebFetch(domain:nautilustrader.io)"
+      "WebFetch(domain:nautilustrader.io)",
+      "Bash(claude mcp add:*)",
+      "Bash(/c/Users/sasai/.local/bin/claude mcp add:*)",
+      "Bash(ls:*)"
     ]
   }
 }
