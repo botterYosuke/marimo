@@ -257,6 +257,11 @@ function isPointInBox(
   return pt.x >= minX && pt.x <= maxX && pt.y >= minY && pt.y <= maxY;
 }
 
+function isInAxes(pt: PixelPoint, g: AxesGeometry): boolean {
+  const [axLeft, axTop, axRight, axBottom] = g.axesPixelBounds;
+  return pt.x >= axLeft && pt.x <= axRight && pt.y >= axTop && pt.y <= axBottom;
+}
+
 export const visibleForTesting = {
   createScale,
   pixelToData,
@@ -264,6 +269,7 @@ export const visibleForTesting = {
   pointInPolygon,
   clampToAxes,
   isPointInBox,
+  isInAxes,
 };
 
 export class MatplotlibRenderer {
@@ -330,10 +336,7 @@ export class MatplotlibRenderer {
     const prev = this.#state;
     this.#state = state;
 
-    if (state.chartBase64 !== this.#currentChartBase64) {
-      this.#loadImage(state.chartBase64);
-      return;
-    }
+    let needsRedraw = false;
 
     // Update canvas dimensions if changed
     if (state.width !== prev.width || state.height !== prev.height) {
@@ -342,15 +345,20 @@ export class MatplotlibRenderer {
       this.#canvas.height = state.height * dpr;
       this.#canvas.style.width = `${state.width}px`;
       this.#canvas.style.height = `${state.height}px`;
+      needsRedraw = true;
+    }
+
+    if (state.chartBase64 !== this.#currentChartBase64) {
+      this.#loadImage(state.chartBase64);
+      return;
     }
 
     // Redraw if style props changed or dimensions changed
     if (
+      needsRedraw ||
       state.selectionColor !== prev.selectionColor ||
       state.selectionOpacity !== prev.selectionOpacity ||
-      state.strokeWidth !== prev.strokeWidth ||
-      state.width !== prev.width ||
-      state.height !== prev.height
+      state.strokeWidth !== prev.strokeWidth
     ) {
       this.#drawCanvas();
     }
@@ -363,6 +371,15 @@ export class MatplotlibRenderer {
 
     // Clear selection on new chart
     this.#interaction = { type: "idle" };
+
+    // Clear stale image so old content doesn't linger while new image loads
+    this.#image = null;
+    const ctx = this.#canvas.getContext("2d");
+    if (ctx) {
+      const dpr = globalThis.devicePixelRatio ?? 1;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, this.#state.width, this.#state.height);
+    }
 
     const img = new Image();
     img.onload = () => {
@@ -557,6 +574,9 @@ export class MatplotlibRenderer {
 
     // Shift+click -> start lasso
     if (e.shiftKey) {
+      if (!isInAxes(pt, this.#state)) {
+        return;
+      }
       this.#interaction = {
         type: "lasso",
         points: [clampToAxes(pt, this.#state)],
@@ -609,7 +629,10 @@ export class MatplotlibRenderer {
       this.#clearSelection();
     }
 
-    // Start new box selection
+    // Start new box selection (only inside axes)
+    if (!isInAxes(pt, this.#state)) {
+      return;
+    }
     const clamped = clampToAxes(pt, this.#state);
     this.#interaction = {
       type: "box",
