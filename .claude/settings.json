@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(uvx --prerelease=explicit --with \"cocoindex>=1.0.0a18\" cocoindex-code@latest:*)"
+      "Bash(uvx --prerelease=explicit --with \"cocoindex>=1.0.0a18\" cocoindex-code@latest:*)",
+      "Skill(dev-restart)",
+      "Skill(dev-restart:*)",
+      "Skill(new_trial)",
+      "Skill(new_trial:*)",
+      "mcp__cocoindex-code__search"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "cocoindex-code"
+  ]
 }
