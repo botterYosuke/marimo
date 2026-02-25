@@ -6,7 +6,9 @@
       "Skill(dev-restart:*)",
       "Skill(new_trial)",
       "Skill(new_trial:*)",
-      "mcp__cocoindex-code__search"
+      "mcp__cocoindex-code__search",
+      "Skill(generate-code-url)",
+      "Skill(generate-code-url:*)"
     ]
   },
   "enabledMcpjsonServers": [
