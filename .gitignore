@@ -144,3 +144,4 @@ frontend/dist-pyodide/
 .playwright-mcp/
 .mcp.json
 frontend/dist-pyodide/
+.cocoindex_code/

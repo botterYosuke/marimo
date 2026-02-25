@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(\"/c/Users/sasai/AppData/Local/hatch/env/virtual/marimo/xK6oz_Ou/test.py3.12/Scripts/python.exe\" -m pytest tests/_server/test_template_notebook.py -v)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(uvx --prerelease=explicit --with \"cocoindex>=1.0.0a18\" cocoindex-code@latest:*)",
+      "Skill(dev-restart)",
+      "Skill(dev-restart:*)",
+      "Skill(new_trial)",
+      "Skill(new_trial:*)",
+      "mcp__cocoindex-code__search",
+      "Skill(generate-code-url)",
+      "Skill(generate-code-url:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "cocoindex-code"
+  ]
 }

@@ -22,6 +22,8 @@ extra:
       link: https://pypi.org/project/marimo/
     - icon: fontawesome/brands/youtube
       link: https://www.youtube.com/@botterYosuke
+    - icon: fontawesome/brands/reddit
+      link: https://www.reddit.com/r/marimo_notebook/
 extra_css:
   - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.css
   - stylesheets/extra.css
@@ -76,10 +78,13 @@ nav:
   - Home: index.md
   - Gameplay Guide: game-guide.md
   - Lore & Story: story.md
+
   - Security: security.md
   - FAQ: faq.md
 plugins:
   - search
+  - git-revision-date-localized:
+      fallback_to_build_date: true
   - social:
       cards_layout_options:
         background_color: '#FFFFFF'

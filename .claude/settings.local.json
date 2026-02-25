@@ -23,7 +23,15 @@
       "Bash(pnpm lint:*)",
       "Bash(rustfmt:*)",
       "Bash(echo:*)",
-      "Bash(pnpm run dev:*)"
+      "Bash(pnpm run dev:*)",
+      "Bash(.venv/Scripts/python.exe:*)",
+      "Bash(python:*)",
+      "Bash(.venv/Scripts/python:*)",
+      "WebFetch(domain:nautilustrader.io)",
+      "Bash(claude mcp add:*)",
+      "Bash(/c/Users/sasai/.local/bin/claude mcp add:*)",
+      "Bash(ls:*)",
+      "Bash(cd:*)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\marimo\\.claude\\skills",
