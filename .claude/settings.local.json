@@ -10,7 +10,8 @@
       "WebFetch(domain:nautilustrader.io)",
       "Bash(claude mcp add:*)",
       "Bash(/c/Users/sasai/.local/bin/claude mcp add:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(cd:*)"
     ]
   }
 }
