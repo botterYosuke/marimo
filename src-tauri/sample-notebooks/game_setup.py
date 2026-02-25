@@ -16,7 +16,7 @@ import marimo as mo
 
 from BackcastPro import get_stock_daily as _get_stock_daily, BankruptError
 from backtest_wrapper import Backtest_Wrapper
-from chart import backtest_chart, update_all_backtest_charts
+from backtest_chart import backtest_chart, update_all_backtest_charts
 from headless_broadcast import enable_headless_trade_events, publish_state_headless
 from progress_manager import broadcast_progress
 from skill_events import get_triggered_skills, emit_skill

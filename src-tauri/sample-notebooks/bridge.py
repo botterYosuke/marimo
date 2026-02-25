@@ -10,7 +10,7 @@ with app.setup:
     import time
     from marimo._output.hypertext import Html
     from BackcastPro import Backtest, get_stock_daily
-    from chart import backtest_chart
+    from backtest_chart import backtest_chart
 
     # =========================================================================
     # ブリッジモード: サンドボックスの裏側を学ぶ
