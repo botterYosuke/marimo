@@ -81,12 +81,42 @@ jobs:
             exit 1
           fi
 
-      - name: Copy sample-notebooks/lib to dist
+      - name: Copy sample-notebooks to dist and generate manifest
         run: |
-          mkdir -p frontend/dist/notebooks/lib
-          cp -r src-tauri/sample-notebooks/lib/. frontend/dist/notebooks/lib/
-          echo "Copied lib files:"
-          find frontend/dist/notebooks/lib -type f
+          mkdir -p frontend/dist/notebooks
+          cp -r src-tauri/sample-notebooks/. frontend/dist/notebooks/
+
+          # Generate manifest.json
+          cd frontend/dist
+
+          # Notebook files (relative to /marimo)
+          # Only include .py and .json files – exclude .js/.css/binary files
+          # so that FILESサイドバーに余分なファイルが表示されないようにする
+          NOTEBOOK_FILES=$(find notebooks -type f ! -path "*/.*" \( -name "*.py" -o -name "*.json" \) | \
+            sed 's|^notebooks/||' | jq -R . | jq -s .)
+
+
+          # DuckDB files (fetch source is /assets/data/..., target in IDBFS is jp/stocks_daily/...)
+          DUCKDB_FILES=$(find assets/data/stocks_daily -name "*.duckdb" | \
+            sed 's|^assets/data/stocks_daily/|jp/stocks_daily/|' | jq -R . | jq -s .)
+
+          jq -n --argjson notebooks "$NOTEBOOK_FILES" \
+                 --argjson duckdb "$DUCKDB_FILES" \
+                 '{notebooks: $notebooks, duckdb: $duckdb}' > notebooks/manifest.json
+
+          echo "Generated manifest.json:"
+          cat notebooks/manifest.json
+
+
+      - name: Verify manifest.json
+        run: |
+          echo "=== Verifying manifest.json ==="
+          jq -e '.notebooks | length > 0' frontend/dist/notebooks/manifest.json \
+            || (echo "ERROR: manifest.json has no notebooks entries" && exit 1)
+          jq -e '.duckdb | length > 0' frontend/dist/notebooks/manifest.json \
+            || (echo "ERROR: manifest.json has no duckdb entries" && exit 1)
+          echo "notebooks: $(jq '.notebooks | length' frontend/dist/notebooks/manifest.json) files"
+          echo "duckdb: $(jq '.duckdb | length' frontend/dist/notebooks/manifest.json) files"
 
       - name: Verify build output
         run: |

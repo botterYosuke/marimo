@@ -6,6 +6,7 @@ import type { JsonString } from "@/utils/json/base64";
 import { invariant } from "../../../utils/invariant";
 import { Logger } from "../../../utils/Logger";
 import { WasmFileSystem } from "./fs";
+import { getFS } from "./getFS";
 import { getMarimoWheel } from "./getMarimoWheel";
 import { t } from "./tracer";
 import type { SerializedBridge, WasmController } from "./types";
@@ -87,12 +88,143 @@ export class DefaultWasmController implements WasmController {
     WasmFileSystem.createHomeDir(this.requirePyodide);
     WasmFileSystem.mountFS(this.requirePyodide);
     await WasmFileSystem.populateFilesToMemory(this.requirePyodide);
+
+    // Populate initial files if needed
+    const defaultFilename = await this.populateInitialFiles(
+      this.requirePyodide,
+    );
+
     span.end("ok");
     return WasmFileSystem.initNotebookCode({
       pyodide: this.requirePyodide,
       code: opts.code,
       filename: opts.filename,
+      defaultFilename: defaultFilename,
     });
+  }
+
+  private async populateInitialFiles(
+    pyodide: PyodideInterface,
+  ): Promise<string | null> {
+    const FS = getFS(pyodide);
+    const HOME_DIR = WasmFileSystem.HOME_DIR;
+
+    // Helper: find the best default .py file from a list of relative paths
+    const findDefaultPy = (notebooks: string[]): string | null => {
+      if (notebooks.includes("pyodide.py")) {
+        return "pyodide.py";
+      }
+      return (
+        notebooks.find((f) => f.endsWith(".py") && !f.includes("/")) || null
+      );
+    };
+
+    try {
+      // Check for marker file (already initialized)
+      try {
+        FS.stat(`${HOME_DIR}/.initialized`);
+        // Python env vars are lost on reload – always re-set
+        pyodide.runPython(
+          'import os; os.environ["STOCKDATA_CACHE_DIR"] = "/marimo"',
+        );
+        // Return the best default .py that exists in IDBFS
+        for (const candidate of ["pyodide.py", "backcast.py"]) {
+          try {
+            FS.stat(`${HOME_DIR}/${candidate}`);
+            return candidate;
+          } catch {
+            /* continue */
+          }
+        }
+        return null;
+      } catch {
+        // Not initialized yet
+      }
+
+      const resp = await fetch("/notebooks/manifest.json");
+      if (!resp.ok) {
+        return null;
+      }
+      const manifest: { notebooks: string[]; duckdb: string[] } =
+        await resp.json();
+
+      // Populate notebooks (sequential – files are small)
+      // Skip files that already exist to preserve user edits on DuckDB retry.
+      for (const relPath of manifest.notebooks) {
+        const destPath = `${HOME_DIR}/${relPath}`;
+        try {
+          FS.stat(destPath);
+          continue; // already exists – skip
+        } catch {
+          /* not found – write it */
+        }
+
+        const dir = destPath.substring(0, destPath.lastIndexOf("/"));
+        try {
+          FS.mkdirTree(dir);
+        } catch {
+          /* ignore */
+        }
+
+        const fileResp = await fetch(`/notebooks/${relPath}`);
+        if (fileResp.ok) {
+          FS.writeFile(destPath, new Uint8Array(await fileResp.arrayBuffer()));
+        }
+      }
+
+      // Populate DuckDB in parallel (each file is several MB)
+      // Stock code names are always numeric: jp/stocks_daily/{code}.duckdb
+      const duckdbResults = await Promise.all(
+        manifest.duckdb.map(async (relPath) => {
+          const destPath = `${HOME_DIR}/${relPath}`;
+          const dir = destPath.substring(0, destPath.lastIndexOf("/"));
+          try {
+            FS.mkdirTree(dir);
+          } catch {
+            // directory already exists or creation failed, continue
+          }
+
+          const codeMatch = relPath.match(/(\d+)\.duckdb$/);
+          if (!codeMatch) {
+            return false;
+          }
+
+          const fileResp = await fetch(
+            `/assets/data/stocks_daily/${codeMatch[1]}.duckdb`,
+          );
+          if (!fileResp.ok) {
+            return false;
+          }
+
+          FS.writeFile(destPath, new Uint8Array(await fileResp.arrayBuffer()));
+          return true;
+        }),
+      );
+
+      // Set environment variable
+      pyodide.runPython(
+        'import os; os.environ["STOCKDATA_CACHE_DIR"] = "/marimo"',
+      );
+
+      // Write marker only when ALL DuckDB files were fetched successfully
+      // (partial success leaves IDBFS in an inconsistent state)
+      const allDuckdbOk =
+        manifest.duckdb.length === 0 || duckdbResults.every(Boolean);
+
+      if (allDuckdbOk) {
+        FS.writeFile(`${HOME_DIR}/.initialized`, new Uint8Array([1]));
+        await WasmFileSystem.persistFilesToRemote(pyodide);
+      } else {
+        Logger.warn(
+          `DuckDB fetch: ${duckdbResults.filter(Boolean).length}/${manifest.duckdb.length} succeeded. Marker not written; will retry on next load.`,
+        );
+      }
+
+      return findDefaultPy(manifest.notebooks);
+    } catch (e) {
+      Logger.warn("Failed to populate initial files", e);
+      return null;
+    }
   }
 
   async startSession(opts: {

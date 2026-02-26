@@ -39,8 +39,9 @@ export const WasmFileSystem = {
     pyodide: PyodideInterface;
     code: string;
     filename: string | null;
+    defaultFilename?: string | null;
   }): { code: string; filename: string } => {
-    const { pyodide, filename, code } = opts;
+    const { pyodide, filename, code, defaultFilename } = opts;
     const FS = getFS(pyodide);
 
     const readIfExist = (filename: string): string | null => {
@@ -59,6 +60,17 @@ export const WasmFileSystem = {
         return {
           code: existingContent,
           filename,
+        };
+      }
+    }
+
+    // If there is a default filename (populated from manifest), use it
+    if (!filename && defaultFilename) {
+      const existingContent = readIfExist(defaultFilename);
+      if (existingContent) {
+        return {
+          code: existingContent,
+          filename: defaultFilename,
         };
       }
     }

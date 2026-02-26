@@ -75,6 +75,7 @@ const messageBuffer = new MessageBuffer(
 );
 const bridgeReady = new Deferred<SerializedBridge>();
 let started = false;
+let currentFilename = WasmFileSystem.NOTEBOOK_FILENAME;
 
 // Handle RPC requests
 const requestHandler = createRPCRequestHandler({
@@ -97,10 +98,12 @@ const requestHandler = createRPCRequestHandler({
     started = true;
     try {
       invariant(self.controller, "Controller not loaded");
-      await self.controller.mountFilesystem?.({
-        code: opts.code,
-        filename: opts.filename,
-      });
+      const { code: finalCode, filename: finalFilename } =
+        (await self.controller.mountFilesystem?.({
+          code: opts.code,
+          filename: opts.filename,
+        })) ?? { code: opts.code, filename: opts.filename };
+      currentFilename = finalFilename ?? WasmFileSystem.NOTEBOOK_FILENAME;
       const startSession = t.wrapAsync(
         self.controller.startSession.bind(self.controller),
       );
@@ -114,8 +117,8 @@ const requestHandler = createRPCRequestHandler({
         message: "Loading notebook and dependencies...",
       });
       const bridge = await startSession({
-        code: opts.code,
-        filename: opts.filename,
+        code: finalCode,
+        filename: finalFilename,
         queryParameters: opts.queryParameters,
         userConfig: opts.userConfig,
         onMessage: (msg) => {
@@ -255,7 +258,7 @@ const requestHandler = createRPCRequestHandler({
       from marimo._pyodide.bootstrap import save_file
       save_file
     `);
-    await saveFile(JSON.stringify(opts), WasmFileSystem.NOTEBOOK_FILENAME);
+    await saveFile(JSON.stringify(opts), currentFilename);
   },
 
   /**

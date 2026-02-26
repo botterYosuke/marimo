@@ -1,0 +1,4 @@
+{
+  "notebooks": ["pyodide.py", "backcast.py"],
+  "duckdb": ["jp/stocks_daily/7203.duckdb"]
+}
