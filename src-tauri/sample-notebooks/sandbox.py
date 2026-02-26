@@ -10,7 +10,7 @@ with app.setup:
     import time
     from marimo._output.hypertext import Html
     from BackcastPro import Backtest, get_stock_daily
-    from backtest_chart import backtest_chart
+    from lib.backtest_chart import backtest_chart
 
     # =========================================================================
     # サンドボックスモード: すぐに取引を始められる環境
@@ -31,7 +31,7 @@ with app.setup:
         unique_id = f"marimo-bc-{bt.step_index}-{int(time.time() * 1000)}"
 
         html = (
-            f'<marimo-broadcast '
+            f"<marimo-broadcast "
             f'id="{unique_id}" '
             f'channel="backtest_channel" '
             f'type="backtest_update" '
@@ -69,6 +69,7 @@ with app.setup:
 
     def enable_headless_trade_events(bt: Backtest):
         """取引イベントをヘッドレスモードで自動発行するよう設定"""
+
         def on_trade(event_type: str, trade):
             publish_trade_event_headless(
                 event_type=event_type,
@@ -77,6 +78,7 @@ with app.setup:
                 price=trade.entry_price,
                 tag=getattr(trade, "tag", None),
             )
+
         bt.add_trade_callback(on_trade)
 
     # =========================================================================
@@ -96,7 +98,6 @@ with app.setup:
     get_playing, set_playing = mo.state(False)
     AutoRefresh, set_step = mo.state(0)
 
-
     def run():
         """ループ開始/停止を制御"""
         if get_playing() == False:
@@ -107,7 +108,6 @@ with app.setup:
             set_playing(False)
             print("ストップ")
 
-
     def reset():
         """バックテストをリセットして最初から"""
         set_playing(False)
@@ -116,17 +116,20 @@ with app.setup:
         set_step(0)
         print("リセットした")
 
-
     def do_step():
         while bt.is_finished == False:
             if get_playing() == False:
                 break
             if bt.step() == False:
                 break
-            publish_state_headless(bt, status_label="実行中", status_variant="success")
+            publish_state_headless(
+                bt, status_label="実行中", status_variant="success"
+            )
             set_step(bt.step_index)
             time.sleep(0.4)
-        publish_state_headless(bt, status_label="停止中", status_variant="secondary")
+        publish_state_headless(
+            bt, status_label="停止中", status_variant="secondary"
+        )
 
 
 @app.cell(hide_code=True)
@@ -157,20 +160,18 @@ def _():
 @app.cell
 def _(code, toyota):
     # 移動平均線を追加
-    toyota['SMA1'] = toyota['Close'].rolling(2).mean()
-    toyota['SMA2'] = toyota['Close'].rolling(5).mean()
+    toyota["SMA1"] = toyota["Close"].rolling(2).mean()
+    toyota["SMA2"] = toyota["Close"].rolling(5).mean()
 
     # データをセット（サンドボックスでは自動）
-    bt.set_data({
-        code: toyota
-    })
+    bt.set_data({code: toyota})
     return
 
 
 @app.cell
 def _(bt, code):
     # チャートを表示
-    backtest_chart(bt, code=code, indicators=['SMA1', 'SMA2'])
+    backtest_chart(bt, code=code, indicators=["SMA1", "SMA2"])
     return
 
 

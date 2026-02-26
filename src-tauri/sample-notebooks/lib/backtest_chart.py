@@ -11,8 +11,8 @@ from __future__ import annotations
 import logging
 import pandas as pd
 
-from chart import LightweightChartWidget, chart_by_df
-from chart_data import (
+from lib.chart import LightweightChartWidget, chart_by_df
+from lib.chart_data import (
     _prepare_chart_df,
     df_to_lwc_data,
     df_to_lwc_indicators,
@@ -264,7 +264,9 @@ def backtest_chart(
 
         # 巻き戻しまたは大きなジャンプの場合は全データ更新
         needs_full_update = (
-            last_idx == 0 or current_idx < last_idx or current_idx - last_idx > 1
+            last_idx == 0
+            or current_idx < last_idx
+            or current_idx - last_idx > 1
         )
 
         if needs_full_update:
@@ -282,7 +284,8 @@ def backtest_chart(
 
             # 指標データ全更新（キャッシュからも取得を試みる）
             effective_indicators = (
-                indicators or (bt._chart_state.indicators.get(code, (None, None))[0])
+                indicators
+                or (bt._chart_state.indicators.get(code, (None, None))[0])
             )
             effective_options = (
                 indicator_options
@@ -292,7 +295,9 @@ def backtest_chart(
                 widget.indicator_options = prepare_indicator_options(
                     effective_indicators, effective_options
                 )
-                widget.indicator_series = df_to_lwc_indicators(df, effective_indicators)
+                widget.indicator_series = df_to_lwc_indicators(
+                    df, effective_indicators
+                )
         else:
             # 差分更新: _perform_differential_chart_update() を使用
             theme_colors = get_theme_colors(bt._chart_state.color_theme)
@@ -316,7 +321,8 @@ def backtest_chart(
 
             # 指標データ差分更新（キャッシュからも取得を試みる）
             effective_indicators = (
-                indicators or (bt._chart_state.indicators.get(code, (None, None))[0])
+                indicators
+                or (bt._chart_state.indicators.get(code, (None, None))[0])
             )
             if effective_indicators:
                 last_ind = get_last_indicators(df, effective_indicators)
@@ -356,7 +362,9 @@ def backtest_chart(
     return widget
 
 
-def update_backtest_chart(bt, widget: LightweightChartWidget, code: str = None) -> None:
+def update_backtest_chart(
+    bt, widget: LightweightChartWidget, code: str = None
+) -> None:
     """
     既存チャートウィジェットを差分更新（軽量）
 
@@ -398,7 +406,12 @@ def update_backtest_chart(bt, widget: LightweightChartWidget, code: str = None) 
     if needs_full:
         # 初回または巻き戻し: 全データ更新
         _perform_full_chart_update(
-            widget, df, all_trades, code, show_tags=True, theme_colors=theme_colors
+            widget,
+            df,
+            all_trades,
+            code,
+            show_tags=True,
+            theme_colors=theme_colors,
         )
     elif current_len > prev_len:
         # 増分: 差分更新

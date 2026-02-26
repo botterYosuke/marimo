@@ -5,7 +5,7 @@ app = marimo.App(width="grid")
 
 with app.setup:
     import marimo as mo
-    import game_setup as bt
+    import lib.game_setup as bt
 
 
 @app.cell(hide_code=True)

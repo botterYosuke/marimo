@@ -81,6 +81,13 @@ jobs:
             exit 1
           fi
 
+      - name: Copy sample-notebooks/lib to dist
+        run: |
+          mkdir -p frontend/dist/notebooks/lib
+          cp -r src-tauri/sample-notebooks/lib/. frontend/dist/notebooks/lib/
+          echo "Copied lib files:"
+          find frontend/dist/notebooks/lib -type f
+
       - name: Verify build output
         run: |
           echo "Checking build output..."

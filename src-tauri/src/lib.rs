@@ -115,43 +115,42 @@ fn seed_recent_files(app: &tauri::AppHandle) {
     }
 }
 
+fn copy_dir_recursive(src: &std::path::Path, dst: &std::path::Path) {
+    if let Err(e) = std::fs::create_dir_all(dst) {
+        log::error!("Failed to create dir {}: {}", dst.display(), e);
+        return;
+    }
+    let entries = match std::fs::read_dir(src) {
+        Ok(e) => e,
+        Err(e) => {
+            log::error!("Failed to read dir {}: {}", src.display(), e);
+            return;
+        }
+    };
+    for entry in entries.flatten() {
+        let src_path = entry.path();
+        let dst_path = dst.join(entry.file_name());
+        if src_path.is_dir() {
+            copy_dir_recursive(&src_path, &dst_path);
+        } else if !dst_path.exists() {
+            match std::fs::copy(&src_path, &dst_path) {
+                Ok(_) => info!("Seeded: {}", dst_path.display()),
+                Err(e) => log::error!("Failed to copy {:?}: {}", src_path, e),
+            }
+        }
+    }
+}
+
 fn copy_sample_files_to_notebooks(app: &tauri::AppHandle) {
     let src_dir = paths::get_sample_dir(app);
     let dst_dir = paths::get_notebooks_dir(app);
-
-    if let Err(e) = std::fs::create_dir_all(&dst_dir) {
-        log::error!("Failed to create notebooks dir: {}", e);
-        return;
-    }
 
     if !src_dir.exists() {
         log::warn!("Sample files dir not found: {}", src_dir.display());
         return;
     }
 
-    let entries = match std::fs::read_dir(&src_dir) {
-        Ok(e) => e,
-        Err(e) => {
-            log::error!("Failed to read sample files dir: {}", e);
-            return;
-        }
-    };
-
-    for entry in entries.flatten() {
-        let src = entry.path();
-        if !src.is_file() {
-            continue;
-        }
-        if let Some(name) = src.file_name() {
-            let dst = dst_dir.join(name);
-            if !dst.exists() {
-                match std::fs::copy(&src, &dst) {
-                    Ok(_) => info!("Seeded notebook: {}", name.to_string_lossy()),
-                    Err(e) => log::error!("Failed to copy {:?}: {}", name, e),
-                }
-            }
-        }
-    }
+    copy_dir_recursive(&src_dir, &dst_dir);
 }
 
 pub fn run() {

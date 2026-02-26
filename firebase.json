@@ -26,6 +26,10 @@
     ],
     "rewrites": [
       {
+        "source": "/notebooks/lib/**",
+        "destination": "/notebooks/lib/**"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

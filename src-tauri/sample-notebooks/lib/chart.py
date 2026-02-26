@@ -20,7 +20,7 @@ import datetime
 
 import pandas as pd
 
-from chart_data import (
+from lib.chart_data import (
     df_to_lwc_data,
     df_to_lwc_volume,
     df_to_lwc_indicators,
@@ -64,12 +64,16 @@ class LightweightChartWidget(anywidget.AnyWidget):
     volume_data = traitlets.List([]).tag(sync=True)
     markers = traitlets.List([]).tag(sync=True)
     last_bar = traitlets.Dict({}).tag(sync=True)
-    last_bar_packed = traitlets.Bytes(b"").tag(sync=True)  # バイナリプロトコル用
+    last_bar_packed = traitlets.Bytes(b"").tag(
+        sync=True
+    )  # バイナリプロトコル用
     options = traitlets.Dict({}).tag(sync=True)
     indicator_series = traitlets.Dict({}).tag(sync=True)  # 指標データ
     indicator_options = traitlets.Dict({}).tag(sync=True)  # 指標表示オプション
     last_indicators = traitlets.Dict({}).tag(sync=True)  # 差分更新用
-    append_bars = traitlets.List([]).tag(sync=True)  # 新バー追加用（バッチ対応）
+    append_bars = traitlets.List([]).tag(
+        sync=True
+    )  # 新バー追加用（バッチ対応）
 
     def __init__(self):
         super().__init__()
@@ -125,7 +129,9 @@ class LightweightChartWidget(anywidget.AnyWidget):
         try:
             import msgpack
 
-            self.last_bar_packed = msgpack.packb([bar[k] for k in required_keys])
+            self.last_bar_packed = msgpack.packb(
+                [bar[k] for k in required_keys]
+            )
             # last_bar も同時に更新（テストやデバッグ用）
             self.last_bar = bar
         except (ImportError, Exception):
@@ -194,14 +200,18 @@ def chart_by_df(
 
     # 売買マーカー設定
     if trades:
-        widget.markers = trades_to_markers(trades, code, show_tags, tz, theme_colors)
+        widget.markers = trades_to_markers(
+            trades, code, show_tags, tz, theme_colors
+        )
 
     # 指標データ設定
     if indicators:
         widget.indicator_options = prepare_indicator_options(
             indicators, indicator_options
         )
-        widget.indicator_series = df_to_lwc_indicators(original_df, indicators, tz)
+        widget.indicator_series = df_to_lwc_indicators(
+            original_df, indicators, tz
+        )
 
     return widget
 

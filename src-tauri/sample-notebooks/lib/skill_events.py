@@ -5,6 +5,7 @@
 スキル達成をBroadcastChannelで通知するための軽量関数。
 AnyWidgetを使わずmarimo HTMLのみで動作。
 """
+
 from __future__ import annotations
 
 import base64
@@ -14,7 +15,7 @@ import time
 import marimo as mo
 from marimo._output.hypertext import Html
 
-from progress_manager import load_progress, add_completed_skill
+from lib.progress_manager import load_progress, add_completed_skill
 
 _triggered_skills: set[str] = set(load_progress().get("completed_skills", []))
 
@@ -40,7 +41,7 @@ def emit_skill(skill_id: str, context: dict | None = None) -> None:
     event_b64 = base64.b64encode(event_json.encode()).decode()
 
     html = (
-        f'<marimo-broadcast '
+        f"<marimo-broadcast "
         f'id="skill-{skill_id}-{int(time.time() * 1000)}" '
         f'channel="skill_event_channel" '
         f'type="skill_complete" '

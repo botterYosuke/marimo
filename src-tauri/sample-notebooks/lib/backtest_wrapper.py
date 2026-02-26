@@ -1,4 +1,4 @@
-from BackcastPro import Backtest, get_stock_daily as _get_stock_daily
+from BackcastPro import Backtest
 
 
 class _ChartState:
@@ -12,10 +12,11 @@ class _ChartState:
         valid_themes = ("dark", "light")
         if color_theme not in valid_themes:
             import warnings
+
             warnings.warn(
                 f"Unknown color_theme '{color_theme}'. Using 'dark' as default. "
                 f"Valid themes: {valid_themes}",
-                stacklevel=3
+                stacklevel=3,
             )
             color_theme = "dark"
         self.color_theme: str = color_theme

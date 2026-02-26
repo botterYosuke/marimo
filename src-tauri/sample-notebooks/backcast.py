@@ -5,7 +5,7 @@ app = marimo.App(width="grid", layout_file="layouts/backcast.grid.json")
 
 with app.setup:
     import marimo as mo
-    import game_setup as bt
+    import lib.game_setup as bt
 
 
 @app.cell(hide_code=True)

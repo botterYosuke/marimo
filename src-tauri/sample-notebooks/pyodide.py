@@ -10,7 +10,7 @@ with app.setup:
     import time
     from marimo._output.hypertext import Html
     from BackcastPro import Backtest, get_stock_daily
-    from backtest_chart import backtest_chart
+    from lib.backtest_chart import backtest_chart
 
     # =========================================================================
     # ヘッドレス関数（Pyodide対応版）
@@ -31,7 +31,7 @@ with app.setup:
         unique_id = f"marimo-bc-{bt.step_index}-{int(time.time() * 1000)}"
 
         html = (
-            f'<marimo-broadcast '
+            f"<marimo-broadcast "
             f'id="{unique_id}" '
             f'channel="backtest_channel" '
             f'type="backtest_update" '
@@ -69,6 +69,7 @@ with app.setup:
 
     def enable_headless_trade_events(bt: Backtest):
         """取引イベントをヘッドレスモードで自動発行するよう設定"""
+
         def on_trade(event_type: str, trade):
             publish_trade_event_headless(
                 event_type=event_type,
@@ -77,6 +78,7 @@ with app.setup:
                 price=trade.entry_price,
                 tag=getattr(trade, "tag", None),
             )
+
         bt.add_trade_callback(on_trade)
 
     # =========================================================================
@@ -96,32 +98,38 @@ with app.setup:
         """開始/停止をトグル"""
         if get_playing():
             set_playing(False)
-            print('ストップ')
+            print("ストップ")
         else:
             if bt.is_finished:
-                print('バックテストは既に終了しています')
+                print("バックテストは既に終了しています")
                 return
             enable_headless_trade_events(bt)
             set_playing(True)
-            print('スタート')
+            print("スタート")
 
     def reset():
         """リセット"""
         set_playing(False)
         bt.reset()
         bt._chart_state.reset()  # チャート状態をリセット
-        print('リセットした')
+        print("リセットした")
 
     def do_step():
         """1ステップ実行（playing時のみ）- Pyodide対応版"""
         if not get_playing():
-            publish_state_headless(bt, status_label="停止中", status_variant="secondary")
+            publish_state_headless(
+                bt, status_label="停止中", status_variant="secondary"
+            )
             return False
         if bt.is_finished or bt.step() == False:
             set_playing(False)
-            publish_state_headless(bt, status_label="停止中", status_variant="secondary")
+            publish_state_headless(
+                bt, status_label="停止中", status_variant="secondary"
+            )
             return False
-        publish_state_headless(bt, status_label="実行中", status_variant="success")
+        publish_state_headless(
+            bt, status_label="実行中", status_variant="success"
+        )
         return True
 
 
@@ -129,8 +137,7 @@ with app.setup:
 def _():
     # refresher を静的に定義（常に表示）- Pyodide対応のポーリング方式
     refresher = mo.ui.refresh(
-        options=["400ms", "1s", "2s"],
-        default_interval="400ms"
+        options=["400ms", "1s", "2s"], default_interval="400ms"
     )
     refresher
     return (refresher,)
@@ -154,18 +161,16 @@ def _():
 
 @app.cell
 def _(code, toyota):
-    toyota['SMA1'] = toyota['Close'].rolling(2).mean()
-    toyota['SMA2'] = toyota['Close'].rolling(5).mean()
+    toyota["SMA1"] = toyota["Close"].rolling(2).mean()
+    toyota["SMA2"] = toyota["Close"].rolling(5).mean()
 
-    bt.set_data({
-        code: toyota
-    })
+    bt.set_data({code: toyota})
     return
 
 
 @app.cell
 def _(bt, code):
-    backtest_chart(bt, code=code, indicators=['SMA1', 'SMA2'])
+    backtest_chart(bt, code=code, indicators=["SMA1", "SMA2"])
     return
 
 

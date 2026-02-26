@@ -10,7 +10,7 @@ with app.setup:
     import time
     from marimo._output.hypertext import Html
     from BackcastPro import Backtest, get_stock_daily
-    from backtest_chart import backtest_chart
+    from lib.backtest_chart import backtest_chart
 
     # =========================================================================
     # フルモード: 自由にセットアップ
@@ -31,7 +31,7 @@ with app.setup:
         unique_id = f"marimo-bc-{bt.step_index}-{int(time.time() * 1000)}"
 
         html = (
-            f'<marimo-broadcast '
+            f"<marimo-broadcast "
             f'id="{unique_id}" '
             f'channel="backtest_channel" '
             f'type="backtest_update" '
@@ -69,6 +69,7 @@ with app.setup:
 
     def enable_headless_trade_events(bt: Backtest):
         """取引イベントをヘッドレスモードで自動発行するよう設定"""
+
         def on_trade(event_type: str, trade):
             publish_trade_event_headless(
                 event_type=event_type,
@@ -77,6 +78,7 @@ with app.setup:
                 price=trade.entry_price,
                 tag=getattr(trade, "tag", None),
             )
+
         bt.add_trade_callback(on_trade)
 
     # =========================================================================
@@ -114,8 +116,8 @@ def _():
     # 好きな金額と手数料を設定してください
 
     bt = Backtest(
-        cash=1_000_000,       # 初期資金（自由に変更可能）
-        commission=0.001,     # 手数料率（0.1%）
+        cash=1_000_000,  # 初期資金（自由に変更可能）
+        commission=0.001,  # 手数料率（0.1%）
         finalize_trades=True,
         color_theme="light",
     )
@@ -153,26 +155,24 @@ def _(bt, code, df):
     # 自分のインジケーターを追加してください
 
     # 移動平均線
-    df['SMA5'] = df['Close'].rolling(5).mean()
-    df['SMA20'] = df['Close'].rolling(20).mean()
-    df['SMA60'] = df['Close'].rolling(60).mean()
+    df["SMA5"] = df["Close"].rolling(5).mean()
+    df["SMA20"] = df["Close"].rolling(20).mean()
+    df["SMA60"] = df["Close"].rolling(60).mean()
 
     # RSI（相対力指数）
-    delta = df['Close'].diff()
+    delta = df["Close"].diff()
     gain = delta.where(delta > 0, 0).rolling(14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
-    df['RSI'] = 100 - (100 / (1 + gain / loss))
+    df["RSI"] = 100 - (100 / (1 + gain / loss))
 
     # ボリンジャーバンド
-    df['BB_middle'] = df['Close'].rolling(20).mean()
-    df['BB_std'] = df['Close'].rolling(20).std()
-    df['BB_upper'] = df['BB_middle'] + 2 * df['BB_std']
-    df['BB_lower'] = df['BB_middle'] - 2 * df['BB_std']
+    df["BB_middle"] = df["Close"].rolling(20).mean()
+    df["BB_std"] = df["Close"].rolling(20).std()
+    df["BB_upper"] = df["BB_middle"] + 2 * df["BB_std"]
+    df["BB_lower"] = df["BB_middle"] - 2 * df["BB_std"]
 
     # データをセット
-    bt.set_data({
-        code: df
-    })
+    bt.set_data({code: df})
     return
 
 
@@ -182,7 +182,7 @@ def _(bt, code):
     # Step 4: チャート表示
     # =========================================================================
 
-    backtest_chart(bt, code=code, indicators=['SMA5', 'SMA20', 'SMA60'])
+    backtest_chart(bt, code=code, indicators=["SMA5", "SMA20", "SMA60"])
     return
 
 
@@ -259,10 +259,14 @@ def _():
                 break
             if bt.step() == False:
                 break
-            publish_state_headless(bt, status_label="実行中", status_variant="success")
+            publish_state_headless(
+                bt, status_label="実行中", status_variant="success"
+            )
             set_step(bt.step_index)
             time.sleep(0.4)
-        publish_state_headless(bt, status_label="停止中", status_variant="secondary")
+        publish_state_headless(
+            bt, status_label="停止中", status_variant="secondary"
+        )
 
     return do_step, reset, run
 
