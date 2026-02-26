@@ -22,7 +22,7 @@ jobs:
 
       - name: Build marimo wheel
         run: |
-          pip install hatch
+          pip install hatch "virtualenv<21"
           hatch build -t wheel
           echo "Built wheel:"
           ls -la dist/*.whl
