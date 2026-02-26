@@ -37,7 +37,10 @@ jobs:
         run: |
           hatch build -t wheel
           echo "Built BackcastPro wheel:"
-          ls -la dist/*.whl
+          ls -la dist/
+          BUILT=$(find dist -name "*.whl" | head -1)
+          [ -z "$BUILT" ] && echo "ERROR: No wheel produced" && exit 1
+          echo "Wheel file: $BUILT"
 
       - name: Build Pyodide frontend
         working-directory: ./frontend
@@ -58,8 +61,10 @@ jobs:
 
       - name: Copy BackcastPro wheel to dist
         run: |
-          cp BackcastPro/dist/BackcastPro-*.whl frontend/dist/wheels/
-          WHEEL_FILE=$(ls BackcastPro/dist/BackcastPro-*.whl | head -1 | xargs basename)
+          WHEEL_PATH=$(find BackcastPro/dist -name "*.whl" | head -1)
+          [ -z "$WHEEL_PATH" ] && echo "ERROR: No BackcastPro wheel found in BackcastPro/dist/" && exit 1
+          cp "$WHEEL_PATH" frontend/dist/wheels/
+          WHEEL_FILE=$(basename "$WHEEL_PATH")
           echo "$WHEEL_FILE" > frontend/dist/wheels/backcastpro-latest.txt
           echo "Copied BackcastPro wheel: $WHEEL_FILE"
 
