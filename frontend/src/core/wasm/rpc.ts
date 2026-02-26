@@ -19,7 +19,7 @@ export function getWorkerRPC<WorkerSchema extends RPCSchema>(worker: Worker) {
     transport: createWorkerTransport(worker, {
       transportId: TRANSPORT_ID,
     }),
-    maxRequestTime: 20_000, // 20 seconds
+    maxRequestTime: 120_000, // 120 seconds - Pyodide bootstrap can take over 60s on slow connections
     _debugHooks: {
       onSend: (message) => {
         Logger.debug("[rpc] Parent -> Worker", message);
