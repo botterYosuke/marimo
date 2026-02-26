@@ -23,7 +23,7 @@ marimo の Tauri デスクトップアプリ（`src-tauri/`）を起動するた
 |-----------|------|
 | `backcast.py` | Backcast フレームワーク サンプル |
 | `backcast_en.py` / `backcast_zh.py` | 多言語版 |
-| `backtest_wrapper.py` | バックテストユーティリティ |
+| `backtest.py` | バックテストユーティリティ |
 | `board.py` | ボード/ゲームロジック |
 | `bridge.py` | ブリッジモジュール |
 | `chart.py` | チャート可視化 |

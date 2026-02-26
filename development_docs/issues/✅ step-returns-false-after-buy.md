@@ -40,7 +40,7 @@ Backcast はトヨタ等の株を売買するバックテストゲーム。以�
 ```
 ユーザー操作層:  bt.buy() / bt.step()  （game_setup.py のモジュール関数）
     ↓
-ラッパー層:      Backtest_Wrapper       （backtest_wrapper.py — Backtest を継承）
+ラッパー層:      Backtest       （backtest.py — Backtest を継承）
     ↓
 コア層:          Backtest               （BackcastPro/backtest.py）
     ↓
@@ -52,7 +52,7 @@ Backcast はトヨタ等の株を売買するバックテストゲーム。以�
 | ファイル | パス | 役割 |
 |---------|------|------|
 | `game_setup.py` | `src-tauri/sample-notebooks/game_setup.py` | ユーザー向けAPI。`bt.buy()`等のモジュール関数を提供 |
-| `backtest_wrapper.py` | `src-tauri/sample-notebooks/backtest_wrapper.py` | Backtest にチャート機能を追加するラッパー |
+| `backtest.py` | `src-tauri/sample-notebooks/backtest.py` | Backtest にチャート機能を追加するラッパー |
 | `backtest.py` | `.venv/Lib/site-packages/BackcastPro/backtest.py` | バックテストのコアエンジン |
 | `_broker.py` | `.venv/Lib/site-packages/BackcastPro/_broker.py` | ブローカー（注文の約定処理を担当） |
 
@@ -96,7 +96,7 @@ Backcast はトヨタ等の株を売買するバックテストゲーム。以�
 ### 診断コードによる確認
 
 ```python
-_inner = bt.bt  # Backtest_Wrapper インスタンス
+_inner = bt.bt  # Backtest インスタンス
 
 # buy前の状態
 print(f"step_index: {_inner._step_index}")       # → 0
@@ -347,11 +347,11 @@ BackcastPro の `Backtest.step()` 内にあった `except Exception: return Fals
 
 ### marimo ノートブックでの `bt` の正体
 
-ノートブック内で `import game_setup as bt` しているため、`bt` はモジュールオブジェクトであり Backtest インスタンスではない。内部の Backtest_Wrapper インスタンスにアクセスするには `bt.bt` を使う必要がある（`game_setup.py` のモジュールレベル変数 `bt` が `Backtest_Wrapper` インスタンス）。
+ノートブック内で `import game_setup as bt` しているため、`bt` はモジュールオブジェクトであり Backtest インスタンスではない。内部の Backtest インスタンスにアクセスするには `bt.bt` を使う必要がある（`game_setup.py` のモジュールレベル変数 `bt` が `Backtest` インスタンス）。
 
 ```python
 # ノートブックでの診断時
-bt.bt._step_index    # ✅ Backtest_Wrapper の内部状態
+bt.bt._step_index    # ✅ Backtest の内部状態
 bt._step_index       # ❌ AttributeError（bt はモジュール）
 ```
 
@@ -379,7 +379,7 @@ pnpm dev
 ### デバッグ時に便利な診断コード
 
 ```python
-# Backtest_Wrapper の内部状態を確認
+# Backtest の内部状態を確認
 _inner = bt.bt
 print(f"step_index: {_inner._step_index}")
 print(f"is_finished: {_inner._is_finished}")

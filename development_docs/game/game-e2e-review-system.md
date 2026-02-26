@@ -106,7 +106,7 @@ E2E テスト（案 E）がバイパスしていたレイヤー①③⑤をユ�
 ### ✅ 完了（2026-02-21 backcast.py ファイル不在バグ修正セッション）
 
 - [x] ✅ **`backcast-integration.spec.ts` 4 件失敗の原因特定**: `C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py` が存在しなかったため全テストが `backend-status` 待機で 20 秒タイムアウト。エラーコンテキストに `{"detail":"File ... not found"}` と記録されていた（知見 42）
-- [x] ✅ **`backcast.py` および関連モジュールを `notebooks/` にコピー**: `game_setup.py`, `skill_events.py`, `backtest_wrapper.py`, `chart.py`, `headless_broadcast.py`, `progress_manager.py`
+- [x] ✅ **`backcast.py` および関連モジュールを `notebooks/` にコピー**: `game_setup.py`, `skill_events.py`, `backtest.py`, `chart.py`, `headless_broadcast.py`, `progress_manager.py`
 - [x] ✅ **`layouts/backcast.grid.json` のコピー追加**: `backcast.py` は `layout_file="layouts/backcast.grid.json"` を参照するが `notebooks/layouts/` が存在しなかった。`mkdir` + コピーで解消（知見 42）
 - [x] ✅ **マニュアル訂正**: `development_docs/plans/backcast-game-play.md` の問題4コピー手順に `layouts/backcast.grid.json` コピーコマンドを追記
 - [x] ✅ **全 9 スイート（80 テスト）パス確認**: 75 passed / 5 skipped / 0 failed（16.4m）
@@ -1146,7 +1146,7 @@ const handleMessage = (event: MessageEvent) => {
 **解決策**: `src-tauri/sample-notebooks/` から以下をコピー:
 ```bash
 cp /d/Documents/marimo/src-tauri/sample-notebooks/backcast.py "C:/..."
-# game_setup.py, skill_events.py, backtest_wrapper.py, chart.py,
+# game_setup.py, skill_events.py, backtest.py, chart.py,
 # headless_broadcast.py, progress_manager.py も同様にコピー
 # さらに layouts/backcast.grid.json も必須（以下の知見参照）
 ```

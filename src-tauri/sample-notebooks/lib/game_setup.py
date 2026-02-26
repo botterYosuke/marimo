@@ -16,7 +16,7 @@ import functools
 import marimo as mo
 
 from BackcastPro import get_stock_daily as _get_stock_daily, BankruptError
-from lib.backtest_wrapper import Backtest_Wrapper
+from lib.backtest import Backtest
 from lib.backtest_chart import backtest_chart, update_all_backtest_charts
 from lib.headless_broadcast import (
     enable_headless_trade_events,
@@ -25,7 +25,7 @@ from lib.headless_broadcast import (
 from lib.progress_manager import broadcast_progress
 from lib.skill_events import get_triggered_skills, emit_skill
 
-bt = Backtest_Wrapper(
+bt = Backtest(
     cash=100_000,
     commission=0.001,
     finalize_trades=True,

@@ -66,7 +66,7 @@ await page.waitForLoadState("networkidle");  // 永遠に解決しない
 
 ### 根本原因の仮説 3: モジュールの `bt` インスタンスがセル間で共有されない
 
-`game_setup` をインポートすると新しい `Backtest_Wrapper` インスタンスが生成される（`game_setup.py` モジュールレベルの `bt = Backtest_Wrapper(...)`）。テストが `gs.buy()` を呼ぶ別セルで再インポートすると、`bt._data` が空の新しいインスタンスになる可能性がある。ただし Python のモジュールキャッシュ（`sys.modules`）が機能していれば同一インスタンスが再利用される。
+`game_setup` をインポートすると新しい `Backtest` インスタンスが生成される（`game_setup.py` モジュールレベルの `bt = Backtest(...)`）。テストが `gs.buy()` を呼ぶ別セルで再インポートすると、`bt._data` が空の新しいインスタンスになる可能性がある。ただし Python のモジュールキャッシュ（`sys.modules`）が機能していれば同一インスタンスが再利用される。
 
 ### 修正方針
 

@@ -29,7 +29,7 @@ class _ChartState:
             self.indicators = {}
 
 
-class Backtest_Wrapper(Backtest):
+class Backtest(Backtest):
     def __init__(self, *args, color_theme: str = "dark", **kwargs):
         super().__init__(*args, **kwargs)
         self._chart_state = _ChartState(color_theme)
