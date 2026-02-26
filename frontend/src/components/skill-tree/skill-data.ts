@@ -91,9 +91,7 @@ for trade in bt.trades():
 
 \`\`\`python
 # 保有株を売却
-for trade in bt.trades():
-    trade.close()
-    mo.output.append("売却完了！")
+bt.sell()
 \`\`\`
 
 ### ポイント

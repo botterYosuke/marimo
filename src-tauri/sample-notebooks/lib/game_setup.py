@@ -132,7 +132,7 @@ def buy():
 
 def sell():
     """保有中の株を売る"""
-    if bt.position.size == 0:
+    if len(bt.trades) == 0:
         mo.output.append(
             mo.callout(
                 mo.md(
