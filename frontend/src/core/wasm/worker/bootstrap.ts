@@ -37,6 +37,8 @@ export class DefaultWasmController implements WasmController {
   }): Promise<PyodideInterface> {
     const pyodide = await this.loadPyodideAndPackages(opts);
 
+    await this.preInstallCustomPackages(pyodide);
+
     if (MAKE_SNAPSHOT) {
       const snapshot = pyodide.makeMemorySnapshot();
       Logger.log("Snapshot size (mb):", snapshot.byteLength / 1024 / 1024);
@@ -79,6 +81,30 @@ export class DefaultWasmController implements WasmController {
     } catch (error) {
       Logger.error("Failed to load Pyodide", error);
       throw error;
+    }
+  }
+
+  private async preInstallCustomPackages(
+    pyodide: PyodideInterface,
+  ): Promise<void> {
+    const span = t.startSpan("preInstallCustomPackages");
+    try {
+      const wheelResp = await fetch("/wheels/backcastpro-latest.txt");
+      if (wheelResp.ok) {
+        const wheelFile = (await wheelResp.text()).trim();
+        await pyodide.runPythonAsync(`
+import micropip
+await micropip.install([
+    "/wheels/${wheelFile}",
+    "python-dotenv",
+])
+`);
+        Logger.log("Pre-installed BackcastPro and python-dotenv");
+      }
+    } catch (e) {
+      Logger.warn("Failed to pre-install BackcastPro", e);
+    } finally {
+      span.end();
     }
   }
 
