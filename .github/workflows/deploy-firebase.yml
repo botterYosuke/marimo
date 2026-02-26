@@ -71,6 +71,7 @@ jobs:
       - name: Download DuckDB data files
         run: |
           mkdir -p frontend/dist/assets/data/stocks_daily
+          mkdir -p frontend/dist/assets/data/stocks_minute
           API_URL="http://backcast.i234.me:8080"
           STOCK_CODES="7203 9984 6758 8306 9432 6861 7267 4502 6501 8035"
           for code in $STOCK_CODES; do
@@ -78,18 +79,24 @@ jobs:
             curl -sf \
               "${API_URL}/jp/stocks_daily/${code}.duckdb" \
               -o "frontend/dist/assets/data/stocks_daily/${code}.duckdb" \
-              || echo "Failed to download: ${code}.duckdb"
+              || echo "Failed to download stocks_daily: ${code}.duckdb"
+            curl -sf \
+              "${API_URL}/jp/stocks_minute/${code}.duckdb" \
+              -o "frontend/dist/assets/data/stocks_minute/${code}.duckdb" \
+              || echo "Failed to download stocks_minute: ${code}.duckdb"
           done
           echo "Downloaded files:"
           find frontend/dist/assets/data -name "*.duckdb" -ls
 
       - name: Verify DuckDB files before deploy
         run: |
-          echo "=== Checking DuckDB files ==="
+          echo "=== Checking DuckDB files (stocks_daily) ==="
           ls -la frontend/dist/assets/data/stocks_daily/
+          echo "=== Checking DuckDB files (stocks_minute) ==="
+          ls -la frontend/dist/assets/data/stocks_minute/
 
           echo "=== Verifying file sizes (must be > 1MB) ==="
-          for f in frontend/dist/assets/data/stocks_daily/*.duckdb; do
+          for f in frontend/dist/assets/data/stocks_daily/*.duckdb frontend/dist/assets/data/stocks_minute/*.duckdb; do
             size=$(stat -c%s "$f")
             if [ "$size" -lt 1000000 ]; then
               echo "ERROR: $f is too small ($size bytes)"
@@ -100,8 +107,8 @@ jobs:
 
           count=$(find frontend/dist/assets/data -name "*.duckdb" | wc -l)
           echo "Total DuckDB files: $count"
-          if [ "$count" -lt 10 ]; then
-            echo "ERROR: Expected 10 files, found $count"
+          if [ "$count" -lt 20 ]; then
+            echo "ERROR: Expected 20 files, found $count"
             exit 1
           fi
 
@@ -120,9 +127,12 @@ jobs:
             sed 's|^notebooks/||' | jq -R . | jq -s .)
 
 
-          # DuckDB files (fetch source is /assets/data/..., target in IDBFS is jp/stocks_daily/...)
-          DUCKDB_FILES=$(find assets/data/stocks_daily -name "*.duckdb" | \
+          # DuckDB files (fetch source is /assets/data/..., target in IDBFS is jp/stocks_daily/... and jp/stocks_minute/...)
+          DUCKDB_DAILY=$(find assets/data/stocks_daily -name "*.duckdb" | \
             sed 's|^assets/data/stocks_daily/|jp/stocks_daily/|' | jq -R . | jq -s .)
+          DUCKDB_MINUTE=$(find assets/data/stocks_minute -name "*.duckdb" | \
+            sed 's|^assets/data/stocks_minute/|jp/stocks_minute/|' | jq -R . | jq -s .)
+          DUCKDB_FILES=$(jq -n --argjson d "$DUCKDB_DAILY" --argjson m "$DUCKDB_MINUTE" '$d + $m')
 
           jq -n --argjson notebooks "$NOTEBOOK_FILES" \
                  --argjson duckdb "$DUCKDB_FILES" \
