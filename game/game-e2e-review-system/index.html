@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
     
     
       
@@ -2257,7 +2257,7 @@
 <h3 id="2026-02-21-backcastpy">✅ 完了（2026-02-21 backcast.py ファイル不在バグ修正セッション）<a class="headerlink" href="#2026-02-21-backcastpy" title="Permanent link">&para;</a></h3>
 <ul>
 <li>[x] ✅ <strong><code>backcast-integration.spec.ts</code> 4 件失敗の原因特定</strong>: <code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\backcast.py</code> が存在しなかったため全テストが <code>backend-status</code> 待機で 20 秒タイムアウト。エラーコンテキストに <code>{"detail":"File ... not found"}</code> と記録されていた（知見 42）</li>
-<li>[x] ✅ <strong><code>backcast.py</code> および関連モジュールを <code>notebooks/</code> にコピー</strong>: <code>game_setup.py</code>, <code>skill_events.py</code>, <code>backtest_wrapper.py</code>, <code>chart.py</code>, <code>headless_broadcast.py</code>, <code>progress_manager.py</code></li>
+<li>[x] ✅ <strong><code>backcast.py</code> および関連モジュールを <code>notebooks/</code> にコピー</strong>: <code>game_setup.py</code>, <code>skill_events.py</code>, <code>backtest.py</code>, <code>chart.py</code>, <code>headless_broadcast.py</code>, <code>progress_manager.py</code></li>
 <li>[x] ✅ <strong><code>layouts/backcast.grid.json</code> のコピー追加</strong>: <code>backcast.py</code> は <code>layout_file="layouts/backcast.grid.json"</code> を参照するが <code>notebooks/layouts/</code> が存在しなかった。<code>mkdir</code> + コピーで解消（知見 42）</li>
 <li>[x] ✅ <strong>マニュアル訂正</strong>: <code>development_docs/plans/backcast-game-play.md</code> の問題4コピー手順に <code>layouts/backcast.grid.json</code> コピーコマンドを追記</li>
 <li>[x] ✅ <strong>全 9 スイート（80 テスト）パス確認</strong>: 75 passed / 5 skipped / 0 failed（16.4m）</li>
@@ -3156,7 +3156,7 @@ taskkill<span class="w"> </span>//F<span class="w"> </span>//IM<span class="w"> 
 <p><strong>原因</strong>: <code>C:\Users\sasac\AppData\Roaming\marimo\notebooks\</code> に <code>backcast.py</code> および必要な依存ファイルが配置されていなかった。</p>
 <p><strong>解決策</strong>: <code>src-tauri/sample-notebooks/</code> から以下をコピー:
 <div class="highlight"><pre><span></span><code>cp<span class="w"> </span>/d/Documents/marimo/src-tauri/sample-notebooks/backcast.py<span class="w"> </span><span class="s2">&quot;C:/...&quot;</span>
-<span class="c1"># game_setup.py, skill_events.py, backtest_wrapper.py, chart.py,</span>
+<span class="c1"># game_setup.py, skill_events.py, backtest.py, chart.py,</span>
 <span class="c1"># headless_broadcast.py, progress_manager.py も同様にコピー</span>
 <span class="c1"># さらに layouts/backcast.grid.json も必須（以下の知見参照）</span>
 </code></pre></div></p>

@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
     
     
       
@@ -1780,7 +1780,7 @@
 <p>Backcast はトヨタ等の株を売買するバックテストゲーム。以下のレイヤー構造を持つ。</p>
 <div class="highlight"><pre><span></span><code>ユーザー操作層:  bt.buy() / bt.step()  （game_setup.py のモジュール関数）
     ↓
-ラッパー層:      Backtest_Wrapper       （backtest_wrapper.py — Backtest を継承）
+ラッパー層:      Backtest       （backtest.py — Backtest を継承）
     ↓
 コア層:          Backtest               （BackcastPro/backtest.py）
     ↓
@@ -1802,8 +1802,8 @@
 <td>ユーザー向けAPI。<code>bt.buy()</code>等のモジュール関数を提供</td>
 </tr>
 <tr>
-<td><code>backtest_wrapper.py</code></td>
-<td><code>src-tauri/sample-notebooks/backtest_wrapper.py</code></td>
+<td><code>backtest.py</code></td>
+<td><code>src-tauri/sample-notebooks/backtest.py</code></td>
 <td>Backtest にチャート機能を追加するラッパー</td>
 </tr>
 <tr>
@@ -1848,7 +1848,7 @@ rm<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;</spa
 </code></pre></div></li>
 </ol>
 <h3 id="_8">診断コードによる確認<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="n">_inner</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">bt</span>  <span class="c1"># Backtest_Wrapper インスタンス</span>
+<div class="highlight"><pre><span></span><code><span class="n">_inner</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">bt</span>  <span class="c1"># Backtest インスタンス</span>
 
 <span class="c1"># buy前の状態</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step_index: </span><span class="si">{</span><span class="n">_inner</span><span class="o">.</span><span class="n">_step_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>       <span class="c1"># → 0</span>
@@ -2102,9 +2102,9 @@ is_finished: True
 <h3 id="except-exception"><code>except Exception</code> の危険性<a class="headerlink" href="#except-exception" title="Permanent link">&para;</a></h3>
 <p>BackcastPro の <code>Backtest.step()</code> 内にあった <code>except Exception: return False</code> パターンは、あらゆる種類のエラーを「正常終了」と区別不可能にしてしまう。このパターンを見つけたら必ず「本当にキャッチすべき例外は何か」を確認し、専用例外クラスに置き換えるべき。</p>
 <h3 id="marimo-bt">marimo ノートブックでの <code>bt</code> の正体<a class="headerlink" href="#marimo-bt" title="Permanent link">&para;</a></h3>
-<p>ノートブック内で <code>import game_setup as bt</code> しているため、<code>bt</code> はモジュールオブジェクトであり Backtest インスタンスではない。内部の Backtest_Wrapper インスタンスにアクセスするには <code>bt.bt</code> を使う必要がある（<code>game_setup.py</code> のモジュールレベル変数 <code>bt</code> が <code>Backtest_Wrapper</code> インスタンス）。</p>
+<p>ノートブック内で <code>import game_setup as bt</code> しているため、<code>bt</code> はモジュールオブジェクトであり Backtest インスタンスではない。内部の Backtest インスタンスにアクセスするには <code>bt.bt</code> を使う必要がある（<code>game_setup.py</code> のモジュールレベル変数 <code>bt</code> が <code>Backtest</code> インスタンス）。</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># ノートブックでの診断時</span>
-<span class="n">bt</span><span class="o">.</span><span class="n">bt</span><span class="o">.</span><span class="n">_step_index</span>    <span class="c1"># ✅ Backtest_Wrapper の内部状態</span>
+<span class="n">bt</span><span class="o">.</span><span class="n">bt</span><span class="o">.</span><span class="n">_step_index</span>    <span class="c1"># ✅ Backtest の内部状態</span>
 <span class="n">bt</span><span class="o">.</span><span class="n">_step_index</span>       <span class="c1"># ❌ AttributeError（bt はモジュール）</span>
 </code></pre></div>
 <h3 id="backcastpro-venv">BackcastPro は <code>.venv</code> 内のパッケージ<a class="headerlink" href="#backcastpro-venv" title="Permanent link">&para;</a></h3>
@@ -2122,7 +2122,7 @@ rm<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;</spa
 pnpm<span class="w"> </span>dev
 </code></pre></div>
 <h3 id="_17">デバッグ時に便利な診断コード<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Backtest_Wrapper の内部状態を確認</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Backtest の内部状態を確認</span>
 <span class="n">_inner</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">bt</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step_index: </span><span class="si">{</span><span class="n">_inner</span><span class="o">.</span><span class="n">_step_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;is_finished: </span><span class="si">{</span><span class="n">_inner</span><span class="o">.</span><span class="n">_is_finished</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>

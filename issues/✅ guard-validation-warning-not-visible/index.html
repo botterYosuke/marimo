@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
     
     
       
@@ -1415,7 +1415,7 @@
 </code></pre></div>
 <p>この問題は <code>networkidle-timeout-websocket-persistent.md</code> とも重複する。</p>
 <h3 id="3-bt">根本原因の仮説 3: モジュールの <code>bt</code> インスタンスがセル間で共有されない<a class="headerlink" href="#3-bt" title="Permanent link">&para;</a></h3>
-<p><code>game_setup</code> をインポートすると新しい <code>Backtest_Wrapper</code> インスタンスが生成される（<code>game_setup.py</code> モジュールレベルの <code>bt = Backtest_Wrapper(...)</code>）。テストが <code>gs.buy()</code> を呼ぶ別セルで再インポートすると、<code>bt._data</code> が空の新しいインスタンスになる可能性がある。ただし Python のモジュールキャッシュ（<code>sys.modules</code>）が機能していれば同一インスタンスが再利用される。</p>
+<p><code>game_setup</code> をインポートすると新しい <code>Backtest</code> インスタンスが生成される（<code>game_setup.py</code> モジュールレベルの <code>bt = Backtest(...)</code>）。テストが <code>gs.buy()</code> を呼ぶ別セルで再インポートすると、<code>bt._data</code> が空の新しいインスタンスになる可能性がある。ただし Python のモジュールキャッシュ（<code>sys.modules</code>）が機能していれば同一インスタンスが再利用される。</p>
 <h3 id="_7">修正方針<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>即時</strong>: <code>beforeEach</code> の <code>waitForLoadState("networkidle")</code> を <code>waitForLoadState("load")</code> + <code>ensureConnected()</code> に変更する</li>
