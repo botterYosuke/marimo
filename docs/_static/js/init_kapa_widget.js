@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Uncertain answer
   script.setAttribute(
     "data-uncertain-answer-callout",
-    "I could not find an answer in my knowledge base. But a human team member can give you more detailed answers directly in our [Discord](https://discord.com/invite/5mR3Gmff).",
+    "I could not find an answer in my knowledge base. But a human team member can give you more detailed answers directly in our [Discord](https://discord.gg/3YUUqzWWxr).",
   );
 
   // CTA
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   script.setAttribute(
     "data-answer-cta-button-link",
-    "https://discord.com/invite/5mR3Gmff",
+    "https://discord.gg/3YUUqzWWxr",
   );
   script.setAttribute(
     "data-answer-cta-button-text",

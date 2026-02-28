@@ -16,7 +16,7 @@ Detail the specific changes made in this pull request. Explain the problem addre
 ## 📋 Checklist
 
 - [ ] I have read the [contributor guidelines](https://github.com/botterYosuke/marimo/blob/main/CONTRIBUTING.md).
-- [ ] For large changes, or changes that affect the public API: this change was discussed or approved through an issue, on [Discord](https://discord.com/invite/5mR3Gmff), or the community [discussions](https://github.com/botterYosuke/marimo/discussions) (Please provide a link if applicable).
+- [ ] For large changes, or changes that affect the public API: this change was discussed or approved through an issue, on [Discord](https://discord.gg/3YUUqzWWxr), or the community [discussions](https://github.com/botterYosuke/marimo/discussions) (Please provide a link if applicable).
 - [ ] Tests have been added for the changes made.
 - [ ] Documentation has been updated where applicable, including docstrings for API changes.
 - [ ] Pull request title is a good summary of the changes - it will be used in the [release notes](https://github.com/botterYosuke/marimo/releases).

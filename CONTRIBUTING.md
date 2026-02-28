@@ -17,7 +17,7 @@ Before sending a pull request, make sure to do the following:
 _Please reach out to the marimo team before starting work on a large
 contribution._ Get in touch at
 [GitHub issues](https://github.com/botterYosuke/marimo/issues)
-or [on Discord](https://discord.com/invite/5mR3Gmff).
+or [on Discord](https://discord.gg/3YUUqzWWxr).
 
 ## Setup
 _Note: We recommend that Windows developers use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) and clone the marimo repository [into the WSL environment and not the Windows mount](https://learn.microsoft.com/en-us/windows/wsl/filesystems)._

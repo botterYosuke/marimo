@@ -169,7 +169,7 @@ There are three channels that marimo uses to engage with the community.
 
 ### **Discord Server**
 
-Discussions focused on marimo's development are conducted on a [Discord Server](https://discord.com/invite/5mR3Gmff). The server is public but requires email verification.
+Discussions focused on marimo's development are conducted on a [Discord Server](https://discord.gg/3YUUqzWWxr). The server is public but requires email verification.
 
 The server consists of several channels with different permissions based on the
 concept of Discord roles. The named roles are “Project Maintainer” and
