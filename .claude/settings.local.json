@@ -31,11 +31,16 @@
       "Bash(claude mcp add:*)",
       "Bash(/c/Users/sasai/.local/bin/claude mcp add:*)",
       "Bash(ls:*)",
+<<<<<<< HEAD
       "Bash(cd:*)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\marimo\\.claude\\skills",
       "C:\\Users\\sasac\\AppData\\Local\\Temp"
+=======
+      "Bash(cd:*)",
+      "Bash(docker push:*)"
+>>>>>>> main
     ]
   },
   "enableAllProjectMcpServers": true,
