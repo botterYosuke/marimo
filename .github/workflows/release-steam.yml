@@ -84,9 +84,11 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: cargo tauri build --features steam --config src-tauri/tauri-steam-windows.conf.json
+        uses: tauri-apps/tauri-action@v0.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --features steam --config src-tauri/tauri-steam-windows.conf.json
 
       - name: 📁 Package Windows files
         shell: pwsh
@@ -166,9 +168,11 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: cargo tauri build --features steam --config src-tauri/tauri-steam-mac.conf.json
+        uses: tauri-apps/tauri-action@v0.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --features steam --config src-tauri/tauri-steam-mac.conf.json
 
       - name: 📤 Upload macOS artifacts (Steam)
         uses: actions/upload-artifact@v4
@@ -251,9 +255,11 @@ jobs:
           workspaces: src-tauri
 
       - name: 🔨 Build Tauri app (Steam)
-        run: cargo tauri build --features steam --config src-tauri/tauri-steam-linux.conf.json
+        uses: tauri-apps/tauri-action@v0.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --features steam --config src-tauri/tauri-steam-linux.conf.json
 
       - name: 📤 Upload Linux artifacts (Steam)
         uses: actions/upload-artifact@v4
