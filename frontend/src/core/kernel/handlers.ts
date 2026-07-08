@@ -4,7 +4,7 @@ import type { LayoutType } from "@/components/editor/renderers/types";
 import { sendBroadcastMessage } from "@/utils/broadcastChannel";
 import { Logger } from "@/utils/Logger";
 import { Objects } from "@/utils/objects";
-import type { UIElementId } from "../cells/ids";
+import type { CellId, UIElementId } from "../cells/ids";
 import { type CellData, createCell } from "../cells/types";
 import { type AppConfig, AppConfigSchema } from "../config/config-schema";
 import { UI_ELEMENT_REGISTRY } from "../dom/uiregistry";
