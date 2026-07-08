@@ -210,7 +210,7 @@ def _(mo):
             if values is not None and isinstance(values, list):
                 return all(isinstance(v, str) for v in values)
 
-        if element is not None:
+        if element is not None and hasattr(element, "value"):
             v = (
                 element.value
                 if not isinstance(element, mo.ui.file)

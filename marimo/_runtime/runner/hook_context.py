@@ -1,10 +1,11 @@
 # Copyright 2026 Marimo. All rights reserved.
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, TypeAlias, Union
+from typing import TYPE_CHECKING, Any, TypeAlias, Union
 
-from marimo._config.config import OnCellChangeType
+from marimo._config.config import MarimoConfig, OnCellChangeType
 from marimo._messaging.errors import Error
 from marimo._types.ids import CellId_t
 
@@ -40,6 +41,26 @@ class CancelledCells:
         else:
             self._by_raising_cell[raising_cell] = descendants
         self._all.update(descendants)
+
+    def discard(self, cell_id: CellId_t) -> None:
+        """Un-cancel a cell
+
+        That is remove it from the cancelled set and any descendant sets."""
+        self._by_raising_cell.pop(cell_id, None)
+        for raising_cell in list(self._by_raising_cell):
+            descendants = self._by_raising_cell[raising_cell]
+            descendants.discard(cell_id)
+            # A raiser with no cancelled descendants left is no longer a
+            # cancellation record.
+            if not descendants:
+                del self._by_raising_cell[raising_cell]
+        # Rebuild the flat view from what remains; otherwise popping a raiser
+        # above strands its descendants in _all, breaking the union invariant.
+        self._all = (
+            set().union(*self._by_raising_cell.values())
+            if self._by_raising_cell
+            else set()
+        )
 
     def __contains__(self, cell_id: object) -> bool:
         """O(1) check if a cell has been cancelled."""
@@ -83,6 +104,8 @@ class PostExecutionHookContext:
     # Whether data (variables, datasets, etc.) should be broadcast
     # to the frontend. Computed once per run to avoid repeated checks.
     should_broadcast_data: bool = False
+    # User configuration, for hooks that need access to runtime settings
+    user_config: MarimoConfig | None = None
 
 
 @dataclass(frozen=True)

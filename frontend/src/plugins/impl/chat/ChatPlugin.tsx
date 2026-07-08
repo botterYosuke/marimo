@@ -1,21 +1,24 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import type { UIMessage } from "ai";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import { z } from "zod";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { createPlugin } from "@/plugins/core/builder";
 import { rpc } from "@/plugins/core/rpc";
 import { Arrays } from "@/utils/arrays";
-import { Chatbot } from "./chat-ui";
-import type { SendMessageRequest } from "./types";
+import type { CancelPromptRequest, SendMessageRequest } from "./types";
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+const LazyChatbot = React.lazy(() =>
+  import("./chat-ui").then((m) => ({ default: m.Chatbot })),
+);
+
+// oxlint-disable-next-line typescript/consistent-type-definitions
 export type PluginFunctions = {
   get_chat_history: (req: {}) => Promise<{ messages: UIMessage[] }>;
   delete_chat_history: (req: {}) => Promise<null>;
   delete_chat_message: (req: { index: number }) => Promise<null>;
   send_prompt: (req: SendMessageRequest) => Promise<unknown>;
+  cancel_prompt: (req: CancelPromptRequest) => Promise<null>;
 };
 
 const messageSchema = z.array(
@@ -63,30 +66,33 @@ export const ChatPlugin = createPlugin<{ messages: UIMessage[] }>(
     send_prompt: rpc
       .input(
         z.object({
+          request_id: z.string(),
           messages: messageSchema,
           config: configSchema,
         }),
       )
       .output(z.unknown()),
+    cancel_prompt: rpc
+      .input(z.object({ request_id: z.string() }))
+      .output(z.null()),
   })
   .renderer((props) => (
-    <TooltipProvider>
-      <Suspense>
-        <Chatbot
-          prompts={props.data.prompts}
-          showConfigurationControls={props.data.showConfigurationControls}
-          maxHeight={props.data.maxHeight}
-          allowAttachments={props.data.allowAttachments}
-          disabled={props.data.disabled}
-          config={props.data.config}
-          get_chat_history={props.functions.get_chat_history}
-          delete_chat_history={props.functions.delete_chat_history}
-          delete_chat_message={props.functions.delete_chat_message}
-          send_prompt={props.functions.send_prompt}
-          value={props.value?.messages || Arrays.EMPTY}
-          setValue={(messages) => props.setValue({ messages })}
-          host={props.host}
-        />
-      </Suspense>
-    </TooltipProvider>
+    <Suspense>
+      <LazyChatbot
+        prompts={props.data.prompts}
+        showConfigurationControls={props.data.showConfigurationControls}
+        maxHeight={props.data.maxHeight}
+        allowAttachments={props.data.allowAttachments}
+        disabled={props.data.disabled}
+        config={props.data.config}
+        get_chat_history={props.functions.get_chat_history}
+        delete_chat_history={props.functions.delete_chat_history}
+        delete_chat_message={props.functions.delete_chat_message}
+        send_prompt={props.functions.send_prompt}
+        cancel_prompt={props.functions.cancel_prompt}
+        value={props.value?.messages || Arrays.EMPTY}
+        setValue={(messages) => props.setValue({ messages })}
+        host={props.host}
+      />
+    </Suspense>
   ));

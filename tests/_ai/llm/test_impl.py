@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,49 +20,48 @@ from marimo._ai.llm._impl import (
     simple,
 )
 from marimo._dependencies.dependencies import DependencyManager
+from marimo._plugins.ui._impl.chat.chat import AI_SDK_VERSION
 
 if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
     from pydantic_ai.settings import ModelSettings
 
 
-@pytest.fixture
-def mock_openai_client():
-    """Fixture for mocking the OpenAI client."""
-    with patch("openai.OpenAI") as mock_openai_class:
-        mock_client = MagicMock()
-        mock_openai_class.return_value = mock_client
+def _make_chat_client_fixture(patch_path: str, *, streaming: bool = False):
+    @pytest.fixture
+    def _fixture():
+        with patch(patch_path) as mock_class:
+            mock_client = MagicMock()
+            mock_class.return_value = mock_client
+            if streaming:
+                mock_chunk = MagicMock()
+                mock_choice = MagicMock()
+                mock_delta = MagicMock()
+                mock_delta.content = "Test response"
+                mock_choice.delta = mock_delta
+                mock_chunk.choices = [mock_choice]
+                mock_client.chat.completions.create.return_value = [mock_chunk]
+            else:
+                mock_response = MagicMock()
+                mock_choice = MagicMock()
+                mock_message = MagicMock()
+                mock_message.content = "Test response"
+                mock_choice.message = mock_message
+                mock_response.choices = [mock_choice]
+                mock_client.chat.completions.create.return_value = (
+                    mock_response
+                )
+            yield mock_client, mock_class
 
-        # Setup the streaming response structure
-        mock_chunk = MagicMock()
-        mock_choice = MagicMock()
-        mock_delta = MagicMock()
-        mock_delta.content = "Test response"
-        mock_choice.delta = mock_delta
-        mock_chunk.choices = [mock_choice]
-
-        # Return an iterable for streaming
-        mock_client.chat.completions.create.return_value = [mock_chunk]
-
-        yield mock_client, mock_openai_class
+    return _fixture
 
 
-@pytest.fixture
-def mock_groq_client():
-    """Fixture for mocking the Groq client."""
-    with patch("groq.Groq") as mock_groq_class:
-        mock_client = MagicMock()
-        mock_groq_class.return_value = mock_client
-
-        # Setup the response structure
-        mock_response = MagicMock()
-        mock_choice = MagicMock()
-        mock_message = MagicMock()
-        mock_message.content = "Test response"
-        mock_choice.message = mock_message
-        mock_response.choices = [mock_choice]
-        mock_client.chat.completions.create.return_value = mock_response
-
-        yield mock_client, mock_groq_class
+mock_openai_client = _make_chat_client_fixture("openai.OpenAI", streaming=True)
+mock_groq_client = _make_chat_client_fixture("groq.Groq")
+mock_azure_openai_client = _make_chat_client_fixture(
+    "openai.AzureOpenAI", streaming=True
+)
 
 
 @pytest.fixture
@@ -98,40 +97,28 @@ def mock_google_client():
 
 
 @pytest.fixture
-def mock_azure_openai_client():
-    """Fixture for mocking the Azure OpenAI client."""
-    with patch("openai.AzureOpenAI") as mock_azure_openai_class:
+def mock_bedrock_client():
+    """Fixture for mocking the boto3 bedrock-runtime client."""
+    with patch("boto3.Session") as mock_session_class:
+        mock_session = MagicMock()
+        mock_session_class.return_value = mock_session
+
         mock_client = MagicMock()
-        mock_azure_openai_class.return_value = mock_client
+        mock_session.client.return_value = mock_client
 
-        # Setup the streaming response structure
-        mock_chunk = MagicMock()
-        mock_choice = MagicMock()
-        mock_delta = MagicMock()
-        mock_delta.content = "Test response"
-        mock_choice.delta = mock_delta
-        mock_chunk.choices = [mock_choice]
+        # Setup converse response
+        mock_client.converse.return_value = {
+            "output": {"message": {"content": [{"text": "Test response"}]}}
+        }
 
-        # Return an iterable for streaming
-        mock_client.chat.completions.create.return_value = [mock_chunk]
+        # Setup converse_stream response
+        mock_client.converse_stream.return_value = {
+            "stream": [
+                {"contentBlockDelta": {"delta": {"text": "Test response"}}}
+            ]
+        }
 
-        yield mock_client, mock_azure_openai_class
-
-
-@pytest.fixture
-def mock_litellm_completion():
-    """Fixture for mocking the OpenAI client."""
-    with patch("litellm.completion") as mock_litellm_completion:
-        # Setup the response structure
-        mock_response = MagicMock()
-        mock_choice = MagicMock()
-        mock_message = MagicMock()
-        mock_message.content = "Test response"
-        mock_choice.message = mock_message
-        mock_response.choices = [mock_choice]
-        mock_litellm_completion.return_value = mock_response
-
-        yield mock_litellm_completion
+        yield mock_client
 
 
 @pytest.fixture
@@ -303,7 +290,7 @@ class TestOpenAI:
         self, mock_openai_client, test_messages, test_config
     ):
         """Test calling the openai class with a custom base URL."""
-        mock_client, mock_openai_class = mock_openai_client
+        _mock_client, mock_openai_class = mock_openai_client
 
         # Create model with API key and base URL
         model = openai(
@@ -576,7 +563,7 @@ class TestGroq:
         self, mock_groq_client, test_messages, test_config
     ):
         """Test calling the groq class with a custom base URL."""
-        mock_client, mock_groq_class = mock_groq_client
+        _mock_client, mock_groq_class = mock_groq_client
 
         # Create model with API key and base URL
         model = groq(
@@ -1034,8 +1021,8 @@ class TestAnthropic:
 
 
 @pytest.mark.skipif(
-    not DependencyManager.boto3.has() or not DependencyManager.litellm.has(),
-    reason="boto3 or litellm is not installed",
+    not DependencyManager.boto3.has(),
+    reason="boto3 is not installed",
 )
 class TestBedrock:
     """Test the Bedrock model class"""
@@ -1048,13 +1035,17 @@ class TestBedrock:
             region_name="us-east-1",
         )
 
-        # bedrock automatically prefixes with bedrock/ for litellm usage
         assert model.model == "bedrock/anthropic.claude-3-sonnet-20240229"
         assert model.system_message == "Test system message"
         assert model.region_name == "us-east-1"
         assert model.profile_name is None
         assert model.aws_access_key_id is None
         assert model.aws_secret_access_key is None
+
+    def test_init_with_bedrock_prefix(self):
+        """Test that the bedrock/ prefix is accepted and preserved"""
+        model = bedrock("bedrock/anthropic.claude-3-sonnet-20240229")
+        assert model.model == "bedrock/anthropic.claude-3-sonnet-20240229"
 
     def test_init_with_credentials(self):
         """Test initialization with explicit credentials"""
@@ -1076,36 +1067,28 @@ class TestBedrock:
 
         assert model.profile_name == "test-profile"
 
-    @pytest.mark.xfail(
-        reason="latest litellm and openai are not compatible",
-    )
-    def test_call(self, mock_litellm_completion, test_messages, test_config):
-        """Test calling the bedrock class with LiteLLM client."""
+    def test_call(self, mock_bedrock_client, test_messages, test_config):
+        """Test calling the bedrock class with boto3 Converse API."""
         model_name = "anthropic.claude-3-sonnet-20240229"
 
-        # Create model with API key to avoid _require_api_key
         model = bedrock(model_name)
 
-        result = model(test_messages, test_config)
+        result = list(model(test_messages, test_config))
 
-        # Verify result
-        assert result == "Test response"
+        assert result == ["Test response"]
 
-        # Verify API call
-        mock_litellm_completion.assert_called_once()
-        call_args = mock_litellm_completion.call_args[1]
-        assert call_args["model"] == f"bedrock/{model_name}"
-        assert len(call_args["messages"]) == 2
-        assert call_args["messages"][0]["role"] == "system"
-        assert call_args["messages"][0]["content"] == DEFAULT_SYSTEM_MESSAGE
-        assert call_args["messages"][1]["role"] == "user"
-        assert call_args["messages"][1]["content"] == "Test prompt"
-        assert call_args["max_tokens"] == 100
-        # Use pytest.approx for floating point comparisons
-        assert call_args["temperature"] == pytest.approx(0.7)
-        assert call_args["top_p"] == pytest.approx(0.9)
-        assert call_args["frequency_penalty"] == pytest.approx(0.5)
-        assert call_args["presence_penalty"] == pytest.approx(0.5)
+        mock_bedrock_client.converse_stream.assert_called_once()
+        call_args = mock_bedrock_client.converse_stream.call_args[1]
+        assert call_args["modelId"] == model_name
+        assert call_args["system"] == [{"text": DEFAULT_SYSTEM_MESSAGE}]
+        assert len(call_args["messages"]) == 1
+        assert call_args["messages"][0]["role"] == "user"
+        assert call_args["messages"][0]["content"] == [{"text": "Test prompt"}]
+        assert call_args["inferenceConfig"]["maxTokens"] == 100
+        assert call_args["inferenceConfig"]["temperature"] == pytest.approx(
+            0.7
+        )
+        assert call_args["inferenceConfig"]["topP"] == pytest.approx(0.9)
 
 
 @pytest.mark.skipif(
@@ -1430,6 +1413,9 @@ class TestPydanticAI:
                 {"id": "2", "type": "text-delta", "delta": " World"},
             ]
 
+            _, kwargs = mock_adapter.call_args
+            assert kwargs.get("sdk_version") == AI_SDK_VERSION
+
     async def test_stream_text(self):
         """Test _stream_text streams text from the model."""
         mock_agent = MagicMock()
@@ -1591,42 +1577,6 @@ class TestPydanticAI:
             "input": {"query": "test"},
         }
 
-    def test_pydantic_ai_serialize_vercel_ai_chunk_v5(self) -> None:
-        """Test that tool-input-start chunks exclude providerMetadata for SDK v5.
-
-        The Vercel AI SDK v5 schema drifts from v6, so we need to use Pydantic's handling.
-
-        For tool-input-start chunks, providerMetadata must be excluded.
-        See: https://github.com/pydantic/pydantic-ai/pull/4166
-        """
-        from pydantic_ai.ui.vercel_ai.response_types import ToolInputStartChunk
-
-        mock_agent = MagicMock()
-        model = pydantic_ai(mock_agent)
-
-        # Create chunk with providerMetadata (like Google Gemini produces)
-        chunk = ToolInputStartChunk(
-            tool_call_id="tc_1",
-            tool_name="my_tool",
-            provider_metadata={
-                "pydantic_ai": {
-                    "id": "test_id",
-                    "provider_name": "google-gla",
-                    "provider_details": {
-                        "thought_signature": "encrypted_data"
-                    },
-                }
-            },
-        )
-        result = model._serialize_vercel_ai_chunk(chunk)
-
-        # providerMetadata should be excluded for SDK v5 compatibility
-        assert result == {
-            "type": "tool-input-start",
-            "toolCallId": "tc_1",
-            "toolName": "my_tool",
-        }
-
     def test_pydantic_ai_serialize_vercel_ai_chunk_done_type(self) -> None:
         """Test that 'done' type chunks are skipped."""
         from pydantic_ai.ui.vercel_ai.response_types import DoneChunk
@@ -1653,14 +1603,142 @@ class TestPydanticAI:
         result = model._serialize_vercel_ai_chunk(cast(Any, error_chunk))
         assert result is None
 
+    def test_build_ui_messages_preserves_tool_approval_field(self):
+        """When the frontend posts back an `approval-responded` tool part,
+        the `approval` payload must reach pydantic-ai intact. The lossy
+        `ToolInvocationPart` dataclass doesn't model `approval`, so without
+        the `_raw_parts` snapshot the field would be silently dropped and
+        the agent would loop on the same tool call forever.
+
+        Regression for the second half of the tool-approval fix: the first
+        half (`sdk_version=AI_SDK_VERSION`) made the request chunk visible
+        to the frontend; this half makes the user's response visible to the
+        agent.
+        """
+        from pydantic_ai.ui.vercel_ai.request_types import (
+            ToolApprovalResponded,
+            ToolApprovalRespondedPart,
+        )
+
+        model = pydantic_ai(MagicMock())
+        messages = [
+            ChatMessage(
+                role="user",
+                content="Delete secrets.env",
+                id="msg-user-1",
+                parts=cast(  # pyright: ignore[reportAny]
+                    Any,
+                    [{"type": "text", "text": "Delete secrets.env"}],
+                ),
+            ),
+            ChatMessage(
+                role="assistant",
+                content=None,
+                id="msg-assistant-1",
+                parts=cast(  # pyright: ignore[reportAny]
+                    Any,
+                    [
+                        {
+                            "type": "tool-delete_file",
+                            "toolCallId": "call-1",
+                            "state": "approval-responded",
+                            "input": {"path": "secrets.env"},
+                            "approval": {
+                                "id": "call-1",
+                                "approved": True,
+                            },
+                        }
+                    ],
+                ),
+            ),
+        ]
+
+        ui_messages = model._build_ui_messages(messages)
+        assert len(ui_messages) == 2
+
+        # The tool part must be reified as the *responded* variant — the
+        # one that carries the approval — and the approval must survive.
+        tool_part = ui_messages[1].parts[0]
+        assert isinstance(tool_part, ToolApprovalRespondedPart), (
+            f"Expected ToolApprovalRespondedPart, got {type(tool_part).__name__}: "
+            f"{tool_part!r}"
+        )
+        approval = tool_part.approval
+        assert isinstance(approval, ToolApprovalResponded), (
+            f"Expected ToolApprovalResponded, got {approval!r}"
+        )
+        assert approval.id == "call-1"
+        assert approval.approved is True
+
+    async def test_stream_response_emits_tool_approval_request(self):
+        """Tools with `requires_approval=True` should surface an
+        approval-request chunk so the frontend can render an Approve/Deny
+        approval. This behavior requires passing `sdk_version=AI_SDK_VERSION`
+        to the adapter.
+        """
+        from pydantic_ai import Agent, DeferredToolRequests
+        from pydantic_ai.models.function import (
+            AgentInfo,
+            DeltaToolCall,
+            DeltaToolCalls,
+            FunctionModel,
+        )
+
+        async def respond(
+            messages: list[Any], _info: AgentInfo
+        ) -> AsyncIterator[DeltaToolCalls]:
+            del messages, _info
+            yield {
+                0: DeltaToolCall(
+                    name="delete_file",
+                    json_args='{"path": "secrets.env"}',
+                    tool_call_id="call-1",
+                )
+            }
+
+        agent = Agent(
+            FunctionModel(stream_function=respond),
+            output_type=[str, DeferredToolRequests],
+        )
+
+        @agent.tool_plain(requires_approval=True)
+        def delete_file(path: str) -> str:
+            return f"File {path!r} deleted"
+
+        model = pydantic_ai(agent)
+        messages = [
+            ChatMessage(
+                role="user",
+                content="Delete secrets.env",
+                id="msg-user-1",
+                parts=[TextPart(type="text", text="Delete secrets.env")],
+            ),
+        ]
+        config = ChatModelConfig(max_tokens=100)
+
+        chunks = [
+            chunk async for chunk in model._stream_response(messages, config)
+        ]
+
+        approval_chunks = [
+            chunk
+            for chunk in chunks
+            if chunk.get("type") == "tool-approval-request"
+        ]
+        # pydantic-ai may reuse toolCallId as approvalId; assert the shape.
+        assert len(approval_chunks) == 1
+        chunk = approval_chunks[0]
+        assert chunk["type"] == "tool-approval-request"
+        assert chunk["toolCallId"] == "call-1"
+        assert isinstance(chunk["approvalId"], str)
+        assert chunk["approvalId"]
+
 
 class MockBaseChunkWithError:
     """Mock BaseChunk that raises on serialization."""
 
-    def model_dump(
-        self, mode: str, by_alias: bool, exclude_none: bool
-    ) -> dict[str, Any]:
-        del mode, by_alias, exclude_none
+    def encode(self, *, sdk_version: int) -> str:
+        del sdk_version
         raise ValueError("Serialization error")
 
 

@@ -142,7 +142,6 @@ export function getSerializedLayout() {
     return null;
   }
 
-  const data = layoutData[selectedLayout];
   const plugin = cellRendererPlugins.find(
     (plugin) => plugin.type === selectedLayout,
   );
@@ -150,11 +149,11 @@ export function getSerializedLayout() {
     Logger.error(`Unknown layout type: ${selectedLayout}`);
     return null;
   }
-  // dataがundefinedの場合はnullを返す
-  if (data === undefined) {
-    return null;
-  }
   const cells = notebookCells(notebook);
+  // Fall back to the plugin's initial layout when the user has not yet
+  // interacted with this layout — otherwise serializers that expect a
+  // structured layout object crash on `undefined`.
+  const data = layoutData[selectedLayout] ?? plugin.getInitialLayout(cells);
   const serialized = plugin.serializeLayout(data, cells);
 
   // Merge 3D positions into grid layout cells

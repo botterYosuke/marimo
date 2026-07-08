@@ -1,11 +1,15 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { EditorView } from "@codemirror/view";
-import { math } from "@streamdown/math";
 import { useAtomValue } from "jotai";
 import { BetweenHorizontalStartIcon } from "lucide-react";
 import { memo, Suspense, useState } from "react";
-import { Streamdown, type StreamdownProps } from "streamdown";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import {
+  defaultRehypePlugins,
+  Streamdown,
+  type StreamdownProps,
+} from "streamdown";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { maybeAddMarimoImport } from "@/core/cells/add-missing-import";
 import { useCellActions } from "@/core/cells/cells";
@@ -13,6 +17,7 @@ import { useLastFocusedCellId } from "@/core/cells/focus";
 import { MarkdownLanguageAdapter } from "@/core/codemirror/language/languages/markdown";
 import { SQLLanguageAdapter } from "@/core/codemirror/language/languages/sql/sql";
 import { autoInstantiateAtom } from "@/core/config/config";
+import { useAsyncData } from "@/hooks/useAsyncData";
 import { LazyAnyLanguageCodeMirror } from "@/plugins/impl/code/LazyAnyLanguageCodeMirror";
 import { useTheme } from "@/theme/useTheme";
 import { copyToClipboard } from "@/utils/copy";
@@ -148,6 +153,23 @@ const CopyButton: React.FC<ButtonProps> = ({ onClick, ...props }) => {
   );
 };
 
+// Allow `className` on every element; the default GitHub schema strips it,
+// which drops the styling on marimo HTML like `mo.md(...)` admonitions.
+const sanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    "*": [...(defaultSchema.attributes?.["*"] ?? []), "className"],
+  },
+};
+
+// Keep Streamdown's other rehype plugins (raw, harden) so scripts and unsafe
+// URLs are still sanitized.
+const REHYPE_PLUGINS: StreamdownProps["rehypePlugins"] = Object.values({
+  ...defaultRehypePlugins,
+  sanitize: [rehypeSanitize, sanitizeSchema],
+});
+
 type Components = StreamdownProps["components"];
 
 const COMPONENTS: Components = {
@@ -166,11 +188,28 @@ const COMPONENTS: Components = {
   },
 };
 
+// Lazy-load the math plugin to keep katex (~264 KB) out of the critical path.
+// The first render works without math; once loaded, it re-renders with math support.
+let mathPluginCache: StreamdownProps["plugins"] | undefined;
+const useMathPlugin = () => {
+  const { data: plugins } = useAsyncData(async () => {
+    if (mathPluginCache) {
+      return mathPluginCache;
+    }
+    const mod = await import("@streamdown/math");
+    mathPluginCache = { math: mod.math };
+    return mathPluginCache;
+  }, []);
+  return plugins;
+};
+
 export const MarkdownRenderer = memo(({ content }: { content: string }) => {
+  const plugins = useMathPlugin();
   return (
     <Streamdown
       components={COMPONENTS}
-      plugins={{ math }}
+      plugins={plugins}
+      rehypePlugins={REHYPE_PLUGINS}
       className="mo-markdown-renderer"
     >
       {content}

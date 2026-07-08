@@ -27,7 +27,7 @@ export function getOtherCellsCode(otherCode: string) {
       return code;
     })
     .filter(Boolean)
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       if (a.startsWith("import") && !b.startsWith("import")) {
         return -1;
       }
@@ -47,7 +47,9 @@ const notebookCellCodes = atom((get) => {
       const handle = notebook.cellHandles[id];
       return [
         id,
-        handle?.current ? getEditorCodeAsPython(handle.current.editorView) : "",
+        handle?.current?.editorView
+          ? getEditorCodeAsPython(handle.current.editorView)
+          : "",
       ];
     }),
   );

@@ -1,6 +1,6 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { isEqual } from "lodash-es";
+import { dequal as isEqual } from "dequal";
 import { Code2Icon, DatabaseIcon, FunctionSquareIcon } from "lucide-react";
 import {
   type JSX,
@@ -29,8 +29,8 @@ import { LoadingDataTableComponent, TableProviders } from "../DataTablePlugin";
 import type { DataType } from "../vega/vega-loader";
 import { TransformPanel, type TransformPanelHandle } from "./panel";
 import {
-  ConditionSchema,
-  type ConditionType,
+  FilterGroupSchema,
+  type FilterGroupType,
   columnToFieldTypesSchema,
   type Transformations,
 } from "./schema";
@@ -54,7 +54,7 @@ interface Data {
   lazy: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+// oxlint-disable-next-line typescript/consistent-type-definitions
 type PluginFunctions = {
   get_dataframe: (req: {}) => Promise<{
     url: string;
@@ -75,7 +75,7 @@ type PluginFunctions = {
       descending: boolean;
     }[];
     query?: string;
-    filters?: ConditionType[];
+    filters?: FilterGroupType;
     page_number: number;
     page_size: number;
   }) => Promise<{
@@ -83,6 +83,9 @@ type PluginFunctions = {
     total_rows: number;
   }>;
   download_as: DownloadAsArgs;
+  get_size_bytes: (opts: Record<string, never>) => Promise<{
+    size_bytes?: number | null;
+  }>;
 };
 
 // Value is selection, but it is not currently exposed to the user
@@ -138,7 +141,7 @@ export const DataFramePlugin = createPlugin<S>("marimo-dataframe")
             )
             .optional(),
           query: z.string().optional(),
-          filters: z.array(ConditionSchema).optional(),
+          filters: FilterGroupSchema.optional(),
           page_number: z.number(),
           page_size: z.number(),
         }),
@@ -150,6 +153,9 @@ export const DataFramePlugin = createPlugin<S>("marimo-dataframe")
         }),
       ),
     download_as: DownloadAsSchema,
+    get_size_bytes: rpc
+      .input(z.object({}))
+      .output(z.object({ size_bytes: z.number().nullish() })),
   })
   .renderer((props) => (
     <TableProviders>
@@ -188,6 +194,7 @@ export const DataFrameComponent = memo(
     get_column_values,
     search,
     download_as,
+    get_size_bytes,
     host,
   }: DataTableProps): JSX.Element => {
     const { data, error, isPending } = useAsyncData(
@@ -329,9 +336,9 @@ export const DataFrameComponent = memo(
           fieldTypes={field_types}
           rowHeaders={row_headers || Arrays.EMPTY}
           showDownload={showDownload}
-          downloadFileName={dataframeName}
           download_as={download_as}
-          enableSearch={false}
+          get_size_bytes={get_size_bytes}
+          showSearch={false}
           showFilters={false}
           search={search}
           showColumnSummaries={false}

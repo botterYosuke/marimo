@@ -58,13 +58,13 @@ describe("Model", () => {
   describe("public API", () => {
     it("should only expose AFM-compliant interface", () => {
       // Get all enumerable own properties
-      const ownProperties = Object.keys(model).sort();
+      const ownProperties = Object.keys(model).toSorted();
       // Get prototype methods (excluding constructor)
       const prototypeMethods = Object.getOwnPropertyNames(
         Object.getPrototypeOf(model),
       )
         .filter((name) => name !== "constructor")
-        .sort();
+        .toSorted();
 
       // Snapshot the public API to catch accidental leaks of internal methods
       expect({ ownProperties, prototypeMethods }).toMatchInlineSnapshot(`
@@ -269,6 +269,25 @@ describe("Model", () => {
       getMarimoInternal(model).updateAndEmitDiffs({ foo: "changed", bar: 456 });
       await TestUtils.nextTick(); // flush
       expect(callback).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("reemitState", () => {
+    it("should emit change events for current values without state changes", async () => {
+      const onFoo = vi.fn();
+      const onBar = vi.fn();
+      const onAny = vi.fn();
+
+      model.on("change:foo", onFoo);
+      model.on("change:bar", onBar);
+      model.on("change", onAny);
+
+      getMarimoInternal(model).reemitState();
+      await TestUtils.nextTick();
+
+      expect(onFoo).toHaveBeenCalledWith("test");
+      expect(onBar).toHaveBeenCalledWith(123);
+      expect(onAny).toHaveBeenCalledTimes(1);
     });
   });
 

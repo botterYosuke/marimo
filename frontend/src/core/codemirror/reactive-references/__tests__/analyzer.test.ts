@@ -3,8 +3,8 @@
 import { python } from "@codemirror/lang-python";
 import { EditorState } from "@codemirror/state";
 import { describe, expect, test } from "vitest";
-import type { CellId } from "@/core/cells/ids";
-import type { VariableName, Variables } from "@/core/variables/types";
+import { cellId, variableName } from "@/__tests__/branded";
+import type { Variables } from "@/core/variables/types";
 import { findReactiveVariables, type ReactiveVariableRange } from "../analyzer";
 
 describe("findReactiveVariables - Lexical Scoping", () => {
@@ -45,9 +45,8 @@ def foo(x):
   });
 
   test("should handle lambda parameters", () => {
-    expect(
-      runHighlight(["a", "b"], "result = lambda a: a + b"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["a", "b"], "result = lambda a: a + b"))
+      .toMatchInlineSnapshot(`
       "
       result = lambda a: a + b
                              ^
@@ -56,9 +55,8 @@ def foo(x):
   });
 
   test("should handle comprehension variables", () => {
-    expect(
-      runHighlight(["a", "data"], "result = [a for a in data]"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["a", "data"], "result = [a for a in data]"))
+      .toMatchInlineSnapshot(`
       "
       result = [a for a in data]
                            ^^^^
@@ -146,9 +144,8 @@ def factorial(n):
   });
 
   test("function param vs global", () => {
-    expect(
-      runHighlight(["a", "b"], "def foo(a): return a + b"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["a", "b"], "def foo(a): return a + b"))
+      .toMatchInlineSnapshot(`
       "
       def foo(a): return a + b
                              ^
@@ -157,9 +154,8 @@ def factorial(n):
   });
 
   test("lambda param vs global", () => {
-    expect(
-      runHighlight(["x", "b"], "func = lambda x: x + b"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["x", "b"], "func = lambda x: x + b"))
+      .toMatchInlineSnapshot(`
       "
       func = lambda x: x + b
                            ^
@@ -168,9 +164,8 @@ def factorial(n):
   });
 
   test("lambda with multiple params", () => {
-    expect(
-      runHighlight(["x", "y", "z"], "f = lambda x, y: x + y + z"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["x", "y", "z"], "f = lambda x, y: x + y + z"))
+      .toMatchInlineSnapshot(`
       "
       f = lambda x, y: x + y + z
                                ^
@@ -187,9 +182,8 @@ def factorial(n):
   });
 
   test("nested comprehension", () => {
-    expect(
-      runHighlight(["a", "b"], "[(a + b) for a, b in [(1,2), (3,4)]]"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["a", "b"], "[(a + b) for a, b in [(1,2), (3,4)]]"))
+      .toMatchInlineSnapshot(`
       "
       [(a + b) for a, b in [(1,2), (3,4)]]
       "
@@ -225,9 +219,8 @@ def factorial(n):
   });
 
   test("class body using globals", () => {
-    expect(
-      runHighlight(["a", "b"], "class MyClass:\n  value = a + b"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["a", "b"], "class MyClass:\n  value = a + b"))
+      .toMatchInlineSnapshot(`
       "
       class MyClass:
         value = a + b
@@ -237,9 +230,8 @@ def factorial(n):
   });
 
   test("decorator using global", () => {
-    expect(
-      runHighlight(["logger"], "@logger\ndef decorated(): pass"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["logger"], "@logger\ndef decorated(): pass"))
+      .toMatchInlineSnapshot(`
       "
       @logger
        ^^^^^^
@@ -317,9 +309,8 @@ ${" ".repeat(8)}
   });
 
   test("multiple assignment", () => {
-    expect(
-      runHighlight(["x", "y", "z", "a"], "x = y = z + a"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["x", "y", "z", "a"], "x = y = z + a"))
+      .toMatchInlineSnapshot(`
       "
       x = y = z + a
               ^   ^
@@ -353,9 +344,8 @@ ${" ".repeat(8)}
   });
 
   test("global in return", () => {
-    expect(
-      runHighlight(["config"], "def get_config(): return config"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["config"], "def get_config(): return config"))
+      .toMatchInlineSnapshot(`
       "
       def get_config(): return config
                                ^^^^^^
@@ -410,9 +400,8 @@ class Configurable:
   });
 
   test("comprehension shadows global 2", () => {
-    expect(
-      runHighlight(["i"], "squares = [i**2 for i in range(10)]"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["i"], "squares = [i**2 for i in range(10)]"))
+      .toMatchInlineSnapshot(`
       "
       squares = [i**2 for i in range(10)]
       "
@@ -420,9 +409,8 @@ class Configurable:
   });
 
   test("comprehension with global in condition", () => {
-    expect(
-      runHighlight(["x", "z"], "filtered = [x for x in [] if x > z]"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["x", "z"], "filtered = [x for x in [] if x > z]"))
+      .toMatchInlineSnapshot(`
       "
       filtered = [x for x in [] if x > z]
                                        ^
@@ -459,9 +447,8 @@ def make_adder(x):
   });
 
   test("rebinding in list comprehension", () => {
-    expect(
-      runHighlight(["x"], "rebinding = [x for x in range(5)]"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["x"], "rebinding = [x for x in range(5)]"))
+      .toMatchInlineSnapshot(`
       "
       rebinding = [x for x in range(5)]
       "
@@ -644,12 +631,65 @@ def run(polars):
   });
 
   test("mixed comprehension and outer globals", () => {
-    expect(
-      runHighlight(["y", "z"], "values = [y + z for y in range(5)]"),
-    ).toMatchInlineSnapshot(`
+    expect(runHighlight(["y", "z"], "values = [y + z for y in range(5)]"))
+      .toMatchInlineSnapshot(`
       "
       values = [y + z for y in range(5)]
                     ^
+      "
+    `);
+  });
+
+  test("set comprehension target shadows outer global", () => {
+    // Regression: SCOPE_CREATING_NODES used "SetComprehension" instead of the
+    // grammar's "SetComprehensionExpression", so set comprehensions never
+    // created a scope and their for-target was treated as reactive.
+    expect(runHighlight(["x"], "result = {x for x in range(5)}"))
+      .toMatchInlineSnapshot(`
+      "
+      result = {x for x in range(5)}
+      "
+    `);
+  });
+
+  test("from-import module path stays reactive", () => {
+    // Regression: ImportStatement collected every VariableName child, so the
+    // module name in `from m import y` was wrongly treated as a local binding.
+    expect(
+      runHighlight(
+        ["math"],
+        `
+def f():
+    from math import sin as my_sin
+    return math + my_sin(1)`,
+      ),
+    ).toMatchInlineSnapshot(`
+      "
+      def f():
+          from math import sin as my_sin
+          return math + my_sin(1)
+                 ^^^^
+      "
+    `);
+  });
+
+  test("from-import: aliased imported name is not a binding", () => {
+    // Regression: `sin` in `from math import sin as my_sin` was incorrectly
+    // registered as a local binding, hiding genuine reactive uses of `sin`.
+    expect(
+      runHighlight(
+        ["sin"],
+        `
+def f():
+    from math import sin as my_sin
+    return sin + my_sin(1)`,
+      ),
+    ).toMatchInlineSnapshot(`
+      "
+      def f():
+          from math import sin as my_sin
+          return sin + my_sin(1)
+                 ^^^
       "
     `);
   });
@@ -1115,6 +1155,60 @@ class Foo:
     `);
   });
 
+  test("should not highlight attribute access matching a for-loop variable", () => {
+    // When `tool` is used as a for-loop variable, `mcp.tool` (attribute access)
+    // should NOT have `tool` highlighted — it's a property, not a variable reference.
+    expect(
+      runHighlight(
+        ["mcp", "client"],
+        `
+@mcp.tool
+def roll_dice():
+    pass
+
+async with client:
+    for tool in await client.list_tools():
+        print(tool)
+`,
+      ),
+    ).toMatchInlineSnapshot(`
+      "
+      @mcp.tool
+       ^^^
+      def roll_dice():
+          pass
+
+      async with client:
+                 ^^^^^^
+          for tool in await client.list_tools():
+                            ^^^^^^
+              print(tool)
+      "
+    `);
+  });
+
+  test("should not highlight property name matching a global variable", () => {
+    // `tool` is a global variable, but `mcp.tool` should not highlight `tool`
+    // because it's a property access, not a variable reference.
+    expect(
+      runHighlight(
+        ["mcp", "tool"],
+        `
+@mcp.tool
+def roll_dice():
+    pass
+`,
+      ),
+    ).toMatchInlineSnapshot(`
+      "
+      @mcp.tool
+       ^^^
+      def roll_dice():
+          pass
+      "
+    `);
+  });
+
   test("class property self-reference", () => {
     expect(
       runHighlight(
@@ -1145,16 +1239,17 @@ class Foo:
 function runHighlight(variableNames: string[], code: string): string {
   const variables: Variables = {};
   for (const name of variableNames) {
-    variables[name as VariableName] = {
-      name: name as VariableName,
-      declaredBy: ["other-cell" as CellId],
+    const varName = variableName(name);
+    variables[varName] = {
+      name: varName,
+      declaredBy: [cellId("other-cell")],
       usedBy: [],
       value: "test-value",
       dataType: "str",
     };
   }
   const ranges = findReactiveVariables({
-    cellId: "current-cell" as CellId,
+    cellId: cellId("current-cell"),
     state: EditorState.create({
       doc: code,
       extensions: [python()],

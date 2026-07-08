@@ -2,30 +2,39 @@
 import { historyField } from "@codemirror/commands";
 import { EditorState, StateEffect } from "@codemirror/state";
 import { EditorView, ViewPlugin } from "@codemirror/view";
+import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { useAtom, useAtomValue } from "jotai";
-import React, { memo, useEffect, useMemo, useRef } from "react";
+import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import useEvent from "react-use-event-hook";
 import { Button } from "@/components/ui/button";
 import { DelayMount } from "@/components/utils/delay-mount";
 import { aiCompletionCellAtom } from "@/core/ai/state";
 import { maybeAddMarimoImport } from "@/core/cells/add-missing-import";
-import { useCellActions } from "@/core/cells/cells";
+import { getNotebook, useCellActions } from "@/core/cells/cells";
+import { SETUP_CELL_ID } from "@/core/cells/ids";
 import { usePendingDeleteService } from "@/core/cells/pending-delete-service";
 import type { CellData, CellRuntimeState } from "@/core/cells/types";
+import { notebookCellEditorViews } from "@/core/cells/utils";
 import { setupCodeMirror } from "@/core/codemirror/cm";
+import { acceptCompletionOnEnterAtom } from "@/core/codemirror/completion/accept-on-enter-atom";
+import { editorMountScheduler } from "@/core/codemirror/editor-mount-scheduler";
 import {
   getInitialLanguageAdapter,
   languageAdapterState,
   reconfigureLanguageEffect,
   switchLanguage,
 } from "@/core/codemirror/language/extension";
+import {
+  getEditorCodeAsPython,
+  updateEditorCodeFromPython,
+} from "@/core/codemirror/language/utils";
 import { MARKDOWN_INITIAL_HIDE_CODE } from "@/core/codemirror/language/languages/markdown";
 import type { LanguageAdapterType } from "@/core/codemirror/language/types";
 import {
   connectedDocAtom,
   realTimeCollaboration,
 } from "@/core/codemirror/rtc/extension";
-import { autoInstantiateAtom, isAiEnabled } from "@/core/config/config";
+import { autoInstantiateAtom, isAiFeatureEnabled } from "@/core/config/config";
 import type { UserConfig } from "@/core/config/config-schema";
 import { OverridingHotkeyProvider } from "@/core/hotkeys/hotkeys";
 import { connectionAtom } from "@/core/network/connection";
@@ -44,10 +53,12 @@ import {
 } from "../../navigation/navigation";
 import { useDeleteCellCallback } from "../useDeleteCell";
 import { useSplitCellCallback } from "../useSplitCell";
+import { CodePlaceholder } from "./code-placeholder";
 import { LanguageToggles } from "./language-toggle";
 
 export interface CellEditorProps
-  extends Pick<CellRuntimeState, "status">,
+  extends
+    Pick<CellRuntimeState, "status">,
     Pick<CellData, "id" | "code" | "serializedEditorState" | "config"> {
   runCell: () => void;
   theme: Theme;
@@ -63,6 +74,11 @@ export interface CellEditorProps
   hasOutput?: boolean;
   languageAdapter: LanguageAdapterType | undefined;
   showLanguageToggles?: boolean;
+  /**
+   * Override for the inline "Edit with AI" tooltip. Defaults to the user's
+   * `ai.inline_tooltip` config. Set to `false` to force-disable it.
+   */
+  inlineAiTooltip?: boolean;
   setLanguageAdapter: React.Dispatch<
     React.SetStateAction<LanguageAdapterType | undefined>
   >;
@@ -71,6 +87,12 @@ export interface CellEditorProps
   editorViewParentRef?: React.RefObject<HTMLDivElement | null>;
   showHiddenCode: (opts?: { focus?: boolean }) => void;
   outputArea?: "above" | "below";
+  /**
+   * CSS selector for the element that editor tooltips (completions, hover,
+   * signature help) are appended to. Useful for fullscreen/dialog containers;
+   * defaults to `#App`.
+   */
+  tooltipParentSelector?: string;
 }
 
 const CellEditorInternal = ({
@@ -92,7 +114,9 @@ const CellEditorInternal = ({
   languageAdapter,
   setLanguageAdapter,
   showLanguageToggles = true,
+  inlineAiTooltip,
   outputArea,
+  tooltipParentSelector,
 }: CellEditorProps) => {
   const [aiCompletionCell, setAiCompletionCell] = useAtom(aiCompletionCellAtom);
   const deleteCell = useDeleteCellCallback();
@@ -145,6 +169,7 @@ const CellEditorInternal = ({
   });
 
   const autoInstantiate = useAtomValue(autoInstantiateAtom);
+  const acceptCompletionOnEnter = useAtomValue(acceptCompletionOnEnterAtom);
   const afterToggleMarkdown = useEvent(() => {
     maybeAddMarimoImport({
       autoInstantiate,
@@ -163,21 +188,29 @@ const CellEditorInternal = ({
     }
   });
 
-  const aiEnabled = isAiEnabled(userConfig);
+  const afterToggleSQL = useEvent(() => {
+    maybeAddMarimoImport({
+      autoInstantiate,
+      createNewCell: cellActions.createNewCell,
+    });
+  });
+
+  const aiFeaturesEnabled = isAiFeatureEnabled(userConfig);
 
   const extensions = useMemo(() => {
     const extensions = setupCodeMirror({
       cellId,
       showPlaceholder,
-      enableAI: aiEnabled,
+      enableAI: aiFeaturesEnabled,
       cellActions: {
         ...cellActions,
         afterToggleMarkdown,
+        afterToggleSQL,
         onRun: handleRunCell,
         deleteCell: handleDelete,
         saveNotebook: saveOrNameNotebook,
         createManyBelow: (cells) => {
-          for (const code of [...cells].reverse()) {
+          for (const code of cells.toReversed()) {
             cellActions.createNewCell({
               code,
               before: false,
@@ -187,9 +220,38 @@ const CellEditorInternal = ({
             });
           }
         },
+        addOrAppendSetupCell: (code) => {
+          const notebook = getNotebook();
+          // No setup cell yet: create one with this code at the top.
+          if (!notebook.cellIds.setupCellExists()) {
+            cellActions.addSetupCellIfDoesntExist({ code });
+            return;
+          }
+          // Setup cell exists: append the pasted code to it. Prefer updating
+          // the mounted editor (keeps the view and state in sync, like
+          // formatting does); fall back to a plain state update otherwise.
+          const view = notebookCellEditorViews(notebook)[SETUP_CELL_ID];
+          const existing = view
+            ? getEditorCodeAsPython(view)
+            : notebook.cellData[SETUP_CELL_ID].code;
+          const merged = existing.trim()
+            ? `${existing.trimEnd()}\n\n${code}`
+            : code;
+          if (view) {
+            updateEditorCodeFromPython(view, merged);
+          }
+          cellActions.updateCellCode({
+            cellId: SETUP_CELL_ID,
+            code: merged,
+            formattingChange: false,
+          });
+        },
         splitCell,
         toggleHideCode,
         aiCellCompletion: () => {
+          if (!aiFeaturesEnabled) {
+            return false;
+          }
           let closed = false;
           setAiCompletionCell((v) => {
             // Toggle close
@@ -203,13 +265,16 @@ const CellEditorInternal = ({
         },
       },
       completionConfig: userConfig.completion,
+      acceptCompletionOnEnter,
       keymapConfig: userConfig.keymap,
       lspConfig: userConfig.language_servers,
       theme,
       hotkeys: new OverridingHotkeyProvider(userConfig.keymap.overrides ?? {}),
       diagnosticsConfig: userConfig.diagnostics,
       displayConfig: userConfig.display,
-      inlineAiTooltip: userConfig.ai?.inline_tooltip ?? false,
+      inlineAiTooltip:
+        inlineAiTooltip ?? userConfig.ai?.inline_tooltip ?? false,
+      tooltipParentSelector,
     });
 
     extensions.push(
@@ -252,12 +317,16 @@ const CellEditorInternal = ({
     return extensions;
   }, [
     cellId,
+    acceptCompletionOnEnter,
     userConfig.keymap,
     userConfig.completion,
     userConfig.language_servers,
     userConfig.display,
     userConfig.diagnostics,
-    aiEnabled,
+    userConfig.ai?.inline_tooltip,
+    inlineAiTooltip,
+    tooltipParentSelector,
+    aiFeaturesEnabled,
     theme,
     showPlaceholder,
     cellActions,
@@ -267,6 +336,7 @@ const CellEditorInternal = ({
     handleRunCell,
     setAiCompletionCell,
     afterToggleMarkdown,
+    afterToggleSQL,
     setLanguageAdapter,
     showHiddenCode,
     saveOrNameNotebook,
@@ -370,37 +440,44 @@ const CellEditorInternal = ({
     // Clear the serialized state so that we don't re-create the editor next time
     cellActions.clearSerializedEditorState({ cellId });
   });
+  const [isEditorMounted, setIsEditorMounted] = useState(
+    serializedEditorState !== null,
+  );
+
+  // Build the editor. Deserialize eagerly; otherwise queue an async build so
+  // large notebooks stay responsive while editors come online progressively.
+  useEffect(() => {
+    if (editorViewRef.current !== null) {
+      setIsEditorMounted(true);
+      return;
+    }
+    if (serializedEditorState !== null) {
+      handleDeserializeEditor();
+      setIsEditorMounted(true);
+      return;
+    }
+    editorMountScheduler.request(cellId, () => {
+      if (editorViewRef.current !== null) {
+        return;
+      }
+      handleInitializeEditor();
+      setIsEditorMounted(true);
+    });
+    return () => editorMountScheduler.cancel(cellId);
+  }, [
+    cellId,
+    editorViewRef,
+    handleDeserializeEditor,
+    handleInitializeEditor,
+    serializedEditorState,
+  ]);
 
   useEffect(() => {
-    if (serializedEditorState === null) {
-      if (editorViewRef.current === null) {
-        handleInitializeEditor();
-      } else {
-        // If the editor already exists, reconfigure it with the new extensions.
-        handleReconfigureEditor();
-      }
-    } else {
-      handleDeserializeEditor();
+    if (editorViewRef.current === null) {
+      return;
     }
-
-    if (
-      editorViewRef.current !== null &&
-      editorViewParentRef &&
-      editorViewParentRef.current !== null
-    ) {
-      // Always replace the children in case the editor view was re-created.
-      editorViewParentRef.current.replaceChildren(editorViewRef.current.dom);
-    }
-  }, [
-    handleInitializeEditor,
-    handleReconfigureEditor,
-    handleDeserializeEditor,
-    editorViewRef,
-    editorViewParentRef,
-    serializedEditorState,
-    // Props to trigger reconfiguration
-    extensions,
-  ]);
+    handleReconfigureEditor();
+  }, [handleReconfigureEditor, extensions, editorViewRef]);
 
   // Destroy the editor when the component is unmounted
   useEffect(() => {
@@ -409,6 +486,26 @@ const CellEditorInternal = ({
       ev?.destroy();
     };
   }, [editorViewRef]);
+
+  // Prioritize building this cell's editor when it scrolls into view, so the
+  // visible region fills in first instead of waiting for the top-to-bottom
+  // queue. The margin builds cells just before they reach the viewport.
+  // uidotdev sets threshold default to 1. Set it 0 so cells are prioritized
+  // at 300px.
+  const [intersectionRef, intersection] = useIntersectionObserver({
+    rootMargin: "300px 0px",
+    threshold: 0,
+  });
+  useEffect(() => {
+    if (isEditorMounted) {
+      return;
+    }
+    if (intersection?.isIntersecting) {
+      editorMountScheduler.prioritize(cellId);
+    } else {
+      editorMountScheduler.deprioritize(cellId);
+    }
+  }, [isEditorMounted, intersection?.isIntersecting, cellId]);
 
   const navigationProps = useCellEditorNavigationProps(cellId, editorViewRef);
 
@@ -454,14 +551,22 @@ const CellEditorInternal = ({
       runCell={handleRunCell}
       outputArea={outputArea}
     >
-      <div className="relative w-full" {...navigationProps}>
-        <CellCodeMirrorEditor
-          className={editorClassName}
-          editorView={editorViewRef.current}
-          ref={editorViewParentRef}
-          hidden={hidden}
-          showHiddenCode={showHiddenCode}
-        />
+      <div
+        className="relative w-full"
+        ref={intersectionRef}
+        {...navigationProps}
+      >
+        {isEditorMounted ? (
+          <CellCodeMirrorEditor
+            className={editorClassName}
+            editorView={editorViewRef.current}
+            ref={editorViewParentRef}
+            hidden={hidden}
+            showHiddenCode={showHiddenCode}
+          />
+        ) : (
+          <CodePlaceholder code={code} className={editorClassName} />
+        )}
         {!hidden && showLanguageToggles && (
           <div className="absolute top-1 right-5">
             <LanguageToggles

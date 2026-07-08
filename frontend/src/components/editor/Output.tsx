@@ -27,6 +27,7 @@ import { useOverflowDetection } from "@/hooks/useOverflowDetection";
 import { renderHTML } from "@/plugins/core/RenderHTML";
 import { Banner } from "@/plugins/impl/common/error-banner";
 import type { TopLevelFacetedUnitSpec } from "@/plugins/impl/data-explorer/queries/types";
+import { getContainerWidth } from "@/plugins/impl/vega/utils";
 import { useTheme } from "@/theme/useTheme";
 import { Events } from "@/utils/events";
 import { invariant } from "@/utils/invariant";
@@ -205,6 +206,7 @@ export const OutputRenderer: React.FC<{
         <Suspense fallback={<ChartLoadingState />}>
           <LazyVegaEmbed
             spec={parsedJsonData as TopLevelFacetedUnitSpec}
+            data-container-width={getContainerWidth(parsedJsonData)}
             options={{
               theme: theme === "dark" ? "dark" : undefined,
               mode: "vega-lite",
@@ -261,7 +263,7 @@ const MimeBundleOutputRenderer: React.FC<{
   const { mode } = useAtomValue(viewStateAtom);
   const appView = mode === "present" || mode === "read";
 
-  // Extract metadata if present (e.g., for retina image rendering)
+  // Extract metadata if present (e.g., to maintain a constant display size regardless of DPI/PPI)
   const metadata = mimebundle[METADATA_KEY];
 
   // Filter out metadata from the mime entries and type narrow
@@ -365,7 +367,7 @@ export const OutputArea = React.memo(
     forceExpand,
     className,
   }: OutputAreaProps) => {
-    if (output === null) {
+    if (output == null) {
       return null;
     }
     if (output.channel === "output" && output.data === "") {

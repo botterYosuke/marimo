@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import ast
+import functools
 import inspect
 import io
 import linecache
@@ -13,7 +14,7 @@ import token as token_types
 import warnings
 from tokenize import TokenError, tokenize
 from types import CodeType, FrameType
-from typing import Any, Callable, Optional, TypeAlias, cast
+from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
 from marimo import _loggers
 from marimo._ast import parse
@@ -27,10 +28,18 @@ from marimo._ast.names import SETUP_CELL_NAME, TOPLEVEL_CELL_PREFIX
 from marimo._ast.pytest import has_fixture_decorator
 from marimo._ast.transformers import ContainedExtractWithBlock
 from marimo._ast.variables import is_local
-from marimo._ast.visitor import ImportData, Name, ScopedVisitor
+from marimo._ast.visitor import (
+    ImportData,
+    Name,
+    ScopedVisitor,
+    get_closure_refs,
+)
 from marimo._schemas.serialization import CellDef, ClassCell, FunctionCell
 from marimo._types.ids import CellId_t
 from marimo._utils.tmpdir import get_tmpdir
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 LOGGER = _loggers.marimo_logger()
 Cls: TypeAlias = type
@@ -62,7 +71,7 @@ def code_key(code: str) -> int:
     return hash(code)
 
 
-def cell_id_from_filename(filename: str) -> Optional[CellId_t]:
+def cell_id_from_filename(filename: str) -> CellId_t | None:
     """Parse cell id from filename."""
     matches = re.findall(r"__marimo__cell_(.*?)_", filename)
     if matches:
@@ -170,7 +179,7 @@ def fix_source_position(node: Any, source_position: SourcePosition) -> Any:
     return node
 
 
-def _extract_const_string(args: list[ast.stmt]) -> str:
+def _extract_const_string(args: list[ast.expr]) -> str:
     (inner,) = args
     # Various string types may need to be unpacked
     if isinstance(inner, ast.JoinedStr) or (
@@ -189,16 +198,23 @@ def const_or_id(args: ast.stmt) -> str:
     return f"{args.id}"  # type: ignore[attr-defined]
 
 
-def _extract_markdown(tree: ast.Module) -> Optional[str]:
+def _extract_markdown(tree: ast.Module) -> str | None:
     # Attribute Error handled by the outer try/except block.
     # Wish there was a more compact to ignore ignore[attr-defined] for all.
     try:
         (body,) = tree.body
+        # Only match bare expressions like `mo.md("...")`, not assignments
+        # like `title = mo.md("...")` — both ast.Expr and ast.Assign have a
+        # `.value` attribute, so we must check the node type explicitly.
+        if not isinstance(body, ast.Expr):
+            return None
         if body.value.func.attr == "md":  # type: ignore[attr-defined, union-attr]
             value = body.value  # type: ignore[attr-defined, union-attr]
         else:
             return None
-        assert value.func.value.id == "mo"
+        if not isinstance(value, ast.Call):
+            return None
+        assert value.func.value.id == "mo"  # type: ignore[attr-defined]
         if not value.args:  # Handle mo.md() with no arguments
             return None
         md_lines = _extract_const_string(value.args).split("\n")
@@ -219,7 +235,7 @@ def _extract_markdown(tree: ast.Module) -> Optional[str]:
     return md
 
 
-def extract_markdown(code: str) -> Optional[str]:
+def extract_markdown(code: str) -> str | None:
     code = code.strip()
     count = 0
     # Early quitting for markdown extraction.
@@ -240,10 +256,10 @@ def extract_markdown(code: str) -> Optional[str]:
 def compile_cell(
     code: str,
     cell_id: CellId_t,
-    source_position: Optional[SourcePosition] = None,
+    source_position: SourcePosition | None = None,
     carried_imports: list[ImportData] | None = None,
     test_rewrite: bool = False,
-    filename: Optional[str] = None,
+    filename: str | None = None,
 ) -> CellImpl:
     if filename is not None and source_position is None:
         source_position = solve_source_position(
@@ -352,6 +368,11 @@ def compile_cell(
         for name in nonlocals
         if name in v.variable_data
     }
+    # Temporaries that closures depend on (transitively) must be retained even
+    # though they would otherwise be deleted after the cell runs. We use the
+    # unfiltered `v.variable_data` here so that references reachable only
+    # through private (temporary) closures are still found.
+    closed_over_temporaries = get_closure_refs(v.variable_data) & temporaries
 
     # If this cell is an import cell, we carry over any imports in
     # `carried_imports` that are also in this cell to the import workspace's
@@ -378,6 +399,7 @@ def compile_cell(
         refs=v.refs,
         sql_refs=v.sql_refs,
         temporaries=temporaries,
+        closed_over_temporaries=closed_over_temporaries,
         variable_data=variable_data,
         import_workspace=ImportWorkspace(
             is_import_block=is_import_block,
@@ -393,39 +415,66 @@ def compile_cell(
     )
 
 
-def solve_source_position(
-    code: str, filename: str
-) -> Optional[SourcePosition]:
+@functools.lru_cache(maxsize=1)
+def _build_source_position_map(
+    filename: str,
+) -> tuple[tuple[str, SourcePosition], ...]:
+    """Parse a notebook file and return a code→SourcePosition mapping.
+
+    Cached per filename to avoid O(N²) when resolving N cells from
+    the same file.
+    """
     from marimo._ast.load import _maybe_contents
     from marimo._ast.parse import parse_notebook
-    from marimo._utils.cell_matching import match_cell_ids_by_similarity
 
     contents = _maybe_contents(filename)
     if not contents:
-        return None
+        return ()
 
     notebook = parse_notebook(contents)
     if notebook is None or not notebook.valid:
+        return ()
+    return tuple(
+        (
+            cell.code.strip(),
+            SourcePosition(
+                filename=filename,
+                lineno=cell.lineno,
+                col_offset=cell.col_offset,
+            ),
+        )
+        for cell in notebook.cells
+    )
+
+
+def solve_source_position(code: str, filename: str) -> SourcePosition | None:
+    entries = _build_source_position_map(filename)
+
+    if not entries:
         return None
+
+    # Fast path: exact match (covers run mode and unmodified cells)
+    stripped = code.strip()
+    for cell_code, position in entries:
+        if cell_code == stripped:
+            return position
+
+    # Slow path: similarity matching for edited cells
+    from marimo._utils.cell_matching import match_cell_ids_by_similarity
+
     on_disk = {
-        CellId_t(str(i)): cell.code for i, cell in enumerate(notebook.cells)
+        CellId_t(str(i)): cell_code for i, (cell_code, _) in enumerate(entries)
     }
     matches = match_cell_ids_by_similarity(on_disk, {CellId_t("new"): code})
     if not matches or len(matches) != 1:
         return None
     (cell_index,) = matches.keys()
-    index = int(cell_index)
-
-    return SourcePosition(
-        filename=filename,
-        lineno=notebook.cells[index].lineno,
-        col_offset=notebook.cells[index].col_offset,
-    )
+    return entries[int(cell_index)][1]
 
 
 def get_source_position(
     f: Cls | Callable[..., Any], lineno: int, col_offset: int
-) -> Optional[SourcePosition]:
+) -> SourcePosition | None:
     # Fallback won't capture embedded scripts
     if inspect.isclass(f):
         is_script = f.__module__ == "__main__"
@@ -557,19 +606,18 @@ def toplevel_cell_factory(
 
 
 def ir_cell_factory(
-    cell_def: CellDef, cell_id: CellId_t, filename: Optional[str] = None
+    cell_def: CellDef, cell_id: CellId_t, filename: str | None = None
 ) -> Cell:
     # NB. no need for test rewrite, anonymous file, etc.
     # Because this is never invoked in script mode.
     source_position = None
     # EXCEPT in the case of debugpy, where we need to preserve source position.
-    if os.environ.get("DEBUGPY_RUNNING"):
-        if filename and cell_def.lineno:
-            source_position = SourcePosition(
-                filename=filename,
-                lineno=cell_def.lineno,
-                col_offset=cell_def.col_offset,
-            )
+    if os.environ.get("DEBUGPY_RUNNING") and filename and cell_def.lineno:
+        source_position = SourcePosition(
+            filename=filename,
+            lineno=cell_def.lineno,
+            col_offset=cell_def.col_offset,
+        )
 
     prefix = ""
     if isinstance(cell_def, (FunctionCell, ClassCell)):

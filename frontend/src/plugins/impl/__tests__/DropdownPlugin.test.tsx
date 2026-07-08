@@ -3,23 +3,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import type { z } from "zod";
+import { SetupMocks } from "@/__mocks__/common";
 import { initialModeAtom } from "@/core/mode";
 import { store } from "@/core/state/jotai";
 import type { IPluginProps } from "../../types";
 import { DropdownPlugin } from "../DropdownPlugin";
 
 beforeAll(() => {
-  global.ResizeObserver = class ResizeObserver {
-    observe() {
-      // do nothing
-    }
-    unobserve() {
-      // do nothing
-    }
-    disconnect() {
-      // do nothing
-    }
-  };
+  SetupMocks.resizeObserver();
   global.HTMLDivElement.prototype.scrollIntoView = () => {
     // do nothing
   };
@@ -45,6 +36,7 @@ describe("DropdownPlugin", () => {
           fullWidth: false,
           searchable: true,
           initialValue: [],
+          disabled: false,
         },
         value: [],
         setValue: vi.fn(),
@@ -55,6 +47,58 @@ describe("DropdownPlugin", () => {
       expect(
         screen.getByTestId("marimo-plugin-searchable-dropdown"),
       ).toBeInTheDocument();
+    });
+
+    it("renders disabled native select when disabled is true", () => {
+      const plugin = new DropdownPlugin();
+      const host = document.createElement("div");
+      const props: IPluginProps<
+        string[],
+        z.infer<(typeof plugin)["validator"]>
+      > = {
+        data: {
+          label: "Test Label",
+          options: ["Option 1", "Option 2"],
+          allowSelectNone: false,
+          fullWidth: false,
+          searchable: false,
+          disabled: true,
+          initialValue: [],
+        },
+        value: [],
+        setValue: vi.fn(),
+        host,
+        functions: {},
+      };
+      render(plugin.render(props));
+      expect(screen.getByTestId("marimo-plugin-dropdown")).toBeDisabled();
+    });
+
+    it("renders disabled searchable combobox with aria-disabled", () => {
+      const plugin = new DropdownPlugin();
+      const host = document.createElement("div");
+      const props: IPluginProps<
+        string[],
+        z.infer<(typeof plugin)["validator"]>
+      > = {
+        data: {
+          label: "Test Label",
+          options: ["Option 1", "Option 2"],
+          allowSelectNone: false,
+          fullWidth: false,
+          searchable: true,
+          disabled: true,
+          initialValue: [],
+        },
+        value: [],
+        setValue: vi.fn(),
+        host,
+        functions: {},
+      };
+      render(plugin.render(props));
+      const trigger = screen.getByTestId("marimo-plugin-searchable-dropdown")
+        .firstChild as HTMLElement;
+      expect(trigger).toHaveAttribute("aria-disabled", "true");
     });
 
     it("renders default dropdown when searchable is false", () => {
@@ -71,6 +115,7 @@ describe("DropdownPlugin", () => {
           fullWidth: false,
           searchable: false,
           initialValue: [],
+          disabled: false,
         },
         value: [],
         setValue: vi.fn(),
@@ -96,6 +141,7 @@ describe("DropdownPlugin", () => {
           fullWidth: false,
           searchable: true,
           initialValue: [],
+          disabled: false,
         },
         value: [],
         setValue,
@@ -138,6 +184,7 @@ describe("DropdownPlugin", () => {
           fullWidth: false,
           searchable: true,
           initialValue: [],
+          disabled: false,
         },
         value: ["Apple"],
         setValue,
@@ -178,8 +225,11 @@ describe("DropdownPlugin", () => {
         screen.getByTestId("marimo-plugin-searchable-dropdown").firstChild!,
       );
 
-      // Select none should clear value
-      fireEvent.click(screen.getByText("--"));
+      // Re-picking the current value clears it when allowSelectNone
+      const bananaOption = screen
+        .getAllByRole("option")
+        .find((el) => el.textContent === "Banana");
+      fireEvent.click(bananaOption!);
       expect(setValue).toHaveBeenCalledWith([]);
     });
   });

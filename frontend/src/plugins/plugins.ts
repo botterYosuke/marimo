@@ -1,5 +1,5 @@
 /* Copyright 2026 Marimo. All rights reserved. */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* oxlint-disable typescript/no-explicit-any */
 
 import { NavigationMenuPlugin } from "@/plugins/layout/NavigationMenuPlugin";
 import { initializeUIElement } from "../core/dom/ui-element";
@@ -26,6 +26,7 @@ import { MatrixPlugin } from "./impl/MatrixPlugin";
 import { MicrophonePlugin } from "./impl/MicrophonePlugin";
 import { MultiselectPlugin } from "./impl/MultiselectPlugin";
 import { MatplotlibPlugin } from "./impl/matplotlib/MatplotlibPlugin";
+import { MplInteractivePlugin } from "./impl/mpl-interactive/MplInteractivePlugin";
 import { NumberPlugin } from "./impl/NumberPlugin";
 import { PanelPlugin } from "./impl/panel/PanelPlugin";
 import { PlotlyPlugin } from "./impl/plotly/PlotlyPlugin";
@@ -92,6 +93,7 @@ export const UI_PLUGINS: IPlugin<any, unknown>[] = [
   AnyWidgetPlugin,
   DataEditorPlugin,
   PanelPlugin,
+  MplInteractivePlugin,
 ];
 
 // List of output / layout plugins

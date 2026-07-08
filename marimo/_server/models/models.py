@@ -1,11 +1,12 @@
 # Copyright 2026 Marimo. All rights reserved.
 from __future__ import annotations
 
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 import msgspec
 
 from marimo._ast.cell import CellConfig
+from marimo._messaging.notebook.changes import DocumentChange
 from marimo._runtime.commands import (
     ClearCacheCommand,
     CodeCompletionCommand,
@@ -19,6 +20,7 @@ from marimo._runtime.commands import (
     InvokeFunctionCommand,
     ListDataSourceConnectionCommand,
     ListSecretKeysCommand,
+    ListSQLSchemasCommand,
     ListSQLTablesCommand,
     ModelCommand,
     PreviewDatasetColumnCommand,
@@ -101,6 +103,17 @@ class ListSQLTablesRequest(ListSQLTablesCommand, tag=False):
             engine=self.engine,
             database=self.database,
             schema=self.schema,
+            schema_path=self.schema_path,
+        )
+
+
+class ListSQLSchemasRequest(ListSQLSchemasCommand, tag=False):
+    def as_command(self) -> ListSQLSchemasCommand:
+        return ListSQLSchemasCommand(
+            request_id=self.request_id,
+            engine=self.engine,
+            database=self.database,
+            schema_path=self.schema_path,
         )
 
 
@@ -123,6 +136,7 @@ class PreviewSQLTableRequest(PreviewSQLTableCommand, tag=False):
             database=self.database,
             schema=self.schema,
             table_name=self.table_name,
+            schema_path=self.schema_path,
         )
 
 
@@ -144,6 +158,7 @@ class StorageListEntriesRequest(StorageListEntriesCommand, tag=False):
             namespace=self.namespace,
             limit=self.limit,
             prefix=self.prefix,
+            page_token=self.page_token,
         )
 
 
@@ -170,7 +185,7 @@ class DeleteCellRequest(DeleteCellCommand, tag=False):
 class InstallPackagesRequest(InstallPackagesCommand, tag=False):
     def as_command(self) -> InstallPackagesCommand:
         return InstallPackagesCommand(
-            manager=self.manager, versions=self.versions
+            manager=self.manager, versions=self.versions, source=self.source
         )
 
 
@@ -205,7 +220,7 @@ class InstantiateNotebookRequest(UpdateUIElementValuesRequest):
     # This is used when the frontend has local edits that should be
     # used instead of the file codes (e.g., pre-connect editing).
     # Maps cell_id -> code.
-    codes: Optional[dict[CellId_t, str]] = None
+    codes: dict[CellId_t, str] | None = None
 
 
 class BaseResponse(msgspec.Struct, rename="camel"):
@@ -218,7 +233,14 @@ class SuccessResponse(BaseResponse):
 
 class ErrorResponse(BaseResponse):
     success: bool = False
-    message: Optional[str] = None
+    message: str | None = None
+
+
+class KernelStatusResponse(msgspec.Struct, rename="camel"):
+    # `running`: at least one cell is queued or running.
+    # `idle`: the kernel is alive but not executing.
+    # `stopped`: the kernel process is not running (dead or not started).
+    state: Literal["running", "idle", "stopped"]
 
 
 class FormatCellsRequest(msgspec.Struct, rename="camel"):
@@ -238,8 +260,12 @@ class RenameNotebookRequest(msgspec.Struct, rename="camel"):
     filename: str
 
 
-class UpdateCellIdsRequest(msgspec.Struct, rename="camel"):
-    cell_ids: list[CellId_t]
+class NotebookDocumentTransactionRequest(msgspec.Struct, rename="camel"):
+    changes: list[DocumentChange]
+
+
+class FocusCellRequest(msgspec.Struct, rename="camel"):
+    cell_id: CellId_t
 
 
 class ExecuteCellsRequest(msgspec.Struct, rename="camel"):
@@ -248,7 +274,7 @@ class ExecuteCellsRequest(msgspec.Struct, rename="camel"):
     # code to register/run for each cell
     codes: list[str]
     # incoming request, e.g. from Starlette or FastAPI
-    request: Optional[HTTPRequest] = None
+    request: HTTPRequest | None = None
 
     def as_command(self) -> ExecuteCellsCommand:
         return ExecuteCellsCommand(
@@ -276,7 +302,7 @@ class SaveNotebookRequest(msgspec.Struct, rename="camel"):
     # path to app
     filename: str
     # layout of app
-    layout: Optional[dict[str, Any]] = None
+    layout: dict[str, Any] | None = None
     # persist the file to disk
     persist: bool = True
 
@@ -305,7 +331,8 @@ class SaveAppConfigurationRequest(msgspec.Struct, rename="camel"):
 
 
 class SaveUserConfigurationRequest(msgspec.Struct, rename="camel"):
-    # deep partial user configuration
+    # deep partial user configuration; keys with value `None` are removed
+    # from the on-disk merged config (None-as-delete)
     config: dict[str, Any]
 
 
@@ -321,17 +348,17 @@ class InvokeAiToolRequest(msgspec.Struct, rename="camel"):
 class InvokeAiToolResponse(BaseResponse):
     tool_name: str
     result: Any
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class MCPStatusResponse(msgspec.Struct, rename="camel"):
     status: Literal["ok", "partial", "error"]
-    error: Optional[str] = None
+    error: str | None = None
     servers: dict[
         str, Literal["pending", "connected", "disconnected", "failed"]
     ] = {}  # server_name -> status
 
 
 class MCPRefreshResponse(BaseResponse):
-    error: Optional[str] = None
+    error: str | None = None
     servers: dict[str, bool] = {}  # server_name -> connected

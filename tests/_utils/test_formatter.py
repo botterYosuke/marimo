@@ -5,7 +5,9 @@ import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from inline_snapshot import snapshot
 
+from marimo._dependencies.dependencies import DependencyManager
 from marimo._utils.formatter import (
     BlackFormatter,
     CellCodes,
@@ -15,6 +17,8 @@ from marimo._utils.formatter import (
     RuffFormatter,
     ruff,
 )
+
+HAS_RUFF = DependencyManager.ruff.has() or DependencyManager.which("ruff")
 
 
 class TestFormatter:
@@ -59,7 +63,9 @@ class TestDefaultFormatter:
         result = await formatter.format(codes)
 
         mock_ruff_formatter.assert_called_once_with(88)
-        mock_instance.format.assert_called_once_with(codes)
+        mock_instance.format.assert_called_once_with(
+            codes, stdin_filename=None
+        )
         assert result == {"cell1": "formatted_code"}
 
     @patch("marimo._utils.formatter.BlackFormatter")
@@ -125,18 +131,158 @@ class TestRuffFormatter:
     async def test_ruff_formatter_calls_ruff_function(
         self, mock_ruff: MagicMock
     ) -> None:
-        """Test RuffFormatter calls the ruff function with correct arguments."""
-        mock_ruff.return_value = {"cell1": "formatted_code"}
+        """Test RuffFormatter wraps cell code before formatting."""
+        import textwrap
 
+        mock_ruff.return_value = {"cell1": "def _():\n    x = 1"}
         formatter = RuffFormatter(line_length=100)
         codes: CellCodes = {"cell1": "x=1"}
 
         result = await formatter.format(codes)
 
+        wrapped_codes: CellCodes = {
+            "cell1": "def _():\n" + textwrap.indent("x=1", "    ")
+        }
         mock_ruff.assert_called_once_with(
-            codes, "format", "--line-length", "100"
+            wrapped_codes,
+            "format",
+            "--line-length",
+            "100",
+            stdin_filename=None,
         )
-        assert result == {"cell1": "formatted_code"}
+        assert result == {"cell1": "x = 1"}
+
+    @patch("marimo._utils.formatter.ruff")
+    async def test_ruff_formatter_passes_stdin_filename(
+        self, mock_ruff: MagicMock
+    ) -> None:
+        """Test RuffFormatter forwards notebook filename for config discovery."""
+        import textwrap
+
+        mock_ruff.return_value = {"cell1": "def _():\n    x = 1"}
+        formatter = RuffFormatter(line_length=100)
+        codes: CellCodes = {"cell1": "x=1"}
+
+        result = await formatter.format(
+            codes, stdin_filename="/tmp/notebook.py"
+        )
+
+        wrapped_codes: CellCodes = {
+            "cell1": "def _():\n" + textwrap.indent("x=1", "    ")
+        }
+        mock_ruff.assert_called_once_with(
+            wrapped_codes,
+            "format",
+            "--line-length",
+            "100",
+            stdin_filename="/tmp/notebook.py",
+        )
+        assert result == {"cell1": "x = 1"}
+
+    @patch("marimo._utils.formatter.ruff")
+    async def test_ruff_formatter_nested_function_single_blank_line(
+        self, mock_ruff: MagicMock
+    ) -> None:
+        """Regression test for #9848: nested functions get 1 blank line (function
+        scope), not 2 (file scope). The wrap/unwrap logic ensures ruff sees cell
+        code as a function body, not a module."""
+        cell_code = "x = 3\ndef _foo():\n    return x + 1\nprint(_foo())"
+        # Ruff formats the wrapped cell with 1 blank line around the nested def
+        wrapped_formatted = "def _():\n    x = 3\n\n    def _foo():\n        return x + 1\n\n    print(_foo())"
+        mock_ruff.return_value = {"cell1": wrapped_formatted}
+
+        formatter = RuffFormatter(line_length=88)
+        result = await formatter.format({"cell1": cell_code})
+
+        # Unwrapped result must have exactly 1 blank line before and after _foo,
+        # not 2 (which file-scope ruff would produce without the wrap).
+        output = result["cell1"]
+        assert (
+            output == "x = 3\n\ndef _foo():\n    return x + 1\n\nprint(_foo())"
+        )
+        assert "\n\n\n" not in output
+
+    @patch("marimo._utils.formatter.ruff")
+    async def test_ruff_formatter_app_function_cell(
+        self, mock_ruff: MagicMock
+    ) -> None:
+        """Regression test: @app.function cells (top-level function definitions)
+        are wrapped before formatting so ruff applies E301 (nested defs get
+        1 blank line), not E302 (top-level defs get 2 blank lines)."""
+        cell_code = 'def foo():\n    """Something here"""'
+        wrapped_formatted = (
+            'def _():\n    def foo():\n        """Something here"""'
+        )
+        mock_ruff.return_value = {"cell1": wrapped_formatted}
+
+        formatter = RuffFormatter(line_length=88)
+        result = await formatter.format({"cell1": cell_code})
+
+        assert result == {"cell1": 'def foo():\n    """Something here"""'}
+
+    @patch("marimo._utils.formatter.ruff")
+    async def test_ruff_formatter_preserves_class_decorator(
+        self, mock_ruff: MagicMock
+    ) -> None:
+        cell_code = (
+            "@dataclasses.dataclass\nclass Test:\n    name: str\n    age: int"
+        )
+        wrapped_formatted = (
+            "def _():\n"
+            "    @dataclasses.dataclass\n"
+            "    class Test:\n"
+            "        name: str\n"
+            "        age: int"
+        )
+        mock_ruff.return_value = {"cell1": wrapped_formatted}
+
+        formatter = RuffFormatter(line_length=88)
+        result = await formatter.format({"cell1": cell_code})
+
+        assert result == {"cell1": cell_code}
+
+    @pytest.mark.skipif(not HAS_RUFF, reason="ruff not installed")
+    async def test_ruff_formatter_preserves_comments(self) -> None:
+        """Regression test for #10054/#10057: comments must survive the real
+        wrap -> ruff -> unwrap round-trip. Comments are not AST nodes, so a
+        leading comment sits before the first body statement's lineno and a
+        trailing comment sits after the last statement's end_lineno; both were
+        previously dropped."""
+        cell_code = "# leading comment\nx=1\ny = 2  # inline comment\n# interior comment\nz = 3  # last-line comment\n# trailing comment"
+
+        result = await RuffFormatter(line_length=88).format({"c": cell_code})
+
+        assert result["c"] == snapshot(
+            """\
+# leading comment
+x = 1
+y = 2  # inline comment
+# interior comment
+z = 3  # last-line comment
+# trailing comment"""
+        )
+
+    @patch("marimo._utils.formatter.ruff")
+    async def test_ruff_formatter_comment_only_cell(
+        self, mock_ruff: MagicMock
+    ) -> None:
+        """Comment-only cells are left unwrapped (def _(): # comment is a
+        syntax error) and passed through ruff unchanged."""
+        cell_code = "# just a comment"
+        mock_ruff.return_value = {"cell1": cell_code}
+
+        formatter = RuffFormatter(line_length=88)
+        result = await formatter.format({"cell1": cell_code})
+
+        # ruff receives the comment unwrapped, not inside def _():
+        mock_ruff.assert_called_once_with(
+            {"cell1": cell_code},
+            "format",
+            "--line-length",
+            "88",
+            stdin_filename=None,
+        )
+        assert result == {"cell1": cell_code}
 
     @patch("marimo._utils.formatter.ruff")
     async def test_ruff_formatter_propagates_exceptions(
@@ -267,6 +413,41 @@ class TestRuffFunction:
             "format",
             "--line-length",
             "88",
+            "-",
+        )
+        assert format_call[1]["input_data"] == b"x=1"
+
+    @patch("marimo._utils.formatter._run_subprocess_safe")
+    async def test_ruff_function_passes_stdin_filename(
+        self, mock_subprocess_safe: MagicMock
+    ):
+        """Test ruff includes --stdin-filename when provided."""
+        mock_subprocess_safe.side_effect = [
+            (b"", b"", 0),  # help command success
+            (b"formatted_code\n", b"", 0),  # format command success
+        ]
+
+        codes: CellCodes = {"cell1": "x=1"}
+        result = await ruff(
+            codes,
+            "format",
+            "--line-length",
+            "88",
+            stdin_filename="/tmp/notebook.py",
+        )
+
+        assert result == {"cell1": "formatted_code"}
+
+        format_call = mock_subprocess_safe.call_args_list[1]
+        assert format_call[0] == (
+            sys.executable,
+            "-m",
+            "ruff",
+            "format",
+            "--line-length",
+            "88",
+            "--stdin-filename",
+            "/tmp/notebook.py",
             "-",
         )
         assert format_call[1]["input_data"] == b"x=1"
@@ -443,5 +624,5 @@ class TestFormatterIntegration:
         """Test CellCodes type alias works as expected."""
         codes: CellCodes = {"cell1": "code1", "cell2": "code2"}
         assert isinstance(codes, dict)
-        assert all(isinstance(k, str) for k in codes.keys())
+        assert all(isinstance(k, str) for k in codes)
         assert all(isinstance(v, str) for v in codes.values())

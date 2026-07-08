@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import os
+import subprocess
+import sys
+import textwrap
 from typing import Any
 
 import pytest
@@ -52,7 +56,7 @@ class TestHash:
             from marimo._save.save import persistent_cache
             from tests._save.loaders.mocks import MockLoader
 
-            expected_hash = "haIqC9yzlTaNo-ClmY11Kvtiv08oQPz3-SlnOLfhJYM"
+            expected_hash = "RSccsMCC0dBqvdcnBN1mdxlvKUr4zzR_qupKBW_P_qE"
 
             return expected_hash, persistent_cache, MockLoader
 
@@ -538,6 +542,239 @@ class TestHash:
             assert direct() == module(), "direct() != module()"
 
 
+class TestHashMemo:
+    @staticmethod
+    @pytest.mark.skipif(
+        not DependencyManager.numpy.has(),
+        reason="optional dependencies not installed",
+    )
+    def test_data_primitive_memoized_across_cells(app) -> None:
+        """Data primitives should be memoized — same array used in two cells
+        should only be serialized once."""
+
+        @app.cell
+        def load() -> tuple[Any]:
+            import numpy as np
+
+            from marimo._save.save import persistent_cache
+            from tests._save.loaders.mocks import MockLoader
+
+            arr = np.ones((64, 64))
+            return MockLoader, persistent_cache, arr, np
+
+        @app.cell
+        def one(MockLoader, persistent_cache, arr, np) -> tuple[Any]:
+            from marimo._runtime.context.types import get_context
+
+            ctx = get_context()
+            with persistent_cache(name="one", _loader=MockLoader()) as c1:
+                _v = np.sum(arr)
+            # After hashing, arr should be memoized
+            assert len(ctx.cache.hash_memo) > 0
+            return c1, ctx
+
+        @app.cell
+        def two(MockLoader, persistent_cache, arr, np, c1, ctx) -> None:
+            memo_before = dict(ctx.cache.hash_memo)
+            with persistent_cache(name="two", _loader=MockLoader()) as c2:
+                _v = np.sum(arr)
+            # Same arr, so memo should have been used (same entry)
+            assert c1._cache.hash == c2._cache.hash
+            assert memo_before == dict(ctx.cache.hash_memo)
+
+    @staticmethod
+    @pytest.mark.skipif(
+        not DependencyManager.numpy.has(),
+        reason="optional dependencies not installed",
+    )
+    def test_same_cell_def_not_memoized(app) -> None:
+        """Variables defined by the current cell should not use memo
+        (values can mutate within a cell)."""
+
+        @app.cell
+        def one() -> tuple[Any]:
+            import numpy as np
+
+            from marimo._runtime.context.types import get_context
+            from marimo._save.save import persistent_cache
+            from tests._save.loaders.mocks import MockLoader
+
+            arr = np.ones((4, 4))
+            with persistent_cache(name="one", _loader=MockLoader()) as c:
+                _v = np.sum(arr)
+            ctx = get_context()
+            # arr is defined in this cell, so should NOT be memoized
+            assert len(ctx.cache.hash_memo) == 0
+            return c, ctx
+
+    @staticmethod
+    def test_list_mutation_not_stale(app) -> None:
+        """Lists are not memoized, so in-place mutation produces different
+        hashes."""
+
+        @app.cell
+        def one() -> tuple[Any]:
+            from marimo._save.save import persistent_cache
+            from tests._save.loaders.mocks import MockLoader
+
+            data = [1, 2, 3]
+            with persistent_cache(name="one", _loader=MockLoader()) as c1:
+                _v = sum(data)
+            data.append(4)
+            with persistent_cache(name="two", _loader=MockLoader()) as c2:
+                _v = sum(data)
+            assert c1._cache.hash != c2._cache.hash
+
+    @staticmethod
+    def test_dict_mutation_not_stale(app) -> None:
+        """Dicts are not memoized, so mutation produces different hashes."""
+
+        @app.cell
+        def one() -> tuple[Any]:
+            from marimo._save.save import persistent_cache
+            from tests._save.loaders.mocks import MockLoader
+
+            data = {"a": 1}
+            with persistent_cache(name="one", _loader=MockLoader()) as c1:
+                _v = sum(data.values())
+            data["b"] = 2
+            with persistent_cache(name="two", _loader=MockLoader()) as c2:
+                _v = sum(data.values())
+            assert c1._cache.hash != c2._cache.hash
+
+    @staticmethod
+    @pytest.mark.skipif(
+        not DependencyManager.numpy.has(),
+        reason="optional dependencies not installed",
+    )
+    def test_memo_with_cached_function(app) -> None:
+        """Memoization works with @mo.cache deferred hashing."""
+
+        @app.cell
+        def load() -> tuple[Any]:
+            import numpy as np
+
+            import marimo as mo
+
+            arr = np.ones((32, 32))
+            return mo, np, arr
+
+        @app.cell
+        def one(mo, np, arr) -> tuple[Any]:
+            @mo.cache
+            def compute(x):
+                return np.sum(x)
+
+            r1 = compute(arr)
+            r2 = compute(arr)
+            assert r1 == r2
+            assert compute.hits == 1
+            return (compute,)
+
+    @staticmethod
+    @pytest.mark.skipif(
+        not DependencyManager.numpy.has(),
+        reason="optional dependencies not installed",
+    )
+    def test_cached_fn_distinct_ndarray_args(app) -> None:
+        """Distinct ndarray args vs kwargs must not collide."""
+
+        @app.cell
+        def load() -> tuple[Any]:
+            import numpy as np
+
+            import marimo as mo
+
+            return mo, np
+
+        @app.cell
+        def one(mo, np) -> tuple[Any]:
+            @mo.cache
+            def f(a):
+                return float(a.sum())
+
+            assert f(np.array([1.0, 2.0, 3.0])) == 6.0
+            # Check alternative arg path to ensure no collision between args and kwargs.
+            assert f(np.array([4.0, 5.0, 6.0])) == 15.0
+            # Keyword form exercises the same arg path.
+            assert f(a=np.array([7.0, 8.0, 9.0])) == 24.0
+            assert f.hits == 0
+            assert f.misses == 3
+            return (f,)
+
+    @staticmethod
+    @pytest.mark.skipif(
+        not DependencyManager.numpy.has(),
+        reason="optional dependencies not installed",
+    )
+    def test_lifecycle_cleanup(app) -> None:
+        """HashMemoCleanup clears memo when defining cell is disposed."""
+
+        @app.cell
+        def load() -> tuple[Any]:
+            import numpy as np
+
+            from marimo._runtime.context.types import get_context
+            from marimo._save.cache import HashMemoCleanup
+            from marimo._save.save import persistent_cache
+            from tests._save.loaders.mocks import MockLoader
+
+            arr = np.ones((4, 4))
+            return (
+                MockLoader,
+                persistent_cache,
+                arr,
+                np,
+                get_context,
+                HashMemoCleanup,
+            )
+
+        @app.cell
+        def one(
+            MockLoader, persistent_cache, arr, np, get_context, HashMemoCleanup
+        ) -> tuple[Any]:
+            with persistent_cache(name="one", _loader=MockLoader()) as c:
+                _v = np.sum(arr)
+            ctx = get_context()
+            assert len(ctx.cache.hash_memo) > 0
+            # Simulate lifecycle disposal — should clear memo
+            cleanup = HashMemoCleanup()
+            cleanup.dispose(ctx, deletion=False)
+            assert len(ctx.cache.hash_memo) == 0
+
+    @staticmethod
+    @pytest.mark.skipif(
+        not DependencyManager.numpy.has(),
+        reason="optional dependencies not installed",
+    )
+    def test_globals_mutation_stale_memo(app) -> None:
+        """Known limitation: mutating a data primitive via globals() bypasses
+        lifecycle cleanup, producing a stale memo hit. This is expected (but
+        highly discouraged) since globals() sidesteps marimo's reactivity — but
+        we capture the behavior so it doesn't silently change."""
+
+        @app.cell
+        def load() -> tuple[Any]:
+            import numpy as np
+
+            from marimo._save.save import persistent_cache
+            from tests._save.loaders.mocks import MockLoader
+
+            arr = np.ones((4, 4))
+            return MockLoader, persistent_cache, arr, np
+
+        @app.cell
+        def one(MockLoader, persistent_cache, arr, np) -> tuple[Any]:
+            with persistent_cache(name="one", _loader=MockLoader()) as c1:
+                _v = np.sum(arr)
+            # Mutate via globals — no lifecycle disposal triggered
+            globals()["arr"] = np.zeros((4, 4))
+            with persistent_cache(name="two", _loader=MockLoader()) as c2:
+                _v = np.sum(arr)
+            # Stale memo: hashes match even though arr changed
+            assert c1._cache.hash == c2._cache.hash
+
+
 class TestDataHash:
     @staticmethod
     @pytest.mark.skipif(
@@ -557,7 +794,7 @@ class TestDataHash:
             from marimo._save.save import persistent_cache
             from tests._save.loaders.mocks import MockLoader
 
-            expected_hash = "w_Bjhpz2xMVQC6Y61GgqB8O80u_UyoJ-1xQmJU3j0Gg"
+            expected_hash = "zLpFb6ANG99kP-4yWoH4zdV_FfrUodnEom1tILpF55c"
             return MockLoader, persistent_cache, expected_hash, np
 
         @app.cell
@@ -610,7 +847,7 @@ class TestDataHash:
             from marimo._save.save import persistent_cache
             from tests._save.loaders.mocks import MockLoader
 
-            expected_hash = "aAL9QNoQIQ1zOJgm_xDbHG63Bc4Atnpn58pGW9x9A_A"
+            expected_hash = "IaLyzmZZ4nwXMveSQjMVAa682QAyd2O90iSeHJvlb44"
             return MockLoader, persistent_cache, expected_hash, np
 
         @app.cell
@@ -663,7 +900,7 @@ class TestDataHash:
             from marimo._save.save import persistent_cache
             from tests._save.loaders.mocks import MockLoader
 
-            expected_hash = "stIOtiKIn4yscvKd-uK6mbmZpWzzfGm8Ccz7mvnRrnI"
+            expected_hash = "6EJfKOu_iB6jpSTtCnUV1kjYy2u96m_w_3VzOUOn5Hg"
             return MockLoader, persistent_cache, expected_hash, torch
 
         @app.cell
@@ -723,7 +960,7 @@ class TestDataHash:
             from marimo._save.save import persistent_cache
             from tests._save.loaders.mocks import MockLoader
 
-            expected_hash = "rTAh8yNbBbq9qkF1nGNUw4DXhZSxRqGe4ptbDh2AwBI"
+            expected_hash = "QIjIEzceYIH7WIvdIasBLceU3Ad40kYqTCSBnUmJZV4"
             return MockLoader, persistent_cache, expected_hash, torch
 
         @app.cell
@@ -763,7 +1000,7 @@ class TestDataHash:
             from marimo._save.save import persistent_cache
             from tests._save.loaders.mocks import MockLoader
 
-            expected_hash = "ggxwHLzWcyDQltN_Zq0_zYVP_w86a9AAQLQwleAMuH8"
+            expected_hash = "1eEgTTthH-FyKbziqYse1ITogQUMat0JW1meFZtMWCI"
             return MockLoader, persistent_cache, expected_hash, DNA, copy
 
         @app.cell
@@ -801,7 +1038,7 @@ class TestDataHash:
             from marimo._save.save import persistent_cache
             from tests._save.loaders.mocks import MockLoader
 
-            expected_hash = "wtrS6NoH2AOH3DnWm7wooK4Bgw8TmMotgMbiY0bu5as"
+            expected_hash = "ycCqtVaQAODpfHyimtlbxj1TIQB3WtLnhDIGq59yiqw"
             return MockLoader, persistent_cache, expected_hash, np, pd
 
         @app.cell
@@ -865,7 +1102,7 @@ class TestDataHash:
             from marimo._save.save import persistent_cache
             from tests._save.loaders.mocks import MockLoader
 
-            expected_hash = "n4KGJ3wrRHd6pDCyekTWZXShmtT_ZkDY4Wo3C6BXzh4"
+            expected_hash = "C9MbH1ov4US2mrm_T_clm4VpI9WT97tg5BGEpOAbF1g"
             return MockLoader, persistent_cache, expected_hash, np, pd
 
         @app.cell
@@ -906,7 +1143,7 @@ class TestDataHash:
             from marimo._save.save import persistent_cache
             from tests._save.loaders.mocks import MockLoader
 
-            expected_hash = "rC6YiNsuaZKQ1JqMgSRa0iyEDwi7ZTl6InABjuM0RDY"
+            expected_hash = "DtWHQ972QmRo2kBlzgoGQDi-bRnRknWZsSFk_rT4lRA"
             return MockLoader, persistent_cache, expected_hash, pl
 
         @app.cell
@@ -963,7 +1200,7 @@ class TestDataHash:
             from marimo._save.save import persistent_cache
             from tests._save.loaders.mocks import MockLoader
 
-            expected_hash = "jMEurCFLl9VI2sSaQOdCShS1MnudIRZNu84578qM3Jc"
+            expected_hash = "1HlOXWU-oQ5MNB5B9YRNLnHcn3I8sngJvLuHV_ICLGY"
             return MockLoader, persistent_cache, expected_hash, pl
 
         @app.cell
@@ -2337,6 +2574,91 @@ class TestRemoveReturnsBytecode:
             return lambda: 2
 
         assert _hash_fn(fn_a) != _hash_fn(fn_b)
+
+
+class TestSetLiteralDeterminism:
+    """Set literals are constant-folded into frozensets in co_consts, whose
+    str()/iteration order is PYTHONHASHSEED-dependent (issue #9829)."""
+
+    def test_set_literal_changes_hash(self) -> None:
+        """Changing set members must still change the hash."""
+
+        def fn_a(x: object) -> bool:
+            return x in {"A", "B", "C"}
+
+        def fn_b(x: object) -> bool:
+            return x in {"A", "B", "D"}
+
+        assert _hash_fn(fn_a) != _hash_fn(fn_b)
+
+    def test_hash_deterministic_across_hashseed(self) -> None:
+        """A set-literal function must hash identically across PYTHONHASHSEED.
+
+        The set literal is constant-folded into a frozenset in the function's
+        co_consts; `hash_module` is what previously serialized it with a
+        seed-dependent `str()`.
+        """
+        program = textwrap.dedent(
+            """
+            from marimo._save.hash import hash_module
+
+            def fn(x):
+                return x in {"A", "B", "C", "D", "E", 1, 2.0, None}
+
+            print(hash_module(fn.__code__).hex())
+            """
+        )
+        digests = set()
+        for seed in ("0", "1", "2", "42", "12345"):
+            env = {**os.environ, "PYTHONHASHSEED": seed}
+            result = subprocess.run(
+                [sys.executable, "-c", program],
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+            assert result.returncode == 0, result.stderr
+            digests.add(result.stdout.strip())
+        assert len(digests) == 1, f"non-deterministic across seeds: {digests}"
+
+    def test_singleton_set_unchanged(self) -> None:
+        """A singleton set literal stays on the str() path (len > 1 guard).
+
+        `str(frozenset({'A'}))` has only one possible order, so it was never
+        broken; its hash must equal the plain str()-based serialization so we
+        don't invalidate caches that already worked.
+        """
+        import hashlib
+
+        from marimo._save.hash import hash_module
+
+        def fn(x: object) -> bool:
+            return x in {"A"}
+
+        code = fn.__code__
+        singleton = next(c for c in code.co_consts if isinstance(c, frozenset))
+        assert len(singleton) == 1
+
+        expected = hashlib.new("sha256", usedforsecurity=False)
+        for const in code.co_consts:
+            expected.update(str(const).encode("utf8"))
+        expected.update(bytes("|".join(code.co_names), "utf8"))
+        expected.update(code.co_code)
+
+        assert hash_module(code) == expected.digest()
+
+    def test_exotic_const_types_dont_crash(self) -> None:
+        """Set literals can hold complex/bytes/bool/tuple — none may crash.
+
+        repr-based serialization handles these; the byte serializers
+        (primitive_to_bytes / common_container_to_bytes) reject complex.
+        """
+        from marimo._save.hash import hash_module
+
+        def fn(x: object) -> bool:
+            return x in {1j, 2j, b"x", True, (1, 2), "s"}
+
+        assert isinstance(hash_module(fn.__code__), bytes)
 
 
 def test_decorator_params_affect_hash() -> None:

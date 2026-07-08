@@ -1,9 +1,15 @@
 # Makefile for marimo - Development and build tasks
 # Prerequisites:
-#   - hatch: for environment permutations management and testing
-#   - uv: for Python dependency management
+#   - uv: for Python dependency management, testing, and building
 #   - pnpm: for frontend development
 #   - Node.js: for frontend development
+
+DENO_VERSION := 2.7.14
+DENO ?= uv tool run --from deno==$(DENO_VERSION) deno
+DESIGN_MD_DENO_FLAGS := --no-config --no-lock --node-modules-dir=none
+DESIGN_MD_READ_PATHS := frontend/src/css/app/App.css,frontend/src/css/app/Cell.css,frontend/src/core/codemirror/theme/dark.ts,frontend/src/core/codemirror/theme/light.ts,frontend/src/core/config/config-schema.ts,frontend/src/plugins/impl/data-editor/themes.ts,frontend/src/css/globals.css,frontend/src/components/editor/renderers/grid-layout/plugin.tsx,frontend/tailwind.config.cjs
+DESIGN_MD_DENO_RUN_FLAGS := $(DESIGN_MD_DENO_FLAGS) --allow-read=$(DESIGN_MD_READ_PATHS) --allow-env=CI
+DESIGN_MD_LINTER ?= pnpm --silent dlx @google/design.md@0.1.1
 
 .PHONY: help
 # 📖 Show available commands
@@ -24,9 +30,8 @@ install-all: fe py
 # ✓ Check if all required tools are installed
 check-prereqs:
 	@command -v pnpm >/dev/null 2>&1 || { echo "pnpm is required. See https://pnpm.io/installation"; exit 1; }
-	@pnpm -v | grep -vq "^[0-8]\." || { echo "pnpm v9+ is required. Current version: $(shell pnpm -v)"; exit 1; }
+	@pnpm -v | grep -vq "^[0-9]\." || { echo "pnpm v10+ is required. Current version: $(shell pnpm -v)"; exit 1; }
 	@command -v uv >/dev/null 2>&1 || { echo "uv is required. See https://docs.astral.sh/uv/getting-started/installation/"; exit 1; }
-	@command -v hatch >/dev/null 2>&1 || { echo "hatch is required. See https://hatch.pypa.io/dev/install/"; exit 1; }
 	@command -v node >/dev/null 2>&1 || { echo "Node.js is required. See https://nodejs.org/en/download/"; exit 1; }
 	@node -v | grep -q "v2[0-9]" || { echo "Node.js v20+ is required. Current version: $(shell node -v)"; exit 1; }
 	@echo "✅ All prerequisites are installed!"
@@ -96,7 +101,7 @@ e2e:
 .PHONY: fe-lint
 # 🧹 Lint frontend
 fe-lint:
-	cd frontend/src && hatch run typos && cd - && pnpm --filter @marimo-team/frontend lint
+	cd frontend/src && uv run typos && cd - && pnpm --filter @marimo-team/frontend lint
 
 .PHONY: fe-typecheck
 # 🔍 Typecheck frontend
@@ -106,9 +111,28 @@ fe-typecheck:
 .PHONY: fe-codegen
 # 🔄 Generate frontend API
 fe-codegen:
-	uv run --python=3.12 ./marimo development openapi > packages/openapi/api.yaml
+	uv run --isolated --python=3.12 --with-editable . marimo development openapi > packages/openapi/api.yaml
 	pnpm run codegen
 	pnpm format packages/openapi/
+
+.PHONY: design-md
+# 🔄 Generate DESIGN.md
+design-md:
+	$(DENO) run $(DESIGN_MD_DENO_RUN_FLAGS) scripts/generate-design-md.ts > DESIGN.md
+
+.PHONY: design-md-check
+# 🔍 Check DESIGN.md generation
+design-md-check:
+	$(DENO) check $(DESIGN_MD_DENO_FLAGS) scripts/generate-design-md.ts
+	$(DENO) lint --no-config scripts/generate-design-md.ts
+	@tmp=$$(mktemp); \
+	trap 'rm -f "$$tmp"' EXIT; \
+	$(DENO) run $(DESIGN_MD_DENO_RUN_FLAGS) scripts/generate-design-md.ts > "$$tmp"; \
+	diff -u DESIGN.md "$$tmp" || { \
+		echo "DESIGN.md is not up to date. Run 'make design-md' to update it."; \
+		exit 1; \
+	}
+	$(DESIGN_MD_LINTER) lint DESIGN.md
 
 .PHONY: py-check
 # 🔍 Typecheck, lint, format python
@@ -118,18 +142,26 @@ py-check:
 .PHONY: typos
 # 🔍 Check for typos
 typos:
-	hatch run typos
+	uv run typos
 
 .PHONY: py-test
 # 🧪 Test python
 py-test:
-	uvx hatch run typos
+	uv run typos
 	./scripts/pytest.sh --optional $(ARGS)
+
+.PHONY: py-test-narwhals
+# 🧪 Test narwhals-related tests (used externally by narwhals repo)
+py-test-narwhals:
+	uv run --group test pytest \
+		tests/_data/ \
+		tests/_plugins/ui/_impl/ \
+		tests/_utils/test_narwhals_utils.py
 
 .PHONY: py-snapshots
 # 📸 Update snapshots
 py-snapshots:
-	hatch run +py=3.12 test:test \
+	uv run --group test pytest \
 		tests/_server/templates/test_templates.py \
 		tests/_server/api/endpoints/test_export.py \
 		tests/test_api.py
@@ -141,7 +173,7 @@ py-snapshots:
 .PHONY: wheel
 # 📦 Build wheel
 wheel:
-	hatch build
+	uv build
 
 
 #################
@@ -151,12 +183,12 @@ wheel:
 .PHONY: docs
 # 📚 Build docs
 docs:
-	hatch run docs:build
+	uv run --group docs mkdocs build
 
 .PHONY: docs-serve
 # 📚 Serve docs
 docs-serve:
-	hatch run docs:serve
+	uv run --group docs mkdocs serve --clean
 
 .PHONY: storybook
 # 🧩 Start Storybook for UI development

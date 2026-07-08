@@ -17,9 +17,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
-    Optional,
     TypedDict,
-    Union,
     cast,
 )
 
@@ -42,19 +40,22 @@ class CompletionConfig(TypedDict):
     - `signature_hint_on_typing`: if `False`, signature hint won't be shown when typing
     - `copilot`: one of `"github"`, `"codeium"`, or `"custom"`
     - `codeium_api_key`: the Codeium API key
+    - `auto_close_pairs`: if `False`, typing an opening bracket, parenthesis,
+    or quote will not automatically insert the closing character
     """
 
     activate_on_typing: bool
     signature_hint_on_typing: bool
-    copilot: Union[bool, Literal["github", "codeium", "custom"]]
+    copilot: bool | Literal["github", "codeium", "custom"]
+    auto_close_pairs: NotRequired[bool]
 
     # Codeium
-    codeium_api_key: NotRequired[Optional[str]]
+    codeium_api_key: NotRequired[str | None]
 
     # @deprecated: use `ai.models.autocomplete_model` instead
-    api_key: NotRequired[Optional[str]]
-    model: NotRequired[Optional[str]]
-    base_url: NotRequired[Optional[str]]
+    api_key: NotRequired[str | None]
+    model: NotRequired[str | None]
+    base_url: NotRequired[str | None]
 
 
 @mddoc
@@ -89,7 +90,7 @@ class KeymapConfig(TypedDict):
 
     preset: Literal["default", "vim"]
     overrides: NotRequired[dict[str, str]]
-    vimrc: NotRequired[Optional[str]]
+    vimrc: NotRequired[str | None]
     destructive_delete: NotRequired[bool]
 
 
@@ -152,6 +153,8 @@ class RuntimeConfig(TypedDict):
         affected cells as stale, `"autorun"` automatically runs affected cells.
     - `output_max_bytes`: the maximum size in bytes of cell outputs; larger
         values may affect frontend performance
+    - `serve_cached_sessions_in_apps`: if `True`, initialize applications with session cache.
+        The default is `False`.
     - `std_stream_max_bytes`: the maximum size in bytes of console outputs;
       larger values may affect frontend performance
     - `pythonpath`: a list of directories to add to the Python search path.
@@ -169,6 +172,9 @@ class RuntimeConfig(TypedDict):
        The default is None.
     - `default_csv_encoding`: the default encoding for CSV exports.
         The default is `"utf-8"`.
+    - `show_tracebacks`: if `True`, show detailed error tracebacks in run mode.
+        When enabled, exceptions will display a clickable toast that opens a modal with the full traceback.
+        The default is `False`.
     """
 
     auto_instantiate: bool
@@ -177,12 +183,14 @@ class RuntimeConfig(TypedDict):
     on_cell_change: OnCellChangeType
     watcher_on_save: Literal["lazy", "autorun"]
     output_max_bytes: int
+    serve_cached_sessions_in_apps: NotRequired[bool]
     std_stream_max_bytes: int
     pythonpath: NotRequired[list[str]]
     dotenv: NotRequired[list[str]]
     default_sql_output: SqlOutputType
     default_auto_download: NotRequired[list[ExportType]]
     default_csv_encoding: NotRequired[str]
+    show_tracebacks: NotRequired[bool]
 
 
 @mddoc
@@ -212,7 +220,7 @@ class DisplayConfig(TypedDict):
     default_table_page_size: int
     default_table_max_columns: int
     reference_highlighting: NotRequired[bool]
-    locale: NotRequired[Optional[str]]
+    locale: NotRequired[str | None]
 
 
 @mddoc
@@ -242,7 +250,7 @@ class ServerConfig(TypedDict):
         hidden in the file explorer.
     """
 
-    browser: Union[Literal["default"], str]
+    browser: Literal["default"] | str
     follow_symlink: bool
     disable_file_downloads: NotRequired[bool]
 
@@ -259,7 +267,7 @@ class PackageManagementConfig(TypedDict):
     manager: Literal["pip", "rye", "uv", "poetry", "pixi"]
 
 
-CopilotMode = Literal["ask", "manual", "agent"]
+CopilotMode = Literal["ask", "manual", "agent", "code_mode"]
 
 
 @mddoc
@@ -290,6 +298,7 @@ class AiConfig(TypedDict, total=False):
 
     **Keys.**
 
+    - `enabled`: if `False`, hide AI actions and panels in the marimo UI
     - `rules`: custom rules to include in all AI completion prompts
     - `max_tokens`: the maximum number of tokens to use in AI completions
     - `mode`: the mode to use for AI completions. Can be one of: `"ask"` or `"manual"`
@@ -304,10 +313,12 @@ class AiConfig(TypedDict, total=False):
     - `github`: the GitHub config
     - `openrouter`: the OpenRouter config
     - `wandb`: the Weights & Biases config
+    - `opencode_go`: the OpenCode Go config
     - `custom_providers`: a dict of custom OpenAI-compatible providers
     - `open_ai_compatible`: the OpenAI-compatible config (deprecated, use custom_providers)
     """
 
+    enabled: NotRequired[bool]
     rules: NotRequired[str]
     max_tokens: NotRequired[int]
     mode: NotRequired[CopilotMode]
@@ -324,6 +335,7 @@ class AiConfig(TypedDict, total=False):
     github: GitHubConfig
     openrouter: OpenAiConfig
     wandb: OpenAiConfig
+    opencode_go: OpenAiConfig
     custom_providers: NotRequired[dict[str, OpenAiConfig]]
     # @deprecated: use `custom_providers` instead
     open_ai_compatible: OpenAiConfig
@@ -501,6 +513,26 @@ class DiagnosticsConfig(TypedDict, total=False):
 
 
 @dataclass
+class LintConfig(TypedDict, total=False):
+    """Configuration for lint rule selection.
+
+    Follows ruff-inspired semantics for selecting which rules to run
+    during `marimo check`.
+
+    **Keys.**
+
+    - `select`: list of rule code prefixes that replaces the default
+      enabled set. Use `"ALL"` to select all rules.
+      Example: `["MB", "MR001"]`
+    - `ignore`: list of rule code prefixes to remove from the
+      enabled set.
+    """
+
+    select: list[str]
+    ignore: list[str]
+
+
+@dataclass
 class SnippetsConfig(TypedDict):
     """Configuration for snippets.
 
@@ -524,9 +556,9 @@ class DatasourcesConfig(TypedDict):
     - `auto_discover_columns`: if `True`, include columns & table metadata in the datasource
     """
 
-    auto_discover_schemas: NotRequired[Union[bool, Literal["auto"]]]
-    auto_discover_tables: NotRequired[Union[bool, Literal["auto"]]]
-    auto_discover_columns: NotRequired[Union[bool, Literal["auto"]]]
+    auto_discover_schemas: NotRequired[bool | Literal["auto"]]
+    auto_discover_tables: NotRequired[bool | Literal["auto"]]
+    auto_discover_columns: NotRequired[bool | Literal["auto"]]
 
 
 @mddoc
@@ -538,10 +570,12 @@ class SharingConfig(TypedDict):
 
     - `html`: if `False`, HTML sharing options will be hidden from the UI
     - `wasm`: if `False`, WebAssembly sharing options will be hidden from the UI
+    - `molab`: if `False`, molab sharing options will be hidden from the UI
     """
 
     html: NotRequired[bool]
     wasm: NotRequired[bool]
+    molab: NotRequired[bool]
 
 
 @dataclass
@@ -552,7 +586,7 @@ class StoreConfig(TypedDict, total=False):
     args: dict[str, Any]
 
 
-CacheConfig = Union[list[StoreConfig], StoreConfig]
+CacheConfig = list[StoreConfig] | StoreConfig
 
 
 class ExperimentalConfig(TypedDict, total=False):
@@ -565,6 +599,7 @@ class ExperimentalConfig(TypedDict, total=False):
     markdown: bool  # Used in playground (community cloud)
     wasm_layouts: bool  # Used in playground (community cloud)
     rtc_v2: bool
+    isolate_apps: bool
 
     # Internal features
     cache: CacheConfig
@@ -592,6 +627,7 @@ class MarimoConfig(TypedDict):
     ai: NotRequired[AiConfig]
     language_servers: NotRequired[LanguageServersConfig]
     diagnostics: NotRequired[DiagnosticsConfig]
+    lint: NotRequired[LintConfig]
     experimental: NotRequired[ExperimentalConfigType]
     snippets: NotRequired[SnippetsConfig]
     datasources: NotRequired[DatasourcesConfig]
@@ -606,9 +642,9 @@ class MCPServerStdioConfig(TypedDict):
     """Configuration for STDIO transport MCP servers"""
 
     command: str
-    args: NotRequired[Optional[list[str]]]
-    env: NotRequired[Optional[dict[str, str]]]
-    disabled: NotRequired[Optional[bool]]
+    args: NotRequired[list[str] | None]
+    env: NotRequired[dict[str, str] | None]
+    disabled: NotRequired[bool | None]
 
 
 @mddoc
@@ -617,16 +653,14 @@ class MCPServerStreamableHttpConfig(TypedDict):
     """Configuration for Streamable HTTP transport MCP servers"""
 
     url: str
-    headers: NotRequired[Optional[dict[str, str]]]
-    timeout: NotRequired[Optional[float]]
-    env: NotRequired[Optional[dict[str, str]]]
-    disabled: NotRequired[Optional[bool]]
+    headers: NotRequired[dict[str, str] | None]
+    timeout: NotRequired[float | None]
+    env: NotRequired[dict[str, str] | None]
+    disabled: NotRequired[bool | None]
 
 
 if TYPE_CHECKING:
-    MCPServerConfig = Union[
-        MCPServerStdioConfig, MCPServerStreamableHttpConfig
-    ]
+    MCPServerConfig = MCPServerStdioConfig | MCPServerStreamableHttpConfig
 else:
     MCPServerConfig = dict[str, Any]
 
@@ -661,6 +695,7 @@ class PartialMarimoConfig(TypedDict, total=False):
     ai: NotRequired[AiConfig]
     language_servers: NotRequired[LanguageServersConfig]
     diagnostics: NotRequired[DiagnosticsConfig]
+    lint: NotRequired[LintConfig]
     experimental: NotRequired[ExperimentalConfigType]
     snippets: SnippetsConfig
     datasources: NotRequired[DatasourcesConfig]
@@ -673,6 +708,7 @@ DEFAULT_CONFIG: MarimoConfig = {
         "activate_on_typing": True,
         "signature_hint_on_typing": False,
         "copilot": False,
+        "auto_close_pairs": True,
     },
     "display": {
         "theme": "light",
@@ -702,6 +738,7 @@ DEFAULT_CONFIG: MarimoConfig = {
         ),
         "default_sql_output": "auto",
         "default_csv_encoding": "utf-8",
+        "show_tracebacks": False,
     },
     "save": {
         "autosave": "after_delay",
@@ -725,6 +762,7 @@ DEFAULT_CONFIG: MarimoConfig = {
         }
     },
     "ai": {
+        "enabled": True,
         "models": {
             "displayed_models": [],
             "custom_models": [],
@@ -753,7 +791,8 @@ def merge_default_config(
 
 
 def merge_config(
-    config: MarimoConfig, new_config: PartialMarimoConfig | MarimoConfig
+    config: MarimoConfig,
+    new_config: PartialMarimoConfig | MarimoConfig,
 ) -> MarimoConfig:
     """Merge a user configuration with a new configuration. The new config
     will take precedence over the default config.
@@ -794,9 +833,7 @@ def merge_config(
             merged["runtime"]["auto_reload"] = "off"
         elif (
             merged["runtime"].get("auto_reload") is True  # type:ignore[comparison-overlap]
-        ):
-            merged["runtime"]["auto_reload"] = "lazy"
-        elif (
+        ) or (
             merged["runtime"].get("auto_reload") == "detect"  # type:ignore[comparison-overlap]
         ):
             merged["runtime"]["auto_reload"] = "lazy"

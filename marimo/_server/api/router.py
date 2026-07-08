@@ -10,6 +10,7 @@ from marimo._server.api.endpoints.config import router as config_router
 from marimo._server.api.endpoints.datasources import (
     router as datasources_router,
 )
+from marimo._server.api.endpoints.document import router as document_router
 from marimo._server.api.endpoints.documentation import (
     router as documentation_router,
 )
@@ -24,7 +25,6 @@ from marimo._server.api.endpoints.health import router as health_router
 from marimo._server.api.endpoints.home import router as home_router
 from marimo._server.api.endpoints.login import router as login_router
 from marimo._server.api.endpoints.lsp import router as lsp_router
-from marimo._server.api.endpoints.mpl import router as mpl_router
 from marimo._server.api.endpoints.packages import router as packages_router
 from marimo._server.api.endpoints.secrets import router as secrets_router
 from marimo._server.api.endpoints.sql import router as sql_router
@@ -61,6 +61,9 @@ def build_routes(base_url: str = "") -> list[BaseRoute]:
         documentation_router, prefix="/api/documentation", name="documentation"
     )
     app_router.include_router(
+        document_router, prefix="/api/document", name="document"
+    )
+    app_router.include_router(
         datasources_router, prefix="/api/datasources", name="datasources"
     )
     app_router.include_router(sql_router, prefix="/api/sql", name="sql")
@@ -82,7 +85,6 @@ def build_routes(base_url: str = "") -> list[BaseRoute]:
     app_router.include_router(lsp_router, prefix="/api/lsp", name="lsp")
     app_router.include_router(health_router, name="health")
     app_router.include_router(ws_router, name="ws")
-    app_router.include_router(mpl_router, name="mpl")
     app_router.include_router(assets_router, name="assets")
 
     return app_router.routes

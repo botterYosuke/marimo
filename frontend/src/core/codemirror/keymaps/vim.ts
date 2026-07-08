@@ -112,6 +112,35 @@ export function vimKeymapExtension(): Extension[] {
   ];
 }
 
+function scrollCursorTo(cm: CodeMirror, position: "center" | "start" | "end") {
+  const view = cm.cm6;
+  if (!view) {
+    return;
+  }
+  const coords = view.coordsAtPos(view.state.selection.main.head);
+  if (!coords) {
+    return;
+  }
+  const appEl = document.getElementById("App");
+  if (!appEl) {
+    return;
+  }
+  const viewportHeight = appEl.clientHeight;
+  let delta: number;
+  switch (position) {
+    case "center":
+      delta = (coords.top + coords.bottom) / 2 - viewportHeight / 2;
+      break;
+    case "start":
+      delta = coords.top;
+      break;
+    case "end":
+      delta = coords.bottom - viewportHeight;
+      break;
+  }
+  appEl.scrollBy({ top: delta, behavior: "smooth" });
+}
+
 const addCustomVimCommandsOnce = once(() => {
   // Go to definition
   Vim.defineAction("goToDefinition", (cm: CodeMirror) => {
@@ -119,6 +148,40 @@ const addCustomVimCommandsOnce = once(() => {
     return goToDefinitionAtCursorPosition(view);
   });
   Vim.mapCommand("gd", "action", "goToDefinition", {}, { context: "normal" });
+
+  // Scroll cursor to center/top/bottom of viewport (mirrors zz/zt/zb in classic vim)
+  Vim.defineAction("scrollCursorToCenter", (cm: CodeMirror) =>
+    scrollCursorTo(cm, "center"),
+  );
+  Vim.mapCommand(
+    "zz",
+    "action",
+    "scrollCursorToCenter",
+    {},
+    { context: "normal" },
+  );
+
+  Vim.defineAction("scrollCursorToTop", (cm: CodeMirror) =>
+    scrollCursorTo(cm, "start"),
+  );
+  Vim.mapCommand(
+    "zt",
+    "action",
+    "scrollCursorToTop",
+    {},
+    { context: "normal" },
+  );
+
+  Vim.defineAction("scrollCursorToBottom", (cm: CodeMirror) =>
+    scrollCursorTo(cm, "end"),
+  );
+  Vim.mapCommand(
+    "zb",
+    "action",
+    "scrollCursorToBottom",
+    {},
+    { context: "normal" },
+  );
 
   // Save command
   Vim.defineEx("write", "w", (cm: CodeMirror) => {
@@ -247,6 +310,32 @@ function applyVimCommands(vimCommands: VimCommand[]) {
   }
 }
 
+interface ExtendedVim {
+  getVimGlobalState_: () => {
+    macroModeState?: {
+      isRecording: boolean;
+      isPlaying: boolean;
+    };
+  };
+}
+
+function isExtendedVim(vim: typeof Vim): vim is typeof Vim & ExtendedVim {
+  return (
+    "getVimGlobalState_" in vim && typeof vim.getVimGlobalState_ === "function"
+  );
+}
+
+function isMacroActive() {
+  if (!isExtendedVim(Vim)) {
+    return false;
+  }
+  const macroModeState = Vim.getVimGlobalState_()?.macroModeState;
+  if (!macroModeState) {
+    return false;
+  }
+  return Boolean(macroModeState.isRecording || macroModeState.isPlaying);
+}
+
 class CodeMirrorVimSync {
   private instances = new Set<EditorView>();
   private isBroadcasting = false;
@@ -275,10 +364,13 @@ class CodeMirrorVimSync {
         return;
       }
       invariant("mode" in e, 'Expected event to have a "mode" property');
+      const skipBroadcast = isMacroActive();
       this.isBroadcasting = true;
       // We use onIdle to keep the focused editor snappy
       onIdle(() => {
-        this.broadcastModeChange(instance, e.mode, e.subMode);
+        if (!skipBroadcast) {
+          this.broadcastModeChange(instance, e.mode, e.subMode);
+        }
         this.isBroadcasting = false;
       });
     });
@@ -338,9 +430,9 @@ class CodeMirrorVimSync {
             }
             break;
           case "insert":
-            // Only enter insert mode if we're not already in it
+            // only enter insert mode if we're not already in it
             if (!vim.insertMode) {
-              Vim.handleKey(cm, "i", "");
+              Vim.handleKey(cm, "i", "mapping");
             }
             break;
           case "visual":

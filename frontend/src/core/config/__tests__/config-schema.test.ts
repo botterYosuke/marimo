@@ -46,6 +46,7 @@ test("default UserConfig - empty", () => {
     {
       "ai": {
         "custom_providers": {},
+        "enabled": true,
         "inline_tooltip": false,
         "mode": "manual",
         "models": {
@@ -56,6 +57,7 @@ test("default UserConfig - empty", () => {
       },
       "completion": {
         "activate_on_typing": true,
+        "auto_close_pairs": true,
         "copilot": false,
         "signature_hint_on_typing": false,
       },
@@ -90,6 +92,7 @@ test("default UserConfig - empty", () => {
         "default_sql_output": "auto",
         "on_cell_change": "autorun",
         "reactive_tests": true,
+        "show_tracebacks": false,
         "watcher_on_save": "lazy",
       },
       "save": {
@@ -116,6 +119,7 @@ test("default UserConfig - one level", () => {
     {
       "ai": {
         "custom_providers": {},
+        "enabled": true,
         "inline_tooltip": false,
         "mode": "manual",
         "models": {
@@ -126,6 +130,7 @@ test("default UserConfig - one level", () => {
       },
       "completion": {
         "activate_on_typing": true,
+        "auto_close_pairs": true,
         "copilot": false,
         "signature_hint_on_typing": false,
       },
@@ -160,6 +165,7 @@ test("default UserConfig - one level", () => {
         "default_sql_output": "auto",
         "on_cell_change": "autorun",
         "reactive_tests": true,
+        "show_tracebacks": false,
         "watcher_on_save": "lazy",
       },
       "save": {

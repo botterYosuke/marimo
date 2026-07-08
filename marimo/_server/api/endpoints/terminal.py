@@ -4,23 +4,26 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import select
+import selectors
 import signal
 import struct
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Literal, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, TypedDict
 
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from marimo import _loggers
+from marimo._server.api.auth import validate_auth
 from marimo._server.api.deps import AppState
+from marimo._server.codes import WebSocketCloseReason, WebSocketCodes
 from marimo._server.router import APIRouter
 from marimo._session.model import SessionMode
+from marimo._utils.asyncio_utils import cancel_and_wait
 from marimo._utils.platform import is_pyodide, is_windows
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
 
 LOGGER = _loggers.marimo_logger()
 
@@ -111,6 +114,21 @@ def _create_process_cleanup_handler(
     """Create a cleanup handler for the child process and file descriptor."""
 
     def cleanup() -> None:
+        # Close the pty master *first*.
+        #
+        # child_pid is the session leader of the pty. If it is killed while the
+        # server still holds the master fd open -- and a foreground child (e.g.
+        # a coding agent or REPL) still holds the slave -- the kernel cannot
+        # finish revoking the shell's controlling terminal, so the shell never
+        # becomes a reapable zombie. The blocking os.waitpid() below would then
+        # hang the asyncio event loop forever (frozen server, Ctrl-C ignored).
+        # Closing the master is the hangup that lets the teardown complete, so
+        # the child reaps promptly.
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+
         try:
             # Try graceful termination first
             os.kill(child_pid, signal.SIGTERM)
@@ -127,12 +145,6 @@ def _create_process_cleanup_handler(
                 pass
         except Exception as e:
             LOGGER.debug(f"Error during cleanup: {e}")
-
-        # Close the pty file descriptor
-        try:
-            os.close(fd)
-        except OSError:
-            pass
 
     return cleanup
 
@@ -171,50 +183,65 @@ def _manage_command_buffer(
     return buffer
 
 
+def _wait_for_read(master: int, timeout: float) -> bool:
+    """Wait for data to be available on the file descriptor.
+
+    Uses selectors instead of select.select() to avoid the FD_SETSIZE
+    limitation (fd must be < 1024) that causes failures when many file
+    descriptors are open.
+    """
+    sel = selectors.DefaultSelector()
+    try:
+        sel.register(master, selectors.EVENT_READ)
+        events = sel.select(timeout=timeout)
+        return len(events) > 0
+    finally:
+        sel.close()
+
+
 async def _read_from_pty(master: int, websocket: WebSocket) -> None:
-    """Read data from PTY and send to websocket with proper buffering."""
+    """Read data from PTY and send to websocket with proper buffering.
+
+    Uses raw os.read() instead of os.fdopen() to avoid double-close issues
+    when both reader and writer share the same fd.
+    """
     loop = asyncio.get_running_loop()
     buffer = b""
 
     try:
-        with os.fdopen(master, "rb", buffering=0) as master_file:
-            while True:
-                try:
-                    # Check for available data with a timeout
-                    r, _, _ = await loop.run_in_executor(
-                        None,
-                        select.select,
-                        [master_file],
-                        [],
-                        [],
-                        READ_TIMEOUT,
-                    )
+        while True:
+            try:
+                # Check for available data with a timeout
+                has_data = await loop.run_in_executor(
+                    None,
+                    _wait_for_read,
+                    master,
+                    READ_TIMEOUT,
+                )
 
-                    if r:
-                        # Read available data
-                        try:
-                            chunk = os.read(master, MAX_CHUNK_SIZE)
-                            if not chunk:
-                                break
-                            buffer += chunk
-                        except OSError as e:
-                            if (
-                                e.errno == 5
-                            ):  # Input/output error (process died)
-                                break
-                            raise
+                if has_data:
+                    # Read available data
+                    try:
+                        chunk = os.read(master, MAX_CHUNK_SIZE)
+                        if not chunk:
+                            break
+                        buffer += chunk
+                    except OSError as e:
+                        if e.errno == 5:  # Input/output error (process died)
+                            break
+                        raise
 
-                    # Send buffered data if we have any
-                    if buffer:
-                        text, buffer = _decode_pty_data(buffer)
-                        if text:
-                            await websocket.send_text(text)
-                    else:
-                        # Small delay to prevent busy-waiting when no data
-                        await asyncio.sleep(IDLE_SLEEP)
+                # Send buffered data if we have any
+                if buffer:
+                    text, buffer = _decode_pty_data(buffer)
+                    if text:
+                        await websocket.send_text(text)
+                else:
+                    # Small delay to prevent busy-waiting when no data
+                    await asyncio.sleep(IDLE_SLEEP)
 
-                except (asyncio.CancelledError, WebSocketDisconnect):
-                    break
+            except (asyncio.CancelledError, WebSocketDisconnect):
+                break
     except OSError as e:
         if e.errno == 9:  # Bad file descriptor
             LOGGER.debug("File descriptor closed, stopping read loop")
@@ -263,50 +290,48 @@ async def _maybe_handle_resize(
 async def _write_to_pty(
     master: int, websocket: WebSocket, child_pid: int
 ) -> None:
-    """Write data from websocket to PTY with command monitoring and resize handling."""
+    """Write data from websocket to PTY with command monitoring and resize handling.
+
+    Uses raw os.write() instead of os.fdopen() to avoid double-close issues
+    when both reader and writer share the same fd.
+    """
     try:
         command_buffer = ""
-        with os.fdopen(master, "wb", buffering=0) as master_file:
-            while True:
+        while True:
+            try:
+                data = await websocket.receive_text()
+                LOGGER.debug("Received: %s", repr(data))
+
+                # Check if this is a resize message
+                if await _maybe_handle_resize(
+                    master=master, child_pid=child_pid, message=data
+                ):
+                    continue
+
+                # Handle special key combinations and commands
+                command_buffer = _manage_command_buffer(command_buffer, data)
+
+                # Check for exit command
+                if _should_close_on_command(command_buffer, data):
+                    LOGGER.debug("Exit command received, closing connection")
+                    return
+
+                # Reset buffer on line endings
+                if data in ["\r", "\n"]:
+                    command_buffer = ""
+
+                # Write data to PTY
                 try:
-                    data = await websocket.receive_text()
-                    LOGGER.debug("Received: %s", repr(data))
+                    encoded_data = data.encode("utf-8")
+                    os.write(master, encoded_data)
+                except OSError as e:
+                    if e.errno == 5:  # Input/output error (process died)
+                        LOGGER.debug("Process died, stopping write loop")
+                        break
+                    raise
 
-                    # Check if this is a resize message
-                    if await _maybe_handle_resize(
-                        master=master, child_pid=child_pid, message=data
-                    ):
-                        continue
-
-                    # Handle special key combinations and commands
-                    command_buffer = _manage_command_buffer(
-                        command_buffer, data
-                    )
-
-                    # Check for exit command
-                    if _should_close_on_command(command_buffer, data):
-                        LOGGER.debug(
-                            "Exit command received, closing connection"
-                        )
-                        return
-
-                    # Reset buffer on line endings
-                    if data in ["\r", "\n"]:
-                        command_buffer = ""
-
-                    # Write data to PTY
-                    try:
-                        encoded_data = data.encode("utf-8")
-                        master_file.write(encoded_data)
-                        master_file.flush()
-                    except OSError as e:
-                        if e.errno == 5:  # Input/output error (process died)
-                            LOGGER.debug("Process died, stopping write loop")
-                            break
-                        raise
-
-                except (asyncio.CancelledError, WebSocketDisconnect):
-                    break
+            except (asyncio.CancelledError, WebSocketDisconnect):
+                break
     except OSError as e:
         if e.errno == 9:  # Bad file descriptor
             LOGGER.debug("File descriptor closed, stopping write loop")
@@ -316,12 +341,7 @@ async def _write_to_pty(
 
 async def _cancel_tasks(tasks: Iterable[asyncio.Task[Any]]) -> None:
     for task in tasks:
-        if not task.done():
-            task.cancel()
-            try:
-                await task
-            except asyncio.CancelledError:
-                pass
+        await cancel_and_wait(task)
 
 
 def supports_terminal() -> bool:
@@ -340,6 +360,13 @@ def supports_terminal() -> bool:
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket) -> None:
     app_state = AppState(websocket)
+
+    if app_state.enable_auth and not validate_auth(websocket):
+        await websocket.close(
+            WebSocketCodes.UNAUTHORIZED, WebSocketCloseReason.UNAUTHORIZED
+        )
+        return
+
     if app_state.mode != SessionMode.EDIT:
         await websocket.close(
             code=1008, reason="Terminal only available in edit mode"

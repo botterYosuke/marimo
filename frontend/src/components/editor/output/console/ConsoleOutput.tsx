@@ -6,7 +6,7 @@ import {
   ChevronsUpDownIcon,
   WrapTextIcon,
 } from "lucide-react";
-import React, { useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ToggleButton } from "react-aria-components";
 import { DebuggerControls } from "@/components/debugger/debugger-code";
 import { CopyClipboardIcon } from "@/components/icons/copy-icon";
@@ -33,12 +33,59 @@ import { useWrapText } from "../useWrapText";
 import { processOutput } from "./process-output";
 import { RenderTextWithLinks } from "./text-rendering";
 
+/**
+ * Delay in ms before clearing console outputs.
+ * This prevents flickering when a cell re-runs and outputs are briefly cleared
+ * before new outputs arrive (e.g., plt.show() with a slider).
+ */
+export const CONSOLE_CLEAR_DEBOUNCE_MS = 200;
+
+/**
+ * Debounces the clearing of console outputs.
+ * - Non-empty updates are applied immediately.
+ * - Transitions to empty are delayed by CONSOLE_CLEAR_DEBOUNCE_MS,
+ *   giving new outputs a chance to arrive and replace the old ones
+ *   without a visible flicker.
+ */
+function useDebouncedConsoleOutputs<T>(outputs: T[]): T[] {
+  const [debouncedOutputs, setDebouncedOutputs] = useState(outputs);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Non-empty outputs: apply immediately and cancel any pending clear
+  if (outputs.length > 0 && debouncedOutputs !== outputs) {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setDebouncedOutputs(outputs);
+  }
+
+  // Empty outputs: delay the clear so new outputs can arrive first
+  useEffect(() => {
+    if (outputs.length === 0 && timerRef.current === null) {
+      timerRef.current = setTimeout(() => {
+        timerRef.current = null;
+        setDebouncedOutputs([]);
+      }, CONSOLE_CLEAR_DEBOUNCE_MS);
+    }
+    return () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [outputs]);
+
+  return debouncedOutputs;
+}
+
 interface Props {
   cellId: CellId;
   cellName: string;
   className?: string;
   consoleOutputs: WithResponse<OutputMessage>[];
   stale: boolean;
+  interrupted: boolean;
   debuggerActive: boolean;
   onRefactorWithAI?: OnRefactorWithAI;
   onClear?: () => void;
@@ -63,8 +110,9 @@ const ConsoleOutputInternal = (props: Props): React.ReactNode => {
     setValue: setStdinValue,
   });
   const {
-    consoleOutputs,
+    consoleOutputs: rawConsoleOutputs,
     stale,
+    interrupted,
     cellName,
     cellId,
     onSubmitDebugger,
@@ -72,6 +120,9 @@ const ConsoleOutputInternal = (props: Props): React.ReactNode => {
     onRefactorWithAI,
     className,
   } = props;
+
+  // Debounce clearing to prevent flickering when cells re-run
+  const consoleOutputs = useDebouncedConsoleOutputs(rawConsoleOutputs);
 
   /* The debugger UI needs some work. For now just use the regular
   /* console output. */
@@ -118,7 +169,7 @@ const ConsoleOutputInternal = (props: Props): React.ReactNode => {
     return null;
   }
 
-  const reversedOutputs = [...consoleOutputs].reverse();
+  const reversedOutputs = consoleOutputs.toReversed();
   const isPdb = reversedOutputs.some(
     (output) =>
       typeof output.data === "string" && output.data.includes("(Pdb)"),
@@ -185,7 +236,7 @@ const ConsoleOutputInternal = (props: Props): React.ReactNode => {
         data-testid="console-output-area"
         ref={ref}
         {...selectAllProps}
-        // biome-ignore lint/a11y/noNoninteractiveTabindex: Needed to capture keypress events
+        // oxlint-ignore-next-line jsx-a11y/no-noninteractive-tabindex -- Needed to capture keypress events
         tabIndex={0}
         className={cn(
           "console-output-area overflow-hidden rounded-b-lg flex flex-col-reverse w-full gap-1 focus:outline-hidden",
@@ -231,6 +282,7 @@ const ConsoleOutputInternal = (props: Props): React.ReactNode => {
                 output={output.data}
                 response={output.response}
                 isPassword={isPassword}
+                interrupted={interrupted}
               />
             );
           }
@@ -310,9 +362,9 @@ const StdInput = (props: {
           if (e.key === "Enter" && !e.shiftKey) {
             if (value) {
               addToHistory(value);
-              onSubmit(value);
-              setValue("");
             }
+            onSubmit(value);
+            setValue("");
             e.preventDefault();
             e.stopPropagation();
           }
@@ -333,12 +385,27 @@ const StdInputWithResponse = (props: {
   output: string;
   response?: string;
   isPassword?: boolean;
+  interrupted?: boolean;
 }) => {
+  const { output, response, isPassword, interrupted } = props;
+  const hasResponse = response != null && response !== "";
+  const wasInterruptedWithoutResponse = interrupted && !hasResponse;
+
   return (
     <div className="flex gap-2 items-center">
-      {renderText(props.output)}
-      {!props.isPassword && (
-        <span className="text-(--sky-11)">{props.response}</span>
+      {renderText(output)}
+      {!isPassword && !wasInterruptedWithoutResponse && (
+        <span
+          className="inline-flex items-center gap-1 text-(--sky-11)"
+          aria-label="stdin response"
+        >
+          <ChevronRightIcon className="w-4 h-4 shrink-0 opacity-70" />
+          {hasResponse ? (
+            response
+          ) : (
+            <span className="italic opacity-70">(empty)</span>
+          )}
+        </span>
       )}
     </div>
   );

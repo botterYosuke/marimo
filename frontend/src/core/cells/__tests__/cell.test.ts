@@ -1,9 +1,10 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 import { describe, expect, it } from "vitest";
-import type { OutputMessage } from "@/core/kernel/messages";
+import type { CellMessage, OutputMessage } from "@/core/kernel/messages";
 import type { RuntimeState } from "@/core/network/types";
 import type { Seconds } from "@/utils/time";
-import { outputIsLoading, outputIsStale } from "../cell";
+import { outputIsLoading, outputIsStale, transitionCell } from "../cell";
+import { createCellRuntimeState } from "../types";
 
 const STATUSES: RuntimeState[] = [
   "queued",
@@ -43,19 +44,20 @@ describe("outputIsLoading", () => {
 });
 
 describe("outputIsStale", () => {
-  it.each(
-    STATUSES,
-  )("should return true if the cell is edited and status is %s", (status) => {
-    const cell = {
-      status: status,
-      staleInputs: true,
-      output: null,
-      runStartTimestamp: null,
-      interrupted: false,
-    };
-    const edited = true;
-    expect(outputIsStale(cell, edited)).toBe(true);
-  });
+  it.each(STATUSES)(
+    "should return true if the cell is edited and status is %s",
+    (status) => {
+      const cell = {
+        status: status,
+        staleInputs: true,
+        output: null,
+        runStartTimestamp: null,
+        interrupted: false,
+      };
+      const edited = true;
+      expect(outputIsStale(cell, edited)).toBe(true);
+    },
+  );
 
   it("should return true if the cell is loading", () => {
     const cell = {
@@ -188,5 +190,31 @@ describe("outputIsStale", () => {
     };
     const edited = false;
     expect(outputIsStale(cell, edited)).toBe(false);
+  });
+});
+
+describe("transitionCell serialization", () => {
+  function cellMessage(serialization?: string | null): CellMessage {
+    return {
+      cell_id: "cell-1",
+      ...(serialization === undefined ? {} : { serialization }),
+    } as CellMessage;
+  }
+
+  it("leaves the hint unchanged when serialization is omitted", () => {
+    const cell = createCellRuntimeState({ serialization: "Valid" });
+    expect(transitionCell(cell, cellMessage()).serialization).toBe("Valid");
+  });
+
+  it("clears the hint when serialization is null", () => {
+    const cell = createCellRuntimeState({ serialization: "Valid" });
+    expect(transitionCell(cell, cellMessage(null)).serialization).toBeNull();
+  });
+
+  it("sets the hint when serialization is a string", () => {
+    const cell = createCellRuntimeState();
+    expect(transitionCell(cell, cellMessage("Valid")).serialization).toBe(
+      "Valid",
+    );
   });
 });

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Protocol
+from typing import Protocol
 
 from marimo._schemas.serialization import (
     AppInstantiation,
@@ -20,8 +20,6 @@ class NotebookSerializer(Protocol):
 
         Args:
             notebook: Notebook in intermediate representation
-            path: Target file path
-            previous_path: Previous file path (for format conversions)
 
         Returns:
             Serialized notebook content as string
@@ -29,7 +27,7 @@ class NotebookSerializer(Protocol):
         ...
 
     def deserialize(
-        self, content: str, filepath: Optional[str] = None
+        self, content: str, filepath: str | None = None
     ) -> NotebookSerializationV1:
         """Convert content string to notebook IR.
 
@@ -42,7 +40,7 @@ class NotebookSerializer(Protocol):
         """
         ...
 
-    def extract_header(self, path: Path) -> Optional[str]:
+    def extract_header(self, path: Path) -> str | None:
         """Extract header/metadata from an existing file.
 
         Args:
@@ -67,7 +65,7 @@ class PythonNotebookSerializer(NotebookSerializer):
         return generate_filecontents_from_ir(notebook)
 
     def deserialize(
-        self, content: str, filepath: Optional[str] = None
+        self, content: str, filepath: str | None = None
     ) -> NotebookSerializationV1:
         """Deserialize Python notebook content to IR."""
         from marimo._ast.parse import parse_notebook
@@ -77,7 +75,7 @@ class PythonNotebookSerializer(NotebookSerializer):
             app=AppInstantiation(options={}), filename=filepath
         )
 
-    def extract_header(self, path: Path) -> Optional[str]:
+    def extract_header(self, path: Path) -> str | None:
         """Extract header comments from Python file."""
         from marimo._ast.codegen import get_header_comments
 
@@ -94,29 +92,34 @@ class MarkdownNotebookSerializer(NotebookSerializer):
         return convert_from_ir_to_markdown(notebook)
 
     def deserialize(
-        self, content: str, filepath: Optional[str] = None
+        self, content: str, filepath: str | None = None
     ) -> NotebookSerializationV1:
         """Deserialize Markdown notebook content to IR."""
         from marimo._convert.markdown.to_ir import convert_from_md_to_marimo_ir
 
         return convert_from_md_to_marimo_ir(content, filepath=filepath)
 
-    def extract_header(self, path: Path) -> Optional[str]:
+    def extract_header(self, path: Path) -> str | None:
         """Extract full frontmatter metadata from Markdown file as YAML.
 
         Unlike Python files where only the script preamble matters, markdown
-        frontmatter can carry arbitrary metadata (author, description, tags,
-        etc.) that must survive through the save lifecycle. Return the full
-        frontmatter as YAML so _save_file() preserves it all.
+        frontmatter and MyST marimo-config directives can carry metadata that
+        must survive through the save lifecycle. Return the full metadata as
+        YAML so _save_file() preserves it all.
         """
+        from marimo._convert.markdown.flavor.mystmd import (
+            extract_mystmd_config_metadata,
+        )
         from marimo._convert.markdown.to_ir import extract_frontmatter
         from marimo._utils import yaml
 
         markdown = path.read_text(encoding="utf-8")
         frontmatter, _ = extract_frontmatter(markdown)
-        if not frontmatter:
+        metadata = dict(frontmatter or {})
+        metadata.update(extract_mystmd_config_metadata(markdown))
+        if not metadata:
             return None
-        return yaml.dump(frontmatter, sort_keys=False)
+        return yaml.dump(metadata, sort_keys=False)
 
 
 # Default format handlers

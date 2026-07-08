@@ -1,7 +1,10 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
 import { usePrevious } from "@dnd-kit/utilities";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { Tooltip } from "radix-ui";
+
+const TooltipProvider = Tooltip.Provider;
+
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
@@ -11,6 +14,8 @@ import { Controls } from "@/components/editor/controls/Controls";
 import { AppHeader } from "@/components/editor/header/app-header";
 import { FilenameForm } from "@/components/editor/header/filename-form";
 import { MultiCellActionToolbar } from "@/components/editor/navigation/multi-cell-action-toolbar";
+import { ViewerBanner } from "@/components/editor/viewer-banner";
+import { ProgressiveBoundary } from "@/components/lifecycle/ProgressiveBoundary";
 import { cn } from "@/utils/cn";
 import { Paths } from "@/utils/paths";
 import { AppContainer } from "../components/editor/app-container";
@@ -18,7 +23,11 @@ import {
   useRunAllCells,
   useRunStaleCells,
 } from "../components/editor/cell/useRunCells";
-import { AddCellButtons, CellArray } from "../components/editor/renderers/cell-array";
+import { useSetCodeVisibility } from "../components/editor/actions/useSetCodeVisibility";
+import {
+  AddCellButtons,
+  CellArray,
+} from "../components/editor/renderers/cell-array";
 import { CellsRenderer } from "../components/editor/renderers/cells-renderer";
 import { Grid3DRenderer } from "../components/editor/renderers/grid-3d-renderer";
 import { Cell3DRenderer } from "../components/editor/renderers/cell-3d-renderer";
@@ -30,7 +39,6 @@ import { ConnectingAlert } from "../components/editor/alerts/connecting-alert";
 import { NotebookBanner } from "../components/editor/notebook-banner";
 import { useHotkey } from "../hooks/useHotkey";
 import {
-  cellIdsAtom,
   columnIdsAtom,
   hasCellsAtom,
   notebookIsRunningAtom,
@@ -39,7 +47,6 @@ import {
   useNotebook,
   flattenTopLevelNotebookCells,
 } from "./cells/cells";
-import { CellEffects } from "./cells/effects";
 import type { AppConfig, UserConfig } from "./config/config-schema";
 import { RuntimeState } from "./kernel/RuntimeState";
 import { getSessionId } from "./kernel/session";
@@ -49,7 +56,7 @@ import { is3DModeAtom, viewStateAtom } from "./mode";
 import { useRequestClient } from "./network/requests";
 import { useFilename } from "./saving/filename";
 import { lastSavedNotebookAtom } from "./saving/state";
-import { useJotaiEffect, store } from "./state/jotai";
+import { store } from "./state/jotai";
 import { GridCSS2DService } from "./three/grid-css2d-service";
 import { SceneManager } from "./three/scene-manager";
 import { cell3DViewAtom } from "./three/cell-3d-view";
@@ -78,8 +85,6 @@ export const EditApp: React.FC<AppProps> = ({
   appConfig,
   hideControls = false,
 }) => {
-  useJotaiEffect(cellIdsAtom, CellEffects.onCellIdsChange);
-
   const { setCells, mergeAllColumns, collapseAllCells, expandAllCells } =
     useCellActions();
   const viewState = useAtomValue(viewStateAtom);
@@ -311,7 +316,7 @@ export const EditApp: React.FC<AppProps> = ({
     }
   }, [is3DMode]);
 
-  const { connection } = useMarimoKernelConnection({
+  const { connection, reconnect } = useMarimoKernelConnection({
     autoInstantiate: userConfig.runtime.auto_instantiate,
     setCells: (cells, layout) => {
       setCells(cells);
@@ -349,6 +354,7 @@ export const EditApp: React.FC<AppProps> = ({
   const runStaleCells = useRunStaleCells();
   const runAllCells = useRunAllCells();
   const togglePresenting = useTogglePresenting();
+  const setCodeVisibility = useSetCodeVisibility();
   const { selectedLayout } = useLayoutState();
   const { setLayoutView } = useLayoutActions();
   const setIs3DMode = useSetAtom(is3DModeAtom);
@@ -398,6 +404,18 @@ export const EditApp: React.FC<AppProps> = ({
   useHotkey("global.runAll", () => {
     runAllCells();
   });
+  useHotkey("global.showAllCode", () => {
+    setCodeVisibility(false, "code");
+  });
+  useHotkey("global.hideAllCode", () => {
+    setCodeVisibility(true, "code");
+  });
+  useHotkey("global.showAllMarkdownCode", () => {
+    setCodeVisibility(false, "markdown");
+  });
+  useHotkey("global.hideAllMarkdownCode", () => {
+    setCodeVisibility(true, "markdown");
+  });
   useHotkey("global.collapseAllSections", () => {
     collapseAllCells();
   });
@@ -410,6 +428,7 @@ export const EditApp: React.FC<AppProps> = ({
       mode={viewState.mode}
       userConfig={userConfig}
       appConfig={appConfig}
+      hideControls={hideControls}
     />
   );
 
@@ -419,6 +438,7 @@ export const EditApp: React.FC<AppProps> = ({
         connection={connection}
         isRunning={isRunning}
         width={appConfig.width}
+        onReconnect={reconnect}
       >
         <AppHeader
           connection={connection}
@@ -429,12 +449,14 @@ export const EditApp: React.FC<AppProps> = ({
             "pointer-events-none",
           )}
         >
-          {isEditing && !is3DMode && (
+          {!hideControls && isEditing && !is3DMode && (
             <div className="flex items-center justify-center container">
               <FilenameForm filename={filename} />
             </div>
           )}
         </AppHeader>
+
+        <ViewerBanner />
 
         {/* 3D表示モード */}
         {is3DMode ? (
@@ -494,16 +516,20 @@ export const EditApp: React.FC<AppProps> = ({
                 </ReactFlowProvider>
               </>
             ) : null}
+            {!hasCells && <NotStartedConnectionAlert />}
           </>
         ) : (
-          /* Don't render until we have a single cell */
-          hasCells && (
+          /* Don't render until we have a single cell. NotStartedConnectionAlert
+             still covers the "no remote runtime started" prompt. */
+          <ProgressiveBoundary
+            requires={hasCellsAtom}
+            fallback={<NotStartedConnectionAlert />}
+          >
             <CellsRenderer appConfig={appConfig} mode={viewState.mode}>
               {editableCellsArray}
             </CellsRenderer>
-          )
+          </ProgressiveBoundary>
         )}
-        {!hasCells && <NotStartedConnectionAlert />}
       </AppContainer>
       <MultiCellActionToolbar />
       {!hideControls && (

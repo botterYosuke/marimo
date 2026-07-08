@@ -9,9 +9,9 @@ import {
   type HeaderGroup,
   type Row,
   type Table,
-  type Table as TanStackTable,
 } from "@tanstack/react-table";
-import { type JSX, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { type JSX, useLayoutEffect, useRef, useState } from "react";
 import useEvent from "react-use-event-hook";
 import {
   TableBody,
@@ -24,10 +24,12 @@ import { cn } from "@/utils/cn";
 import { getCellDomProps } from "./cell-utils";
 import { COLUMN_WRAPPING_STYLES } from "./column-wrapping/feature";
 import { DataTableContextMenu } from "./context-menu";
+import { HoverTooltip } from "./hover-tooltip/hover-tooltip";
+import { useTableHoverTooltip } from "./hover-tooltip/use-table-hover-tooltip";
 import { CellRangeSelectionIndicator } from "./range-focus/cell-selection-indicator";
 import { useCellRangeSelection } from "./range-focus/use-cell-range-selection";
 import { useScrollIntoViewOnFocus } from "./range-focus/use-scroll-into-view";
-import { stringifyUnknownValue } from "./utils";
+import { AUTO_WIDTH_MAX_COLUMNS, TABLE_ROW_HEIGHT_PX } from "./types";
 
 export function renderTableHeader<TData>(
   table: Table<TData>,
@@ -45,12 +47,12 @@ export function renderTableHeader<TData>(
           <TableHead
             key={header.id}
             className={cn(
-              "h-auto min-h-10 whitespace-pre align-top",
+              "h-auto min-h-10 whitespace-pre align-top border-r border-r-border/75",
               className,
             )}
             style={style}
             ref={(thead) => {
-              columnSizingHandler(thead, table, header.column);
+              columnSizingHandler({ table, column: header.column, thead });
             }}
           >
             {header.isPlaceholder
@@ -68,6 +70,13 @@ export function renderTableHeader<TData>(
         {renderHeaderGroup(table.getLeftHeaderGroups())}
         {renderHeaderGroup(table.getCenterHeaderGroups())}
         {renderHeaderGroup(table.getRightHeaderGroups())}
+        {table.getAllColumns().length <= AUTO_WIDTH_MAX_COLUMNS && (
+          <th
+            className="w-full border-0"
+            aria-hidden="true"
+            role="presentation"
+          />
+        )}
       </TableRow>
     </TableHeader>
   );
@@ -79,6 +88,7 @@ interface DataTableBodyProps<TData> {
   rowViewerPanelOpen: boolean;
   getRowIndex?: (row: TData, idx: number) => number;
   viewedRowIdx?: number;
+  virtualize?: boolean;
 }
 
 export const DataTableBody = <TData,>({
@@ -87,9 +97,30 @@ export const DataTableBody = <TData,>({
   rowViewerPanelOpen,
   getRowIndex,
   viewedRowIdx,
+  virtualize = false,
 }: DataTableBodyProps<TData>) => {
-  // Automatically scroll focused cells into view
+  const rows = table.getRowModel().rows;
+
+  // Find the scroll container (tbody -> table -> overflow-auto wrapper div).
+  // Using useState so that when the element becomes available after mount,
+  // useVirtualizer re-observes the correct element.
+  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
   const tableRef = useRef<HTMLTableSectionElement>(null);
+  useLayoutEffect(() => {
+    // tbody.parentElement = table, table.parentElement = overflow wrapper
+    setScrollElement(tableRef.current?.parentElement?.parentElement ?? null);
+  }, []);
+
+  // Always call useVirtualizer (rules of hooks); count=0 when not virtualizing
+  const virtualizer = useVirtualizer({
+    count: virtualize ? rows.length : 0,
+    getScrollElement: () => scrollElement,
+    estimateSize: () => TABLE_ROW_HEIGHT_PX,
+    overscan: 10,
+  });
+
+  // Automatically scroll focused cells into view.
+  // In virtual mode, off-screen cells won't be in the DOM so this silently no-ops for them.
   useScrollIntoViewOnFocus(tableRef);
 
   const {
@@ -105,42 +136,26 @@ export const DataTableBody = <TData,>({
     contextMenuCell.current = cell;
   });
 
-  function applyHoverTemplate(
-    template: string,
-    cells: Cell<TData, unknown>[],
-  ): string {
-    const variableRegex = /{{(\w+)}}/g;
-    // Map column id -> stringified value
-    const idToValue = new Map<string, string>();
-    for (const c of cells) {
-      const v = c.getValue();
-      // Prefer empty string for nulls to keep tooltip clean
-      const s = stringifyUnknownValue({ value: v, nullAsEmptyString: true });
-      idToValue.set(c.column.id, s);
-    }
-    return template.replaceAll(variableRegex, (_substr, varName: string) => {
-      const val = idToValue.get(varName);
-      return val === undefined ? `{{${varName}}}` : val;
-    });
-  }
+  const hoverTooltip = useTableHoverTooltip({ table });
 
   const renderCells = (cells: Cell<TData, unknown>[]) => {
     return cells.map((cell) => {
       const { className, style: pinningstyle } = getPinningStyles(cell.column);
+      const fixedWidth = cell.column.columnDef.meta?.width;
       const style = Object.assign(
         {},
         cell.getUserStyling?.() || {},
         pinningstyle,
       );
 
-      const title = cell.getHoverTitle?.() ?? undefined;
       return (
         <TableCell
           tabIndex={0}
           {...getCellDomProps(cell.id)}
           key={cell.id}
           className={cn(
-            "whitespace-pre truncate max-w-[300px] outline-hidden",
+            "whitespace-pre truncate outline-hidden border-r border-r-border/75",
+            !fixedWidth && "max-w-[300px]",
             cell.column.getColumnWrapping &&
               cell.column.getColumnWrapping?.() === "wrap" &&
               COLUMN_WRAPPING_STYLES,
@@ -148,10 +163,18 @@ export const DataTableBody = <TData,>({
             className,
           )}
           style={style}
-          title={title}
-          onMouseDown={(e) => handleCellMouseDown(e, cell)}
+          onMouseDown={(e) => {
+            handleCellMouseDown(e, cell);
+            hoverTooltip.hideTooltip();
+          }}
           onMouseUp={handleCellMouseUp}
-          onMouseOver={(e) => handleCellMouseOver(e, cell)}
+          onMouseOver={(e) => {
+            handleCellMouseOver(e, cell);
+            hoverTooltip.handleCellMouseOver(e, cell);
+          }}
+          onMouseLeave={hoverTooltip.handleCellMouseLeave}
+          onFocus={(e) => hoverTooltip.handleCellFocus(e, cell)}
+          onBlur={hoverTooltip.handleCellBlur}
           onContextMenu={() => handleContextMenu(cell)}
         >
           <CellRangeSelectionIndicator cellId={cell.id} />
@@ -170,69 +193,101 @@ export const DataTableBody = <TData,>({
     }
   };
 
-  const hoverTemplate = table.getState().cellHoverTemplate || null;
+  const renderRow = (row: Row<TData>) => {
+    // Only find the row index if the row viewer panel is open
+    const rowIndex = rowViewerPanelOpen
+      ? (getRowIndex?.(row.original, row.index) ?? row.index)
+      : undefined;
+    const isRowViewedInPanel = rowViewerPanelOpen && viewedRowIdx === rowIndex;
 
-  const tableBody = (
-    <TableBody onKeyDown={handleCellsKeyDown} ref={tableRef}>
-      {table.getRowModel().rows?.length ? (
-        table.getRowModel().rows.map((row) => {
-          // Only find the row index if the row viewer panel is open
-          const rowIndex = rowViewerPanelOpen
-            ? (getRowIndex?.(row.original, row.index) ?? row.index)
-            : undefined;
-          const isRowViewedInPanel =
-            rowViewerPanelOpen && viewedRowIdx === rowIndex;
+    return (
+      <TableRow
+        key={row.id}
+        data-state={row.getIsSelected() && "selected"}
+        // These classes ensure that empty rows (nulls) still render
+        className={cn(
+          "border-t h-6",
+          rowViewerPanelOpen && "cursor-pointer",
+          isRowViewedInPanel &&
+            "bg-(--blue-3) hover:bg-(--blue-3) data-[state=selected]:bg-(--blue-4)",
+        )}
+        onClick={() => handleRowClick(row)}
+      >
+        {renderCells(row.getLeftVisibleCells())}
+        {renderCells(row.getCenterVisibleCells())}
+        {renderCells(row.getRightVisibleCells())}
+        {columns.length <= AUTO_WIDTH_MAX_COLUMNS && (
+          <td className="border-0" aria-hidden="true" role="presentation" />
+        )}
+      </TableRow>
+    );
+  };
 
-          // Compute hover title once per row using all visible cells
-          let rowTitle: string | undefined;
-          if (hoverTemplate) {
-            const visibleCells = row.getVisibleCells?.() ?? [
-              ...row.getLeftVisibleCells(),
-              ...row.getCenterVisibleCells(),
-              ...row.getRightVisibleCells(),
-            ];
-            rowTitle = hoverTemplate
-              ? applyHoverTemplate(hoverTemplate, visibleCells)
-              : undefined;
-          }
+  const hasFillerColumn = columns.length <= AUTO_WIDTH_MAX_COLUMNS;
+  const totalColSpan = columns.length + (hasFillerColumn ? 1 : 0);
 
-          return (
-            <TableRow
-              key={row.id}
-              data-state={row.getIsSelected() && "selected"}
-              title={rowTitle}
-              // These classes ensure that empty rows (nulls) still render
-              className={cn(
-                "border-t h-6",
-                rowViewerPanelOpen && "cursor-pointer",
-                isRowViewedInPanel &&
-                  "bg-(--blue-3) hover:bg-(--blue-3) data-[state=selected]:bg-(--blue-4)",
-              )}
-              onClick={() => handleRowClick(row)}
-            >
-              {renderCells(row.getLeftVisibleCells())}
-              {renderCells(row.getCenterVisibleCells())}
-              {renderCells(row.getRightVisibleCells())}
-            </TableRow>
-          );
-        })
-      ) : (
+  const renderRows = () => {
+    if (rows.length === 0) {
+      return (
         <TableRow>
-          <TableCell colSpan={columns.length} className="h-24 text-center">
+          <TableCell colSpan={totalColSpan} className="h-24 text-center">
             No results.
           </TableCell>
         </TableRow>
-      )}
+      );
+    }
+
+    if (virtualize) {
+      const virtualItems = virtualizer.getVirtualItems();
+      const totalSize = virtualizer.getTotalSize();
+      return (
+        <>
+          {virtualItems[0]?.start > 0 && (
+            <tr
+              data-virtual-spacer=""
+              style={{ height: virtualItems[0].start }}
+            >
+              <td colSpan={totalColSpan} />
+            </tr>
+          )}
+          {virtualItems.map((vItem) => renderRow(rows[vItem.index]))}
+          {virtualItems.length > 0 && (
+            <tr
+              data-virtual-spacer=""
+              style={{
+                height: totalSize - (virtualItems.at(-1)?.end ?? totalSize),
+              }}
+            >
+              <td colSpan={totalColSpan} />
+            </tr>
+          )}
+        </>
+      );
+    }
+
+    return rows.map((row) => renderRow(row));
+  };
+
+  const tableBody = (
+    <TableBody onKeyDown={handleCellsKeyDown} ref={tableRef}>
+      {renderRows()}
     </TableBody>
   );
 
   return (
-    <DataTableContextMenu
-      tableBody={tableBody}
-      contextMenuRef={contextMenuCell}
-      tableRef={tableRef}
-      copyAllCells={handleCopyAllCells}
-    />
+    <>
+      <DataTableContextMenu
+        tableBody={tableBody}
+        contextMenuRef={contextMenuCell}
+        tableRef={tableRef}
+        copyAllCells={handleCopyAllCells}
+      />
+      <HoverTooltip
+        state={hoverTooltip.tooltipState}
+        contentId={hoverTooltip.tooltipContentId}
+        onClose={hoverTooltip.hideTooltip}
+      />
+    </>
   );
 };
 
@@ -244,6 +299,7 @@ function getPinningStyles<TData>(
     isPinned === "left" && column.getIsLastColumn("left");
   const isFirstRightPinnedColumn =
     isPinned === "right" && column.getIsFirstColumn("right");
+  const fixedWidth = column.columnDef.meta?.width;
 
   return {
     className: cn(isPinned && "bg-inherit", "shadow-r z-10"),
@@ -260,29 +316,37 @@ function getPinningStyles<TData>(
       position: isPinned ? "sticky" : "relative",
       zIndex: isPinned ? 1 : 0,
       width: column.getSize(),
+      ...(fixedWidth ? { minWidth: fixedWidth, maxWidth: fixedWidth } : {}),
     },
   };
 }
 
 // Update column sizes in table state for column pinning offsets
 // https://github.com/TanStack/table/discussions/3947#discussioncomment-9564867
-function columnSizingHandler<TData>(
-  thead: HTMLTableCellElement | null,
-  table: TanStackTable<TData>,
-  column: Column<TData>,
-) {
+function columnSizingHandler<TData>({
+  table,
+  column,
+  thead,
+}: {
+  table: Table<TData>;
+  column: Column<TData>;
+  thead: HTMLTableCellElement | null;
+}): void {
   if (!thead) {
     return;
   }
-  if (
-    table.getState().columnSizing[column.id] ===
-    thead.getBoundingClientRect().width
-  ) {
+  // Round to avoid infinite re-render loops: the browser's table layout
+  // algorithm may render a <th> at a slightly different width than the
+  // CSS `width` we set via column.getSize(), so a strict float === float
+  // comparison never stabilizes. Rounding to integers ensures convergence
+  // after at most one cycle.
+  const measuredWidth = Math.round(thead.getBoundingClientRect().width);
+  if (table.getState().columnSizing[column.id] === measuredWidth) {
     return;
   }
 
   table.setColumnSizing((prevSizes) => ({
     ...prevSizes,
-    [column.id]: thead.getBoundingClientRect().width,
+    [column.id]: measuredWidth,
   }));
 }

@@ -27,11 +27,13 @@ export interface Hotkey {
    * @default true
    */
   editable?: boolean;
+  additionalKeywords?: string[];
 }
 
 interface ResolvedHotkey {
   name: string;
   key: string;
+  additionalKeywords?: string[];
 }
 
 type ModKey = "Cmd" | "Ctrl";
@@ -110,6 +112,7 @@ const DEFAULT_HOT_KEY = {
     name: "Run",
     group: "Running Cells",
     key: "Mod-Enter",
+    additionalKeywords: ["execute", "submit"],
   },
   "cell.runAndNewBelow": {
     name: "Run and new below",
@@ -132,11 +135,20 @@ const DEFAULT_HOT_KEY = {
     name: "Format cell",
     group: "Editing",
     key: "Mod-b",
+    additionalKeywords: ["lint"],
   },
   "cell.viewAsMarkdown": {
     name: "View as Markdown",
     group: "Editing",
     key: "Mod-Shift-m",
+  },
+  "cell.viewAsSQL": {
+    name: "Toggle SQL",
+    group: "Editing",
+    key: {
+      windows: "Alt-Shift-l",
+      main: "Mod-Shift-l",
+    },
   },
   "cell.complete": {
     name: "Code completion",
@@ -201,6 +213,7 @@ const DEFAULT_HOT_KEY = {
     name: "Delete cell",
     group: "Editing",
     key: "Shift-Backspace",
+    additionalKeywords: ["remove"],
   },
   "cell.hideCode": {
     name: "Hide cell code",
@@ -320,6 +333,7 @@ const DEFAULT_HOT_KEY = {
     name: "Save file",
     group: "Other",
     key: "Mod-s",
+    additionalKeywords: ["write", "persist"],
   },
   "global.commandPalette": {
     name: "Show command palette",
@@ -355,6 +369,27 @@ const DEFAULT_HOT_KEY = {
     name: "Toggle developer panel",
     group: "Other",
     key: "Mod-j",
+  },
+  "global.showAllCode": {
+    name: "Show all code",
+    group: "Editing",
+    key: NOT_SET,
+    additionalKeywords: ["unhide", "hide", "reveal", "show source"],
+  },
+  "global.hideAllCode": {
+    name: "Hide all code",
+    group: "Editing",
+    key: NOT_SET,
+  },
+  "global.showAllMarkdownCode": {
+    name: "Show all markdown code",
+    group: "Editing",
+    key: NOT_SET,
+  },
+  "global.hideAllMarkdownCode": {
+    name: "Hide all markdown code",
+    group: "Editing",
+    key: NOT_SET,
   },
   "global.collapseAllSections": {
     name: "Collapse all sections",
@@ -428,6 +463,11 @@ const DEFAULT_HOT_KEY = {
     group: "Command",
     key: "c",
   },
+  "command.cutCell": {
+    name: "Cut cell",
+    group: "Command",
+    key: "x",
+  },
   "command.pasteCell": {
     name: "Paste cell",
     group: "Command",
@@ -485,23 +525,26 @@ export class HotkeyProvider implements IHotkeyProvider {
   }
 
   getHotkey(action: HotkeyAction): ResolvedHotkey {
-    const { name, key } = this.hotkeys[action];
+    const { name, key, additionalKeywords } = this.hotkeys[action];
     if (typeof key === "string") {
       return {
         name,
         key: key.replace("Mod", this.mod),
+        additionalKeywords,
       };
     }
     if (key === NOT_SET) {
       return {
         name,
         key: "",
+        additionalKeywords,
       };
     }
     const platformKey = key[this.platform] || key.main;
     return {
       name,
       key: platformKey.replace("Mod", this.mod),
+      additionalKeywords,
     };
   }
 
@@ -539,6 +582,7 @@ export class OverridingHotkeyProvider extends HotkeyProvider {
     return {
       name: base.name,
       key: override ? normalizeKeyString(override) : base.key,
+      additionalKeywords: base.additionalKeywords,
     };
   }
 }

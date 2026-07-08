@@ -25,7 +25,7 @@ import { CellOutputId } from "@/core/cells/ids";
 import { isOutputEmpty } from "@/core/cells/outputs";
 import { goToDefinitionAtCursorPosition } from "@/core/codemirror/go-to-definition/utils";
 import { sendToPanelManager } from "@/core/vscode/vscode-bindings";
-import { copyToClipboard } from "@/utils/copy";
+import { copyImageToClipboard, copyToClipboard } from "@/utils/copy";
 import { getImageExtension } from "@/utils/filenames";
 import { Logger } from "@/utils/Logger";
 import type { ActionButton } from "../actions/types";
@@ -34,8 +34,10 @@ import {
   useCellActionButtons,
 } from "../actions/useCellActionButton";
 
-interface Props
-  extends Pick<CellActionButtonProps, "cellId" | "getEditorView"> {
+interface Props extends Pick<
+  CellActionButtonProps,
+  "cellId" | "getEditorView"
+> {
   children: React.ReactNode;
 }
 
@@ -59,6 +61,7 @@ export const CellActionsContextMenu = ({
   });
   const [imageRightClicked, setImageRightClicked] =
     React.useState<HTMLImageElement>();
+  const suppressCloseAutoFocus = React.useRef(false);
 
   const DEFAULT_CONTEXT_MENU_ITEMS: ActionButton[] = [
     {
@@ -127,11 +130,7 @@ export const CellActionsContextMenu = ({
       icon: <ClipboardCopyIcon size={13} strokeWidth={1.5} />,
       handle: async () => {
         if (imageRightClicked) {
-          const response = await fetch(imageRightClicked.src);
-          const blob = await response.blob();
-          const item = new ClipboardItem({ [blob.type]: blob });
-          await navigator.clipboard
-            .write([item])
+          await copyImageToClipboard(imageRightClicked.src)
             .then(() => {
               toast({
                 title: "Copied image to clipboard",
@@ -168,7 +167,10 @@ export const CellActionsContextMenu = ({
       handle: () => {
         const editorView = getEditorView();
         if (editorView) {
-          goToDefinitionAtCursorPosition(editorView);
+          // Only suppress focus restoration when we actually navigated;
+          // otherwise let Radix return focus to the trigger cell.
+          suppressCloseAutoFocus.current =
+            goToDefinitionAtCursorPosition(editorView);
         }
       },
     },
@@ -196,7 +198,16 @@ export const CellActionsContextMenu = ({
       >
         {children}
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-[300px]" scrollable={true}>
+      <ContextMenuContent
+        className="w-[300px]"
+        scrollable={true}
+        onCloseAutoFocus={(evt) => {
+          if (suppressCloseAutoFocus.current) {
+            evt.preventDefault();
+            suppressCloseAutoFocus.current = false;
+          }
+        }}
+      >
         {visibleActions.map((group, i) => (
           <Fragment key={i}>
             {group.map((action) => {

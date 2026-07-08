@@ -1,5 +1,6 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 import { beforeEach, describe, expect, it } from "vitest";
+import { variableName } from "@/__tests__/branded";
 import type { VariableName } from "../../variables/types";
 import { exportedForTesting } from "../state";
 import type { StorageEntry, StorageNamespace, StorageState } from "../types";
@@ -7,9 +8,10 @@ import type { StorageEntry, StorageNamespace, StorageState } from "../types";
 const { initialState, reducer, createActions } = exportedForTesting;
 
 function makeNamespace(
-  overrides: Partial<StorageNamespace> & { name: string },
+  overrides: Partial<StorageNamespace> & { name: VariableName },
 ): StorageNamespace {
   return {
+    backendType: overrides.backendType ?? "obstore",
     displayName: overrides.displayName ?? overrides.name,
     name: overrides.name,
     protocol: overrides.protocol ?? "s3",
@@ -46,14 +48,21 @@ describe("storage state", () => {
       expect(state).toEqual({
         namespaces: [],
         entriesByPath: new Map(),
+        pageMetadataByPath: new Map(),
       });
     });
   });
 
   describe("setNamespaces", () => {
     it("should add namespaces from an empty state", () => {
-      const ns1 = makeNamespace({ name: "my_s3", protocol: "s3" });
-      const ns2 = makeNamespace({ name: "my_gcs", protocol: "gcs" });
+      const ns1 = makeNamespace({
+        name: variableName("my_s3"),
+        protocol: "s3",
+      });
+      const ns2 = makeNamespace({
+        name: variableName("my_gcs"),
+        protocol: "gcs",
+      });
 
       actions.setNamespaces({ namespaces: [ns1, ns2] });
 
@@ -62,15 +71,18 @@ describe("storage state", () => {
 
     it("should merge namespaces by name, replacing existing ones", () => {
       const nsOld = makeNamespace({
-        name: "my_s3",
+        name: variableName("my_s3"),
         protocol: "s3",
         rootPath: "/old",
       });
-      const nsOther = makeNamespace({ name: "my_gcs", protocol: "gcs" });
+      const nsOther = makeNamespace({
+        name: variableName("my_gcs"),
+        protocol: "gcs",
+      });
       actions.setNamespaces({ namespaces: [nsOld, nsOther] });
 
       const nsUpdated = makeNamespace({
-        name: "my_s3",
+        name: variableName("my_s3"),
         protocol: "s3",
         rootPath: "/new",
       });
@@ -81,10 +93,10 @@ describe("storage state", () => {
     });
 
     it("should add new namespaces alongside existing ones", () => {
-      const ns1 = makeNamespace({ name: "ns1" });
+      const ns1 = makeNamespace({ name: variableName("ns1") });
       actions.setNamespaces({ namespaces: [ns1] });
 
-      const ns2 = makeNamespace({ name: "ns2" });
+      const ns2 = makeNamespace({ name: variableName("ns2") });
       actions.setNamespaces({ namespaces: [ns2] });
 
       expect(state.namespaces).toHaveLength(2);
@@ -100,7 +112,7 @@ describe("storage state", () => {
       });
 
       actions.setNamespaces({
-        namespaces: [makeNamespace({ name: "ns" })],
+        namespaces: [makeNamespace({ name: variableName("ns") })],
       });
 
       expect(state.entriesByPath.get("ns::")).toEqual([entry]);
@@ -121,6 +133,49 @@ describe("storage state", () => {
       });
 
       expect(state.entriesByPath.get("my_s3::data/")).toEqual(entries);
+    });
+
+    it("should store next page tokens keyed by namespace and prefix", () => {
+      const entries = [makeEntry({ path: "a.txt" })];
+
+      actions.setEntries({
+        namespace: "my_s3",
+        prefix: "data/",
+        entries,
+        nextPageToken: "150",
+      });
+
+      expect(state.entriesByPath.get("my_s3::data/")).toEqual(entries);
+      expect(state.pageMetadataByPath.get("my_s3::data/")?.nextPageToken).toBe(
+        "150",
+      );
+    });
+
+    it("should append entries when requested", () => {
+      const firstPage = [makeEntry({ path: "a.txt" })];
+      const secondPage = [makeEntry({ path: "b.txt" })];
+
+      actions.setEntries({
+        namespace: "my_s3",
+        prefix: "data/",
+        entries: firstPage,
+        nextPageToken: "150",
+      });
+      actions.setEntries({
+        namespace: "my_s3",
+        prefix: "data/",
+        entries: secondPage,
+        nextPageToken: null,
+        append: true,
+      });
+
+      expect(state.entriesByPath.get("my_s3::data/")).toEqual([
+        ...firstPage,
+        ...secondPage,
+      ]);
+      expect(
+        state.pageMetadataByPath.get("my_s3::data/")?.nextPageToken,
+      ).toBeNull();
     });
 
     it("should use empty string for null prefix", () => {
@@ -204,7 +259,7 @@ describe("storage state", () => {
     });
 
     it("should not affect namespaces", () => {
-      const ns = makeNamespace({ name: "ns" });
+      const ns = makeNamespace({ name: variableName("ns") });
       actions.setNamespaces({ namespaces: [ns] });
 
       actions.setEntries({
@@ -240,6 +295,11 @@ describe("storage state", () => {
       expect(state.entriesByPath.get("my_s3::")).toBeUndefined();
       expect(state.entriesByPath.get("my_s3::data/")).toBeUndefined();
       expect(state.entriesByPath.get("my_s3::data/nested/")).toBeUndefined();
+      expect(state.pageMetadataByPath.get("my_s3::")).toBeUndefined();
+      expect(state.pageMetadataByPath.get("my_s3::data/")).toBeUndefined();
+      expect(
+        state.pageMetadataByPath.get("my_s3::data/nested/"),
+      ).toBeUndefined();
     });
 
     it("should not affect entries from other namespaces", () => {
@@ -262,7 +322,7 @@ describe("storage state", () => {
     });
 
     it("should not affect namespaces", () => {
-      const ns = makeNamespace({ name: "my_s3" });
+      const ns = makeNamespace({ name: variableName("my_s3") });
       actions.setNamespaces({ namespaces: [ns] });
       actions.setEntries({
         namespace: "my_s3",
@@ -292,31 +352,31 @@ describe("storage state", () => {
 
   describe("filterFromVariables", () => {
     it("should keep namespaces whose variable is still in scope", () => {
-      const ns1 = makeNamespace({ name: "var_a" });
-      const ns2 = makeNamespace({ name: "var_b" });
+      const ns1 = makeNamespace({ name: variableName("var_a") });
+      const ns2 = makeNamespace({ name: variableName("var_b") });
       actions.setNamespaces({ namespaces: [ns1, ns2] });
 
       actions.filterFromVariables([
-        "var_a" as VariableName,
-        "var_b" as VariableName,
+        variableName("var_a"),
+        variableName("var_b"),
       ]);
 
       expect(state.namespaces).toEqual([ns1, ns2]);
     });
 
     it("should remove namespaces whose variable is no longer in scope", () => {
-      const ns1 = makeNamespace({ name: "var_a" });
-      const ns2 = makeNamespace({ name: "var_b" });
+      const ns1 = makeNamespace({ name: variableName("var_a") });
+      const ns2 = makeNamespace({ name: variableName("var_b") });
       actions.setNamespaces({ namespaces: [ns1, ns2] });
 
-      actions.filterFromVariables(["var_a" as VariableName]);
+      actions.filterFromVariables([variableName("var_a")]);
 
       expect(state.namespaces).toEqual([ns1]);
     });
 
     it("should remove all named namespaces when given an empty variable list", () => {
-      const ns1 = makeNamespace({ name: "var_a" });
-      const ns2 = makeNamespace({ name: "var_b" });
+      const ns1 = makeNamespace({ name: variableName("var_a") });
+      const ns2 = makeNamespace({ name: variableName("var_b") });
       actions.setNamespaces({ namespaces: [ns1, ns2] });
 
       actions.filterFromVariables([]);
@@ -325,7 +385,7 @@ describe("storage state", () => {
     });
 
     it("should not affect entriesByPath", () => {
-      const ns = makeNamespace({ name: "ns" });
+      const ns = makeNamespace({ name: variableName("ns") });
       actions.setNamespaces({ namespaces: [ns] });
 
       const entry = makeEntry({ path: "file.txt" });

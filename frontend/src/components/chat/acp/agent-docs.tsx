@@ -17,9 +17,6 @@ import {
   getAllAgentIds,
 } from "./state";
 
-// Opencode currently edits files without requesting for permission
-const BETA_AGENTS = new Set<ExternalAgentId>(["opencode"]);
-
 interface AgentDocItemProps {
   agentId: ExternalAgentId;
   showCopy?: boolean;
@@ -41,20 +38,15 @@ const AgentDocItem = memo<AgentDocItemProps>(
       <div className={cn("space-y-2", className)}>
         <div className="flex items-center gap-2">
           <AiProviderIcon provider={agentId} className="h-4 w-4" />
-          <span className="font-medium text-sm">
-            {displayName}
-            {BETA_AGENTS.has(agentId) && (
-              <span className="text-muted-foreground ml-1">(beta)</span>
-            )}
-          </span>
+          <span className="font-medium text-sm">{displayName}</span>
         </div>
         <div className="bg-muted/50 rounded-md p-2 border">
           <div className="flex items-start gap-2 text-xs">
-            <TerminalIcon className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
-            <code className="text-xs font-mono break-words flex-1 whitespace-pre-wrap">
+            <TerminalIcon className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+            <code className="text-xs font-mono wrap-break-word flex-1 whitespace-pre-wrap">
               {command}
             </code>
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               {showCopy && (
                 <Button size="xs" variant="outline" className="border">
                   <CopyClipboardIcon value={command} className="h-3 w-3" />

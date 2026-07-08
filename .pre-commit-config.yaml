@@ -30,21 +30,44 @@ repos:
       - id: typos
         pass_filenames: false
 
+  - repo: local
+    hooks:
+      - id: no-double-backticks-in-docstrings
+        name: no double backticks in docstrings
+        entry: python scripts/check_docstring_backticks.py
+        language: python
+        types: [python]
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.0
+    rev: v0.15.18
     hooks:
       # Run the linter
-      - id: ruff
+      - id: ruff-check
         args: [--fix]
       # Run the formatter
       - id: ruff-format
 
-  - repo: https://github.com/biomejs/pre-commit
-    rev: v2.3.13
+  # TODO: add back. this throws errors: thread 'tokio-rt-worker' (169) panicked at crates/oxc_allocator/src/pool/fixed_size.rs:112:67
+  # - repo: https://github.com/oxc-project/mirrors-oxlint
+  #   rev: v1.56.0
+  #   hooks:
+  #     - id: oxlint
+  #       args: [--fix, --quiet]
+  #       files: ^(frontend/src/|packages/)
+
+  - repo: https://github.com/oxc-project/mirrors-oxfmt
+    rev: v0.42.0
     hooks:
-      - id: biome-check
-        args: [--diagnostic-level, warn]
-        exclude: |
-          (?x)^(
-            docs/_static/.*|
-          )$
+      - id: oxfmt
+        args: [--write, --config, .oxfmtrc.json]
+        files: ^(frontend/src/|packages/)
+        "types_or": [javascript, jsx, ts, tsx]
+
+  - repo: local
+    hooks:
+      - id: unique-test-filenames
+        name: Enforce unique test filenames
+        entry: python scripts/check_test_filenames.py
+        language: system
+        pass_filenames: false
+        files: ^tests/.*\.py$

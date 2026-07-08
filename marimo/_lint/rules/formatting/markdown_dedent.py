@@ -69,7 +69,7 @@ class MarkdownDedentRule(LintRule):
 
     async def check(self, ctx: RuleContext) -> None:
         """Check for markdown cells with indented content."""
-        from marimo._lint.linter import (
+        from marimo._utils.generated_with import (
             contents_differ_excluding_generated_with,
         )
 
@@ -102,13 +102,11 @@ class MarkdownDedentRule(LintRule):
                 line_count = len(cell.code.splitlines())
                 line_start = notebook_cell.lineno + 1
                 overly_dedented = any(
-                    [
-                        line[0] != " "
-                        for line in ctx.contents[
-                            line_start : line_start + line_count
-                        ]
-                        if line
+                    line[0] != " "
+                    for line in ctx.contents[
+                        line_start : line_start + line_count
                     ]
+                    if line
                 )
 
             if needs_dedent or overly_dedented:

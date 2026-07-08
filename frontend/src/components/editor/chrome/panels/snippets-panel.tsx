@@ -31,6 +31,7 @@ import { cn } from "@/utils/cn";
 import { HideInKioskMode } from "../../kiosk-mode";
 import { ContributeSnippetButton } from "../components/contribute-snippet-button";
 import { usePanelOrientation, usePanelSection } from "./panel-context";
+import { getReadonlyCodeDisplay } from "@/core/cells/readonly-code-display";
 
 const extensions = [EditorView.lineWrapping];
 
@@ -125,7 +126,7 @@ const SnippetViewer: React.FC<{ snippet: Snippet; onClose: () => void }> = ({
 
   const handleInsertSnippet = () => {
     // Add below last focused cell in reverse order
-    for (const section of [...snippet.sections].reverse()) {
+    for (const section of snippet.sections.toReversed()) {
       if (section.code) {
         createNewCell({
           code: section.code,
@@ -187,6 +188,8 @@ const SnippetViewer: React.FC<{ snippet: Snippet; onClose: () => void }> = ({
             return null;
           }
 
+          const { language, code: displayCode } = getReadonlyCodeDisplay(code);
+
           return (
             <div
               className="relative hover-actions-parent pr-2"
@@ -210,10 +213,10 @@ const SnippetViewer: React.FC<{ snippet: Snippet; onClose: () => void }> = ({
                 <LazyAnyLanguageCodeMirror
                   key={`${snippet.title}-${id}`}
                   theme={theme === "dark" ? "dark" : "light"}
-                  language="python"
+                  language={language}
                   className="cm border rounded overflow-hidden"
                   extensions={extensions}
-                  value={code}
+                  value={displayCode}
                   readOnly={true}
                 />
               </Suspense>

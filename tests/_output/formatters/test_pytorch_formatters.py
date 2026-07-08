@@ -12,7 +12,7 @@ HAS_DEPS = DependencyManager.torch.has()
 @pytest.mark.skipif(not HAS_DEPS, reason="torch not installed")
 class TestPyTorchFormatter:
     def test_format_simple_module(self) -> None:
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import format
 
@@ -26,7 +26,7 @@ class TestPyTorchFormatter:
         assert "nn-t-summary" in html
 
     def test_format_sequential(self) -> None:
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import format
 
@@ -49,7 +49,7 @@ class TestPyTorchFormatter:
         assert "cpu" in html
 
     def test_format_nested_module(self) -> None:
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import format
 
@@ -72,7 +72,7 @@ class TestPyTorchFormatter:
         assert "Conv2d" in html
 
     def test_format_frozen_model(self) -> None:
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import format
 
@@ -91,7 +91,7 @@ class TestPyTorchFormatter:
         assert "data-frozen" in html
 
     def test_format_partially_frozen(self) -> None:
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import format
 
@@ -110,7 +110,7 @@ class TestPyTorchFormatter:
         assert "trainable" in html.lower()
 
     def test_category_badges(self) -> None:
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import format
 
@@ -129,7 +129,7 @@ class TestPyTorchFormatter:
         assert 'data-cat="reg"' in html
 
     def test_legend_present(self) -> None:
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import format
 
@@ -148,9 +148,10 @@ class TestPyTorchFormatter:
         assert _fmt_integer(500) == "500"
         assert _fmt_integer(1_500) == "1.5K"
         assert _fmt_integer(1_500_000) == "1.5M"
+        assert _fmt_integer(1_500_000_000) == "1.5B"
 
     def test_extra_repr_html(self) -> None:
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import (
             _extra_repr_html,
@@ -169,7 +170,7 @@ class TestPyTorchFormatter:
         assert "kernel_size" in extra.kwargs
 
     def test_layer_category(self) -> None:
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import (
             _layer_category,
@@ -241,7 +242,7 @@ class TestPyTorchFormatter:
     def test_expand_body_dtype_device(self) -> None:
         """Expanding a layer shows kwargs, then a 'tensor' divider,
         then dtype/device."""
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import format
 
@@ -273,7 +274,7 @@ class TestPyTorchFormatter:
         assert 'class="nn-t-key"' in result
 
     def test_returns_html_type(self) -> None:
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatters.pytorch_formatters import format
         from marimo._output.hypertext import Html
@@ -286,7 +287,7 @@ class TestPyTorchFormatter:
         """Smoke test: the formatter registers and produces output."""
         register_formatters()
 
-        import torch.nn as nn
+        from torch import nn
 
         from marimo._output.formatting import get_formatter
 
@@ -297,3 +298,20 @@ class TestPyTorchFormatter:
         assert mimetype == "text/html"
         assert "nn-t" in data
         assert "Linear" in data
+
+    def test_escapes_html_in_names(self) -> None:
+        """Module/class names are escaped to prevent HTML injection.
+
+        marimo renders this output as HTML in the browser (incl. served
+        apps and exported notebooks), and names can be arbitrary strings
+        (e.g. `add_module` / `type()`), so they must be escaped.
+        """
+        from torch import nn
+
+        from marimo._output.formatters.pytorch_formatters import format
+
+        parent = nn.Module()
+        parent.add_module("<img src=x onerror=alert(1)>", nn.Linear(2, 2))
+        html = format(parent).text
+        assert "<img src=x" not in html
+        assert "&lt;img src=x" in html

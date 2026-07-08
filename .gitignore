@@ -143,3 +143,6 @@ src-tauri/resources/
 .mcp.json
 frontend/dist-pyodide/
 .cocoindex_code/
+
+.agents/
+*skills*

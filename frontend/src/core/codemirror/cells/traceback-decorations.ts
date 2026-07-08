@@ -32,7 +32,7 @@ function createErrorDecorations(state: EditorState, errors: TracebackInfos) {
   // Filter and sort errors by line number to ensure they're added in order
   const relevantErrors = errors
     .filter((error) => error.kind === "cell" && error.cellId === cellId)
-    .sort((a, b) => a.lineNumber - b.lineNumber);
+    .toSorted((a, b) => a.lineNumber - b.lineNumber);
 
   for (const error of relevantErrors) {
     try {
@@ -147,7 +147,7 @@ export function errorLineHighlighter(
         backgroundColor: "color-mix(in srgb, var(--red-4) 40%, transparent)",
       },
       "&.cm-focused .cm-error-line.cm-activeLine": {
-        backgroundColor: "color-mix(in srgb, var(--red-6) 40%, transparent)",
+        backgroundColor: "color-mix(in srgb, var(--red-5) 40%, transparent)",
       },
     }),
   ];

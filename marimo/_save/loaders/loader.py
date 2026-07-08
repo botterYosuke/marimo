@@ -5,7 +5,7 @@ import re
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from marimo._runtime.context import get_context
 from marimo._runtime.context.types import ContextNotInitializedError
@@ -34,7 +34,7 @@ class LoaderError(BaseException):
     """Base exception such that it can be raised as context for other errors."""
 
     def __init__(self, message: str) -> None:
-        self.message = "\n".join([message, INCONSISTENT_CACHE_BOILER_PLATE])
+        self.message = f"{message}\n{INCONSISTENT_CACHE_BOILER_PLATE}"
         super().__init__(message)
 
 
@@ -122,9 +122,10 @@ class Loader(ABC):
         defs: set[Name],
         key: HashKey,
         stateful_refs: set[Name],
+        glbls: dict[str, Any] | None = None,
     ) -> Cache:
         start_time = time.time()
-        loaded = self.load_cache(key)
+        loaded = self.load_cache(key, glbls=glbls)
         if not loaded:
             return Cache.empty(defs=defs, key=key, stateful_refs=stateful_refs)
         load_time = time.time() - start_time
@@ -180,8 +181,14 @@ class Loader(ABC):
         """
 
     @abstractmethod
-    def load_cache(self, key: HashKey) -> Optional[Cache]:
-        """Load Cache"""
+    def load_cache(
+        self,
+        key: HashKey,
+        glbls: dict[str, Any] | None = None,
+    ) -> Cache | None:
+        """Load Cache. `glbls` is an optional cell namespace used by
+        loaders (e.g. `LazyLoader`) that need to resolve
+        `__main__`-qualified pickle refs against the live cell scope."""
 
     @abstractmethod
     def save_cache(self, cache: Cache) -> bool:
@@ -200,7 +207,7 @@ class BasePersistenceLoader(Loader):
         self,
         name: str,
         suffix: str,
-        store: Optional[Store] = None,
+        store: Store | None = None,
     ) -> None:
         super().__init__(name)
 
@@ -208,7 +215,7 @@ class BasePersistenceLoader(Loader):
             self.store = store
         else:
             try:
-                self.store = get_context().cache_store
+                self.store = get_context().cache.store
             except ContextNotInitializedError:
                 self.store = DEFAULT_STORE()
 
@@ -223,15 +230,27 @@ class BasePersistenceLoader(Loader):
     def cache_hit(self, key: HashKey) -> bool:
         return self.store.hit(str(self.build_path(key)))
 
+    def mark_stale(self, manifest_key: str) -> None:
+        """Force a manifest to miss for the rest of the session.
+
+        No-op by default; loaders with a session-scoped store override this to
+        record the key as stale.
+        """
+
     def save_cache(self, cache: Cache) -> bool:
         blob = self.to_blob(cache)
         if blob is None:
             return False
         return self.store.put(str(self.build_path(cache.key)), blob)
 
-    def load_cache(self, key: HashKey) -> Optional[Cache]:
+    def load_cache(
+        self,
+        key: HashKey,
+        glbls: dict[str, Any] | None = None,
+    ) -> Cache | None:
+        del glbls  # Base persistence loader doesn't need a cell namespace.
         try:
-            blob: Optional[bytes] = self.store.get(str(self.build_path(key)))
+            blob: bytes | None = self.store.get(str(self.build_path(key)))
             if not blob:
                 return None
             return self.restore_cache(key, blob)
@@ -260,7 +279,7 @@ class BasePersistenceLoader(Loader):
         """May throw FileNotFoundError"""
 
     @abstractmethod
-    def to_blob(self, cache: Cache) -> Optional[bytes]:
+    def to_blob(self, cache: Cache) -> bytes | None:
         """Convert cache to bytes"""
 
 

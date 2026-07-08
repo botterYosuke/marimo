@@ -18,8 +18,9 @@ export const PanelEmptyState = ({
     <div className="mx-6 my-6 flex flex-col gap-2">
       <div className="flex flex-row gap-2 items-center">
         {icon &&
+          // oxlint-disable-next-line react/no-clone-element
           React.cloneElement(icon, {
-            className: "text-accent-foreground flex-shrink-0",
+            className: "text-accent-foreground shrink-0",
           })}
         <span className="mt-1 text-accent-foreground">{title}</span>
       </div>

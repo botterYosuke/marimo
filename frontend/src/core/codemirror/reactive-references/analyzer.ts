@@ -3,7 +3,7 @@
 import { syntaxTree } from "@codemirror/language";
 import type { EditorState } from "@codemirror/state";
 import type { SyntaxNode, Tree, TreeCursor } from "@lezer/common";
-import type { CellId } from "@/core/cells/ids";
+import { type CellId, SETUP_CELL_ID } from "@/core/cells/ids";
 import type { VariableName, Variables } from "@/core/variables/types";
 
 export interface ReactiveVariableRange {
@@ -16,7 +16,7 @@ const SCOPE_CREATING_NODES = new Set([
   "FunctionDefinition",
   "LambdaExpression",
   "ArrayComprehensionExpression",
-  "SetComprehension",
+  "SetComprehensionExpression",
   "DictionaryComprehensionExpression",
   "ComprehensionExpression",
   "ClassDefinition",
@@ -52,7 +52,7 @@ export function findReactiveVariables(options: {
       const variable = options.variables[name as VariableName];
       return (
         variable.dataType !== "module" &&
-        !variable.declaredBy.includes("setup" as CellId) &&
+        !variable.declaredBy.includes(SETUP_CELL_ID) &&
         !variable.declaredBy.includes(options.cellId)
       );
     }),
@@ -152,7 +152,7 @@ export function findReactiveVariables(options: {
       }
       case "ArrayComprehensionExpression":
       case "DictionaryComprehensionExpression":
-      case "SetComprehension":
+      case "SetComprehensionExpression":
       case "ComprehensionExpression": {
         // Domprehension variables - look for VariableName or TupleExpression after 'for'
         const subCursor = node.cursor();
@@ -276,49 +276,52 @@ export function findReactiveVariables(options: {
         break;
       }
       case "ImportStatement": {
-        // Handle import x
+        // The grammar emits a single ImportStatement for both `import x [as y]`
+        // and `from m import x [as y], ...`. Direct children mix keywords,
+        // module-path names (before `import`), imported names, and aliases.
+        // Only post-`import` names that aren't shadowed by a following `as`
+        // (and the alias itself when `as` is present) bind in the current
+        // scope.
         const subCursor = node.cursor();
         subCursor.firstChild();
-        do {
-          if (subCursor.name === "VariableName") {
-            const varName = options.state.doc.sliceString(
-              subCursor.from,
-              subCursor.to,
-            );
-
-            const currentScope =
-              currentScopeStack[currentScopeStack.length - 1] ?? -1;
-            if (!allDeclarations.has(currentScope)) {
-              allDeclarations.set(currentScope, new Set());
-            }
-            allDeclarations.get(currentScope)?.add(varName);
+        const currentScope =
+          currentScopeStack[currentScopeStack.length - 1] ?? -1;
+        if (!allDeclarations.has(currentScope)) {
+          allDeclarations.set(currentScope, new Set());
+        }
+        const scope = allDeclarations.get(currentScope);
+        let pastImport = false;
+        let pending: string | null = null;
+        const commit = () => {
+          if (pending !== null) {
+            scope?.add(pending);
           }
-        } while (subCursor.nextSibling());
-
-        break;
-      }
-      case "ImportFromStatement": {
-        // Handle from x import y as z
-        const subCursor = node.cursor();
-        subCursor.firstChild();
-        let foundImport = false;
+          pending = null;
+        };
         do {
           if (subCursor.name === "import") {
-            foundImport = true;
-          } else if (foundImport && subCursor.name === "VariableName") {
-            const varName = options.state.doc.sliceString(
+            pastImport = true;
+            continue;
+          }
+          if (!pastImport) {
+            continue;
+          }
+          if (subCursor.name === "as") {
+            // Drop the imported name; the next VariableName is the alias.
+            pending = null;
+            continue;
+          }
+          if (subCursor.name === "VariableName") {
+            commit();
+            pending = options.state.doc.sliceString(
               subCursor.from,
               subCursor.to,
             );
-            // Add to the current innermost scope
-            const currentScope =
-              currentScopeStack[currentScopeStack.length - 1] ?? -1;
-            if (!allDeclarations.has(currentScope)) {
-              allDeclarations.set(currentScope, new Set());
-            }
-            allDeclarations.get(currentScope)?.add(varName);
+          } else if (subCursor.name === ",") {
+            commit();
           }
         } while (subCursor.nextSibling());
+        commit();
 
         break;
       }
@@ -424,6 +427,12 @@ export function findReactiveVariables(options: {
     const nodeName = cursor.name;
     const nodeStart = cursor.from;
 
+    // Names inside an import statement are module paths, imported names, or
+    // aliases — none of them are reactive *uses* of an outer-cell global.
+    if (nodeName === "ImportStatement") {
+      return;
+    }
+
     const isNewScope = SCOPE_CREATING_NODES.has(nodeName);
 
     let currentScopeStack = scopeStack;
@@ -462,6 +471,7 @@ export function findReactiveVariables(options: {
   ): boolean {
     return (
       allVariableNames.has(varName) &&
+      !isPropertyAccess(cursor) &&
       !isKeywordArgumentName(cursor) &&
       !isAssignmentTarget(cursor)
     );
@@ -526,6 +536,19 @@ function isAssignmentTarget(cursor: TreeCursor): boolean {
     return assignOpPosition !== -1 && cursor.from < assignOpPosition;
   }
 
+  return false;
+}
+
+/** Checks whether a `VariableName` is a property access (e.g. `tool` in `mcp.tool`). */
+function isPropertyAccess(cursor: TreeCursor): boolean {
+  // Check if the previous sibling is a "." node, which means this
+  // VariableName is a property access rather than a standalone variable.
+  // This handles both MemberExpression (e.g. `obj.attr`) and Decorator
+  // (e.g. `@mcp.tool`) where the parser emits flat sibling nodes.
+  const temp = cursor.node.cursor();
+  if (temp.prevSibling() && temp.name === ".") {
+    return true;
+  }
   return false;
 }
 

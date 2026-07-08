@@ -4,17 +4,26 @@ import type { UIMessage } from "@ai-sdk/react";
 import { useChat } from "@ai-sdk/react";
 import { storePrompt } from "@marimo-team/codemirror-ai";
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import { DefaultChatTransport, type FileUIPart, type TextUIPart } from "ai";
+import {
+  type ChatAddToolApproveResponseFunction,
+  DefaultChatTransport,
+  type FileUIPart,
+  safeValidateUIMessages,
+  type TextUIPart,
+} from "ai";
 import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import {
   BotMessageSquareIcon,
   HatGlasses,
+  ArrowRightIcon,
   Loader2,
   type LucideIcon,
   MessageCircleIcon,
   NotebookText,
   PlusIcon,
+  SparklesIcon,
   SettingsIcon,
+  CodeIcon,
 } from "lucide-react";
 import { memo, useEffect, useRef, useState } from "react";
 import useEvent from "react-use-event-hook";
@@ -36,6 +45,7 @@ import {
   type Chat,
   type ChatId,
   chatStateAtom,
+  pendingAiPromptAtom,
 } from "@/core/ai/state";
 import type { ToolNotebookContext } from "@/core/ai/tools/base";
 import {
@@ -43,22 +53,27 @@ import {
   FRONTEND_TOOL_REGISTRY,
 } from "@/core/ai/tools/registry";
 import { useCellActions } from "@/core/cells/cells";
-import { aiAtom, aiEnabledAtom } from "@/core/config/config";
+import { aiAtom, aiModelConfiguredAtom } from "@/core/config/config";
 import { DEFAULT_AI_MODEL } from "@/core/config/config-schema";
 import { useRequestClient } from "@/core/network/requests";
 import { useRuntimeManager } from "@/core/runtime/config";
+import { isWasm } from "@/core/wasm/utils";
 import { ErrorBanner } from "@/plugins/impl/common/error-banner";
 import { cn } from "@/utils/cn";
 import { Logger } from "@/utils/Logger";
 import { AIModelDropdown } from "../ai/ai-model-dropdown";
 import { useOpenSettingsToTab } from "../app-config/state";
+import { PairWithAgentModal } from "../editor/actions/pair-with-agent-modal";
 import { PromptInput } from "../editor/ai/add-cell-with-ai";
 import {
   addContextCompletion,
   CONTEXT_TRIGGER,
+  isContextAttachment,
+  resolveChatContext,
 } from "../editor/ai/completion-utils";
 import { PanelEmptyState } from "../editor/chrome/panels/empty-state";
 import { CopyClipboardIcon } from "../icons/copy-icon";
+import { useImperativeModal } from "../modal/ImperativeModal";
 import { MCPStatusIndicator } from "../mcp/mcp-status-indicator";
 import { Tooltip, TooltipProvider } from "../ui/tooltip";
 import {
@@ -71,7 +86,6 @@ import {
 import { renderUIMessage } from "./chat-display";
 import { ChatHistoryPopover } from "./chat-history-popover";
 import {
-  buildCompletionRequestBody,
   convertToFileUIPart,
   generateChatTitle,
   handleToolCall,
@@ -80,6 +94,8 @@ import {
   PROVIDERS_THAT_SUPPORT_ATTACHMENTS,
   useFileState,
 } from "./chat-utils";
+import { getCodes } from "@/core/codemirror/copilot/getCodes";
+import { focusInputAndMoveToEnd } from "@/core/codemirror/utils";
 
 // Default mode for the AI
 const DEFAULT_MODE = "manual";
@@ -131,10 +147,20 @@ interface ChatMessageProps {
   onEdit: (index: number, newValue: string) => void;
   isStreamingReasoning: boolean;
   isLast: boolean;
+  isActive: boolean;
+  addToolApprovalResponse?: ChatAddToolApproveResponseFunction;
 }
 
 const ChatMessageDisplay: React.FC<ChatMessageProps> = memo(
-  ({ message, index, onEdit, isStreamingReasoning, isLast }) => {
+  ({
+    message,
+    index,
+    onEdit,
+    isStreamingReasoning,
+    isLast,
+    isActive,
+    addToolApprovalResponse,
+  }) => {
     const renderUserMessage = (message: UIMessage) => {
       const textParts = message.parts?.filter(
         (p): p is TextUIPart => p.type === "text",
@@ -181,7 +207,13 @@ const ChatMessageDisplay: React.FC<ChatMessageProps> = memo(
           <div className="absolute right-1 top-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <CopyClipboardIcon className="h-3 w-3" value={content || ""} />
           </div>
-          {renderUIMessage({ message, isStreamingReasoning, isLast })}
+          {renderUIMessage({
+            message,
+            isStreamingReasoning,
+            isLast,
+            isActive,
+            addToolApprovalResponse,
+          })}
         </div>
       );
     };
@@ -244,24 +276,29 @@ const ChatInputFooter: React.FC<ChatInputFooterProps> = memo(
       {
         value: "ask",
         label: "Ask",
-        subtitle:
-          "Use AI with access to read-only tools like documentation search",
+        subtitle: "AI with access to read-only tools like documentation search",
         Icon: NotebookText,
       },
       {
         value: "agent",
-        label: "Agent (beta)",
-        subtitle: "Use AI with access to read and write tools",
+        label: "Agent",
+        subtitle: "AI with access to read and write tools",
         Icon: HatGlasses,
+      },
+      {
+        value: "code_mode",
+        label: "Code Mode (experimental)",
+        subtitle: "AI with access to the notebook's kernel. Use with caution.",
+        Icon: CodeIcon,
       },
     ];
 
     const isAttachmentSupported =
       PROVIDERS_THAT_SUPPORT_ATTACHMENTS.has(currentProvider);
 
-    const CurrentModeIcon = modeOptions.find(
-      (o) => o.value === currentMode,
-    )?.Icon;
+    const currentModeOption = modeOptions.find((o) => o.value === currentMode);
+    const CurrentModeIcon = currentModeOption?.Icon;
+    const CurrentModeLabel = currentModeOption?.label;
 
     return (
       <TooltipProvider>
@@ -270,7 +307,7 @@ const ChatInputFooter: React.FC<ChatInputFooterProps> = memo(
             <Select value={currentMode} onValueChange={saveModeChange}>
               <SelectTrigger className="h-6 text-xs border-border shadow-none! ring-0! bg-muted hover:bg-muted/30 py-0 px-2 gap-1.5">
                 {CurrentModeIcon && <CurrentModeIcon className="h-3 w-3" />}
-                <span className="capitalize">{currentMode}</span>
+                <span>{CurrentModeLabel}</span>
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -372,6 +409,7 @@ const ChatInput: React.FC<ChatInputProps> = memo(
       <div className="relative shrink-0 min-h-[80px] flex flex-col border-t">
         <div className={cn("px-2 py-3 flex-1", inputClassName)}>
           <PromptInput
+            className="max-h-[400px]"
             inputRef={inputRef}
             value={input}
             onChange={setInput}
@@ -397,8 +435,28 @@ const ChatInput: React.FC<ChatInputProps> = memo(
 
 ChatInput.displayName = "ChatInput";
 
+const PairWithAgentCallout: React.FC<{
+  onPairWithAgent: () => void;
+}> = ({ onPairWithAgent }) => {
+  if (isWasm()) {
+    return null;
+  }
+
+  return (
+    <Button
+      variant="text"
+      className="gap-1.5 text-sm text-link hover:underline"
+      onClick={onPairWithAgent}
+    >
+      <SparklesIcon className="h-3.5 w-3.5 shrink-0" />
+      <span>Work on this notebook with your own agent</span>
+      <ArrowRightIcon className="h-3 w-3 shrink-0" />
+    </Button>
+  );
+};
+
 const ChatPanel = () => {
-  const aiConfigured = useAtomValue(aiEnabledAtom);
+  const aiConfigured = useAtomValue(aiModelConfiguredAtom);
   const { handleClick } = useOpenSettingsToTab();
 
   if (!aiConfigured) {
@@ -426,6 +484,7 @@ const ChatPanel = () => {
 const ChatPanelBody = () => {
   const setChatState = useSetAtom(chatStateAtom);
   const [activeChat, setActiveChat] = useAtom(activeChatAtom);
+  const [pendingPrompt, setPendingPrompt] = useAtom(pendingAiPromptAtom);
   const [input, setInput] = useState("");
   const [newThreadInput, setNewThreadInput] = useState("");
   const { files, addFiles, clearFiles, removeFile } = useFileState();
@@ -436,6 +495,7 @@ const ChatPanelBody = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const runtimeManager = useRuntimeManager();
   const { invokeAiTool, sendRun } = useRequestClient();
+  const { openModal, closeModal } = useImperativeModal();
 
   const activeChatId = activeChat?.id;
   const store = useStore();
@@ -458,6 +518,7 @@ const ChatPanelBody = () => {
     regenerate,
     stop,
     addToolOutput,
+    addToolApprovalResponse,
     id: chatId,
   } = useChat({
     id: activeChatId,
@@ -465,17 +526,32 @@ const ChatPanelBody = () => {
     messages: activeChat?.messages || [], // initial messages
     transport: new DefaultChatTransport({
       api: runtimeManager.getAiURL("chat").toString(),
-      headers: runtimeManager.headers(),
+      headers: () => runtimeManager.headers(),
       prepareSendMessagesRequest: async (options) => {
-        const completionBody = await buildCompletionRequestBody(
-          options.messages,
-        );
+        // Canary: flag outgoing messages that don't match the AI SDK's own
+        // schema. The server-side sanitizer in `_pydantic_ai_utils.py` corrects these before validation;
+        // this log surfaces drift early without affecting the request.
+        const validation = await safeValidateUIMessages({
+          messages: options.messages,
+        });
+        if (!validation.success) {
+          Logger.debug(
+            "Outgoing chat messages failed AI SDK schema validation",
+            validation.error,
+          );
+        }
+
+        const completionBody = {
+          uiMessages: options.messages,
+          includeOtherCode: getCodes(""),
+        };
 
         // Call this here to ensure the value is not stale
         const chatMode = store.get(aiAtom)?.mode || DEFAULT_MODE;
         const tools = FRONTEND_TOOL_REGISTRY.getToolSchemas(chatMode);
 
         return {
+          api: runtimeManager.getAiURL("chat").toString(),
           body: {
             tools,
             ...options,
@@ -494,13 +570,6 @@ const ChatPanelBody = () => {
       });
     },
     onToolCall: async ({ toolCall }) => {
-      // Dynamic tool calls will throw an error for toolName
-      // https://ai-sdk.dev/docs/ai-sdk-ui/chatbot-tool-usage#client-side-page
-      if (toolCall.dynamic) {
-        Logger.debug("Skipping dynamic tool call", toolCall);
-        return;
-      }
-
       await handleToolCall({
         invokeAiTool,
         addToolOutput,
@@ -535,10 +604,7 @@ const ChatPanelBody = () => {
     requestAnimationFrame(scrollToBottom);
   }, [activeChatId]);
 
-  const createNewThread = async (
-    initialMessage: string,
-    initialAttachments?: File[],
-  ) => {
+  const startNewChatState = useEvent((initialMessage: string) => {
     const now = Date.now();
     const newChat: Chat = {
       id: chatId as ChatId,
@@ -548,37 +614,41 @@ const ChatPanelBody = () => {
       updatedAt: now,
     };
 
-    // Create new chat and set as active
     setChatState((prev) => {
       const newChats = new Map(prev.chats);
       newChats.set(newChat.id, newChat);
-      const newState = {
+      return {
         ...prev,
         chats: newChats,
         activeChatId: newChat.id,
       };
-      return newState;
     });
+  });
 
-    const fileParts =
-      initialAttachments && initialAttachments.length > 0
-        ? await convertToFileUIPart(initialAttachments)
-        : undefined;
+  const createNewThread = useEvent(
+    async (initialMessage: string, initialAttachments?: File[]) => {
+      startNewChatState(initialMessage);
 
-    // Trigger AI conversation with append
-    sendMessage({
-      role: "user",
-      parts: [
-        {
-          type: "text" as const,
-          text: initialMessage,
-        },
-        ...(fileParts ?? []),
-      ],
-    });
-    clearFiles();
-    setInput("");
-  };
+      const fileParts =
+        initialAttachments && initialAttachments.length > 0
+          ? await convertToFileUIPart(initialAttachments)
+          : undefined;
+      const { contextPart, attachments } =
+        await resolveChatContext(initialMessage);
+
+      sendMessage({
+        role: "user",
+        parts: [
+          { type: "text" as const, text: initialMessage },
+          ...(contextPart ? [contextPart] : []),
+          ...(fileParts ?? []),
+          ...attachments,
+        ],
+      });
+      clearFiles();
+      setInput("");
+    },
+  );
 
   const handleNewChat = useEvent(() => {
     setActiveChat(null);
@@ -587,17 +657,35 @@ const ChatPanelBody = () => {
     clearFiles();
   });
 
-  const handleMessageEdit = useEvent((index: number, newValue: string) => {
-    const editedMessage = messages[index];
-    const fileParts = editedMessage.parts?.filter((p) => p.type === "file");
-
-    const messageId = editedMessage.id;
-    sendMessage({
-      messageId: messageId, // replace the message
-      role: "user",
-      parts: [{ type: "text", text: newValue }, ...fileParts],
-    });
+  const handlePairWithAgent = useEvent(() => {
+    openModal(<PairWithAgentModal onClose={closeModal} />);
   });
+
+  const handleMessageEdit = useEvent(
+    async (index: number, newValue: string) => {
+      const editedMessage = messages[index];
+      // Keep the user's own uploaded files, but drop the previous @-context
+      // snapshot (data part + its attachments) so we can re-resolve a fresh,
+      // point-in-time snapshot from the edited text below.
+      const userFileParts =
+        editedMessage.parts?.filter(
+          (p) => p.type === "file" && !isContextAttachment(p),
+        ) ?? [];
+      const { contextPart, attachments } = await resolveChatContext(newValue);
+
+      const messageId = editedMessage.id;
+      sendMessage({
+        messageId: messageId, // replace the message
+        role: "user",
+        parts: [
+          { type: "text", text: newValue },
+          ...(contextPart ? [contextPart] : []),
+          ...userFileParts,
+          ...attachments,
+        ],
+      });
+    },
+  );
 
   const handleChatInputSubmit = useEvent(
     async (e: KeyboardEvent | undefined, newValue: string): Promise<void> => {
@@ -608,11 +696,17 @@ const ChatPanelBody = () => {
         storePrompt(newMessageInputRef.current.view);
       }
       const fileParts = files ? await convertToFileUIPart(files) : undefined;
+      const { contextPart, attachments } = await resolveChatContext(newValue);
 
       e?.preventDefault();
       sendMessage({
-        text: newValue,
-        files: fileParts,
+        role: "user",
+        parts: [
+          { type: "text", text: newValue },
+          ...(contextPart ? [contextPart] : []),
+          ...(fileParts ?? []),
+          ...attachments,
+        ],
       });
       setInput("");
       clearFiles();
@@ -635,7 +729,45 @@ const ChatPanelBody = () => {
 
   const handleOnCloseThread = () => newThreadInputRef.current?.editor?.blur();
 
+  const submitPendingPrompt = useEvent(async (prompt: string) => {
+    if (activeChatId == null) {
+      startNewChatState(prompt);
+      // Starting a chat swaps the new-thread input for the regular input;
+      // carry over any draft the user had typed so it isn't lost.
+      setInput(newThreadInput);
+    }
+    const { contextPart, attachments } = await resolveChatContext(prompt);
+    sendMessage({
+      role: "user",
+      parts: [
+        { type: "text", text: prompt },
+        ...(contextPart ? [contextPart] : []),
+        ...attachments,
+      ],
+    });
+  });
+
   const isNewThread = messages.length === 0;
+
+  // Deliver a prompt queued elsewhere (e.g. error auto-fix) to the chat,
+  // appending to the active thread or starting one if none exists.
+  useEffect(() => {
+    if (!pendingPrompt) {
+      return;
+    }
+    setPendingPrompt(null);
+    const { prompt, submit } = pendingPrompt;
+    if (submit) {
+      void submitPendingPrompt(prompt);
+    } else if (isNewThread) {
+      setNewThreadInput(prompt);
+      focusInputAndMoveToEnd(newThreadInputRef);
+    } else {
+      setInput(prompt);
+      focusInputAndMoveToEnd(newMessageInputRef);
+    }
+  }, [pendingPrompt, setPendingPrompt, isNewThread, submitPendingPrompt]);
+
   const chatInput = isNewThread ? (
     <ChatInput
       key="new-thread-input"
@@ -697,9 +829,12 @@ const ChatPanelBody = () => {
         ref={scrollContainerRef}
       >
         {isNewThread && (
-          <div className="rounded-md border bg-background">
-            {filesPills}
-            {chatInput}
+          <div className="flex flex-col gap-2">
+            <div className="rounded-md border bg-background">
+              {filesPills}
+              {chatInput}
+            </div>
+            <PairWithAgentCallout onPairWithAgent={handlePairWithAgent} />
           </div>
         )}
 
@@ -711,6 +846,8 @@ const ChatPanelBody = () => {
             onEdit={handleMessageEdit}
             isStreamingReasoning={isStreamingReasoning}
             isLast={idx === messages.length - 1}
+            isActive={isLoading}
+            addToolApprovalResponse={addToolApprovalResponse}
           />
         ))}
 

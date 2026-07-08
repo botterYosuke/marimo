@@ -3,6 +3,18 @@ import { toast } from "@/components/ui/use-toast";
 import { Logger } from "@/utils/Logger";
 import type { EditRequests, RunRequests } from "./types";
 
+const STATIC_NOTEBOOK_TOAST_ID = "static-notebook";
+
+function showStaticNotebookToast() {
+  toast({
+    id: STATIC_NOTEBOOK_TOAST_ID,
+    once: true,
+    title: "Static notebook",
+    description:
+      "This notebook is not connected to a kernel. Any interactive elements will not work.",
+  });
+}
+
 export function createStaticRequests(): EditRequests & RunRequests {
   const throwNotInEditMode = () => {
     throw new Error("Unreachable. Expected to be in run mode");
@@ -10,11 +22,7 @@ export function createStaticRequests(): EditRequests & RunRequests {
 
   return {
     sendComponentValues: async () => {
-      toast({
-        title: "Static notebook",
-        description:
-          "This notebook is not connected to a kernel. Any interactive elements will not work.",
-      });
+      showStaticNotebookToast();
       Logger.log("Updating UI elements is not supported in static mode");
       return null;
     },
@@ -27,16 +35,12 @@ export function createStaticRequests(): EditRequests & RunRequests {
       return null;
     },
     sendFunctionRequest: async () => {
-      toast({
-        title: "Static notebook",
-        description:
-          "This notebook is not connected to a kernel. Any interactive elements will not work.",
-      });
+      showStaticNotebookToast();
       Logger.log("Function requests are not supported in static mode");
       return null;
     },
     sendRestart: throwNotInEditMode,
-    syncCellIds: throwNotInEditMode,
+    sendDocumentTransaction: throwNotInEditMode,
     sendRun: throwNotInEditMode,
     sendRunScratchpad: throwNotInEditMode,
     sendRename: throwNotInEditMode,
@@ -56,6 +60,7 @@ export function createStaticRequests(): EditRequests & RunRequests {
     previewDatasetColumn: throwNotInEditMode,
     previewSQLTable: throwNotInEditMode,
     previewSQLTableList: throwNotInEditMode,
+    previewSQLSchemaList: throwNotInEditMode,
     previewDataSourceConnection: throwNotInEditMode,
     validateSQL: throwNotInEditMode,
     openFile: throwNotInEditMode,
@@ -65,6 +70,7 @@ export function createStaticRequests(): EditRequests & RunRequests {
     sendPdb: throwNotInEditMode,
     sendCreateFileOrFolder: throwNotInEditMode,
     sendDeleteFileOrFolder: throwNotInEditMode,
+    sendCopyFileOrFolder: throwNotInEditMode,
     sendRenameFileOrFolder: throwNotInEditMode,
     sendUpdateFile: throwNotInEditMode,
     sendFileDetails: throwNotInEditMode,

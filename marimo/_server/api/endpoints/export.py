@@ -19,11 +19,18 @@ from marimo._convert.common.filename import (
     make_download_headers,
 )
 from marimo._convert.markdown import convert_from_ir_to_markdown
+from marimo._convert.markdown.flavor import (
+    markdown_output_filename,
+    normalize_markdown_flavor,
+)
 from marimo._convert.script import convert_from_ir_to_script
 from marimo._dependencies.dependencies import DependencyManager
 from marimo._messaging.msgspec_encoder import asdict
 from marimo._server.api.deps import AppState
-from marimo._server.api.utils import parse_request
+from marimo._server.api.utils import (
+    notify_server_missing_packages,
+    parse_request,
+)
 from marimo._server.export.exporter import AutoExporter, Exporter
 from marimo._server.models.export import (
     ExportAsHTMLRequest,
@@ -40,12 +47,30 @@ from marimo._utils.http import HTTPStatus
 if TYPE_CHECKING:
     from starlette.requests import Request
 
+    from marimo._schemas.serialization import NotebookSerializationV1
+
 LOGGER = _loggers.marimo_logger()
 
 # Router for export endpoints
 router = APIRouter()
 
 auto_exporter = AutoExporter()
+
+
+def _export_markdown(
+    notebook: NotebookSerializationV1, filename: str | None
+) -> tuple[str, str]:
+    export_filename = filename or notebook.filename
+    markdown_flavor = normalize_markdown_flavor(
+        None, filename=export_filename or "notebook.md"
+    )
+    markdown = convert_from_ir_to_markdown(
+        notebook, filename=export_filename, flavor=markdown_flavor
+    )
+    return (
+        markdown,
+        markdown_output_filename(export_filename, markdown_flavor),
+    )
 
 
 @router.post("/html")
@@ -91,11 +116,13 @@ async def export_as_html(
     if not app_state.session_manager.should_send_code_to_frontend():
         body.include_code = False
 
+    resolved_config = session.config_manager.get_config()
     html, filename = Exporter().export_as_html(
         app=session.app_file_manager.app,
         filename=session.app_file_manager.filename,
         session_view=session.session_view,
-        display_config=session.config_manager.get_config()["display"],
+        display_config=resolved_config["display"],
+        sharing_config=resolved_config.get("sharing"),
         request=body,
     )
 
@@ -274,12 +301,11 @@ async def export_as_markdown(
             detail="File must be saved before downloading",
         )
 
-    markdown = convert_from_ir_to_markdown(app_file_manager.app.to_ir())
+    markdown, download_filename = _export_markdown(
+        app_file_manager.app.to_ir(), app_file_manager.filename
+    )
 
     if body.download:
-        download_filename = get_download_filename(
-            app_file_manager.filename, "md"
-        )
         headers = make_download_headers(download_filename)
     else:
         headers = {}
@@ -457,12 +483,19 @@ async def auto_export_as_ipynb(
         LOGGER.debug("Already auto-exported to IPYNB")
         return PlainTextResponse(status_code=HTTPStatus.NOT_MODIFIED)
 
-    async def _background_export() -> None:
-        # Check has nbformat installed
-        if not DependencyManager.nbformat.has():
-            LOGGER.error("Cannot snapshot to IPYNB: nbformat not installed")
-            return
+    # Check nbformat before scheduling background task.  Alert at most once
+    # per session so the notification doesn't keep popping up on every save.
+    if not DependencyManager.nbformat.has():
+        LOGGER.warning("Cannot snapshot to IPYNB: nbformat not installed")
+        if "nbformat" not in session_view.notified_server_packages:
+            notify_server_missing_packages(
+                session, app_state.get_current_session_id(), ["nbformat"]
+            )
+            session_view.notified_server_packages.add("nbformat")
+        session_view.mark_auto_export_ipynb()
+        return PlainTextResponse(status_code=HTTPStatus.NOT_MODIFIED)
 
+    async def _background_export() -> None:
         # Reload the file manager to get the latest state
         session.app_file_manager.reload()
 

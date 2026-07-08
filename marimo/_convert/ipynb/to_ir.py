@@ -3,18 +3,27 @@ from __future__ import annotations
 
 import ast
 import json
+import logging
 import re
 import sys
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Union
+from typing import Any
+
+from pymdownx.superfences import RE_NESTED_FENCE_START  # type: ignore
 
 from marimo._ast.cell import CellConfig
 from marimo._ast.compiler import compile_cell
+from marimo._ast.names import DEFAULT_CELL_NAME
 from marimo._ast.transformers import NameTransformer, RemoveImportTransformer
 from marimo._ast.variables import is_local
 from marimo._ast.visitor import Block, NamedNode, ScopedVisitor
-from marimo._convert.common.format import markdown_to_marimo
+from marimo._convert.common.format import (
+    DEFAULT_MARKDOWN_PREFIX,
+    markdown_to_marimo,
+)
+from marimo._convert.ipynb.from_ir import NBCONVERT_REMOVE_INPUT_TAG
 from marimo._runtime.dataflow import DirectedGraph
 from marimo._schemas.serialization import (
     AppInstantiation,
@@ -31,10 +40,104 @@ Transform = Callable[[list[str]], list[str]]
 @dataclass
 class CodeCell:
     source: str
+    name: str = field(default_factory=lambda: DEFAULT_CELL_NAME)
     config: CellConfig = field(default_factory=CellConfig)
 
 
-# Define a type for transforms that add/remove cells
+# Regex patterns for stripping bare <p>/<\/p> tags from Jupyter markdown cells.
+# Only match bare <p> (no attributes) — styled tags like <p style="color: red">
+# carry semantic meaning and must be preserved.
+_BARE_OPEN_P_RE = re.compile(r"<p\s*>", re.IGNORECASE)
+_ANY_OPEN_P_RE = re.compile(r"<p(?:\s[^>]*)?>", re.IGNORECASE)
+_CLOSE_P_RE = re.compile(r"</p>", re.IGNORECASE)
+
+
+def _strip_paragraph_tags(source: str) -> str:
+    """Remove bare `<p>` / `</p>` HTML tags from markdown source.
+
+    Jupyter markdown cells often wrap content in `<p>…</p>` tags which are
+    redundant in plain markdown and can break LaTeX rendering inside
+    `mo.md()`.
+
+    Only bare `<p>` tags (without attributes) are removed.  Styled tags such
+    as `<p style="color: red">` are preserved because they carry semantic
+    meaning.  The matching `</p>` is only removed when it closes a bare
+    `<p>`.
+
+    Closing `</p>` tags for bare opens are replaced with a newline to
+    preserve paragraph separation.  Content inside fenced code blocks is
+    left untouched.
+    """
+    # Collect fenced code block spans so we can skip them.
+    # Uses RE_NESTED_FENCE_START from pymdownx.superfences (already a marimo
+    # dependency) instead of a hand-rolled regex.
+    protected: list[tuple[int, int]] = []
+    fence_marker: str | None = None
+    block_start = 0
+    pos = 0
+    for line in source.split("\n"):
+        if fence_marker is None:
+            m = RE_NESTED_FENCE_START.match(line)
+            if m:
+                fence_marker = m.group("fence")
+                block_start = pos
+        else:
+            stripped = line.strip()
+            if stripped == fence_marker or (
+                stripped.startswith(fence_marker)
+                and stripped == stripped[0] * len(stripped)
+            ):
+                protected.append((block_start, pos + len(line)))
+                fence_marker = None
+        pos += len(line) + 1  # +1 for the newline
+
+    def _in_protected(pos: int) -> bool:
+        return any(s <= pos < e for s, e in protected)
+
+    # Pair opening <p> tags with closing </p> using a simple stack.
+    # Only mark pairs for removal when the opening tag is bare (no attrs).
+    opens = list(_ANY_OPEN_P_RE.finditer(source))
+    closes = list(_CLOSE_P_RE.finditer(source))
+
+    remove_opens: list[re.Match[str]] = []
+    remove_closes: list[re.Match[str]] = []
+    stack: list[re.Match[str]] = []
+
+    # Walk all tags in document order
+    all_tags: list[tuple[int, str, re.Match[str]]] = []
+    for m in opens:
+        all_tags.append((m.start(), "open", m))
+    for m in closes:
+        all_tags.append((m.start(), "close", m))
+    all_tags.sort(key=lambda t: t[0])
+
+    for _pos, kind, match in all_tags:
+        if _in_protected(match.start()):
+            continue
+        if kind == "open":
+            stack.append(match)
+        elif kind == "close" and stack:
+            opener = stack.pop()
+            if _BARE_OPEN_P_RE.fullmatch(opener.group()):
+                remove_opens.append(opener)
+                remove_closes.append(match)
+
+    # Build set of (start, end) spans to remove, sorted end-to-start
+    removals: list[tuple[int, int, str]] = []
+    for m in remove_opens:
+        removals.append((m.start(), m.end(), ""))
+    for m in remove_closes:
+        removals.append((m.start(), m.end(), "\n"))
+    removals.sort(key=lambda t: t[0], reverse=True)
+
+    for start, end, replacement in removals:
+        source = source[:start] + replacement + source[end:]
+
+    # Clean up excessive blank lines introduced by replacements
+    source = re.sub(r"\n{3,}", "\n\n", source)
+    return source.strip()
+
+
 CellsTransform = Callable[[list[CodeCell]], list[CodeCell]]
 
 
@@ -102,15 +205,13 @@ def transform_add_marimo_import(sources: list[CodeCell]) -> list[CodeCell]:
         def is_in_import_line(line: str) -> bool:
             if line.startswith("import marimo as mo"):
                 return True
-            if line.startswith("import ") or line.startswith("from "):
+            if line.startswith(("import ", "from ")):
                 return "import marimo as mo" in line
             return False
 
         # Slow check
         lines = cell.strip().split("\n")
-        if any(is_in_import_line(line) for line in lines):
-            return True
-        return False
+        return any(is_in_import_line(line) for line in lines)
 
     already_has_marimo_import = any(
         has_marimo_import(cell.source) for cell in sources
@@ -141,15 +242,11 @@ def transform_add_subprocess_import(
 
         def is_in_import_line(line: str) -> bool:
             stripped = line.strip()
-            if stripped.startswith("import subprocess"):
-                return True
-            return False
+            return stripped.startswith("import subprocess")
 
         # Slow check
         lines = cell.strip().split("\n")
-        if any(is_in_import_line(line) for line in lines):
-            return True
-        return False
+        return any(is_in_import_line(line) for line in lines)
 
     already_has_subprocess_import = any(
         has_subprocess_import(cell.source) for cell in sources
@@ -212,13 +309,13 @@ def transform_magic_commands(sources: list[str]) -> list[str]:
         if not double:
             return "\n".join(
                 [
-                    "# magic command not supported in marimo; please file an issue to add support",  # noqa: E501
+                    "# magic command not supported in marimo; please file an issue to add support",
                     f"# {command + ' ' + source}",
                 ]
             )
 
         result = [
-            "# magic command not supported in marimo; please file an issue to add support",  # noqa: E501
+            "# magic command not supported in marimo; please file an issue to add support",
             f"# {command}",
         ]
         if source:
@@ -445,8 +542,7 @@ def _normalize_git_url_package(package: str) -> str:
         repo_name = path.rstrip("/").split("/")[-1]
 
         # Remove .git extension if present
-        if repo_name.endswith(".git"):
-            repo_name = repo_name[:-4]
+        repo_name = repo_name.removesuffix(".git")
 
         # If we couldn't extract a name, use a placeholder
         if not repo_name:
@@ -1133,7 +1229,13 @@ def transform_duplicate_definitions(sources: list[str]) -> list[str]:
         visitor = ScopedVisitor(
             ignore_local=True, on_def=on_def, on_ref=on_ref
         )
-        new_tree = visitor.visit(tree)
+        try:
+            new_tree = visitor.visit(tree)
+        except SyntaxError:
+            # Cell contains constructs like `import *` that marimo
+            # doesn't support — skip renaming but keep the cell as-is
+            new_sources[cell_idx] = source
+            continue
 
         # Don't unparse if no changes were made
         if not renamer.made_changes:
@@ -1162,31 +1264,52 @@ def bind_cell_metadata(
 
     This marks the boundary between source-only transformations and cell-level transformations.
 
-    - If "hide-cell" is present in the tags, the cell is marked hidden (and removed)
+    - If "hide-cell" or the standard nbconvert "remove-input" tag is present,
+      the cell is marked hidden (and the tag is consumed).
+    - The Jupyter UI hint `metadata.jupyter.source_hidden` is also treated as
+      a hidden-code signal.
     - Remaining tags (if any) are inserted as a comment at the top of the source.
     - If marimo-specific metadata is present, it is used to restore cell config.
     """
     cells: list[CodeCell] = []
-    for source, meta, hide_code in zip(sources, metadata, hide_flags):
+    for source, meta, hide_code in zip(
+        sources, metadata, hide_flags, strict=False
+    ):
         tags: set[str] = set(meta.get("tags", []))
-        if "hide-cell" in tags:
-            tags.discard("hide-cell")
-            hide_code = True
-        if tags:
-            source = f"# Cell tags: {', '.join(sorted(tags))}\n{source}"
+
+        # The `remove-input` tag and `jupyter.source_hidden` flag are emitted by
+        # marimo's ipynb exporter (and recognized by nbconvert / JupyterLab /
+        # VS Code) to indicate hidden code. Consume them here so they don't
+        # leak back into the .py source as a stray comment.
+        had_remove_input = NBCONVERT_REMOVE_INPUT_TAG in tags
+        tags.discard(NBCONVERT_REMOVE_INPUT_TAG)
+        source_hidden = bool(meta.get("jupyter", {}).get("source_hidden"))
 
         # Extract marimo-specific cell config if present
         marimo_meta = meta.get("marimo", {})
         marimo_config = marimo_meta.get("config", {})
+        name = marimo_meta.get("name", DEFAULT_CELL_NAME)
 
-        # Merge marimo config with existing flags
-        # marimo config takes precedence for hide_code if present
+        # Determine hide_code with priority: marimo config > tags > hide_flags default
         if "hide_code" in marimo_config:
             hide_code = marimo_config["hide_code"]
+        elif "hide-cell" in tags:
+            tags.discard("hide-cell")
+            hide_code = True
+        elif had_remove_input or source_hidden:
+            hide_code = True
+        elif "marimo" in meta:
+            # Cell was created by marimo; marimo would have stored hide_code=True
+            # explicitly if needed, so default to False instead of is_markdown
+            hide_code = False
+
+        if tags:
+            source = f"# Cell tags: {', '.join(sorted(tags))}\n{source}"
 
         cells.append(
             CodeCell(
                 source=source,
+                name=name,
                 config=CellConfig(
                     hide_code=hide_code,
                     column=marimo_config.get("column"),
@@ -1318,6 +1441,8 @@ def _transform_sources(
     """
     from marimo._convert.common.comment_preserver import CommentPreserver
 
+    logger = logging.getLogger(__name__)
+
     # Define transforms that don't need comment preservation
     simple_transforms = [
         transform_strip_whitespace,
@@ -1331,13 +1456,56 @@ def _transform_sources(
         transform_duplicate_definitions,
     ]
 
+    _REPORT_URL = "https://github.com/marimo-team/marimo/issues"
+
+    def _run_transform(
+        name: str,
+        fn: Callable[[list[str]], list[str]],
+        sources: list[str],
+    ) -> list[str]:
+        try:
+            new_sources = fn(sources)
+        except Exception:
+            logger.warning(
+                "Notebook conversion transform '%s' failed; "
+                "skipping this optimization. "
+                "Please report this at %s",
+                name,
+                _REPORT_URL,
+                exc_info=True,
+            )
+            return sources
+
+        if len(new_sources) != len(sources):
+            logger.warning(
+                "Notebook conversion transform '%s' changed cell count "
+                "(%d -> %d); skipping this optimization. "
+                "Please report this at %s",
+                name,
+                len(sources),
+                len(new_sources),
+                _REPORT_URL,
+            )
+            return sources
+
+        return new_sources
+
     # Run simple transforms first (no comment preservation needed)
     for source_transform in simple_transforms:
-        new_sources = source_transform(sources)
-        assert len(new_sources) == len(sources), (
-            f"{source_transform.__name__} changed cell count"
+        sources = _run_transform(
+            source_transform.__name__, source_transform, sources
         )
-        sources = new_sources
+
+    # Handle exclamation marks before the comment-preserving transforms.
+    # `!`-command cells are invalid Python, and several of the downstream
+    # transforms (notably `transform_fixup_multiple_definitions`) compile the
+    # whole notebook at once and bail out entirely on a SyntaxError. Rewriting
+    # `!` commands into valid Python first keeps those optimizations enabled
+    # for the rest of the notebook. Handled specially since it returns an
+    # ExclamationMarkResult carrying pip-package/subprocess metadata.
+    exclamation_result = transform_exclamation_mark(sources)
+    sources = exclamation_result.transformed_sources
+    exclamation_metadata = exclamation_result
 
     # Create comment preserver from the simplified sources
     comment_preserver = CommentPreserver(sources)
@@ -1345,16 +1513,7 @@ def _transform_sources(
     # Run comment-preserving transforms
     for base_transform in comment_preserving_transforms:
         transform = comment_preserver(base_transform)
-        new_sources = transform(sources)
-        assert len(new_sources) == len(sources), (
-            f"{base_transform.__name__} changed cell count"
-        )
-        sources = new_sources
-
-    # Handle exclamation_mark specially since it returns ExclamationMarkResult
-    exclamation_result = transform_exclamation_mark(sources)
-    sources = exclamation_result.transformed_sources
-    exclamation_metadata = exclamation_result
+        sources = _run_transform(base_transform.__name__, transform, sources)
 
     cells = bind_cell_metadata(sources, metadata, hide_flags)
 
@@ -1383,7 +1542,7 @@ def convert_from_ipynb_to_notebook_ir(
     sources: list[str] = []
     metadata: list[dict[str, Any]] = []
     hide_flags: list[bool] = []
-    inline_meta: Union[str, None] = None
+    inline_meta: str | None = None
 
     for cell in notebook["cells"]:
         source = (
@@ -1393,7 +1552,12 @@ def convert_from_ipynb_to_notebook_ir(
         )
         is_markdown: bool = cell["cell_type"] == "markdown"
         if is_markdown:
-            source = markdown_to_marimo(source)
+            source = _strip_paragraph_tags(source)
+            cell_meta = cell.get("metadata", {})
+            md_prefix = cell_meta.get("marimo", {}).get(
+                "md_prefix", DEFAULT_MARKDOWN_PREFIX
+            )
+            source = markdown_to_marimo(source, prefix=md_prefix)
         elif inline_meta is None:
             # Eagerly find PEP 723 metadata, first match wins
             inline_meta, source = extract_inline_meta(source)
@@ -1420,6 +1584,7 @@ def convert_from_ipynb_to_notebook_ir(
         cells=[
             CellDef(
                 code=cell.source,
+                name=cell.name,
                 options=cell.config.asdict(),
             )
             for cell in transformed_cells

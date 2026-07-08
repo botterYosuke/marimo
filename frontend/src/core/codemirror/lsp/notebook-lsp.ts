@@ -22,7 +22,7 @@ import {
   type ILanguageServerClient,
   isClientWithNotify,
 } from "./types";
-import { getLSPDocument } from "./utils";
+import { getLspDocumentUri } from "./utils";
 
 /**
  * Check if a variable name is private (starts with underscore but not dunder).
@@ -178,6 +178,8 @@ export class NotebookLanguageServerClient implements ILanguageServerClient {
     string,
     Promise<LSP.CompletionItem>
   >(10);
+  private latestDiagnosticsVersion: number | null = null;
+  private forwardedDiagnosticsVersion = 0;
 
   constructor(
     client: ILanguageServerClient,
@@ -187,7 +189,7 @@ export class NotebookLanguageServerClient implements ILanguageServerClient {
       EditorView | null | undefined
     > = defaultGetNotebookEditors,
   ) {
-    this.documentUri = getLSPDocument();
+    this.documentUri = getLspDocumentUri();
     this.getNotebookEditors = getNotebookEditors;
     this.initialSettings = initialSettings;
     this.client = client;
@@ -270,6 +272,8 @@ export class NotebookLanguageServerClient implements ILanguageServerClient {
 
     // Get the current document state
     const { lens, version } = this.snapshotter.snapshot();
+    this.latestDiagnosticsVersion = null;
+    this.forwardedDiagnosticsVersion = 0;
 
     // Re-open the merged document with the LSP server
     // This sends a textDocument/didOpen for the entire notebook
@@ -768,13 +772,34 @@ export class NotebookLanguageServerClient implements ILanguageServerClient {
         | { method: "other"; params: unknown },
     ) => {
       if (notification.method === "textDocument/publishDiagnostics") {
+        const incomingVersion = notification.params.version;
+        if (incomingVersion != null) {
+          const latestVersion = this.latestDiagnosticsVersion;
+          if (
+            latestVersion !== null &&
+            Number.isFinite(incomingVersion) &&
+            incomingVersion < latestVersion
+          ) {
+            Logger.debug(
+              "[lsp] dropping stale diagnostics notification",
+              notification,
+            );
+            return;
+          }
+          this.latestDiagnosticsVersion = incomingVersion;
+        }
+
         Logger.debug("[lsp] handling diagnostics", notification);
         // Use the correct lens by version
         const payload = this.snapshotter.getLatestSnapshot();
 
         const diagnostics = notification.params.diagnostics;
 
-        const { lens, version: cellVersion } = payload;
+        const { lens } = payload;
+        // Forward diagnostics with a strictly increasing version so downstream
+        // plugin updates/clears reliably, even when server repeats the same
+        // document version across multiple publishDiagnostics notifications.
+        const diagnosticsVersion = ++this.forwardedDiagnosticsVersion;
 
         // Pre-partition diagnostics by cell
         const diagnosticsByCellId = new Map<CellId, LSP.Diagnostic[]>();
@@ -790,7 +815,7 @@ export class NotebookLanguageServerClient implements ILanguageServerClient {
                 ...diag,
                 range: lens.reverseRange(diag.range, cellId),
               };
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              // oxlint-disable-next-line typescript/no-non-null-assertion
               diagnosticsByCellId.get(cellId)!.push(cellDiag);
               break; // Exit inner loop once we find the matching cell
             }
@@ -817,7 +842,7 @@ export class NotebookLanguageServerClient implements ILanguageServerClient {
             params: {
               ...notification.params,
               uri: cellDocumentUri,
-              version: cellVersion,
+              version: diagnosticsVersion,
               diagnostics: cellDiagnostics,
             },
           });
@@ -832,6 +857,7 @@ export class NotebookLanguageServerClient implements ILanguageServerClient {
               method: "textDocument/publishDiagnostics",
               params: {
                 uri: cellDocumentUri,
+                version: diagnosticsVersion,
                 diagnostics: [],
               },
             });

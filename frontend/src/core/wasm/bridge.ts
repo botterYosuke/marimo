@@ -1,8 +1,9 @@
 /* Copyright 2026 Marimo. All rights reserved. */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* oxlint-disable typescript/no-explicit-any */
 
 import { toast } from "@/components/ui/use-toast";
 import { userConfigAtom } from "@/core/config/config";
+import { serializeBlob } from "@/utils/blob";
 import { Deferred } from "@/utils/Deferred";
 import { throwNotImplemented } from "@/utils/functions";
 import { Logger } from "@/utils/Logger";
@@ -17,6 +18,7 @@ import type {
   EditRequests,
   ExportAsHTMLRequest,
   ExportAsMarkdownRequest,
+  FileCopyResponse,
   FileCreateResponse,
   FileDeleteResponse,
   FileDetailsResponse,
@@ -36,7 +38,7 @@ import type { IConnectionTransport } from "../websocket/transports/transport";
 import { PyodideRouter } from "./router";
 import { getWorkerRPC } from "./rpc";
 import { createShareableLink } from "./share";
-import { wasmInitializationAtom } from "./state";
+import { wasmInitStateAtom } from "./state";
 import { fallbackFileStore, notebookFileStore } from "./store";
 import { isWasm } from "./utils";
 import type { SaveWorkerSchema } from "./worker/save-worker";
@@ -68,10 +70,10 @@ export class PyodideBridge implements RunRequests, EditRequests {
 
   private getSaveWorker(): SaveWorker {
     if (getInitialAppMode() === "read") {
-      Logger.debug("Skipping SaveWorker in read-mode");
+      Logger.debug("Using partially disabled SaveWorker in read-mode");
       return {
         readFile: throwNotImplemented,
-        readNotebook: throwNotImplemented,
+        readNotebook: async () => (await notebookFileStore.readFile()) ?? "",
         saveNotebook: throwNotImplemented,
       };
     }
@@ -79,8 +81,8 @@ export class PyodideBridge implements RunRequests, EditRequests {
     // Create save worker
     const saveWorker = new Worker(saveWorkerUrl, {
       type: "module",
-      // Pass the version to the worker
-      name: getMarimoVersion(),
+      // Pass the version (and optional capability suffix) to the worker
+      name: getWasmWorkerName(),
     });
 
     return getWorkerRPC<SaveWorkerSchema>(saveWorker).proxy.request;
@@ -94,8 +96,8 @@ export class PyodideBridge implements RunRequests, EditRequests {
     // Create a worker
     const worker = new Worker(workerUrl, {
       type: "module",
-      // Pass the version to the worker
-      name: getMarimoVersion(),
+      // Pass the version (and optional capability suffix) to the worker
+      name: getWasmWorkerName(),
     });
 
     // Create the RPC
@@ -110,13 +112,20 @@ export class PyodideBridge implements RunRequests, EditRequests {
       // By initializing after, we get hits on cached network requests
       this.saveRpc = this.getSaveWorker();
       this.setInterruptBuffer();
+      store.set(wasmInitStateAtom, { kind: "ready" });
       this.initialized.resolve();
     });
     this.rpc.addMessageListener("initializingMessage", ({ message }) => {
-      store.set(wasmInitializationAtom, message);
+      // Only bump the progress label while still loading — if we've already
+      // reached "ready" or "error", a late message shouldn't roll us back.
+      const current = store.get(wasmInitStateAtom);
+      if (current.kind === "loading") {
+        store.set(wasmInitStateAtom, { kind: "loading", message });
+      }
     });
     this.rpc.addMessageListener("initializedError", ({ error }) => {
-      // If already resolved, show a toast
+      // If already initialized, surface as a toast and leave the deferred /
+      // init status alone — the worker is healthy, this is a runtime error.
       if (this.initialized.status === "resolved") {
         Logger.error(error);
         toast({
@@ -124,7 +133,9 @@ export class PyodideBridge implements RunRequests, EditRequests {
           description: error,
           variant: "danger",
         });
+        return;
       }
+      store.set(wasmInitStateAtom, { kind: "error", message: error });
       this.initialized.reject(new Error(error));
     });
     this.rpc.addMessageListener("kernelMessage", ({ message }) => {
@@ -418,9 +429,21 @@ export class PyodideBridge implements RunRequests, EditRequests {
   sendCreateFileOrFolder: EditRequests["sendCreateFileOrFolder"] = async (
     request,
   ) => {
+    // The WASM RPC boundary can only carry JSON, so we base64-encode the
+    // file bytes here. The HTTP transport uses multipart/form-data instead.
+    let contents: string | null = null;
+    if (request.file) {
+      const dataUrl = await serializeBlob(request.file);
+      contents = dataUrl.split(",")[1] ?? "";
+    }
     const response = await this.rpc.proxy.request.bridge({
       functionName: "create_file_or_directory",
-      payload: request,
+      payload: {
+        path: request.path,
+        type: request.type,
+        name: request.name,
+        contents,
+      },
     });
     return response as FileCreateResponse;
   };
@@ -433,6 +456,16 @@ export class PyodideBridge implements RunRequests, EditRequests {
       payload: request,
     });
     return response as FileDeleteResponse;
+  };
+
+  sendCopyFileOrFolder: EditRequests["sendCopyFileOrFolder"] = async (
+    request,
+  ) => {
+    const response = await this.rpc.proxy.request.bridge({
+      functionName: "copy_file_or_directory",
+      payload: request,
+    });
+    return response as FileCopyResponse;
   };
 
   sendRenameFileOrFolder: EditRequests["sendRenameFileOrFolder"] = async (
@@ -515,6 +548,16 @@ export class PyodideBridge implements RunRequests, EditRequests {
     return null;
   };
 
+  previewSQLSchemaList: EditRequests["previewSQLSchemaList"] = async (
+    request,
+  ) => {
+    await this.putControlRequest({
+      type: "list-sql-schemas",
+      ...request,
+    });
+    return null;
+  };
+
   previewDataSourceConnection: EditRequests["previewDataSourceConnection"] =
     async (request) => {
       await this.putControlRequest({
@@ -540,7 +583,7 @@ export class PyodideBridge implements RunRequests, EditRequests {
     return null;
   };
 
-  syncCellIds = () => Promise.resolve(null);
+  sendDocumentTransaction = () => Promise.resolve(null);
 
   addPackage: EditRequests["addPackage"] = async (request) => {
     return this.rpc.proxy.request.addPackage(request);
@@ -604,4 +647,18 @@ export function createPyodideConnection(): IConnectionTransport {
   return BasicTransport.withProducerCallback((callback) => {
     PyodideBridge.INSTANCE.attachMessageConsumer(callback);
   });
+}
+
+// Compose the worker name. The version prefix is read by getMarimoVersion()
+// in the worker; the optional "::controller" suffix tells getController.ts
+// that the host page provides a custom /wasm/controller.js and that the
+// dynamic import should be attempted. Hosts opt in by setting
+// `window.__MARIMO_HAS_WASM_CONTROLLER__ = true` before
+// PyodideBridge/worker initialization.
+export function getWasmWorkerName(): string {
+  const hasCustomController =
+    typeof window !== "undefined" &&
+    (window as unknown as { __MARIMO_HAS_WASM_CONTROLLER__?: boolean })
+      .__MARIMO_HAS_WASM_CONTROLLER__ === true;
+  return getMarimoVersion() + (hasCustomController ? "::controller" : "");
 }

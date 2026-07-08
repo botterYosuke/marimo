@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -10,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 from starlette.applications import Starlette
 from starlette.responses import PlainTextResponse, Response
+from starlette.routing import Route, WebSocketRoute
 from starlette.testclient import TestClient
 
 from marimo._server.asgi import (
@@ -511,6 +513,55 @@ class TestDynamicDirectoryMiddleware(unittest.TestCase):
         assert response.status_code == 404
         assert response.text == "Not Found"
 
+    def test_path_traversal_blocked(self):
+        # Create a dedicated sibling directory with a unique name to hold
+        # the "outside" file, so we don't clobber files in the shared
+        # parent directory and are safe under parallel test runs.
+        parent_dir = Path(self.temp_dir).parent
+        outside_dir = Path(tempfile.mkdtemp(dir=parent_dir))
+        outside_name = outside_dir.name
+        (outside_dir / "secret.py").write_text(contents)
+        try:
+            # Raw traversal
+            response = self.client.get(f"/apps/../{outside_name}/secret/")
+            assert response.status_code == 404
+            assert response.text == "Not Found"
+
+            # URL-encoded traversal (%2e%2e = ..)
+            response = self.client.get(f"/apps/%2e%2e/{outside_name}/secret/")
+            assert response.status_code == 404
+            assert response.text == "Not Found"
+
+            # Double-encoded
+            response = self.client.get(
+                f"/apps/%252e%252e/{outside_name}/secret/"
+            )
+            assert response.status_code == 404
+            assert response.text == "Not Found"
+
+            # Nested traversal
+            response = self.client.get(
+                f"/apps/nested/../../{outside_name}/secret/"
+            )
+            assert response.status_code == 404
+            assert response.text == "Not Found"
+        finally:
+            shutil.rmtree(outside_dir, ignore_errors=True)
+
+    def test_path_traversal_blocked_backslash(self):
+        # Windows treats "\" as a path separator, so URLs like
+        # "/apps/..%5Csecret/" (%5C = "\") could bypass a naive "/"-only
+        # check. Call _find_matching_file directly since httpx/starlette
+        # would otherwise reject or normalize the raw URL before it
+        # reaches the middleware.
+        middleware = self.app_with_middleware
+        assert middleware._find_matching_file("..\\secret") is None
+        assert middleware._find_matching_file("foo\\..\\secret") is None
+        assert middleware._find_matching_file("nested\\..\\..\\secret") is None
+        # Mixed separators
+        assert middleware._find_matching_file("..\\..\\secret") is None
+        assert middleware._find_matching_file("foo/..\\secret") is None
+
     def test_valid_app_path(self):
         response = self.client.get("/apps/test_app/")
         assert response.status_code == 200
@@ -538,21 +589,22 @@ class TestDynamicDirectoryMiddleware(unittest.TestCase):
         # Create a WebSocket test app
         def ws_app_builder(base_url: str, file_path: str) -> Starlette:
             del base_url
-            app = Starlette()
 
             async def websocket_endpoint(websocket: WebSocket) -> None:
                 await websocket.accept()
                 await websocket.send_text(f"WS from {Path(file_path).stem}")
                 await websocket.close()
 
-            app.add_websocket_route("/ws", websocket_endpoint)
-
             async def handle(request: Request) -> Response:
                 del request
                 return PlainTextResponse(f"App from {Path(file_path).stem}")
 
-            app.add_route("/", handle)
-            return app
+            return Starlette(
+                routes=[
+                    WebSocketRoute("/ws", websocket_endpoint),
+                    Route("/", handle),
+                ]
+            )
 
         # Create middleware with WebSocket support
         ws_middleware = DynamicDirectoryMiddleware(
@@ -647,21 +699,22 @@ class TestDynamicDirectoryMiddleware(unittest.TestCase):
     def test_nested_file_websocket(self):
         def ws_app_builder(base_url: str, file_path: str) -> Starlette:
             del base_url
-            app = Starlette()
 
             async def websocket_endpoint(websocket: WebSocket) -> None:
                 await websocket.accept()
                 await websocket.send_text(f"WS from {Path(file_path).stem}")
                 await websocket.close()
 
-            app.add_websocket_route("/ws", websocket_endpoint)
-
             async def handle(request: Request) -> Response:
                 del request
                 return PlainTextResponse(f"App from {Path(file_path).stem}")
 
-            app.add_route("/", handle)
-            return app
+            return Starlette(
+                routes=[
+                    WebSocketRoute("/ws", websocket_endpoint),
+                    Route("/", handle),
+                ]
+            )
 
         ws_middleware = DynamicDirectoryMiddleware(
             app=self.base_app,
@@ -784,9 +837,7 @@ class TestDynamicDirectoryMiddleware(unittest.TestCase):
                 # Check the marimo app file as added to the scope prior.
                 file = scope["marimo_app_file"]
                 assert isinstance(file, str)
-                assert file.endswith(str(allowed_file)) or file.endswith(
-                    str(blocked_file)
-                )
+                assert file.endswith((str(allowed_file), str(blocked_file)))
 
                 if scope["type"] == "http":
 
@@ -822,6 +873,107 @@ class TestDynamicDirectoryMiddleware(unittest.TestCase):
         response = client.get("/apps/nested/another_app/")
         assert response.status_code == 200
         assert response.headers["x-custom-middleware"] == "applied"
+
+
+class TestDynamicDirectoryMiddlewareSymlink(unittest.TestCase):
+    """Symlinked-directory behavior for DynamicDirectoryMiddleware (#10012)."""
+
+    def setUp(self) -> None:
+        self.temp_dir = Path(tempfile.mkdtemp())
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def _build_client(self, directory: Path) -> TestClient:
+        base_app = Starlette()
+
+        async def catch_all(request: Request) -> Response:
+            del request
+            return PlainTextResponse("Not Found", status_code=404)
+
+        base_app.add_route("/{path:path}", catch_all)
+
+        def app_builder(base_url: str, file_path: str) -> Starlette:
+            del base_url
+            app = Starlette()
+
+            async def handle(request: Request) -> Response:
+                del request
+                return PlainTextResponse(f"App from {Path(file_path).stem}")
+
+            app.add_route("/{path:path}", handle)
+            return app
+
+        middleware = DynamicDirectoryMiddleware(
+            app=base_app,
+            base_path="/apps",
+            directory=str(directory),
+            app_builder=app_builder,
+        )
+        return TestClient(middleware)
+
+    def test_symlink_swap_continues_serving(self) -> None:
+        """Notebooks keep serving after the directory symlink is swapped."""
+        releases = self.temp_dir / "releases"
+        (releases / "v1").mkdir(parents=True)
+        (releases / "v2").mkdir(parents=True)
+        (releases / "v1" / "nb.py").write_text(contents)
+        (releases / "v2" / "nb.py").write_text(contents)
+
+        served = self.temp_dir / "notebooks"
+        try:
+            os.symlink(releases / "v1", served, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            pytest.skip("Symlinks not supported on this platform")
+
+        client = self._build_client(served)
+
+        response = client.get("/apps/nb/")
+        assert response.status_code == 200
+        assert response.text == "App from nb"
+
+        # Re-point the symlink at a new release. Remove + recreate rather
+        # than os.replace, which can't overwrite an existing directory
+        # symlink on Windows. A directory symlink is removed with rmdir on
+        # Windows and unlink on POSIX.
+        if sys.platform == "win32":
+            os.rmdir(served)
+        else:
+            served.unlink()
+        os.symlink(releases / "v2", served, target_is_directory=True)
+
+        # Still served (regressed to 404 before the fix).
+        response = client.get("/apps/nb/")
+        assert response.status_code == 200
+        assert response.text == "App from nb"
+
+    def test_symlink_escape_is_blocked(self) -> None:
+        """A symlink that escapes the served directory is still rejected."""
+        served = self.temp_dir / "served"
+        served.mkdir()
+        (served / "ok.py").write_text(contents)
+
+        secret_dir = self.temp_dir / "secret"
+        secret_dir.mkdir()
+        (secret_dir / "secret.py").write_text(contents)
+
+        try:
+            os.symlink(secret_dir, served / "escape", target_is_directory=True)
+        except (OSError, NotImplementedError):
+            pytest.skip("Symlinks not supported on this platform")
+
+        client = self._build_client(served)
+
+        # In-tree notebook serves; the escaping one does not, even though it
+        # exists through the symlink.
+        response = client.get("/apps/ok/")
+        assert response.status_code == 200
+        assert response.text == "App from ok"
+
+        assert (served / "escape" / "secret.py").exists()
+        response = client.get("/apps/escape/secret/")
+        assert response.status_code == 404
+        assert response.text == "Not Found"
 
 
 class TestDynamicDirectoryMiddlewareSubMount(unittest.TestCase):
@@ -941,21 +1093,22 @@ class TestDynamicDirectoryMiddlewareSubMount(unittest.TestCase):
 
         def ws_app_builder(base_url: str, file_path: str) -> Starlette:
             del base_url
-            app = Starlette()
 
             async def websocket_endpoint(websocket: WebSocket) -> None:
                 await websocket.accept()
                 await websocket.send_text(f"WS from {Path(file_path).stem}")
                 await websocket.close()
 
-            app.add_websocket_route("/ws", websocket_endpoint)
-
             async def handle(request: Request) -> Response:
                 del request
                 return PlainTextResponse(f"App from {Path(file_path).stem}")
 
-            app.add_route("/", handle)
-            return app
+            return Starlette(
+                routes=[
+                    WebSocketRoute("/ws", websocket_endpoint),
+                    Route("/", handle),
+                ]
+            )
 
         middleware = DynamicDirectoryMiddleware(
             app=self.base_app,

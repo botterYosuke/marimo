@@ -303,6 +303,18 @@ export default defineConfig({
     // Pyodide builds use esbuild to avoid CJS module issues with oxc minifier.
     minify: isDev ? false : isPyodide ? "esbuild" : "oxc",
     sourcemap: isDev,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (
+          warning.message?.includes(
+            "has been externalized for browser compatibility",
+          )
+        ) {
+          return;
+        }
+        warn(warning);
+      },
+    },
   },
   resolve: {
     tsconfigPaths: true,

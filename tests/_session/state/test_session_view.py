@@ -4,6 +4,8 @@ from __future__ import annotations
 from typing import Any
 from unittest.mock import patch
 
+import msgspec
+
 from marimo._ast.cell import RuntimeStateType
 from marimo._data.models import (
     Database,
@@ -25,12 +27,12 @@ from marimo._messaging.notification import (
     ModelLifecycleNotification,
     ModelOpen,
     ModelUpdate,
+    SQLDatabaseMetadata,
     SQLMetadata,
+    SQLSchemaListPreviewNotification,
     SQLTableListPreviewNotification,
     SQLTablePreviewNotification,
     StartupLogsNotification,
-    UpdateCellCodesNotification,
-    UpdateCellIdsNotification,
     VariableDeclarationNotification,
     VariablesNotification,
     VariableValue,
@@ -66,19 +68,6 @@ initial_status: RuntimeStateType = "running"
 updated_status: RuntimeStateType = "running"
 
 
-def test_cell_ids(session_view: SessionView) -> None:
-    assert session_view.cell_ids is None
-
-    session_view.add_notification(
-        UpdateCellIdsNotification(
-            cell_ids=[cell_id],
-        )
-    )
-    operation = session_view.notifications[0]
-    assert isinstance(operation, UpdateCellIdsNotification)
-    assert operation.cell_ids == [cell_id]
-
-
 def test_session_view_cell_notification(session_view: SessionView) -> None:
     # Create initial CellNotification
     initial_cell_notification = CellNotification(
@@ -94,6 +83,57 @@ def test_session_view_cell_notification(session_view: SessionView) -> None:
 
     assert session_view.cell_notifications[cell_id].output == updated_output
     assert session_view.cell_notifications[cell_id].status == updated_status
+
+
+def test_session_view_serialization_hint_survives_status_updates(
+    session_view: SessionView,
+) -> None:
+    # A top-level definition advertises its reusability hint.
+    session_view.add_notification(
+        CellNotification(cell_id=cell_id, serialization="Valid")
+    )
+    assert session_view.cell_notifications[cell_id].serialization == "Valid"
+
+    # Subsequent lifecycle updates omit serialization (UNSET) and must not
+    # wipe the hint — otherwise a reconnect snapshot loses the badge.
+    for status in ("queued", "running", "idle"):
+        status_update = CellNotification(cell_id=cell_id, status=status)
+        assert status_update.serialization is msgspec.UNSET
+        session_view.add_notification(status_update)
+        assert (
+            session_view.cell_notifications[cell_id].serialization == "Valid"
+        )
+
+
+def test_session_view_serialization_hint_explicit_clear(
+    session_view: SessionView,
+) -> None:
+    session_view.add_notification(
+        CellNotification(cell_id=cell_id, serialization="Valid")
+    )
+    # An explicit None clears the hint (cell is no longer a top-level def).
+    session_view.add_notification(
+        CellNotification(cell_id=cell_id, serialization=None)
+    )
+    assert session_view.cell_notifications[cell_id].serialization is None
+
+
+def test_cell_notification_serialization_wire_encoding() -> None:
+    # UNSET is omitted (unchanged), None is sent explicitly (clear), a string
+    # is sent verbatim (set).
+    assert "serialization" not in serialize(CellNotification(cell_id=cell_id))
+    assert (
+        serialize(CellNotification(cell_id=cell_id, serialization=None))[
+            "serialization"
+        ]
+        is None
+    )
+    assert (
+        serialize(CellNotification(cell_id=cell_id, serialization="Valid"))[
+            "serialization"
+        ]
+        == "Valid"
+    )
 
 
 # Test adding Variables to SessionView
@@ -180,6 +220,7 @@ def test_ui_values(session_view: SessionView) -> None:
     session_view.add_control_request(
         CreateNotebookCommand(
             execution_requests=(),
+            cell_ids=(),
             set_ui_element_value_request=UpdateUIElementCommand.from_ids_and_values(
                 [("test_ui3", 101112)]
             ),
@@ -471,6 +512,7 @@ class TestModelReplayState:
             zip(
                 [tuple(p) for p in msg.buffer_paths],
                 msg.buffers,
+                strict=False,
             )
         )
         assert path_buf == {("img",): b"png", ("data",): b"csv"}
@@ -501,6 +543,7 @@ def test_last_run_code(session_view: SessionView) -> None:
             execution_requests=(
                 ExecuteCellCommand(cell_id=cell_id, code="print('hello')"),
             ),
+            cell_ids=(cell_id, "cell_2"),
             set_ui_element_value_request=UpdateUIElementCommand.from_ids_and_values(
                 []
             ),
@@ -899,6 +942,49 @@ def test_add_sql_table_previews() -> None:
         == 10
     )
 
+    # Add sql schema preview list
+    session_view.add_raw_notification(
+        serialize_kernel_message(
+            SQLSchemaListPreviewNotification(
+                metadata=SQLDatabaseMetadata(
+                    connection="connection1", database="db1"
+                ),
+                request_id=RequestId("request_id"),
+                schemas=[
+                    Schema(
+                        name="db1",
+                        tables=[
+                            DataTable(
+                                name="table2",
+                                source_type="connection",
+                                source="db1",
+                                num_rows=20,
+                                num_columns=10,
+                                variable_name=VariableName("var"),
+                                columns=[],
+                            )
+                        ],
+                    )
+                ],
+            )
+        )
+    )
+    assert session_view_connections[0].databases[0].schemas[0].tables == [
+        DataTable(
+            source_type="connection",
+            source="db1",
+            name="table2",
+            num_rows=20,
+            num_columns=10,
+            variable_name=VariableName("var"),
+            columns=[],
+            engine=None,
+            type="table",
+            primary_keys=None,
+            indexes=None,
+        )
+    ]
+
     # Add sql table preview list
     session_view.add_raw_notification(
         serialize_kernel_message(
@@ -1012,6 +1098,51 @@ def test_combine_console_outputs(
     assert session_view.cell_notifications[cell_id].console == [
         CellOutput.stdout("three")
     ]
+
+
+@patch("time.time", return_value=123)
+def test_explicit_empty_console_clears_mid_run(
+    time_mock: Any, session_view: SessionView
+) -> None:
+    """An explicit `console=[]` clears the session view, even while running."""
+    del time_mock
+    session_view.add_notification(
+        CellNotification(
+            cell_id=cell_id,
+            console=CellOutput.stdout("secret"),
+            status="running",
+        )
+    )
+    session_view.add_notification(
+        CellNotification(
+            cell_id=cell_id,
+            console=CellOutput.stdout(" code"),
+            status="running",
+        )
+    )
+    assert session_view.cell_notifications[cell_id].console == [
+        CellOutput.stdout("secret code"),
+    ]
+
+    # Explicit clear mid-run (status stays "running", no queued transition).
+    session_view.add_notification(
+        CellNotification(
+            cell_id=cell_id,
+            console=[],
+            status="running",
+        )
+    )
+    assert session_view.cell_notifications[cell_id].console == []
+
+    # A subsequent status-only update (console unchanged) keeps it cleared.
+    session_view.add_notification(
+        CellNotification(
+            cell_id=cell_id,
+            console=None,
+            status="running",
+        )
+    )
+    assert session_view.cell_notifications[cell_id].console == []
 
 
 @patch("time.time", return_value=123)
@@ -1313,48 +1444,6 @@ def test_mark_auto_export(session_view: SessionView):
 
     session_view._touch()
     assert session_view.needs_export("session")
-
-
-def test_stale_code(session_view: SessionView) -> None:
-    """Test that stale code is properly tracked and included in operations."""
-    assert session_view.stale_code is None
-
-    # Add stale code operation
-    stale_code_op = UpdateCellCodesNotification(
-        cell_ids=["cell1"],
-        codes=["print('hello')"],
-        code_is_stale=True,
-    )
-    session_view.add_notification(stale_code_op)
-
-    # Verify stale code is tracked
-    assert session_view.stale_code == stale_code_op
-    assert session_view.stale_code in session_view.notifications
-
-    # Add non-stale code operation
-    non_stale_code_op = UpdateCellCodesNotification(
-        cell_ids=["cell2"],
-        codes=["print('world')"],
-        code_is_stale=False,
-    )
-    session_view.add_notification(non_stale_code_op)
-
-    # Verify non-stale code doesn't affect stale_code tracking
-    assert session_view.stale_code == stale_code_op
-    assert session_view.stale_code in session_view.notifications
-
-    # Update stale code
-    new_stale_code_op = UpdateCellCodesNotification(
-        cell_ids=["cell3"],
-        codes=["print('updated')"],
-        code_is_stale=True,
-    )
-    session_view.add_notification(new_stale_code_op)
-
-    # Verify stale code is updated
-    assert session_view.stale_code == new_stale_code_op
-    assert session_view.stale_code in session_view.notifications
-    assert stale_code_op not in session_view.notifications
 
 
 def test_dataset_filter_by_engine_and_variable(

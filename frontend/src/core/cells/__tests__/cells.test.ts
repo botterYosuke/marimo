@@ -6,6 +6,7 @@ import { EditorView } from "@codemirror/view";
 import { createStore } from "jotai";
 import {
   afterAll,
+  afterEach,
   beforeAll,
   beforeEach,
   describe,
@@ -14,13 +15,18 @@ import {
   vi,
 } from "vitest";
 import { MockNotebook } from "@/__mocks__/notebook";
+import { cellId } from "@/__tests__/branded";
 import type { CellHandle } from "@/components/editor/notebook-cell";
-import { CellId, SETUP_CELL_ID } from "@/core/cells/ids";
+import { CellId, SCRATCH_CELL_ID, SETUP_CELL_ID } from "@/core/cells/ids";
 import { foldAllBulk, unfoldAllBulk } from "@/core/codemirror/editing/commands";
 import { adaptiveLanguageConfiguration } from "@/core/codemirror/language/extension";
 import { OverridingHotkeyProvider } from "@/core/hotkeys/hotkeys";
 import type { OutputMessage } from "@/core/kernel/messages";
-import { type CollapsibleTree, MultiColumn } from "@/utils/id-tree";
+import {
+  type CollapsibleTree,
+  MultiColumn,
+  type CellColumnId,
+} from "@/utils/id-tree";
 import type { Seconds } from "@/utils/time";
 import {
   exportedForTesting,
@@ -28,6 +34,7 @@ import {
   type NotebookState,
   notebookAtom,
 } from "../cells";
+import { exportedForTesting as documentTransactionTestExports } from "../document-changes";
 import {
   focusAndScrollCellIntoView,
   scrollToBottom,
@@ -39,10 +46,13 @@ vi.mock("@/core/codemirror/editing/commands", () => ({
   foldAllBulk: vi.fn(),
   unfoldAllBulk: vi.fn(),
 }));
+vi.mock("@/core/wasm/utils", () => ({
+  isWasm: vi.fn(() => false),
+}));
 vi.mock("../scrollCellIntoView", async (importOriginal) => {
   const actual = await importOriginal();
   return {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     ...(actual as any),
     scrollToTop: vi.fn(),
     scrollToBottom: vi.fn(),
@@ -84,7 +94,7 @@ function createEditor(content: string) {
     extensions: [
       python(),
       adaptiveLanguageConfiguration({
-        cellId: "cell1" as CellId,
+        cellId: cellId("cell1"),
         completionConfig: {
           activate_on_typing: true,
           signature_hint_on_typing: false,
@@ -113,14 +123,16 @@ describe("cell reducer", () => {
 
   const actions = createActions((action) => {
     state = reducer(state, action);
-    for (const [cellId, handle] of Object.entries(state.cellHandles)) {
+    for (const [cellIdString, handle] of Object.entries(state.cellHandles)) {
+      // @ts-expect-error - Typescript Object.entries doesn't know that keys are CellId
+      const cid: CellId = cellIdString;
       if (!handle.current) {
-        const view = createEditor(state.cellData[cellId as CellId].code);
+        const view = createEditor(state.cellData[cid].code);
         const handle: CellHandle = {
           editorView: view,
           editorViewOrNull: view,
         };
-        state.cellHandles[cellId as CellId] = { current: handle };
+        state.cellHandles[cid] = { current: handle };
       }
     }
     cells = flattenTopLevelNotebookCells(state);
@@ -131,7 +143,7 @@ describe("cell reducer", () => {
 
   beforeAll(() => {
     CellId.create = () => {
-      return `${i++}` as CellId;
+      return cellId(`${i++}`);
     };
   });
 
@@ -142,6 +154,10 @@ describe("cell reducer", () => {
     state.cellIds = MultiColumn.from([]);
     actions.createNewCell({ cellId: "__end__", before: false });
     firstCellId = state.cellIds.inOrderIds[0];
+  });
+
+  afterEach(() => {
+    documentTransactionTestExports.cancelPendingChanges();
   });
 
   afterAll(() => {
@@ -196,6 +212,20 @@ describe("cell reducer", () => {
     `);
   });
 
+  it("can add a cell with name and config", () => {
+    actions.createNewCell({
+      cellId: firstCellId,
+      before: false,
+      code: "x = 1",
+      name: "My Cell",
+      config: { hide_code: true, disabled: false },
+    });
+    const newCellId = state.cellIds.inOrderIds[1];
+    expect(state.cellData[newCellId].name).toBe("My Cell");
+    expect(state.cellData[newCellId].config.hide_code).toBe(true);
+    expect(state.cellData[newCellId].config.disabled).toBe(false);
+  });
+
   it("can delete a Python cell and undo delete", () => {
     actions.createNewCell({
       cellId: firstCellId,
@@ -221,7 +251,7 @@ describe("cell reducer", () => {
     `);
 
     // Verify scrollKey is set to the restored cell
-    expect(state.scrollKey).toBe("2" as CellId);
+    expect(state.scrollKey).toBe("2");
   });
 
   it("can delete a SQL cell and undo delete", () => {
@@ -362,7 +392,7 @@ describe("cell reducer", () => {
     `);
 
     // Add a column breakpoint to test left/right movement
-    actions.addColumnBreakpoint({ cellId: "1" as CellId });
+    actions.addColumnBreakpoint({ cellId: cellId("1") });
     expect(formatCells(state)).toMatchInlineSnapshot(`
       "
       > col 0
@@ -422,7 +452,7 @@ describe("cell reducer", () => {
 
     // Try to move cell right when it's already in rightmost column (should noop)
     actions.moveCell({
-      cellId: "1" as CellId,
+      cellId: cellId("1"),
       direction: "right",
     });
     expect(formatCells(state)).toMatchInlineSnapshot(`
@@ -442,7 +472,7 @@ describe("cell reducer", () => {
       before: false,
     });
     actions.createNewCell({
-      cellId: "1" as CellId,
+      cellId: cellId("1"),
       before: false,
     });
     expect(formatCells(state)).toMatchInlineSnapshot(`
@@ -458,7 +488,7 @@ describe("cell reducer", () => {
     // drag first cell to the end
     actions.dropCellOverCell({
       cellId: firstCellId,
-      overCellId: "2" as CellId,
+      overCellId: cellId("2"),
     });
     expect(formatCells(state)).toMatchInlineSnapshot(`
       "
@@ -473,7 +503,7 @@ describe("cell reducer", () => {
     // drag it back to the middle
     actions.dropCellOverCell({
       cellId: firstCellId,
-      overCellId: "2" as CellId,
+      overCellId: cellId("2"),
     });
     expect(formatCells(state)).toMatchInlineSnapshot(`
       "
@@ -482,6 +512,279 @@ describe("cell reducer", () => {
       [0] ''
 
       [2] ''
+      "
+    `);
+  });
+
+  it("can move a cell to an exact index within a column", () => {
+    actions.createNewCell({
+      cellId: firstCellId,
+      before: false,
+    });
+    actions.createNewCell({
+      cellId: cellId("1"),
+      before: false,
+    });
+
+    const columnId = state.cellIds.atOrThrow(0).id;
+    actions.moveCellToIndex({
+      cellId: firstCellId,
+      columnId,
+      index: 3,
+    });
+
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      [1] ''
+
+      [2] ''
+
+      [0] ''
+      "
+    `);
+  });
+
+  it("can move a cell to an exact index across columns", () => {
+    actions.createNewCell({
+      cellId: firstCellId,
+      before: false,
+    });
+    actions.createNewCell({
+      cellId: cellId("1"),
+      before: false,
+    });
+    actions.addColumnBreakpoint({ cellId: cellId("1") });
+
+    const secondColumnId = state.cellIds.atOrThrow(1).id;
+    actions.moveCellToIndex({
+      cellId: firstCellId,
+      columnId: secondColumnId,
+      index: 1,
+    });
+
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      > col 0
+
+
+      > col 1
+      [1] ''
+
+      [0] ''
+
+      [2] ''
+      "
+    `);
+  });
+
+  it("moveCellToIndex is a no-op when moving to the same position", () => {
+    actions.createNewCell({
+      cellId: firstCellId,
+      before: false,
+    });
+    actions.createNewCell({
+      cellId: cellId("1"),
+      before: false,
+    });
+
+    const columnId = state.cellIds.atOrThrow(0).id;
+    const before = formatCells(state);
+
+    actions.moveCellToIndex({
+      cellId: firstCellId,
+      columnId,
+      index: 0,
+    });
+
+    expect(formatCells(state)).toBe(before);
+  });
+
+  it("moveCellToIndex is a no-op for an invalid columnId", () => {
+    actions.createNewCell({
+      cellId: firstCellId,
+      before: false,
+    });
+
+    const before = formatCells(state);
+
+    actions.moveCellToIndex({
+      cellId: firstCellId,
+      columnId: "nonexistent-column" as CellColumnId,
+      index: 0,
+    });
+
+    expect(formatCells(state)).toBe(before);
+  });
+
+  it("can move multiple cells relative to target", () => {
+    actions.createNewCell({
+      cellId: firstCellId,
+      before: false,
+    });
+    actions.createNewCell({
+      cellId: cellId("1"),
+      before: false,
+    });
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      [0] ''
+
+      [1] ''
+
+      [2] ''
+      "
+    `);
+
+    // Move first two cells after the third
+    actions.moveCellsRelativeTo({
+      cellIds: [firstCellId, cellId("1")],
+      targetCellId: cellId("2"),
+      position: "after",
+    });
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      [2] ''
+
+      [0] ''
+
+      [1] ''
+      "
+    `);
+  });
+
+  it("can undo cut-paste (move with previousPlacements)", () => {
+    actions.createNewCell({
+      cellId: firstCellId,
+      before: false,
+    });
+    actions.createNewCell({
+      cellId: cellId("1"),
+      before: false,
+    });
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      [0] ''
+
+      [1] ''
+
+      [2] ''
+      "
+    `);
+
+    const col = state.cellIds.findWithId(firstCellId);
+    const previousPlacements = [
+      {
+        columnId: col.id,
+        index: col.indexOfOrThrow(
+          firstCellId,
+        ) as import("@/utils/id-tree").CellIndex,
+      },
+      {
+        columnId: col.id,
+        index: col.indexOfOrThrow(
+          cellId("1"),
+        ) as import("@/utils/id-tree").CellIndex,
+      },
+    ];
+
+    actions.moveCellsRelativeTo({
+      cellIds: [firstCellId, cellId("1")],
+      targetCellId: cellId("2"),
+      position: "after",
+      previousPlacements,
+    });
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      [2] ''
+
+      [0] ''
+
+      [1] ''
+      "
+    `);
+
+    actions.undoDeleteCell();
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      [0] ''
+
+      [1] ''
+
+      [2] ''
+      "
+    `);
+  });
+
+  it("undo order: cut-paste then delete — first undo restores delete, second undo undoes move", () => {
+    actions.createNewCell({
+      cellId: firstCellId,
+      before: false,
+    });
+    actions.createNewCell({
+      cellId: cellId("1"),
+      before: false,
+    });
+
+    const col = state.cellIds.findWithId(firstCellId);
+    const previousPlacements = [
+      {
+        columnId: col.id,
+        index: col.indexOfOrThrow(
+          firstCellId,
+        ) as import("@/utils/id-tree").CellIndex,
+      },
+      {
+        columnId: col.id,
+        index: col.indexOfOrThrow(
+          cellId("1"),
+        ) as import("@/utils/id-tree").CellIndex,
+      },
+    ];
+
+    actions.moveCellsRelativeTo({
+      cellIds: [firstCellId, cellId("1")],
+      targetCellId: cellId("2"),
+      position: "after",
+      previousPlacements,
+    });
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      [2] ''
+
+      [0] ''
+
+      [1] ''
+      "
+    `);
+
+    actions.deleteCell({ cellId: cellId("2") });
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      [0] ''
+
+      [1] ''
+      "
+    `);
+
+    actions.undoDeleteCell();
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      [3] ''
+
+      [0] ''
+
+      [1] ''
+      "
+    `);
+
+    actions.undoDeleteCell();
+    expect(formatCells(state)).toMatchInlineSnapshot(`
+      "
+      [0] ''
+
+      [1] ''
+
+      [3] ''
       "
     `);
   });
@@ -1001,7 +1304,7 @@ describe("cell reducer", () => {
         data: [
           {
             msg: "This cell wasn't run because an ancestor was stopped with `mo.stop`: ",
-            raising_cell: "2" as CellId,
+            raising_cell: "2",
             type: "ancestor-stopped",
           },
         ],
@@ -1014,7 +1317,7 @@ describe("cell reducer", () => {
     });
     cell = cells[0];
     expect(cell.status).toBe("idle");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any no-unsafe-optional-chaining
     expect((cell.output?.data as any)[0].msg).toBe(
       "This cell wasn't run because an ancestor was stopped with `mo.stop`: ",
     );
@@ -1200,6 +1503,47 @@ describe("cell reducer", () => {
     ]);
   });
 
+  it("does not crash when setStdinResponse has out-of-bounds outputIndex", () => {
+    const STDOUT: OutputMessage = {
+      channel: "stdout",
+      mimetype: "text/plain",
+      data: "hello!",
+      timestamp: 1,
+    };
+
+    // Set the cell to running with a console output
+    actions.prepareForRun({ cellId: firstCellId });
+    actions.handleCellMessage({
+      cell_id: firstCellId,
+      output: undefined,
+      console: null,
+      status: "running",
+      stale_inputs: null,
+      timestamp: new Date(20).getTime() as Seconds,
+    });
+    actions.handleCellMessage({
+      cell_id: firstCellId,
+      output: undefined,
+      console: STDOUT,
+      status: undefined,
+      stale_inputs: null,
+      timestamp: new Date(22).getTime() as Seconds,
+    });
+
+    // Try to set stdin response with an out-of-bounds index
+    // This should not crash - it should return state unchanged
+    actions.setStdinResponse({
+      response: "test",
+      cellId: firstCellId,
+      outputIndex: 999,
+    });
+
+    // Cell state should be unchanged
+    const cell = cells[0];
+    expect(cell.consoleOutputs).toHaveLength(1);
+    expect(cell.consoleOutputs[0]).toMatchObject(STDOUT);
+  });
+
   it("can receive console when the cell is idle and will clear when starts again", () => {
     const OLD_STDOUT: OutputMessage = {
       channel: "stdout",
@@ -1284,8 +1628,8 @@ describe("cell reducer", () => {
 
   it("can send a cell to the top", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
-    actions.sendToTop({ cellId: "2" as CellId });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
+    actions.sendToTop({ cellId: cellId("2") });
     expect(formatCells(state)).toMatchInlineSnapshot(`
       "
       [2] ''
@@ -1299,7 +1643,7 @@ describe("cell reducer", () => {
 
   it("can send a cell to the bottom", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
     actions.sendToBottom({ cellId: firstCellId });
     expect(formatCells(state)).toMatchInlineSnapshot(`
       "
@@ -1314,12 +1658,12 @@ describe("cell reducer", () => {
 
   it("can focus cells", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
 
-    actions.focusCell({ cellId: "1" as CellId, where: "before" });
+    actions.focusCell({ cellId: cellId("1"), where: "before" });
     expect(focusAndScrollCellIntoView).toHaveBeenCalledWith(
       expect.objectContaining({
-        cellId: "0" as CellId,
+        cellId: cellId("0"),
       }),
     );
 
@@ -1336,7 +1680,7 @@ describe("cell reducer", () => {
   });
 
   it("can set cell IDs and codes", () => {
-    const newIds = ["3", "4", "5"] as CellId[];
+    const newIds = [cellId("3"), cellId("4"), cellId("5")];
     const newCodes = ["code1", "code2", "code3"];
 
     actions.setCellIds({ cellIds: newIds });
@@ -1371,72 +1715,149 @@ describe("cell reducer", () => {
   it("can can add a new cell with/without stale code", () => {
     actions.setCellCodes({
       codes: ["new code"],
-      ids: ["2"] as CellId[],
+      ids: [cellId("2")],
       codeIsStale: false,
     });
 
-    expect(state.cellData["2" as CellId].code).toBe("new code");
-    expect(state.cellData["2" as CellId].edited).toBe(false);
-    expect(state.cellData["2" as CellId].lastCodeRun).toBe("new code");
+    expect(state.cellData[cellId("2")].code).toBe("new code");
+    expect(state.cellData[cellId("2")].edited).toBe(false);
+    expect(state.cellData[cellId("2")].lastCodeRun).toBe("new code");
 
     actions.setCellCodes({
       codes: ["new code 2"],
-      ids: ["9"] as CellId[],
+      ids: [cellId("9")],
       codeIsStale: true,
     });
 
-    expect(state.cellData["9" as CellId].code).toBe("new code 2");
-    expect(state.cellData["9" as CellId].edited).toBe(true);
-    expect(state.cellData["9" as CellId].lastCodeRun).toBe(null);
+    expect(state.cellData[cellId("9")].code).toBe("new code 2");
+    expect(state.cellData[cellId("9")].edited).toBe(true);
+    expect(state.cellData[cellId("9")].lastCodeRun).toBe(null);
   });
 
   it("can partial update cell codes", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
 
-    expect(state.cellIds.inOrderIds).toEqual(["0", "1", "2"]);
-    expect(state.cellData["0" as CellId].code).toBe("");
-    expect(state.cellData["1" as CellId].code).toBe("");
-    expect(state.cellData["2" as CellId].code).toBe("");
+    expect(state.cellIds.inOrderIds).toEqual([
+      cellId("0"),
+      cellId("1"),
+      cellId("2"),
+    ]);
+    expect(state.cellData[cellId("0")].code).toBe("");
+    expect(state.cellData[cellId("1")].code).toBe("");
+    expect(state.cellData[cellId("2")].code).toBe("");
 
     // Update cell 1
     actions.setCellCodes({
       codes: ["new code 2"],
-      ids: ["1"] as CellId[],
+      ids: [cellId("1")],
       codeIsStale: false,
     });
 
-    expect(state.cellIds.inOrderIds).toEqual(["0", "1", "2"]);
-    expect(state.cellData["0" as CellId].code).toBe("");
-    expect(state.cellData["1" as CellId].code).toBe("new code 2");
-    expect(state.cellData["1" as CellId].edited).toBe(false);
-    expect(state.cellData["2" as CellId].code).toBe("");
+    expect(state.cellIds.inOrderIds).toEqual([
+      cellId("0"),
+      cellId("1"),
+      cellId("2"),
+    ]);
+    expect(state.cellData[cellId("0")].code).toBe("");
+    expect(state.cellData[cellId("1")].code).toBe("new code 2");
+    expect(state.cellData[cellId("1")].edited).toBe(false);
+    expect(state.cellData[cellId("2")].code).toBe("");
   });
 
   it("can set cell codes with new cell ids, while preserving the old cell data", () => {
     actions.setCellCodes({
       codes: ["code1", "code2", "code3"],
-      ids: ["3", "4", "5"] as CellId[],
+      ids: [cellId("3"), cellId("4"), cellId("5")],
       codeIsStale: false,
     });
-    expect(state.cellData["3" as CellId].code).toBe("code1");
-    expect(state.cellData["4" as CellId].code).toBe("code2");
-    expect(state.cellData["5" as CellId].code).toBe("code3");
+    expect(state.cellData[cellId("3")].code).toBe("code1");
+    expect(state.cellData[cellId("4")].code).toBe("code2");
+    expect(state.cellData[cellId("5")].code).toBe("code3");
 
     // Update with some new cell ids and some old cell ids
-    actions.setCellIds({ cellIds: ["1", "2", "3", "4"] as CellId[] });
+    actions.setCellIds({
+      cellIds: [cellId("1"), cellId("2"), cellId("3"), cellId("4")],
+    });
     actions.setCellCodes({
       codes: ["new1", "new2", "code1", "code2"],
-      ids: ["1", "2", "3", "4"] as CellId[],
+      ids: [cellId("1"), cellId("2"), cellId("3"), cellId("4")],
       codeIsStale: false,
     });
-    expect(state.cellData["1" as CellId].code).toBe("new1");
-    expect(state.cellData["2" as CellId].code).toBe("new2");
-    expect(state.cellData["3" as CellId].code).toBe("code1");
-    expect(state.cellData["4" as CellId].code).toBe("code2");
-    expect(state.cellIds.inOrderIds).toEqual(["1", "2", "3", "4"]);
+    expect(state.cellData[cellId("1")].code).toBe("new1");
+    expect(state.cellData[cellId("2")].code).toBe("new2");
+    expect(state.cellData[cellId("3")].code).toBe("code1");
+    expect(state.cellData[cellId("4")].code).toBe("code2");
+    expect(state.cellIds.inOrderIds).toEqual([
+      cellId("1"),
+      cellId("2"),
+      cellId("3"),
+      cellId("4"),
+    ]);
     // Cell 5 data is preserved (possibly used for tracing), but it's not in the cellIds
-    expect(state.cellData["5" as CellId]).not.toBeUndefined();
+    expect(state.cellData[cellId("5")]).not.toBeUndefined();
+  });
+
+  it("can set cell codes with names and configs", () => {
+    const newIds = [cellId("3"), cellId("4")];
+    actions.setCellIds({ cellIds: newIds });
+    actions.setCellCodes({
+      codes: ["code1", "code2"],
+      ids: newIds,
+      codeIsStale: false,
+      names: ["setup_cell", "analysis"],
+      configs: [
+        { hide_code: true, disabled: false, column: null },
+        { hide_code: false, disabled: true, column: null },
+      ],
+    });
+
+    expect(state.cellData[cellId("3")].name).toBe("setup_cell");
+    expect(state.cellData[cellId("3")].config.hide_code).toBe(true);
+    expect(state.cellData[cellId("3")].config.disabled).toBe(false);
+
+    expect(state.cellData[cellId("4")].name).toBe("analysis");
+    expect(state.cellData[cellId("4")].config.hide_code).toBe(false);
+    expect(state.cellData[cellId("4")].config.disabled).toBe(true);
+  });
+
+  it("can set cell codes without names/configs (backward compat)", () => {
+    const newIds = [cellId("3")];
+    actions.setCellIds({ cellIds: newIds });
+    actions.setCellCodes({
+      codes: ["code1"],
+      ids: newIds,
+      codeIsStale: false,
+    });
+
+    // Should use defaults when names/configs not provided
+    expect(state.cellData[cellId("3")].code).toBe("code1");
+    expect(state.cellData[cellId("3")].config.hide_code).toBe(false);
+    expect(state.cellData[cellId("3")].config.disabled).toBe(false);
+  });
+
+  it("can update names and configs on existing cells via setCellCodes", () => {
+    // Set initial state
+    actions.setCellCodes({
+      codes: ["x = 1"],
+      ids: [firstCellId],
+      codeIsStale: false,
+      names: ["old_name"],
+      configs: [{ hide_code: false, disabled: false, column: null }],
+    });
+    expect(state.cellData[firstCellId].name).toBe("old_name");
+    expect(state.cellData[firstCellId].config.hide_code).toBe(false);
+
+    // Update with new name and config (same code)
+    actions.setCellCodes({
+      codes: ["x = 1"],
+      ids: [firstCellId],
+      codeIsStale: true,
+      names: ["new_name"],
+      configs: [{ hide_code: true, disabled: false, column: null }],
+    });
+    expect(state.cellData[firstCellId].name).toBe("new_name");
+    expect(state.cellData[firstCellId].config.hide_code).toBe(true);
   });
 
   it("can fold and unfold all cells", () => {
@@ -1459,12 +1880,12 @@ describe("cell reducer", () => {
   it("can collapse and expand cells", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
     actions.createNewCell({
-      cellId: "1" as CellId,
+      cellId: cellId("1"),
       before: false,
       code: "# Header",
     });
     actions.createNewCell({
-      cellId: "2" as CellId,
+      cellId: cellId("2"),
       before: false,
       code: "## Subheader",
     });
@@ -1487,25 +1908,25 @@ describe("cell reducer", () => {
   it("can collapse and expand all cells in multiple columns", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
     actions.createNewCell({
-      cellId: "1" as CellId,
+      cellId: cellId("1"),
       before: false,
       code: "# First Column Header",
     });
     actions.createNewCell({
-      cellId: "2" as CellId,
+      cellId: cellId("2"),
       before: false,
       code: "## First Column Subheader",
     });
 
-    actions.addColumnBreakpoint({ cellId: "2" as CellId });
+    actions.addColumnBreakpoint({ cellId: cellId("2") });
 
     actions.createNewCell({
-      cellId: "3" as CellId,
+      cellId: cellId("3"),
       before: false,
       code: "# Second Column Header",
     });
     actions.createNewCell({
-      cellId: "4" as CellId,
+      cellId: cellId("4"),
       before: false,
       code: "## Second Column Subheader",
     });
@@ -1554,17 +1975,17 @@ describe("cell reducer", () => {
   it("can collapse and expand nested cells in one call", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
     actions.createNewCell({
-      cellId: "1" as CellId,
+      cellId: cellId("1"),
       before: false,
       code: "# Header",
     });
     actions.createNewCell({
-      cellId: "2" as CellId,
+      cellId: cellId("2"),
       before: false,
       code: "## Subheader",
     });
     actions.createNewCell({
-      cellId: "3" as CellId,
+      cellId: cellId("3"),
       before: false,
       code: "### Subsubheader",
     });
@@ -1608,10 +2029,10 @@ describe("cell reducer", () => {
 
   it("can show hidden cells", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
     actions.collapseCell({ cellId: firstCellId });
 
-    actions.showCellIfHidden({ cellId: "1" as CellId });
+    actions.showCellIfHidden({ cellId: cellId("1") });
     expect(state.cellIds.atOrThrow(FIRST_COLUMN).isCollapsed(firstCellId)).toBe(
       false,
     );
@@ -1686,8 +2107,8 @@ describe("cell reducer", () => {
 
   it("can add a column breakpoint", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
-    actions.createNewCell({ cellId: "2" as CellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
+    actions.createNewCell({ cellId: cellId("2"), before: false });
 
     expect(state.cellIds.getColumns().length).toBe(1);
     expect(formatCells(state)).toMatchInlineSnapshot(`
@@ -1702,7 +2123,7 @@ describe("cell reducer", () => {
       "
     `);
 
-    actions.addColumnBreakpoint({ cellId: "2" as CellId });
+    actions.addColumnBreakpoint({ cellId: cellId("2") });
 
     expect(state.cellIds.getColumns().length).toBe(2);
     expect(formatCells(state)).toMatchInlineSnapshot(`
@@ -1720,23 +2141,29 @@ describe("cell reducer", () => {
     `);
 
     // Check that the cells are in the correct columns
-    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual(["0", "1"]);
-    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual(["2", "3"]);
+    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual([
+      cellId("0"),
+      cellId("1"),
+    ]);
+    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual([
+      cellId("2"),
+      cellId("3"),
+    ]);
   });
 
   it("cannot add a column breakpoint before the first cell", () => {
     expect(state.cellIds.getColumns().length).toBe(1);
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
     actions.addColumnBreakpoint({ cellId: firstCellId });
     expect(state.cellIds.getColumns().length).toBe(1);
   });
 
   it("can delete a column", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
-    actions.createNewCell({ cellId: "2" as CellId, before: false });
-    actions.addColumnBreakpoint({ cellId: "2" as CellId });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
+    actions.createNewCell({ cellId: cellId("2"), before: false });
+    actions.addColumnBreakpoint({ cellId: cellId("2") });
 
     expect(state.cellIds.getColumns().length).toBe(2);
     expect(formatCells(state)).toMatchInlineSnapshot(`
@@ -1780,7 +2207,7 @@ describe("cell reducer", () => {
 
   it("deleting the last column does nothing", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
 
     const initialState = { ...state };
 
@@ -1792,8 +2219,8 @@ describe("cell reducer", () => {
 
   it("can drop a cell over another cell", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
-    actions.createNewCell({ cellId: "2" as CellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
+    actions.createNewCell({ cellId: cellId("2"), before: false });
 
     expect(formatCells(state)).toMatchInlineSnapshot(`
       "
@@ -1808,8 +2235,8 @@ describe("cell reducer", () => {
     `);
 
     actions.dropCellOverCell({
-      cellId: "0" as CellId,
-      overCellId: "3" as CellId,
+      cellId: cellId("0"),
+      overCellId: cellId("3"),
     });
 
     expect(formatCells(state)).toMatchInlineSnapshot(`
@@ -1827,7 +2254,7 @@ describe("cell reducer", () => {
 
   it("can drop a cell over a new column", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
 
     expect(state.cellIds.getColumns().length).toBe(1);
     expect(formatCells(state)).toMatchInlineSnapshot(`
@@ -1840,7 +2267,7 @@ describe("cell reducer", () => {
       "
     `);
 
-    actions.dropOverNewColumn({ cellId: "1" as CellId });
+    actions.dropOverNewColumn({ cellId: cellId("1") });
 
     expect(state.cellIds.getColumns().length).toBe(2);
     expect(formatCells(state)).toMatchInlineSnapshot(`
@@ -1856,15 +2283,18 @@ describe("cell reducer", () => {
     `);
 
     // Check that the cells are in the correct columns
-    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual(["0", "2"]);
-    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual(["1"]);
+    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual([
+      cellId("0"),
+      cellId("2"),
+    ]);
+    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual([cellId("1")]);
   });
 
   it("can drop a column over another column", () => {
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
-    actions.createNewCell({ cellId: "2" as CellId, before: false });
-    actions.addColumnBreakpoint({ cellId: "2" as CellId });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
+    actions.createNewCell({ cellId: cellId("2"), before: false });
+    actions.addColumnBreakpoint({ cellId: cellId("2") });
 
     expect(state.cellIds.getColumns().length).toBe(2);
     expect(formatCells(state)).toMatchInlineSnapshot(`
@@ -1902,17 +2332,23 @@ describe("cell reducer", () => {
     `);
 
     // Check that the columns have swapped positions
-    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual(["2", "3"]);
-    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual(["0", "1"]);
+    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual([
+      cellId("2"),
+      cellId("3"),
+    ]);
+    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual([
+      cellId("0"),
+      cellId("1"),
+    ]);
   });
 
   it("can compact columns", () => {
     // Create initial state with 3 columns, including an empty one
     actions.createNewCell({ cellId: firstCellId, before: false });
-    actions.createNewCell({ cellId: "1" as CellId, before: false });
-    actions.addColumnBreakpoint({ cellId: "1" as CellId });
-    actions.addColumnBreakpoint({ cellId: "2" as CellId });
-    actions.dropOverNewColumn({ cellId: "2" as CellId });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
+    actions.addColumnBreakpoint({ cellId: cellId("1") });
+    actions.addColumnBreakpoint({ cellId: cellId("2") });
+    actions.dropOverNewColumn({ cellId: cellId("2") });
 
     expect(state.cellIds.getColumns().length).toBe(4);
     expect(formatCells(state)).toMatchInlineSnapshot(`
@@ -1932,10 +2368,10 @@ describe("cell reducer", () => {
     `);
 
     // Check initial column structure
-    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual(["0"]);
-    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual(["1"]);
+    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual([cellId("0")]);
+    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual([cellId("1")]);
     expect(state.cellIds.getColumns()[2].topLevelIds).toEqual([]);
-    expect(state.cellIds.getColumns()[3].topLevelIds).toEqual(["2"]);
+    expect(state.cellIds.getColumns()[3].topLevelIds).toEqual([cellId("2")]);
 
     // Compact columns
     actions.compactColumns();
@@ -1955,9 +2391,119 @@ describe("cell reducer", () => {
     `);
 
     // Check compacted column structure
-    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual(["0"]);
-    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual(["1"]);
-    expect(state.cellIds.getColumns()[2].topLevelIds).toEqual(["2"]);
+    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual([cellId("0")]);
+    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual([cellId("1")]);
+    expect(state.cellIds.getColumns()[2].topLevelIds).toEqual([cellId("2")]);
+  });
+
+  it("rebuildCellColumns regroups cells by config.column", () => {
+    // Create four cells in a single column.
+    actions.createNewCell({ cellId: firstCellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
+    actions.createNewCell({ cellId: cellId("2"), before: false });
+    expect(state.cellIds.getColumns().length).toBe(1);
+
+    // Explicitly set config.column on each cell. This ONLY updates metadata —
+    // updateCellConfig does not touch the MultiColumn tree.
+    actions.updateCellConfig({
+      cellId: cellId("0"),
+      config: { column: 0 },
+    });
+    actions.updateCellConfig({
+      cellId: cellId("2"),
+      config: { column: 1 },
+    });
+
+    // Tree is still a single column at this point.
+    expect(state.cellIds.getColumns().length).toBe(1);
+
+    // Now rebuild the column tree from metadata.
+    actions.rebuildCellColumns({
+      cellIds: [cellId("0"), cellId("1"), cellId("2"), cellId("3")],
+    });
+
+    expect(state.cellIds.getColumns().length).toBe(2);
+    // Cell 1 inherits from 0 (col 0), cell 3 inherits from 2 (col 1).
+    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual([
+      cellId("0"),
+      cellId("1"),
+    ]);
+    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual([
+      cellId("2"),
+      cellId("3"),
+    ]);
+  });
+
+  it("rebuildCellColumns with explicit column on every cell", () => {
+    actions.createNewCell({ cellId: firstCellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
+    actions.createNewCell({ cellId: cellId("2"), before: false });
+
+    for (const [id, col] of [
+      ["0", 1],
+      ["1", 0],
+      ["2", 1],
+      ["3", 0],
+    ] as const) {
+      actions.updateCellConfig({ cellId: cellId(id), config: { column: col } });
+    }
+
+    actions.rebuildCellColumns({
+      cellIds: [cellId("0"), cellId("1"), cellId("2"), cellId("3")],
+    });
+
+    expect(state.cellIds.getColumns().length).toBe(2);
+    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual([
+      cellId("1"),
+      cellId("3"),
+    ]);
+    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual([
+      cellId("0"),
+      cellId("2"),
+    ]);
+  });
+
+  it("rebuildCellColumns collapses to one column when all cells are col 0", () => {
+    actions.createNewCell({ cellId: firstCellId, before: false });
+    actions.addColumnBreakpoint({ cellId: cellId("1") });
+    expect(state.cellIds.getColumns().length).toBe(2);
+
+    // Wipe column metadata back to 0 for both cells.
+    actions.updateCellConfig({ cellId: cellId("0"), config: { column: 0 } });
+    actions.updateCellConfig({ cellId: cellId("1"), config: { column: 0 } });
+
+    actions.rebuildCellColumns({
+      cellIds: [cellId("0"), cellId("1")],
+    });
+
+    expect(state.cellIds.getColumns().length).toBe(1);
+    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual([
+      cellId("0"),
+      cellId("1"),
+    ]);
+  });
+
+  it("rebuildCellColumns follows the provided order, not current tree order", () => {
+    // Start with a single column.
+    actions.createNewCell({ cellId: firstCellId, before: false });
+    actions.createNewCell({ cellId: cellId("1"), before: false });
+    actions.updateCellConfig({ cellId: cellId("0"), config: { column: 0 } });
+    actions.updateCellConfig({ cellId: cellId("2"), config: { column: 1 } });
+
+    // Pass the reversed order. The rebuild should honor it.
+    actions.rebuildCellColumns({
+      cellIds: [cellId("2"), cellId("1"), cellId("0")],
+    });
+
+    // cellIds iteration:
+    //   2 → col=1, pushed to col1, prev=1
+    //   1 → col=null, pushed to col[prev=1] = col1
+    //   0 → col=0, pushed to col0
+    expect(state.cellIds.getColumns()[0].topLevelIds).toEqual([cellId("0")]);
+    expect(state.cellIds.getColumns()[1].topLevelIds).toEqual([
+      cellId("2"),
+      cellId("1"),
+    ]);
   });
 
   it("can clear output of a single cell", () => {
@@ -2344,7 +2890,7 @@ describe("cell reducer", () => {
       const initialState = { ...state };
 
       actions.moveToNextCell({
-        cellId: "__scratch__" as CellId,
+        cellId: SCRATCH_CELL_ID,
         before: false,
         noCreate: false,
       });
@@ -2372,6 +2918,39 @@ describe("cell reducer", () => {
       const newCellId =
         state.cellIds.inOrderIds[state.cellIds.inOrderIds.length - 1];
       expect(state.untouchedNewCells.has(newCellId)).toBe(true);
+    });
+
+    it("adds interactively-created hidden cell with boilerplate code to untouchedNewCells", () => {
+      // Markdown cells are created with hideCode and non-empty default code
+      // (e.g. `mo.md(r"""\n""")`). They are user-initiated, so their editor
+      // should be shown until first blur.
+      actions.createNewCell({
+        cellId: "__end__",
+        before: false,
+        code: 'mo.md(r"""\n""")',
+        hideCode: true,
+        autoFocus: true,
+      });
+
+      const newCellId =
+        state.cellIds.inOrderIds[state.cellIds.inOrderIds.length - 1];
+      expect(state.untouchedNewCells.has(newCellId)).toBe(true);
+    });
+
+    it("does not add programmatically-created hidden cell with code to untouchedNewCells", () => {
+      // Cells created by the kernel (e.g. via code_mode) carry code and
+      // autoFocus=false; their hide_code must take effect immediately.
+      actions.createNewCell({
+        cellId: "__end__",
+        before: false,
+        code: "x = 1",
+        hideCode: true,
+        autoFocus: false,
+      });
+
+      const newCellId =
+        state.cellIds.inOrderIds[state.cellIds.inOrderIds.length - 1];
+      expect(state.untouchedNewCells.has(newCellId)).toBe(false);
     });
 
     it("does not add cell to untouchedNewCells when hideCode is false", () => {
@@ -2436,7 +3015,7 @@ describe("cell reducer", () => {
     });
 
     it("can mark a non-existent cell as touched without error", () => {
-      const nonExistentCellId = "non-existent" as CellId;
+      const nonExistentCellId = cellId("non-existent");
 
       expect(() => {
         actions.markTouched({ cellId: nonExistentCellId });
@@ -2767,7 +3346,7 @@ describe("isCellCodeHidden", () => {
   const firstCellId = state.cellIds.inOrderIds[0];
 
   it("returns false when hide_code is false and cell is not untouched", () => {
-    const testCellId = "test-cell" as CellId;
+    const testCellId = cellId("test-cell");
     const testState: NotebookState = {
       ...state,
       cellData: {
@@ -2787,7 +3366,7 @@ describe("isCellCodeHidden", () => {
   });
 
   it("returns true when hide_code is true and cell is not untouched", () => {
-    const testCellId = "test-cell" as CellId;
+    const testCellId = cellId("test-cell");
     const testState: NotebookState = {
       ...state,
       cellData: {
@@ -2807,7 +3386,7 @@ describe("isCellCodeHidden", () => {
   });
 
   it("returns false when hide_code is true but cell is untouched", () => {
-    const testCellId = "test-cell" as CellId;
+    const testCellId = cellId("test-cell");
     const testState: NotebookState = {
       ...state,
       cellData: {
@@ -2827,7 +3406,7 @@ describe("isCellCodeHidden", () => {
   });
 
   it("returns false when hide_code is false and cell is untouched", () => {
-    const testCellId = "test-cell" as CellId;
+    const testCellId = cellId("test-cell");
     const testState: NotebookState = {
       ...state,
       cellData: {
@@ -2855,8 +3434,8 @@ describe("createTracebackInfoAtom", () => {
       notebookAtom,
       MockNotebook.notebookState({
         cellData: {
-          cell1: {
-            id: "cell1" as CellId,
+          [cellId("cell1")]: {
+            id: cellId("cell1"),
             name: "cell1",
             code: "",
           },
@@ -2865,7 +3444,7 @@ describe("createTracebackInfoAtom", () => {
     );
 
     const tracebackAtom = exportedForTesting.createTracebackInfoAtom(
-      "cell1" as CellId,
+      cellId("cell1"),
     );
     const traceback = store.get(tracebackAtom);
 
@@ -2877,10 +3456,14 @@ describe("createTracebackInfoAtom", () => {
       notebookAtom,
       MockNotebook.notebookState({
         cellData: {
-          cell1: { id: "cell1" as CellId, name: "cell1", code: "x = 1" },
+          [cellId("cell1")]: {
+            id: cellId("cell1"),
+            name: "cell1",
+            code: "x = 1",
+          },
         },
         cellRuntime: {
-          cell1: {
+          [cellId("cell1")]: {
             output: {
               channel: "marimo-error",
               data: [{ type: "syntax", msg: "Syntax error", lineno: 5 }],
@@ -2892,7 +3475,7 @@ describe("createTracebackInfoAtom", () => {
     );
 
     const tracebackAtom = exportedForTesting.createTracebackInfoAtom(
-      "cell1" as CellId,
+      cellId("cell1"),
     );
     const traceback = store.get(tracebackAtom);
 
@@ -2900,7 +3483,7 @@ describe("createTracebackInfoAtom", () => {
     expect(traceback).toHaveLength(1);
     expect(traceback![0]).toEqual({
       kind: "cell",
-      cellId: "cell1",
+      cellId: cellId("cell1"),
       lineNumber: 5,
     });
   });
@@ -2910,10 +3493,14 @@ describe("createTracebackInfoAtom", () => {
       notebookAtom,
       MockNotebook.notebookState({
         cellData: {
-          cell1: { id: "cell1" as CellId, name: "cell1", code: "x = 1" },
+          [cellId("cell1")]: {
+            id: cellId("cell1"),
+            name: "cell1",
+            code: "x = 1",
+          },
         },
         cellRuntime: {
-          cell1: {
+          [cellId("cell1")]: {
             output: {
               channel: "marimo-error",
               data: [{ type: "syntax", msg: "Syntax error", lineno: 0 }],
@@ -2925,7 +3512,7 @@ describe("createTracebackInfoAtom", () => {
     );
 
     const tracebackAtom = exportedForTesting.createTracebackInfoAtom(
-      "cell1" as CellId,
+      cellId("cell1"),
     );
     const traceback = store.get(tracebackAtom);
     expect(traceback).toBeDefined();
@@ -2938,10 +3525,14 @@ describe("createTracebackInfoAtom", () => {
       notebookAtom,
       MockNotebook.notebookState({
         cellData: {
-          cell1: { id: "cell1" as CellId, name: "cell1", code: "x = 1" },
+          [cellId("cell1")]: {
+            id: cellId("cell1"),
+            name: "cell1",
+            code: "x = 1",
+          },
         },
         cellRuntime: {
-          cell1: {
+          [cellId("cell1")]: {
             output: {
               channel: "marimo-error",
               data: [{ type: "syntax", msg: "Syntax error", lineno: null }],
@@ -2953,7 +3544,7 @@ describe("createTracebackInfoAtom", () => {
     );
 
     const tracebackAtom = exportedForTesting.createTracebackInfoAtom(
-      "cell1" as CellId,
+      cellId("cell1"),
     );
     const traceback = store.get(tracebackAtom);
 
@@ -2965,10 +3556,14 @@ describe("createTracebackInfoAtom", () => {
       notebookAtom,
       MockNotebook.notebookState({
         cellData: {
-          cell1: { id: "cell1" as CellId, name: "cell1", code: "x = 1" },
+          [cellId("cell1")]: {
+            id: cellId("cell1"),
+            name: "cell1",
+            code: "x = 1",
+          },
         },
         cellRuntime: {
-          cell1: {
+          [cellId("cell1")]: {
             output: {
               channel: "marimo-error",
               data: [
@@ -2983,7 +3578,7 @@ describe("createTracebackInfoAtom", () => {
     );
 
     const tracebackAtom = exportedForTesting.createTracebackInfoAtom(
-      "cell1" as CellId,
+      cellId("cell1"),
     );
     const traceback = store.get(tracebackAtom);
     expect(traceback).toBeDefined();
@@ -2997,10 +3592,14 @@ describe("createTracebackInfoAtom", () => {
       notebookAtom,
       MockNotebook.notebookState({
         cellData: {
-          cell1: { id: "cell1" as CellId, name: "cell1", code: "x = 1" },
+          [cellId("cell1")]: {
+            id: cellId("cell1"),
+            name: "cell1",
+            code: "x = 1",
+          },
         },
         cellRuntime: {
-          cell1: {
+          [cellId("cell1")]: {
             output: {
               channel: "marimo-error",
               data: [{ type: "syntax", msg: "Syntax error", lineno: 1 }],
@@ -3013,7 +3612,7 @@ describe("createTracebackInfoAtom", () => {
     );
 
     const tracebackAtom = exportedForTesting.createTracebackInfoAtom(
-      "cell1" as CellId,
+      cellId("cell1"),
     );
     const traceback = store.get(tracebackAtom);
 
@@ -3025,10 +3624,14 @@ describe("createTracebackInfoAtom", () => {
       notebookAtom,
       MockNotebook.notebookState({
         cellData: {
-          cell1: { id: "cell1" as CellId, name: "cell1", code: "x = 1" },
+          [cellId("cell1")]: {
+            id: cellId("cell1"),
+            name: "cell1",
+            code: "x = 1",
+          },
         },
         cellRuntime: {
-          cell1: {
+          [cellId("cell1")]: {
             output: {
               channel: "marimo-error",
               data: [{ type: "syntax", msg: "Syntax error", lineno: 1 }],
@@ -3041,10 +3644,106 @@ describe("createTracebackInfoAtom", () => {
     );
 
     const tracebackAtom = exportedForTesting.createTracebackInfoAtom(
-      "cell1" as CellId,
+      cellId("cell1"),
     );
     const traceback = store.get(tracebackAtom);
 
     expect(traceback).toBeUndefined();
+  });
+});
+
+describe("setCells snapshot preservation", () => {
+  const CELL_A = cellId("A");
+  const CELL_B = cellId("B");
+  const newCells: CellData[] = [
+    {
+      id: CELL_A,
+      name: "a",
+      code: "1",
+      edited: false,
+      lastCodeRun: null,
+      lastExecutionTime: null,
+      config: { hide_code: false, disabled: false, column: null },
+      serializedEditorState: null,
+    },
+    {
+      id: CELL_B,
+      name: "b",
+      code: "2",
+      edited: false,
+      lastCodeRun: null,
+      lastExecutionTime: null,
+      config: { hide_code: false, disabled: false, column: null },
+      serializedEditorState: null,
+    },
+  ];
+
+  const hydratedState = () =>
+    MockNotebook.notebookState({
+      cellData: {
+        [CELL_A]: { id: CELL_A, code: "1" },
+        [CELL_B]: { id: CELL_B, code: "2" },
+      },
+      cellRuntime: {
+        [CELL_A]: {
+          output: {
+            channel: "output",
+            mimetype: "text/plain",
+            data: "hydrated-A",
+            timestamp: 0,
+          },
+        },
+        [CELL_B]: {
+          consoleOutputs: [
+            {
+              channel: "stdout",
+              mimetype: "text/plain",
+              data: "hydrated-B-stdout",
+              timestamp: 0,
+            },
+          ],
+        },
+      },
+    });
+
+  beforeEach(async () => {
+    const { isWasm } = await import("@/core/wasm/utils");
+    vi.mocked(isWasm).mockReturnValue(true);
+  });
+
+  it("preserves hydrated output in WASM", () => {
+    const next = exportedForTesting.reducer(hydratedState(), {
+      type: "setCells",
+      payload: newCells,
+    });
+
+    expect(next.cellRuntime[CELL_A].output).toMatchObject({
+      data: "hydrated-A",
+    });
+  });
+
+  it("preserves console-only hydration in WASM", () => {
+    const next = exportedForTesting.reducer(hydratedState(), {
+      type: "setCells",
+      payload: newCells,
+    });
+
+    expect(next.cellRuntime[CELL_B].consoleOutputs).toHaveLength(1);
+    expect(next.cellRuntime[CELL_B].consoleOutputs[0]).toMatchObject({
+      data: "hydrated-B-stdout",
+    });
+  });
+
+  it("resets cells with no prior runtime even in WASM", () => {
+    const empty = MockNotebook.notebookState({ cellData: {} });
+    const next = exportedForTesting.reducer(empty, {
+      type: "setCells",
+      payload: newCells,
+    });
+
+    expect(next.cellRuntime[CELL_A].output).toBeNull();
+    expect(next.cellRuntime[CELL_A].consoleOutputs).toEqual([]);
+    expect(next.cellRuntime[CELL_B].output).toBeNull();
+    expect(next.cellRuntime[CELL_B].consoleOutputs).toEqual([]);
   });
 });

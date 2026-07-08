@@ -1,7 +1,6 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { useAtom, useAtomValue } from "jotai";
-import { capitalize } from "lodash-es";
+import { useAtom } from "jotai";
 import {
   BotMessageSquareIcon,
   RefreshCwIcon,
@@ -9,7 +8,7 @@ import {
 } from "lucide-react";
 import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import useEvent from "react-use-event-hook";
-import { useAcpClient } from "use-acp";
+import { JsonRpcError, useAcpClient } from "use-acp";
 import {
   ConnectionStatus,
   PermissionRequest,
@@ -24,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/utils/cn";
 import { Logger } from "@/utils/Logger";
+import { capitalize } from "@/utils/strings";
 import { AgentDocs } from "./agent-docs";
 import { AgentSelector } from "./agent-selector";
 import { ModelSelector } from "./model-selector";
@@ -49,6 +49,7 @@ import {
   addContextCompletion,
   CONTEXT_TRIGGER,
 } from "@/components/editor/ai/completion-utils";
+import { pendingAiPromptAtom } from "@/core/ai/state";
 import {
   Select,
   SelectContent,
@@ -72,6 +73,7 @@ import {
   SendButton,
 } from "../chat-components";
 import { useFileState } from "../chat-utils";
+import { focusInputAndMoveToEnd } from "@/core/codemirror/utils";
 import { ReadyToChatBlock } from "./blocks";
 import {
   convertFilesToResourceLinks,
@@ -95,7 +97,9 @@ interface AgentTitleProps {
 }
 
 const AgentTitle = memo<AgentTitleProps>(({ currentAgentId }) => (
-  <span className="text-sm font-medium">{capitalize(currentAgentId)}</span>
+  <span className="text-sm font-medium">
+    {capitalize(currentAgentId ?? "")}
+  </span>
 ));
 AgentTitle.displayName = "AgentTitle";
 
@@ -205,7 +209,6 @@ interface EmptyStateProps {
 
 const EmptyState = memo<EmptyStateProps>(
   ({ currentAgentId, connectionState, onConnect, onDisconnect }) => {
-    const filename = useAtomValue(filenameAtom);
     return (
       <div className="flex flex-col h-full">
         <AgentPanelHeader
@@ -221,7 +224,7 @@ const EmptyState = memo<EmptyStateProps>(
             <PanelEmptyState
               title="No Agent Sessions"
               description="Create a new session to start a conversation"
-              action={<AgentSelector className="border-y-1 rounded" />}
+              action={<AgentSelector className="border-y rounded" />}
               icon={<BotMessageSquareIcon />}
             />
             {connectionState.status === "disconnected" && (
@@ -230,10 +233,13 @@ const EmptyState = memo<EmptyStateProps>(
                 title="Connect to an agent"
                 description={
                   <>
-                    Start agents by running these commands in your terminal:
+                    <span>
+                      Start agents by running these commands in your terminal.
+                    </span>
                     <br />
-                    Note: This must be in the directory{" "}
-                    {Paths.dirname(filename ?? "")}
+                    <span>
+                      Authenticate with the agent before starting a session.
+                    </span>
                   </>
                 }
               />
@@ -259,7 +265,7 @@ const LoadingIndicator = memo<LoadingIndicatorProps>(
     }
 
     return (
-      <div className="px-3 py-2 border-t bg-muted/30 flex-shrink-0">
+      <div className="px-3 py-2 border-t bg-muted/30 shrink-0">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <Spinner size="small" className="text-primary" />
@@ -301,6 +307,7 @@ interface PromptAreaProps {
   onModeChange?: (mode: string) => void;
   sessionModels?: SessionModelState | null;
   onModelChange?: (modelId: string) => void;
+  inputRef: React.RefObject<ReactCodeMirrorRef | null>;
 }
 
 const PromptArea = memo<PromptAreaProps>(
@@ -318,8 +325,8 @@ const PromptArea = memo<PromptAreaProps>(
     onModeChange,
     sessionModels,
     onModelChange,
+    inputRef,
   }) => {
-    const inputRef = useRef<ReactCodeMirrorRef | null>(null);
     const promptCompletions: AdditionalCompletions | undefined = useMemo(() => {
       if (!commands) {
         return undefined;
@@ -348,7 +355,7 @@ const PromptArea = memo<PromptAreaProps>(
     });
 
     return (
-      <div className="border-t bg-background flex-shrink-0">
+      <div className="border-t bg-background shrink-0">
         <div
           className={cn(
             "px-3 py-2 min-h-[80px]",
@@ -579,7 +586,7 @@ const ChatContent = memo<ChatContentProps>(
     };
 
     return (
-      <div className="flex-1 flex flex-col overflow-hidden flex-shrink-0 relative">
+      <div className="flex-1 flex flex-col overflow-hidden shrink-0 relative">
         {pendingPermission && (
           <div className="p-3 border-b">
             <PermissionRequest
@@ -613,6 +620,15 @@ const ChatContent = memo<ChatContentProps>(
 ChatContent.displayName = "ChatContent";
 
 const NO_WS_SET = "_skip_auto_connect_";
+const AUTH_REQUIRED_CODE = -32_000;
+
+function getDataMessage(data: unknown): string | undefined {
+  if (data != null && typeof data === "object" && "message" in data) {
+    const msg = (data as Record<string, unknown>).message;
+    return typeof msg === "string" ? msg : undefined;
+  }
+  return undefined;
+}
 
 function getCwd(): string {
   const cwd = store.get(cwdAtom);
@@ -647,6 +663,8 @@ const AgentPanel: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | string | null>(null);
   const [promptValue, setPromptValue] = useState("");
+  const promptInputRef = useRef<ReactCodeMirrorRef | null>(null);
+  const [pendingPrompt, setPendingPrompt] = useAtom(pendingAiPromptAtom);
   const { files, addFiles, clearFiles, removeFile } = useFileState();
   const [sessionModels, setSessionModels] = useState<SessionModelState | null>(
     null,
@@ -703,14 +721,31 @@ const AgentPanel: React.FC = () => {
   } = acpClient;
 
   useEffect(() => {
-    agent?.initialize({
-      protocolVersion: 1,
-      clientCapabilities: {
-        fs: {
-          readTextFile: true,
-          writeTextFile: true,
+    if (!agent) {
+      return;
+    }
+
+    const initAndAuth = async () => {
+      const response = await agent.initialize({
+        protocolVersion: 1,
+        clientCapabilities: {
+          fs: {
+            readTextFile: true,
+            writeTextFile: true,
+          },
         },
-      },
+      });
+
+      // We try to authenticate with the agent if it supports it.
+      // The user must then restart the session
+      const authMethods = response?.authMethods;
+      if (authMethods && authMethods.length > 0) {
+        await agent.authenticate({ methodId: authMethods[0].id });
+      }
+    };
+
+    initAndAuth().catch((error) => {
+      logger.error("Failed to initialize/authenticate agent", { error });
     });
   }, [agent]);
 
@@ -733,7 +768,7 @@ const AgentPanel: React.FC = () => {
       // We don't want to disconnect so users can switch between different
       // panels without losing their session
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [wsUrl]);
 
   const handleNewSession = useEvent(async () => {
@@ -859,7 +894,7 @@ const AgentPanel: React.FC = () => {
     };
 
     createOrResumeSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected, agent, tabLastActiveSessionId, activeSessionId]);
 
   // Handler for prompt submission
@@ -942,6 +977,34 @@ const AgentPanel: React.FC = () => {
       }
     },
   );
+
+  // Consume a prompt queued by another part of the app (e.g. error auto-fix).
+  useEffect(() => {
+    if (
+      !activeSessionId ||
+      !agent ||
+      isLoading ||
+      connectionState.status !== "connected" ||
+      !pendingPrompt
+    ) {
+      return;
+    }
+    setPendingPrompt(null);
+    if (pendingPrompt.submit) {
+      void handlePromptSubmit(undefined, pendingPrompt.prompt);
+    } else {
+      setPromptValue(pendingPrompt.prompt);
+      focusInputAndMoveToEnd(promptInputRef);
+    }
+  }, [
+    activeSessionId,
+    agent,
+    isLoading,
+    connectionState.status,
+    pendingPrompt,
+    setPendingPrompt,
+    handlePromptSubmit,
+  ]);
 
   // Handler for stopping the current operation
   const handleStop = useEvent(async () => {
@@ -1039,18 +1102,37 @@ const AgentPanel: React.FC = () => {
 
   const renderBody = () => {
     if (error) {
+      const isAuthError =
+        error instanceof JsonRpcError && error.code === AUTH_REQUIRED_CODE;
+      const dataMessage =
+        error instanceof JsonRpcError ? getDataMessage(error.data) : undefined;
+      const displayError = dataMessage ? new Error(dataMessage) : error;
+
       return (
         <ErrorBanner
           className="w-3/4 mx-auto mt-10"
-          error={error}
+          error={displayError}
           action={
-            <Button
-              variant="linkDestructive"
-              size="sm"
-              onClick={() => setError(null)}
-            >
-              Dismiss
-            </Button>
+            isAuthError ? (
+              <Button
+                variant="linkDestructive"
+                size="sm"
+                onClick={() => {
+                  setError(null);
+                  handleNewSession();
+                }}
+              >
+                Restart session
+              </Button>
+            ) : (
+              <Button
+                variant="linkDestructive"
+                size="sm"
+                onClick={() => setError(null)}
+              >
+                Dismiss
+              </Button>
+            )
           }
         />
       );
@@ -1138,6 +1220,7 @@ const AgentPanel: React.FC = () => {
           onModeChange={handleModeChange}
           sessionModels={sessionModels}
           onModelChange={handleModelChange}
+          inputRef={promptInputRef}
         />
       </>
     );

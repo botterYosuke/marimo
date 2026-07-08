@@ -1,5 +1,5 @@
 /* Copyright 2026 Marimo. All rights reserved. */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* oxlint-disable typescript/no-explicit-any */
 
 import type { AnyModel } from "@anywidget/types";
 import { debounce } from "lodash-es";
@@ -113,6 +113,10 @@ interface MarimoInternalApi<T extends ModelState> {
    */
   updateAndEmitDiffs: (value: T) => void;
   /**
+   * Re-emit current state as change events.
+   */
+  reemitState: () => void;
+  /**
    * Emit a custom message to listeners.
    */
   emitCustomMessage: (
@@ -160,6 +164,7 @@ export class Model<T extends ModelState> implements AnyModel<T> {
    */
   [marimoSymbol]: MarimoInternalApi<T> = {
     updateAndEmitDiffs: (value: T) => this.#updateAndEmitDiffs(value),
+    reemitState: () => this.#reemitState(),
     emitCustomMessage: (
       message: Extract<AnyWidgetMessage, { method: "custom" }>,
       buffers?: readonly DataView[],
@@ -269,6 +274,16 @@ export class Model<T extends ModelState> implements AnyModel<T> {
     });
   }
 
+  #reemitState() {
+    for (const [key, value] of Object.entries(this.#data) as [
+      keyof T & string,
+      T[keyof T],
+    ][]) {
+      this.#emit(`change:${key}`, value);
+    }
+    this.#emitAnyChange();
+  }
+
   /**
    * When receiving a message from the backend.
    * We want to notify all listeners with `msg:custom`
@@ -323,8 +338,7 @@ export async function handleWidgetMessage(
   const msg = notification.message;
 
   // Decode base64 buffers to DataViews (present in open/update/custom messages)
-  const base64Buffers: Base64String[] =
-    "buffers" in msg ? (msg.buffers as Base64String[]) : [];
+  const base64Buffers: Base64String[] = "buffers" in msg ? msg.buffers : [];
   const buffers = base64Buffers.map(base64ToDataView);
 
   switch (msg.method) {

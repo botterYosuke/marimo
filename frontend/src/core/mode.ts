@@ -1,6 +1,6 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { atom } from "jotai";
+import { atom, useAtomValue } from "jotai";
 import { isIslands } from "@/core/islands/utils";
 import { assertExists } from "@/utils/assertExists";
 import { invariant } from "@/utils/invariant";
@@ -91,3 +91,12 @@ function setIs3DMode(value: boolean) {
   store.set(is3DModeAtom, value);
 }
 repl(setIs3DMode, "setIs3DMode");
+
+/**
+ * Whether installing packages is allowed in the current view. False in read
+ * mode, since end-users of a deployed notebook cannot mutate its environment.
+ */
+export function useInstallAllowed(): boolean {
+  const { mode } = useAtomValue(viewStateAtom);
+  return mode !== "read";
+}

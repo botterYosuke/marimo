@@ -1,8 +1,9 @@
 /* Copyright 2026 Marimo. All rights reserved. */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* oxlint-disable typescript/no-explicit-any */
 
+import { createStore } from "jotai";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { CellId } from "@/core/cells/ids";
+import { cellId, variableName } from "@/__tests__/branded";
 import type {
   ConnectionsMap,
   DatasetTablesMap,
@@ -88,7 +89,7 @@ const createMockDataTable = (
   source_type: "local",
   num_rows: 100,
   num_columns: 3,
-  variable_name: name, // This makes it a dataframe
+  variable_name: variableName(name), // This makes it a dataframe
   columns: [
     {
       name: "id",
@@ -634,7 +635,8 @@ describe("DatasourceContextProvider", () => {
 
 describe("getDatasourceContext", () => {
   it("should return null if no cell ID is found", () => {
-    const context = getDatasourceContext("1" as CellId);
+    const store = createStore();
+    const context = getDatasourceContext(cellId("1"), store);
     expect(context).toBeNull();
   });
 });

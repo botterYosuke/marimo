@@ -1,6 +1,6 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 
-import { sanitizeHtml } from "@/plugins/core/sanitize";
+import { sanitizeHtml } from "@/plugins/core/sanitize-html";
 import { invariant } from "@/utils/invariant";
 import { Logger } from "@/utils/Logger";
 import type { Outline, OutlineItem } from "../cells/outline";
@@ -39,7 +39,7 @@ function getOutline(html: string): Outline | null {
   const document = parser.parseFromString(html, "text/html");
 
   const headings = document.querySelectorAll(HEADER_TAGS);
-  // eslint-disable-next-line unicorn/prefer-spread
+  // oxlint-disable-next-line unicorn/prefer-spread
   for (const heading of Array.from(headings)) {
     const name = heading.textContent;
     // Check if the heading is within any of the excluded tags

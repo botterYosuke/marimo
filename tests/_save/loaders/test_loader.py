@@ -7,17 +7,31 @@ import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+import msgspec
 import pytest
 
-from marimo._save.cache import Cache
+from marimo._dependencies.dependencies import DependencyManager
+from marimo._save.cache import MARIMO_CACHE_VERSION, Cache
 from marimo._save.hash import HashKey
-from marimo._save.loaders import JsonLoader, MemoryLoader, PickleLoader
+from marimo._save.loaders import (
+    JsonLoader,
+    LazyLoader,
+    MemoryLoader,
+    PickleLoader,
+)
 from marimo._save.loaders.loader import (
     BasePersistenceLoader,
     Loader,
     LoaderPartial,
 )
 from marimo._save.stores.file import FileStore
+from marimo._save.stubs.lazy_stub import (
+    Cache as CacheSchema,
+    CacheType,
+    Item,
+    Meta,
+    UnhashableStub,
+)
 from tests._save.loaders.mocks import MockLoader
 
 
@@ -116,9 +130,8 @@ class ABCTestLoader(ABC):
         assert not loader.cache_hit(key("hash1", "Deferred"))
 
         # Empty file should miss
-        empty_path = loader.build_path(key("empty", "Pure"))
-        empty_path.parent.mkdir(parents=True, exist_ok=True)
-        empty_path.write_bytes(b"")
+        empty_key = str(loader.build_path(key("empty", "Pure")))
+        self.store.put(empty_key, b"")
         assert not loader.cache_hit(key("empty", "Pure"))
 
         assert loader.hits == 1
@@ -188,3 +201,400 @@ class TestPickleLoader(ABCTestLoader):
         )
 
         self.store.put(str(cache_path), pickle.dumps(cache))
+
+
+class TestLazyLoader(ABCTestLoader):
+    suffix = "jsonl"
+
+    def _instance(self) -> Loader:
+        return LazyLoader("test", store=self.store)
+
+    def teardown_method(self) -> None:
+        if self.value and hasattr(self.value, "flush"):
+            self.value.flush()
+        super().teardown_method()
+
+    def seed_cache(self) -> None:
+        loader = self.instance()
+        cache_path = loader.build_path(key("hash1", "Pure"))
+        base = Path("test") / "hash1"
+
+        # Write the pickle blob for var1
+        var_ref = (base / "var1.pickle").as_posix()
+        self.store.put(var_ref, pickle.dumps("value1"))
+
+        # Write the manifest
+        manifest = msgspec.json.encode(
+            CacheSchema(
+                hash="hash1",
+                cache_type=CacheType("Pure"),
+                defs={"var1": Item(reference=var_ref)},
+                stateful_refs=[],
+                meta=Meta(version=MARIMO_CACHE_VERSION),
+            )
+        )
+        self.store.put(str(cache_path), manifest)
+
+    def test_round_trip(self) -> None:
+        """Test save_cache -> flush -> load_cache round-trip."""
+        loader = self.instance()
+
+        cache = Cache(
+            defs={"x": 42, "y": "hello", "z": [1, 2, 3]},
+            hash="round_trip_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        loaded = loader.load_cache(key("round_trip_hash", "Pure"))
+        assert loaded is not None
+        assert loaded.hash == "round_trip_hash"
+        assert loaded.defs["x"] == 42
+        assert loaded.defs["y"] == "hello"
+        assert loaded.defs["z"] == [1, 2, 3]
+
+    def test_import_reference_stays_inline(self) -> None:
+        """Re-importable references (`from typing import Optional`, an
+        imported function/class) are stored inline in the manifest, not as
+        per-variable blobs, and restore to the original object by identity."""
+        from collections import OrderedDict
+        from typing import Optional
+
+        loader = self.instance()
+        cache = Cache(
+            defs={"Optional": Optional, "OrderedDict": OrderedDict},
+            hash="import_ref_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        cache.update({"Optional": Optional, "OrderedDict": OrderedDict})
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        # No blob files — only the manifest is written.
+        blobs = [
+            p
+            for p in Path(self.store.save_path).rglob("*")
+            if p.is_file() and p.suffix != ".jsonl"
+        ]
+        assert not blobs, f"expected no blobs, found {blobs}"
+
+        loaded = loader.load_cache(key("import_ref_hash", "Pure"))
+        assert loaded is not None
+        assert loaded.defs["Optional"] is Optional
+        assert loaded.defs["OrderedDict"] is OrderedDict
+
+    def test_unserializable_def_marks_manifest_no_blob(self) -> None:
+        """A def that can't be serialized (a lambda) writes no blob; the
+        manifest `Item` carries `unserializable_type`, and load reconstructs
+        an `UnhashableStub` tripwire in-memory."""
+        loader = self.instance()
+        cache = Cache(
+            # `ok` is a list (pickle-blob path); `f` is a lambda (unpicklable).
+            defs={"ok": [1, 2, 3], "f": lambda x: x + 1},
+            hash="unserializable_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        # No blob written for the lambda — only the serializable `ok` blob
+        # and the manifest exist.
+        blob_names = sorted(
+            p.name
+            for p in Path(self.store.save_path).rglob("*")
+            if p.is_file() and p.suffix != ".jsonl"
+        )
+        assert blob_names == ["ok.pickle"], blob_names
+
+        # Manifest marks the lambda's Item, with no dangling reference.
+        cache_path = loader.build_path(key("unserializable_hash", "Pure"))
+        manifest = self.store.get(str(cache_path))
+        decoded = msgspec.json.decode(manifest, type=CacheSchema)
+        f_item = decoded.defs["f"]
+        assert f_item.reference is None
+        assert f_item.unserializable_type is not None
+        assert "function" in f_item.unserializable_type.lower()
+
+        # Load: `ok` restores; `f` becomes an in-memory tripwire.
+        loaded = loader.load_cache(key("unserializable_hash", "Pure"))
+        assert loaded is not None
+        assert loaded.defs["ok"] == [1, 2, 3]
+        assert isinstance(loaded.defs["f"], UnhashableStub)
+        assert loaded.defs["f"].var_name == "f"
+
+    def test_unserializable_ui_clears_ui_defs_and_stale_blob(self) -> None:
+        """A UI def that can't be pickled must not leave `ui_defs` pointing
+        at `ui.pickle`: restore loads UI defs via `ui_defs`, bypassing the
+        per-Item marks, so a stale `ui.pickle` from a prior run would load as
+        a phantom hit. On failure `ui_defs` is cleared, each UI Item is
+        marked, and the stale blob is removed."""
+        from marimo._save.stubs.ui_element_stub import UIElementStub
+
+        loader = self.instance()
+        # A UIElementStub instance routes to the "ui" loader by type; give it
+        # an unpicklable attribute so the shared ui.pickle write fails.
+        ui_stub = UIElementStub.__new__(UIElementStub)
+        ui_stub.data = {"bad": lambda: 1}  # type: ignore[attr-defined]
+
+        # Pre-seed a stale ui.pickle at the hash path from a "prior run".
+        base = Path("test") / "ui_fail_hash"
+        ui_key = (base / "ui.pickle").as_posix()
+        self.store.put(ui_key, pickle.dumps({"u": "stale"}))
+
+        cache = Cache(
+            defs={"ok": [1, 2, 3], "u": ui_stub},
+            hash="ui_fail_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        # Stale ui.pickle removed; the serializable `ok` blob remains.
+        assert self.store.get(ui_key) is None
+        cache_path = loader.build_path(key("ui_fail_hash", "Pure"))
+        decoded = msgspec.json.decode(
+            self.store.get(str(cache_path)), type=CacheSchema
+        )
+        assert decoded.ui_defs == []
+        assert decoded.defs["u"].reference is None
+        assert decoded.defs["u"].unserializable_type is not None
+
+        # Load: `u` is an in-memory tripwire, not the stale value.
+        loaded = loader.load_cache(key("ui_fail_hash", "Pure"))
+        assert loaded is not None
+        assert loaded.defs["ok"] == [1, 2, 3]
+        assert isinstance(loaded.defs["u"], UnhashableStub)
+
+    def test_corrupt_cache_returns_none(self) -> None:
+        """Corrupt manifest triggers cache miss, not crash."""
+        loader = self.instance()
+        cache_path = loader.build_path(key("bad", "Pure"))
+        self.store.put(str(cache_path), b"not valid json")
+
+        result = loader.load_cache(key("bad", "Pure"))
+        assert result is None
+
+    def test_missing_blob_returns_none(self) -> None:
+        """Missing pickle blob triggers cache miss."""
+        loader = self.instance()
+        cache_path = loader.build_path(key("missing", "Pure"))
+        base = Path("test") / "missing"
+
+        # Manifest references a blob that doesn't exist
+        manifest = msgspec.json.encode(
+            CacheSchema(
+                hash="missing",
+                cache_type=CacheType("Pure"),
+                defs={
+                    "var1": Item(reference=(base / "var1.pickle").as_posix())
+                },
+                stateful_refs=[],
+                meta=Meta(version=MARIMO_CACHE_VERSION),
+            )
+        )
+        self.store.put(str(cache_path), manifest)
+
+        result = loader.load_cache(key("missing", "Pure"))
+        assert result is None
+
+    @pytest.mark.skipif(
+        not DependencyManager.numpy.has(), reason="numpy required"
+    )
+    def test_numpy_object_dtype_round_trip(self) -> None:
+        """Object-dtype numpy arrays survive save → flush → load via .npy."""
+        import numpy as np
+
+        loader = self.instance()
+        arr = np.array(["a", "b"], dtype=object)
+        cache = Cache(
+            defs={"arr": arr},
+            hash="np_obj_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        loaded = loader.load_cache(key("np_obj_hash", "Pure"))
+        assert loaded is not None
+        np.testing.assert_array_equal(loaded.defs["arr"], arr)
+
+    @pytest.mark.skipif(
+        not DependencyManager.numpy.has(), reason="numpy required"
+    )
+    def test_numpy_round_trip(self) -> None:
+        """numpy arrays survive save → flush → load via .npy format."""
+        import numpy as np
+
+        loader = self.instance()
+        arr = np.array([1.0, 2.0, 3.0])
+        cache = Cache(
+            defs={"arr": arr},
+            hash="np_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        assert list(Path(self.store.save_path).rglob("*.npy")), (
+            "expected .npy blob, got pickle fallback"
+        )
+        loaded = loader.load_cache(key("np_hash", "Pure"))
+        assert loaded is not None
+        np.testing.assert_array_equal(loaded.defs["arr"], arr)
+
+    @pytest.mark.skipif(
+        not DependencyManager.has("torch"), reason="torch required"
+    )
+    def test_torch_round_trip(self) -> None:
+        """torch tensors survive save → flush → load via the .pt format —
+        the manifest reference must match the blob extension."""
+        import torch
+
+        loader = self.instance()
+        tensor = torch.tensor([1.0, 2.0, 3.0])
+        cache = Cache(
+            defs={"t": tensor},
+            hash="pt_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        assert list(Path(self.store.save_path).rglob("*.pt")), (
+            "expected .pt blob, got pickle fallback"
+        )
+        loaded = loader.load_cache(key("pt_hash", "Pure"))
+        assert loaded is not None
+        assert torch.equal(loaded.defs["t"], tensor)
+
+    @pytest.mark.skipif(
+        not DependencyManager.has("polars"), reason="polars required"
+    )
+    def test_polars_round_trip(self) -> None:
+        """polars DataFrames survive save → flush → load via .arrow format."""
+        import polars as pl
+
+        loader = self.instance()
+        df = pl.DataFrame({"a": [1, 2], "b": [3.0, 4.0]})
+        cache = Cache(
+            defs={"df": df},
+            hash="pl_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        assert list(Path(self.store.save_path).rglob("*.arrow")), (
+            "expected .arrow blob, got pickle fallback"
+        )
+        loaded = loader.load_cache(key("pl_hash", "Pure"))
+        assert loaded is not None
+        assert loaded.defs["df"].equals(df)
+
+    @pytest.mark.skipif(
+        not DependencyManager.has("polars"), reason="polars required"
+    )
+    def test_polars_series_round_trip(self) -> None:
+        """polars Series survive save → flush → load via .arrow format."""
+        import polars as pl
+
+        loader = self.instance()
+        s = pl.Series("vals", [10, 20, 30])
+        cache = Cache(
+            defs={"s": s},
+            hash="pl_series_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        assert list(Path(self.store.save_path).rglob("*.arrow")), (
+            "expected .arrow blob, got pickle fallback"
+        )
+        loaded = loader.load_cache(key("pl_series_hash", "Pure"))
+        assert loaded is not None
+        assert isinstance(loaded.defs["s"], pl.Series)
+        assert loaded.defs["s"].to_list() == s.to_list()
+
+    @pytest.mark.skipif(
+        not DependencyManager.has("pandas"), reason="pandas required"
+    )
+    def test_pandas_round_trip(self) -> None:
+        """pandas DataFrames survive save → flush → load via .arrow format."""
+        import pandas as pd
+
+        loader = self.instance()
+        df = pd.DataFrame({"x": [1, 2], "y": [3.0, 4.0]})
+        cache = Cache(
+            defs={"df": df},
+            hash="pd_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        assert list(Path(self.store.save_path).rglob("*.arrow")), (
+            "expected .arrow blob, got pickle fallback"
+        )
+        loaded = loader.load_cache(key("pd_hash", "Pure"))
+        assert loaded is not None
+        pd.testing.assert_frame_equal(loaded.defs["df"], df)
+
+    @pytest.mark.skipif(
+        not DependencyManager.has("pandas"), reason="pandas required"
+    )
+    def test_pandas_series_round_trip(self) -> None:
+        """pandas Series survive save → flush → load via .arrow format."""
+        import pandas as pd
+
+        loader = self.instance()
+        s = pd.Series([10, 20, 30], name="vals")
+        cache = Cache(
+            defs={"s": s},
+            hash="pd_series_hash",
+            cache_type="Pure",
+            stateful_refs=set(),
+            hit=False,
+            meta={"version": MARIMO_CACHE_VERSION},
+        )
+        assert loader.save_cache(cache)
+        loader.flush()
+
+        assert list(Path(self.store.save_path).rglob("*.arrow")), (
+            "expected .arrow blob, got pickle fallback"
+        )
+        loaded = loader.load_cache(key("pd_series_hash", "Pure"))
+        assert loaded is not None
+        assert isinstance(loaded.defs["s"], pd.Series)
+        pd.testing.assert_series_equal(loaded.defs["s"], s)

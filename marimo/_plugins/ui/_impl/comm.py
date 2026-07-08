@@ -1,8 +1,9 @@
 # Copyright 2026 Marimo. All rights reserved.
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from typing import Any
 
 from marimo._loggers import marimo_logger
 from marimo._messaging.notification import (
@@ -38,7 +39,7 @@ class MarimoCommManager:
     def receive_comm_message(
         self,
         command: ModelCommand,
-    ) -> tuple[Optional[str], Optional[dict[str, Any]]]:
+    ) -> tuple[str | None, dict[str, Any] | None]:
         """Receive a message from the frontend and forward to the comm.
 
         Returns:
@@ -47,7 +48,9 @@ class MarimoCommManager:
             The caller can use this to trigger a cell re-run.
         """
         if command.model_id not in self.comms:
-            LOGGER.warning(
+            # Expected race: the frontend may send messages to a comm
+            # that was already closed (cell re-run, server shutdown).
+            LOGGER.debug(
                 "Received message for unknown comm: %s", command.model_id
             )
             return (None, None)
@@ -65,21 +68,21 @@ class MarimoCommManager:
 
 Msg = dict[str, Any]
 MsgCallback = Callable[[Msg], None]
-DataType = Optional[dict[str, Any]]
-MetadataType = Optional[dict[str, Any]]
+DataType = dict[str, Any] | None
+MetadataType = dict[str, Any] | None
 Buffer = bytes | memoryview | bytearray
-BufferType = Optional[list[Buffer]]
+BufferType = list[Buffer] | None
 
 
 def _ensure_bytes(buf: object) -> bytes:
-    """Coerce a buffer to plain ``bytes`` for msgspec serialization.
+    """Coerce a buffer to plain `bytes` for msgspec serialization.
 
-    msgspec natively handles ``bytes``, ``memoryview``, and ``bytearray``.
+    msgspec natively handles `bytes`, `memoryview`, and `bytearray`.
     Some libraries (e.g. obstore) use custom types that hold binary data
     but aren't subclasses of these, so msgspec can't serialize them directly.
 
-    ``bytes()`` handles memoryview/bytearray on all Python versions, and
-    on Python 3.12+ also handles any object implementing ``__buffer__``.
+    `bytes()` handles memoryview/bytearray on all Python versions, and
+    on Python 3.12+ also handles any object implementing `__buffer__`.
     """
     if isinstance(buf, bytes):
         return buf
@@ -89,10 +92,12 @@ def _ensure_bytes(buf: object) -> bytes:
 def _create_model_message(
     data: dict[str, Any],
     buffers: list[Buffer],
-) -> Optional[ModelMessage]:
+) -> ModelMessage | None:
     """Create the appropriate ModelMessage based on the method field.
 
-    Returns None for methods that should be skipped (e.g., echo_update).
+    Returns None for unknown methods that should be skipped.
+    `echo_update` is converted to `ModelUpdate` to preserve
+    frontend-driven trait changes for reconnect replay.
     """
     bbuffers = [_ensure_bytes(b) for b in buffers]
     method = data.get("method", "update")
@@ -117,8 +122,14 @@ def _create_model_message(
             buffers=bbuffers,
         )
     elif method == "echo_update":
-        # echo_update is for multi-client sync acknowledgment, skip it
-        return None
+        # Preserve frontend-driven trait changes for reconnect replay.
+        # anywidget/ipywidgets can emit echo_update as the synchronisation
+        # acknowledgement path; dropping it causes stale replay state.
+        return ModelUpdate(
+            state=state,
+            buffer_paths=buffer_paths,
+            buffers=bbuffers,
+        )
     else:
         LOGGER.warning("Unknown method: %s, skipping", method)
         return None
@@ -145,15 +156,15 @@ class MarimoComm:
     ) -> None:
         del keys  # unused
         del metadata  # unused
-        self._msg_callback: Optional[MsgCallback] = None
-        self._close_callback: Optional[MsgCallback] = None
+        self._msg_callback: MsgCallback | None = None
+        self._close_callback: MsgCallback | None = None
         self._closed: bool = False
         self._closed_data: dict[str, object] = {}
 
         self.comm_id = comm_id
         self.comm_manager = comm_manager
         self.target_name = target_name
-        self.ui_element_id: Optional[str] = None
+        self.ui_element_id: str | None = None
         self._open(data=data, buffers=buffers)
 
     def _open(
@@ -163,6 +174,12 @@ class MarimoComm:
     ) -> None:
         """Open the comm and send initial state."""
         LOGGER.debug("Opening comm %s", self.comm_id)
+        # Stash anywidget ESM info from the open state so it can be
+        # looked up later by model_id (used by repr_formatters to
+        # produce <marimo-anywidget> HTML).
+        state = (data or {}).get("state", {})
+        esm = state.get("_esm")
+        self.esm: str | None = esm if isinstance(esm, str) and esm else None
         self.comm_manager.register_comm(self)
         try:
             self._broadcast(data or {}, buffers or [])

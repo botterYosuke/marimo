@@ -4,8 +4,10 @@ from __future__ import annotations
 import asyncio
 import subprocess
 import sys
+import textwrap
 
 from marimo import _loggers
+from marimo._ast.parse import unwrap_cell_body
 from marimo._dependencies.dependencies import DependencyManager
 from marimo._types.ids import CellId_t
 
@@ -59,7 +61,9 @@ async def _run_subprocess_safe(
         return await asyncio.to_thread(run_sync)
 
 
-async def ruff(codes: CellCodes, *cmd: str) -> CellCodes:
+async def ruff(
+    codes: CellCodes, *cmd: str, stdin_filename: str | None = None
+) -> CellCodes:
     # Try with sys.executable first
     ruff_cmd = [sys.executable, "-m", "ruff"]
     stdout, _stderr, returncode = await _run_subprocess_safe(
@@ -80,8 +84,13 @@ async def ruff(codes: CellCodes, *cmd: str) -> CellCodes:
     formatted_codes: CellCodes = {}
     for key, code in codes.items():
         try:
+            command = [*ruff_cmd, *cmd]
+            if stdin_filename:
+                command.extend(["--stdin-filename", stdin_filename])
+            command.append("-")
+
             stdout, _stderr, returncode = await _run_subprocess_safe(
-                *ruff_cmd, *cmd, "-", input_data=code.encode()
+                *command, input_data=code.encode()
             )
 
             if returncode != 0:
@@ -101,7 +110,10 @@ class Formatter:
     def __init__(self, line_length: int) -> None:
         self.line_length = line_length
 
-    async def format(self, codes: CellCodes) -> CellCodes:
+    async def format(
+        self, codes: CellCodes, stdin_filename: str | None = None
+    ) -> CellCodes:
+        del stdin_filename
         return codes
 
 
@@ -110,10 +122,14 @@ class DefaultFormatter(Formatter):
     Tries ruff, then black, then no formatting.
     """
 
-    async def format(self, codes: CellCodes) -> CellCodes:
+    async def format(
+        self, codes: CellCodes, stdin_filename: str | None = None
+    ) -> CellCodes:
         # Ruff may be installed in venv or globally
         if DependencyManager.ruff.has() or DependencyManager.which("ruff"):
-            return await RuffFormatter(self.line_length).format(codes)
+            return await RuffFormatter(self.line_length).format(
+                codes, stdin_filename=stdin_filename
+            )
         # Black must be installed in venv
         elif DependencyManager.black.has():
             return await BlackFormatter(self.line_length).format(codes)
@@ -125,17 +141,59 @@ class DefaultFormatter(Formatter):
 
 
 class RuffFormatter(Formatter):
-    async def format(self, codes: CellCodes) -> CellCodes:
-        return await ruff(
-            codes, "format", "--line-length", str(self.line_length)
+    async def format(
+        self, codes: CellCodes, stdin_filename: str | None = None
+    ) -> CellCodes:
+        # Wrap each cell in a dummy function so ruff applies function-scope
+        # blank-line rules (1 blank line around nested defs) instead of
+        # file-scope rules (2 blank lines). Cells with no executable
+        # statements (whitespace-only or comment-only) are left unwrapped
+        # since an empty or comment-only function body is invalid Python.
+        skip_wrap = {
+            key
+            for key, code in codes.items()
+            if all(
+                not line.strip() or line.strip().startswith("#")
+                for line in code.splitlines()
+            )
+        }
+        wrapped: CellCodes = {}
+        for key, code in codes.items():
+            if key not in skip_wrap:
+                wrapped[key] = "\n".join(
+                    ["def _():", textwrap.indent(code, "    ")]
+                )
+            else:
+                wrapped[key] = code
+
+        wrapped_result = await ruff(
+            wrapped,
+            "format",
+            "--line-length",
+            str(self.line_length),
+            stdin_filename=stdin_filename,
         )
+
+        # Unwrap: use the AST to extract the function body, mirroring the
+        # parse mechanism in marimo/_ast/parse.py (Extractor + fixed_dedent).
+        result: CellCodes = {}
+        for key, code in codes.items():
+            if key in skip_wrap:
+                result[key] = wrapped_result.get(key, code)
+            elif key in wrapped_result:
+                result[key] = unwrap_cell_body(wrapped_result[key])
+
+        return result
 
 
 class BlackFormatter(Formatter):
-    async def format(self, codes: CellCodes) -> CellCodes:
+    async def format(
+        self, codes: CellCodes, stdin_filename: str | None = None
+    ) -> CellCodes:
+        del stdin_filename
         DependencyManager.black.require("to enable code formatting")
 
-        import black
+        import black  # type: ignore[import-not-found]
 
         formatted_codes: CellCodes = {}
         for key, code in codes.items():

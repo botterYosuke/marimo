@@ -1,5 +1,5 @@
 /* Copyright 2026 Marimo. All rights reserved. */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* oxlint-disable typescript/no-explicit-any */
 
 import { EditorView } from "@codemirror/view";
 import {
@@ -8,9 +8,11 @@ import {
 } from "@marimo-team/codemirror-languageserver";
 import { beforeEach, describe, expect, it, type Mocked, vi } from "vitest";
 import * as LSP from "vscode-languageserver-protocol";
+import { cellId } from "@/__tests__/branded";
 import type { CellId } from "@/core/cells/ids";
 import { store } from "@/core/state/jotai";
 import { topologicalCodesAtom } from "../../copilot/getCodes";
+import { lspWorkspaceAtom } from "@/core/saving/file-state";
 import { languageAdapterState } from "../../language/extension";
 import { PythonLanguageAdapter } from "../../language/languages/python";
 import { languageMetadataField } from "../../language/metadata";
@@ -19,9 +21,9 @@ import { NotebookLanguageServerClient } from "../notebook-lsp";
 import { CellDocumentUri, type ILanguageServerClient } from "../types";
 
 const Cells = {
-  cell1: "cell1" as CellId,
-  cell2: "cell2" as CellId,
-  cell3: "cell3" as CellId,
+  cell1: cellId("cell1"),
+  cell2: cellId("cell2"),
+  cell3: cellId("cell3"),
 };
 
 describe("createNotebookLens", () => {
@@ -284,6 +286,12 @@ describe("NotebookLanguageServerClient", () => {
           },
         };
       }
+      if (atom === lspWorkspaceAtom) {
+        return {
+          rootUri: "file:///project",
+          documentUri: "file:///project/__marimo_notebook__.py",
+        };
+      }
       return undefined;
     });
 
@@ -420,7 +428,7 @@ describe("NotebookLanguageServerClient", () => {
       expect(result).toEqual(mockCompletionResponse);
       expect(mockClient.textDocumentCompletion).toHaveBeenCalledWith(
         expect.objectContaining({
-          textDocument: { uri: "file:///__marimo_notebook__.py" },
+          textDocument: { uri: "file:///project/__marimo_notebook__.py" },
         }),
       );
     });

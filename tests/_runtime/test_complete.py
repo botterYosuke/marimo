@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import random
 import threading
+import time
 from collections.abc import Mapping
 from inspect import signature
 from types import ModuleType
@@ -19,6 +20,9 @@ from marimo._messaging.types import KernelMessage, Stream
 from marimo._runtime.commands import CodeCompletionCommand
 from marimo._runtime.complete import (
     _build_docstring_cached,
+    _get_completion_info,
+    _get_completion_option,
+    _get_completion_options,
     _get_docstring,
     _maybe_get_key_options,
     _resolve_chained_key_path,
@@ -51,7 +55,7 @@ def test_docstring_function_with_google_style():
     result = _build_docstring_cached(
         completion_type="function",
         completion_name="my_func",
-        signature_strings=("my_func(arg1, arg2)",),
+        signature_strings=("my_func(arg1: str, arg2: int)",),
         raw_body="""
         Args:
             arg1: Description of arg1.
@@ -61,12 +65,62 @@ def test_docstring_function_with_google_style():
             HTML: A description of the return value.
         """,
         init_docstring=None,
+        param_types=(("arg1", "str"), ("arg2", "int")),
     )
 
     assert "Description of arg1" in result
     assert "Description of arg2" in result
     assert "A description of the return value" in result
+    assert "<code>str</code>" in result
+    assert "<code>int</code>" in result
     snapshot("docstrings_function_google.txt", result)
+
+
+def test_docstring_function_with_google_style_infers_types_from_jedi() -> None:
+    patch_jedi_parameter_completion()
+
+    code = '''def func(arg: int) -> None:
+    """Do something
+
+    Args:
+        arg: An integer argument
+    """
+    return
+
+func'''
+    script = jedi.Script(code)
+    completions = script.complete(line=9, column=4)
+    func_completion = next(c for c in completions if c.name == "func")
+    result = _get_docstring(func_completion)
+
+    assert "<code>int</code>" in result
+    assert "An integer argument" in result
+
+
+def test_docstring_function_infers_varargs_types_from_jedi() -> None:
+    patch_jedi_parameter_completion()
+
+    code = '''def func(*args: str, **kwargs: float) -> None:
+    """Do something
+
+    Args:
+        *args: extra positionals
+        **kwargs: extra keywords
+    """
+    return
+
+func'''
+    script = jedi.Script(code)
+    completions = script.complete(line=10, column=4)
+    func_completion = next(c for c in completions if c.name == "func")
+    result = _get_docstring(func_completion)
+
+    assert "extra positionals" in result
+    assert "extra keywords" in result
+    # Jedi reports varargs as container types (`args`/`kwargs` without stars);
+    # they should still populate the `*args`/`**kwargs` rows.
+    assert "<code>Tuple[str]</code>" in result
+    assert "<code>Dict[str, float]</code>" in result
 
 
 def test_docstring_math_directive_is_normalized():
@@ -313,7 +367,10 @@ def collect_functions_to_check():
                 continue
             objects_to_check.add(obj)
     assert len(objects_to_check) > 1
-    return objects_to_check
+    return sorted(
+        objects_to_check,
+        key=lambda obj: f"{obj.__module__}.{obj.__qualname__}",
+    )
 
 
 def dummy_func(arg1: str, arg2: str) -> None:
@@ -385,7 +442,10 @@ def test_parameter_descriptions(obj: Any, runtime_inference: bool):
             f"Jedi did not suggest {param_name} in {call}. It suggested {param_completions.keys()}"
         )
         jedi_param = param_completions[param_name]
-        docstring = jedi_param.docstring()
+        # raw=True: Jedi otherwise prepends inferred signature strings for
+        # annotated unions like str|None / int|None (builtin ctor docs + NoneType),
+        # which is noise for dataclass field comments served by py__doc__.
+        docstring = jedi_param.docstring(raw=True)
         assert docstring != "", f"Empty docstring result: {call}{param_name}"
         assert "NoneType" not in docstring, (
             f"NoneType found in docstring: {call}{param_name}"
@@ -678,7 +738,7 @@ mixed_keys = {"static_key": "foo", str(random.randint(0, 10)): "bar"}
         # from source code in variable `other_cells_code`
         expected_keys = ["foo", "bar", "baz"]
     else:
-        RuntimeError(
+        raise RuntimeError(
             f"Make sure you defined `expected_keys` for `{object_name}`"
             " Currently, the test is improperly defined."
         )
@@ -686,6 +746,113 @@ mixed_keys = {"static_key": "foo", str(random.randint(0, 10)): "bar"}
     # check `len()` to ensure `set()` operation doesn't deduplicate keys
     assert len(options_values) == len(expected_keys)
     assert set(options_values) == set(expected_keys)
+
+
+def _run_complete(document: str, other_code: str = "") -> dict[str, Any]:
+    """Run the `complete()` entrypoint and return the emitted notification."""
+    current_cell_id = CellId_t("current-cell")
+
+    mock_other_cell = mock.MagicMock()
+    mock_other_cell.code = other_code
+    mock_current_cell = mock.MagicMock()
+    mock_current_cell.code = document
+
+    mock_graph = mock.MagicMock()
+    mock_graph.cells = {
+        "other-cell": mock_other_cell,
+        current_cell_id: mock_current_cell,
+    }
+
+    glbls: dict[str, Any] = {}
+    if other_code:
+        exec(other_code, {}, glbls)
+
+    stream = CaptureStream()
+    complete(
+        request=CodeCompletionCommand(
+            id="request-id", document=document, cell_id=current_cell_id
+        ),
+        graph=mock_graph,
+        glbls=glbls,
+        glbls_lock=threading.RLock(),
+        stream=stream,
+    )
+    assert len(stream.operations) == 1
+    return stream.operations[0]
+
+
+@pytest.mark.parametrize("document", ["1,", "foo(", "foo(1,", "[1, "])
+def test_no_completions_after_comma_or_paren_without_signature(
+    document: str,
+) -> None:
+    """An empty prefix after `,` or `(` must not dump the whole namespace.
+
+    Regression test: previously `,` and `(` were treated as completion trigger
+    characters, so typing e.g. `1,` opened a popup listing every builtin.
+    """
+    content = _run_complete(document)
+    assert content["op"] == CompletionResultNotification.name
+    assert content["options"] == []
+
+
+@pytest.mark.parametrize("document", ["my_func(", "my_func(1,"])
+def test_signature_shown_after_comma_or_paren_in_call(document: str) -> None:
+    """Inside a known call, an empty prefix falls through to signature help."""
+    content = _run_complete(
+        document, other_code="def my_func(a, b): return a + b"
+    )
+    assert content["op"] == CompletionResultNotification.name
+    assert len(content["options"]) == 1
+    option = content["options"][0]
+    assert option["type"] == "tooltip"
+    assert option["name"] == "my_func"
+
+
+@pytest.mark.parametrize("document", ["1 / ", "x = 10 /", "a = b / "])
+def test_no_completions_for_division_operator(document: str) -> None:
+    """`/` triggers path completion inside strings, but as a division operator
+    it must not dump the whole namespace.
+    """
+    content = _run_complete(document)
+    assert content["op"] == CompletionResultNotification.name
+    assert content["options"] == []
+
+
+def test_path_completion_still_works(tmp_path: Any) -> None:
+    """`/` still triggers file-path completion inside a string literal."""
+    (tmp_path / "marimo_data.csv").write_text("x\n")
+    content = _run_complete(f'open("{tmp_path}/')
+    assert content["options"]
+    assert all(option["type"] == "path" for option in content["options"])
+    assert any(
+        "marimo_data.csv" in option["name"] for option in content["options"]
+    )
+
+
+def test_parameter_completion_omits_full_function_docstring() -> None:
+    """Completing a parameter must not dump the whole function docstring.
+
+    Regression test: `param` completions used to be swapped to the enclosing
+    signature, so every parameter's info box showed the entire function
+    docstring. Now we surface only the parameter's own description (empty when
+    it can't be extracted, e.g. without `docstring_to_markdown`), never the
+    function summary or a sibling parameter's text.
+    """
+    other_code = (
+        "def my_func(alpha, beta):\n"
+        '    """SUMMARY_MARKER.\n\n'
+        "    Args:\n"
+        "        alpha: ALPHA_MARKER.\n"
+        "        beta: BETA_MARKER.\n"
+        '    """\n'
+        "    return alpha\n"
+    )
+    content = _run_complete("my_func(al", other_code=other_code)
+    options = {o["name"]: o for o in content["options"]}
+    assert "alpha=" in options
+    info = options["alpha="]["completion_info"]
+    assert "SUMMARY_MARKER" not in info
+    assert "BETA_MARKER" not in info
 
 
 @pytest.mark.parametrize(
@@ -703,3 +870,310 @@ def test_resolve_chained_key_path(
 ) -> None:
     key_path = _resolve_chained_key_path("obj", trigger_code)
     assert key_path == expected_key_path
+
+
+class _FakeCompletion:
+    """Stand-in for jedi.api.classes.Completion.
+
+    Tracks whether `type` was accessed and how often `infer()` ran so we can
+    assert we didn't pay the (expensive) jedi inference cost in the fast path.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        completion_type: str = "function",
+        raise_on_type: bool = False,
+        inferred: list[Any] | None = None,
+    ) -> None:
+        self.name = name
+        self._type = completion_type
+        self._raise_on_type = raise_on_type
+        self._inferred = inferred or []
+        self.type_access_count = 0
+        self.docstring_called = False
+        self.infer_count = 0
+
+    @property
+    def type(self) -> str:
+        self.type_access_count += 1
+        if self._raise_on_type:
+            raise AssertionError(
+                "completion.type accessed when it should have been skipped"
+            )
+        return self._type
+
+    def docstring(self, *_args: Any, **_kwargs: Any) -> str:
+        self.docstring_called = True
+        return ""
+
+    def get_signatures(self) -> list[Any]:
+        return []
+
+    def get_type_hint(self) -> str:
+        return "int"
+
+    def infer(self) -> list[Any]:
+        self.infer_count += 1
+        return self._inferred
+
+
+def test_get_completion_option_skips_type_when_compute_type_false() -> None:
+    completion = _FakeCompletion("foo", raise_on_type=True)
+
+    option = _get_completion_option(
+        completion,
+        compute_completion_info=False,
+        compute_type=False,
+    )
+
+    assert option.name == "foo"
+    assert option.type == ""
+    assert option.completion_info == ""
+    assert completion.type_access_count == 0
+
+
+def test_get_completion_option_computes_type_by_default() -> None:
+    completion = _FakeCompletion("foo", completion_type="class")
+
+    option = _get_completion_option(
+        completion,
+        compute_completion_info=False,
+    )
+
+    assert option.type == "class"
+    assert completion.type_access_count == 1
+
+
+def test_get_completion_option_skips_all_inference_when_type_skipped() -> None:
+    """When `compute_type=False`, we also skip docstrings and signatures.
+    The whole point of `compute_type=False` is "we're out of budget", so
+    further jedi inference (docstring, signature) would defeat the purpose.
+    """
+    completion = _FakeCompletion("foo", raise_on_type=True)
+
+    option = _get_completion_option(
+        completion,
+        compute_completion_info=True,
+        compute_type=False,
+    )
+
+    assert option.name == "foo"
+    assert option.type == ""
+    assert option.completion_info == ""
+    assert completion.type_access_count == 0
+    assert not completion.docstring_called
+
+
+def test_get_completion_options_skips_docstrings_past_limit() -> None:
+    completions = [_FakeCompletion(f"attr_{i}") for i in range(10)]
+
+    options = _get_completion_options(
+        completions, prefix="", limit=5, timeout=5.0
+    )
+
+    assert len(options) == 10
+    assert all(opt.completion_info == "" for opt in options)
+    # Types are still computed since we're well under the timeout
+    assert all(c.type_access_count == 1 for c in completions)
+
+
+def test_get_completion_options_keeps_docstrings_under_limit() -> None:
+    completions = [_FakeCompletion(f"attr_{i}") for i in range(3)]
+
+    _get_completion_options(completions, prefix="", limit=10, timeout=5.0)
+
+    # All three completions should have had docstring() invoked
+    assert all(c.docstring_called for c in completions)
+
+
+def test_get_completion_options_bails_out_when_timeout_elapsed() -> None:
+    """Once the time budget is blown, subsequent completions skip both type
+    inference and docstring lookup — this is the key knob that keeps cold
+    completions from taking 10+ seconds on heavy libraries.
+    """
+    completions = [_FakeCompletion(f"attr_{i}") for i in range(4)]
+
+    # Burn time on the first call so the rest see an expired budget.
+    original_monotonic = time.monotonic
+    times = iter([0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0])
+
+    with mock.patch(
+        "marimo._runtime.complete.time.monotonic",
+        side_effect=lambda: next(times, original_monotonic()),
+    ):
+        options = _get_completion_options(
+            completions, prefix="", limit=100, timeout=1.0
+        )
+
+    # First one completes normally, the rest should have no info or type
+    assert options[0].completion_info != "" or completions[0].docstring_called
+    assert options[0].type == "function"
+    for opt in options[1:]:
+        assert opt.type == ""
+        assert opt.completion_info == ""
+
+
+def test_get_completion_options_respects_prefix_filter() -> None:
+    """Underscore names are filtered out by `_should_include_name`."""
+    completions = [
+        _FakeCompletion("public"),
+        _FakeCompletion("_private"),
+        _FakeCompletion("__dunder__"),
+    ]
+
+    options = _get_completion_options(
+        completions, prefix="", limit=100, timeout=5.0
+    )
+
+    assert [opt.name for opt in options] == ["public"]
+
+
+def _completion_for(code: str, name: str) -> Any:
+    """Return the Jedi completion named `name` at the end of `code`."""
+    script = jedi.Script(code=code)
+    lines = code.split("\n")
+    completions = script.complete(line=len(lines), column=len(lines[-1]))
+    matches = [c for c in completions if c.name == name]
+    assert matches, (
+        f"no completion named {name!r}; got {[c.name for c in completions]}"
+    )
+    return matches[0]
+
+
+def test_completion_info_resolves_aliased_function() -> None:
+    """Aliases to a function show the underlying docstring + signature.
+
+    Regression test for #9822: `alias = func` is reported by Jedi as a
+    `statement`, which previously fell through to a bare type hint, dropping
+    the docstring and signature highlighting in live docs / hover.
+    """
+    code = (
+        "def my_documented_func(arg: int) -> None:\n"
+        '    """Docstring for the aliased function."""\n'
+        "    print(arg)\n"
+        "\n"
+        "alias = my_documented_func\n"
+        "alias"
+    )
+    completion = _completion_for(code, "alias")
+    assert completion.type == "statement"
+
+    info = _get_completion_info(completion)
+    assert "Docstring for the aliased function." in info
+    # Signature is rendered as a highlighted python code block.
+    assert "codehilite" in info
+    assert "my_documented_func" in info
+
+
+def test_completion_info_resolves_aliased_class() -> None:
+    code = (
+        "class MyDocumentedClass:\n"
+        '    """Docstring for the aliased class."""\n'
+        "\n"
+        "Alias = MyDocumentedClass\n"
+        "Alias"
+    )
+    completion = _completion_for(code, "Alias")
+    assert completion.type == "statement"
+
+    info = _get_completion_info(completion)
+    assert "Docstring for the aliased class." in info
+
+
+def test_completion_info_plain_value_statement_uses_type_hint() -> None:
+    """Statements resolving to plain values keep the type-hint fallback rather
+    than surfacing a builtin's docstring."""
+    code = "answer = 42\nanswer"
+    completion = _completion_for(code, "answer")
+    assert completion.type == "statement"
+
+    info = _get_completion_info(completion)
+    assert info == "answer: int"
+    assert "codehilite" not in info
+
+
+def test_completion_info_ambiguous_alias_falls_back_to_type_hint() -> None:
+    """When `infer()` resolves to multiple definitions (e.g. a conditional
+    assignment), don't guess a docstring — defer to the type hint."""
+    code = (
+        "import random\n"
+        "\n"
+        "def foo(a: int) -> int:\n"
+        '    """Foo docstring."""\n'
+        "    return a\n"
+        "\n"
+        "def bar(b: str) -> str:\n"
+        '    """Bar docstring."""\n'
+        "    return b\n"
+        "\n"
+        "chosen = foo if random.random() > 0.5 else bar\n"
+        "chosen"
+    )
+    completion = _completion_for(code, "chosen")
+    assert completion.type == "statement"
+
+    info = _get_completion_info(completion)
+    assert info.startswith("chosen: ")
+    assert "Foo docstring." not in info
+    assert "Bar docstring." not in info
+    assert "codehilite" not in info
+
+
+def test_infer_skipped_for_statements_past_limit() -> None:
+    """The docstring limit must prevent `.infer()` fan-out.
+
+    Aliased-statement resolution calls `jedi`'s `infer()`, which "follows all
+    results" and is very slow across large completion sets (e.g. `np.`). The
+    `len(completions) <= limit` gate has to keep us out of that path entirely.
+    """
+    completions = [
+        _FakeCompletion(f"v{i}", completion_type="statement")
+        for i in range(10)
+    ]
+
+    _get_completion_options(completions, prefix="", limit=5, timeout=5.0)
+
+    assert all(c.infer_count == 0 for c in completions)
+
+
+def test_infer_only_runs_for_statements_under_budget() -> None:
+    """Within budget, only statement completions infer (once each); other
+    types go straight to `_get_docstring` and never touch `infer()`."""
+    statements = [
+        _FakeCompletion(f"s{i}", completion_type="statement") for i in range(3)
+    ]
+    functions = [
+        _FakeCompletion(f"f{i}", completion_type="function") for i in range(3)
+    ]
+
+    _get_completion_options(
+        statements + functions,
+        prefix="",
+        limit=100,
+        timeout=5.0,
+    )
+
+    assert all(c.infer_count == 1 for c in statements)
+    assert all(c.infer_count == 0 for c in functions)
+
+
+def test_infer_skipped_once_timeout_elapsed() -> None:
+    """Once the time budget is blown, remaining statements skip `.infer()`
+    just like they skip type/docstring inference."""
+    completions = [
+        _FakeCompletion(f"v{i}", completion_type="statement") for i in range(4)
+    ]
+
+    original_monotonic = time.monotonic
+    times = iter([0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0])
+
+    with mock.patch(
+        "marimo._runtime.complete.time.monotonic",
+        side_effect=lambda: next(times, original_monotonic()),
+    ):
+        _get_completion_options(completions, prefix="", limit=100, timeout=1.0)
+
+    # First completion is under budget and infers; the rest are skipped.
+    assert completions[0].infer_count == 1
+    assert all(c.infer_count == 0 for c in completions[1:])

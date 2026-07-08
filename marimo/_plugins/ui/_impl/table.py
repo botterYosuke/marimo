@@ -6,13 +6,15 @@ from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Final,
     Literal,
-    Optional,
+    TypedDict,
     Union,
     cast,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping
 
 from narwhals.typing import IntoDataFrame
 
@@ -33,9 +35,11 @@ from marimo._plugins.ui._impl.dataframes.transforms.apply import (
     apply_transforms_to_df,
 )
 from marimo._plugins.ui._impl.dataframes.transforms.types import (
-    Condition,
+    FilterCondition,
+    FilterGroup,
     FilterRowsTransform,
     TransformType,
+    validate_operator_for_dtype,
 )
 from marimo._plugins.ui._impl.tables.selection import (
     INDEX_COLUMN_NAME,
@@ -54,6 +58,7 @@ from marimo._plugins.ui._impl.utils.dataframe import (
     ListOrTuple,
     TableData,
     download_as,
+    get_bound_name,
 )
 from marimo._plugins.validators import (
     validate_no_integer_columns,
@@ -71,7 +76,6 @@ from marimo._utils.narwhals_utils import (
     can_narwhalify_lazyframe,
     unwrap_narwhals_dataframe,
 )
-from marimo._utils.variable_name import infer_variable_name
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -89,7 +93,18 @@ class TableSearchError(Exception):
 
 @dataclass
 class DownloadAsArgs:
-    format: Literal["csv", "json", "parquet"]
+    format: Literal["csv", "tsv", "json", "parquet"]
+
+
+@dataclass
+class DownloadAsResponse:
+    url: str = ""
+    filename: str = ""
+    # Populated when the requested format's dependencies are missing (e.g.,
+    # Parquet without pyarrow/pandas/polars). Mirrors the shape used by
+    # ColumnPreview so the frontend can reuse its install-prompt flow.
+    error: str | None = None
+    missing_packages: list[str] | None = None
 
 
 @dataclass
@@ -99,17 +114,48 @@ class ColumnSummariesArgs: ...
 @dataclass
 class ColumnSummaries:
     # If precomputed aggregations fail, we fallback to chart data
-    data: Union[JSONType, str]
+    data: JSONType | str
     stats: dict[ColumnName, ColumnStats]
     bin_values: dict[ColumnName, list[BinValue]]
     value_counts: dict[ColumnName, list[ValueCount]]
     show_charts: bool
     # Disabled because of too many columns/rows
     # This will show a banner in the frontend
-    is_disabled: Optional[bool] = None
+    is_disabled: bool | None = None
 
 
-ShowColumnSummaries = Union[bool, Literal["stats", "chart"]]
+ShowColumnSummaries = bool | Literal["stats", "chart"]
+
+
+class TableDisplay(TypedDict, total=False):
+    """Visibility options for `mo.ui.table` UI elements.
+
+    All fields are optional; omitted fields fall back to the table's
+    defaults. Build one and unpack it into one or more tables:
+
+    ```python
+    cfg = mo.ui.table.Display(show_search=False, show_download=False)
+    mo.ui.table(data, **cfg)
+
+    # Derive a variant; the original is unchanged
+    mo.ui.table(other, **{**cfg, "show_column_summaries": False})
+    ```
+
+    Args:
+        show_search (bool, optional): Whether to show the search bar.
+        show_download (bool, optional): Whether to show the download button.
+        show_column_summaries (bool | Literal["stats", "chart"], optional):
+            Whether to show column summaries.
+        show_data_types (bool, optional): Whether to show data type
+            indicators in column headers.
+    """
+
+    show_search: bool
+    show_download: bool
+    show_column_summaries: ShowColumnSummaries
+    show_data_types: bool
+
+
 CHART_MAX_ROWS_STRING_VALUE_COUNTS = 20_000
 
 DEFAULT_MAX_COLUMNS = 50
@@ -117,7 +163,7 @@ DEFAULT_MAX_COLUMNS = 50
 MaxColumnsNotProvided = Literal["inherit"]
 MAX_COLUMNS_NOT_PROVIDED: MaxColumnsNotProvided = "inherit"
 
-MaxColumnsType = Union[int, None, MaxColumnsNotProvided]
+MaxColumnsType = int | None | MaxColumnsNotProvided
 
 
 @dataclass(frozen=True)
@@ -130,13 +176,11 @@ class SortArgs:
 class SearchTableArgs:
     page_size: int
     page_number: int
-    query: Optional[str] = None
-    sort: Optional[list[SortArgs]] = None
-    filters: Optional[list[Condition]] = None
-    limit: Optional[int] = None
-    max_columns: Optional[Union[int, MaxColumnsNotProvided]] = (
-        MAX_COLUMNS_NOT_PROVIDED
-    )
+    query: str | None = None
+    sort: list[SortArgs] | None = None
+    filters: FilterGroup | None = None
+    limit: int | None = None
+    max_columns: int | MaxColumnsNotProvided | None = MAX_COLUMNS_NOT_PROVIDED
 
 
 CellStyles = dict[RowId, dict[ColumnName, dict[str, Any]]]
@@ -145,24 +189,30 @@ CellStyles = dict[RowId, dict[ColumnName, dict[str, Any]]]
 @dataclass(frozen=True)
 class SearchTableResponse:
     data: str
-    total_rows: Union[int, Literal["too_many"]]
-    cell_styles: Optional[CellStyles] = None
+    total_rows: int | Literal["too_many"]
+    cell_styles: CellStyles | None = None
     # Mapping of rowId -> columnName -> hover text (plain string or None to suppress)
-    cell_hover_texts: Optional[
-        dict[RowId, dict[ColumnName, Optional[str]]]
-    ] = None
+    cell_hover_texts: dict[RowId, dict[ColumnName, str | None]] | None = None
+    # Unformatted data mirroring the same shape/page as `data`,
+    # provided when format_mapping is applied.
+    raw_data: str | None = None
+
+
+@dataclass(frozen=True)
+class GetSizeBytesResponse:
+    size_bytes: int | None = None
 
 
 @dataclass
 class GetRowIdsResponse:
     row_ids: list[int]
     all_rows: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
 class GetDataUrlResponse:
-    data_url: Union[str, object]
+    data_url: str | object
     format: Literal["csv", "json", "arrow"]
 
 
@@ -202,6 +252,93 @@ def get_default_table_max_columns() -> int:
         return ctx.marimo_config["display"]["default_table_max_columns"]
 
 
+_DATATYPE_TO_CATEGORY: dict[str, str] = {
+    "string": "str",
+    "boolean": "boolean",
+    "integer": "number",
+    "number": "number",
+    "date": "temporal",
+    "datetime": "temporal",
+    "time": "temporal",
+}
+
+
+def _filters_reference_column(
+    group: FilterGroup, target_column: ColumnName
+) -> bool:
+    """True if any condition in the tree targets `target_column`."""
+    for child in group.children:
+        if isinstance(child, FilterCondition):
+            if child.column_id == target_column:
+                return True
+        elif isinstance(child, FilterGroup):
+            if _filters_reference_column(child, target_column):
+                return True
+    return False
+
+
+def _strip_filters_for_column(
+    group: FilterGroup, target_column: ColumnName
+) -> FilterGroup:
+    """Recursively remove conditions referencing the target column."""
+    valid_children: list[FilterCondition | FilterGroup] = []
+    for child in group.children:
+        if (
+            isinstance(child, FilterCondition)
+            and child.column_id == target_column
+        ):
+            continue
+        elif isinstance(child, FilterGroup):
+            stripped_child = _strip_filters_for_column(child, target_column)
+            if stripped_child.children:
+                valid_children.append(stripped_child)
+        else:
+            valid_children.append(child)
+    return FilterGroup(
+        type="group",
+        operator=group.operator,
+        children=tuple(valid_children),
+        negate=group.negate,
+    )
+
+
+def _filter_valid_columns(
+    group: FilterGroup,
+    column_dtypes: Mapping[str, str],
+) -> FilterGroup:
+    """Recursively remove conditions on non-existent columns
+    or with invalid operators for the column dtype."""
+    valid_children: list[FilterCondition | FilterGroup] = []
+    for child in group.children:
+        if isinstance(child, FilterCondition):
+            if child.column_id not in column_dtypes:
+                continue
+            category = _DATATYPE_TO_CATEGORY.get(
+                column_dtypes[child.column_id], ""
+            )
+            if not validate_operator_for_dtype(child.operator, category):
+                LOGGER.warning(
+                    "Invalid operator '%s' for dtype '%s' on column '%s'",
+                    child.operator,
+                    column_dtypes[child.column_id],
+                    child.column_id,
+                )
+                continue
+            valid_children.append(child)
+        elif isinstance(child, FilterGroup):
+            filtered = _filter_valid_columns(child, column_dtypes)
+            if filtered.children:
+                valid_children.append(filtered)
+    return FilterGroup(
+        type="group",
+        operator=group.operator,
+        children=tuple(valid_children),
+        negate=group.negate,
+    )
+
+
+# Use Union[] instead of X | Y in class base — see altair_transformer.py
+# for rationale.
 @mddoc
 class table(
     UIElement[
@@ -215,10 +352,8 @@ class table(
 
     1. a list of dicts, with one dict for each row, keyed by column names;
     2. a list of values, representing a table with a single column;
-    3. a Pandas dataframe; or
-    4. a Polars dataframe; or
-    5. an Ibis dataframe; or
-    6. a PyArrow table.
+    3. a dict of lists, with one list for each column, keyed by column names;
+    4. a dataframe (e.g., Polars, Pandas, PyArrow, Ibis, DuckDB).
 
     Examples:
         Create a table from a list of dicts, one for each row:
@@ -233,14 +368,23 @@ class table(
         )
         ```
 
-        Create a table from a single column of data:
+        Create a table from a list of values, as a single column:
 
         ```python
         table = mo.ui.table(
-            data=[
-                {"first_name": "Michael", "last_name": "Scott"},
-                {"first_name": "Dwight", "last_name": "Schrute"},
-            ],
+            data=["Michael Scott", "Dwight Schrute"],
+            label="Users",
+        )
+        ```
+
+        Create a table from a dict of lists, one list per column:
+
+        ```python
+        table = mo.ui.table(
+            data={
+                "first_name": ["Michael", "Dwight"],
+                "last_name": ["Scott", "Schrute"],
+            },
             label="Users",
         )
         ```
@@ -352,13 +496,20 @@ class table(
             Defaults to True.
         show_download (bool, optional): Whether to show the download button.
             Defaults to True for dataframes, False otherwise.
+        show_search (bool, optional): Whether to show the search bar.
+            Defaults to True.
         format_mapping (Dict[str, Union[str, Callable[..., Any]]], optional): A mapping from
             column names to formatting strings or functions.
         freeze_columns_left (Sequence[str], optional): List of column names to freeze on the left.
         freeze_columns_right (Sequence[str], optional): List of column names to freeze on the right.
+        hidden_columns (Sequence[str], optional): List of column names to hide. Mutually exclusive with `visible_columns`.
+        visible_columns (Sequence[str], optional): List of column names to show. All other columns will be hidden. Mutually exclusive with `hidden_columns`.
         text_justify_columns (Dict[str, Literal["left", "center", "right"]], optional):
             Dictionary of column names to text justification options: left, center, right.
         wrapped_columns (List[str], optional): List of column names to wrap.
+        column_widths (Dict[str, int], optional): Mapping of column name to
+            fixed pixel width. Listed columns render at exactly that width;
+            unlisted columns size to their content.
         header_tooltip (Dict[str, str], optional): Mapping from column names to tooltip text on the column header.
         label (str, optional): Markdown label for the element. Defaults to "".
         on_change (Callable[[Union[List[JSONType], Dict[str, List[JSONType]], IntoDataFrame, List[TableCell]]], None], optional):
@@ -378,17 +529,19 @@ class table(
         label (str, optional): A descriptive name for the table. Defaults to "".
     """
 
+    Display = TableDisplay
+
     _name: Final[str] = "marimo-table"
 
     @staticmethod
     def lazy(
         data: IntoLazyFrame,
         *,
-        page_size: Optional[int] = None,
+        page_size: int | None = None,
         preload: bool = False,
     ) -> table:
         """
-        Create a table from a Polars LazyFrame.
+        Create a table from a lazy dataframe (e.g., Polars LazyFrame, Ibis Table, DuckDB Relation).
 
         This won't load the data into memory until requested by the user.
         Once requested, only the first 10 rows will be loaded.
@@ -424,6 +577,7 @@ class table(
             freeze_columns_right=None,
             text_justify_columns=None,
             wrapped_columns=None,
+            column_widths=None,
             label="",
             on_change=None,
             style_cell=None,
@@ -437,59 +591,53 @@ class table(
 
     def __init__(
         self,
-        data: Union[
-            ListOrTuple[Union[str, int, float, bool, MIME, None]],
-            ListOrTuple[dict[str, JSONType]],
-            dict[str, ListOrTuple[JSONType]],
-            IntoDataFrame,
-        ],
-        pagination: Optional[bool] = None,
-        selection: Optional[
-            Literal["single", "multi", "single-cell", "multi-cell"]
-        ] = "multi",
-        initial_selection: Optional[
-            Union[list[int], list[tuple[str, str]]]
-        ] = None,
-        page_size: Optional[int] = None,
-        show_column_summaries: Optional[ShowColumnSummaries] = None,
+        data: ListOrTuple[str | int | float | bool | MIME | None]
+        | ListOrTuple[dict[str, JSONType]]
+        | dict[str, ListOrTuple[JSONType]]
+        | list[dict[str, Any]]
+        | dict[str, list[Any]]
+        | IntoDataFrame
+        | IntoLazyFrame,
+        pagination: bool | None = None,
+        selection: Literal["single", "multi", "single-cell", "multi-cell"]
+        | None = "multi",
+        initial_selection: list[int] | list[tuple[str, str]] | None = None,
+        page_size: int | None = None,
+        show_column_summaries: ShowColumnSummaries | None = None,
         show_data_types: bool = True,
-        format_mapping: Optional[
-            dict[str, Union[str, Callable[..., Any]]]
-        ] = None,
-        freeze_columns_left: Optional[Sequence[str]] = None,
-        freeze_columns_right: Optional[Sequence[str]] = None,
-        text_justify_columns: Optional[
-            dict[str, Literal["left", "center", "right"]]
-        ] = None,
-        wrapped_columns: Optional[list[str]] = None,
-        header_tooltip: Optional[dict[str, str]] = None,
+        format_mapping: dict[str, str | Callable[..., Any]] | None = None,
+        freeze_columns_left: Sequence[str] | None = None,
+        freeze_columns_right: Sequence[str] | None = None,
+        text_justify_columns: dict[str, Literal["left", "center", "right"]]
+        | None = None,
+        wrapped_columns: list[str] | None = None,
+        column_widths: dict[str, int] | None = None,
+        hidden_columns: Sequence[str] | None = None,
+        visible_columns: Sequence[str] | None = None,
+        header_tooltip: dict[str, str] | None = None,
         show_download: bool = True,
         max_columns: MaxColumnsType = MAX_COLUMNS_NOT_PROVIDED,
         *,
+        show_search: bool = True,
         label: str = "",
-        on_change: Optional[
-            Callable[
-                [
-                    Union[
-                        list[JSONType],
-                        dict[str, ListOrTuple[JSONType]],
-                        IntoDataFrame,
-                        list[TableCell],
-                    ]
-                ],
-                None,
-            ]
-        ] = None,
-        style_cell: Optional[Callable[[str, str, Any], dict[str, Any]]] = None,
-        hover_template: Optional[
-            Union[str, Callable[[str, str, Any], str]]
-        ] = None,
-        max_height: Optional[int] = None,
+        on_change: Callable[
+            [
+                list[JSONType]
+                | dict[str, ListOrTuple[JSONType]]
+                | IntoDataFrame
+                | list[TableCell]
+            ],
+            None,
+        ]
+        | None = None,
+        style_cell: Callable[[str, str, Any], dict[str, Any]] | None = None,
+        hover_template: str | Callable[[str, str, Any], str] | None = None,
+        max_height: int | None = None,
         # The _internal_* arguments are for overriding and unit tests
         # table should take the value unconditionally
-        _internal_column_charts_row_limit: Optional[int] = None,
-        _internal_summary_row_limit: Optional[int] = None,
-        _internal_total_rows: Optional[Union[int, Literal["too_many"]]] = None,
+        _internal_column_charts_row_limit: int | None = None,
+        _internal_summary_row_limit: int | None = None,
+        _internal_total_rows: int | Literal["too_many"] | None = None,
         _internal_lazy: bool = False,
         _internal_preload: bool = False,
     ) -> None:
@@ -500,12 +648,8 @@ class table(
         validate_page_size(page_size)
         self._lazy = _internal_lazy
         self._page_size = page_size
-        self._max_columns: Optional[int] = None
-        max_columns_arg: Union[int, str]
-
-        # Infer the variable name before add_selection_column() mutates data,
-        # so the identity check still matches the caller's original variable.
-        download_file_name = infer_variable_name(data, "download")
+        self._max_columns: int | None = None
+        max_columns_arg: int | str
 
         has_stable_row_id = False
         if selection is not None:
@@ -533,6 +677,11 @@ class table(
         else:
             num_rows = self._manager.get_num_rows(force=True)
             total_rows = num_rows if num_rows is not None else "too_many"
+
+        # Most recent filter/query state from the frontend; used to rescope
+        # filter-aware computations like top-K. None until the first _search call.
+        self._current_filters: FilterGroup | None = None
+        self._current_query: str | None = None
 
         # Set the default value for show_column_summaries,
         # if it is not set by the user
@@ -580,9 +729,9 @@ class table(
         # (searching operations include query, sort, filter, etc.)
         self._searched_manager = self._manager
         # Holds the data after user selecting from the component
-        self._selected_manager: Optional[
-            Union[TableManager[Any], list[TableCell]]
-        ] = None
+        self._selected_manager: TableManager[Any] | list[TableCell] | None = (
+            None
+        )
 
         self._selection = selection
         self._has_any_selection = False
@@ -645,29 +794,29 @@ class table(
             page_size = total_rows
         # pagination defaults to True if there are more than page_size rows
         if pagination is None:
-            if total_rows == "too_many":
-                pagination = True
-            elif total_rows > page_size:
+            if total_rows == "too_many" or total_rows > page_size:
                 pagination = True
             else:
                 pagination = False
 
         self._style_cell = style_cell
         # Store hover callable vs string template separately
-        self._hover_cell: Optional[Callable[[str, str, Any], str]] = None
-        self._hover_template: Optional[str] = None
+        self._hover_cell: Callable[[str, str, Any], str] | None = None
+        self._hover_template: str | None = None
         if isinstance(hover_template, str):
             self._hover_template = hover_template
         elif callable(hover_template):
             self._hover_cell = hover_template
 
-        search_result_styles: Optional[CellStyles] = None
-        search_result_hover_texts: Optional[
-            dict[RowId, dict[ColumnName, Optional[str]]]
-        ] = None
+        search_result_styles: CellStyles | None = None
+        search_result_hover_texts: (
+            dict[RowId, dict[ColumnName, str | None]] | None
+        ) = None
         search_result_data: JSONType = []
-        field_types: Optional[FieldTypes] = None
+        search_result_raw_data: str | None = None
+        field_types: FieldTypes | None = None
         num_columns = 0
+        row_headers = self._manager.get_row_headers()
 
         if not _internal_lazy:
             # Search first page
@@ -682,20 +831,45 @@ class table(
             )
             search_result_styles = search_result.cell_styles
             search_result_data = search_result.data
+            search_result_raw_data = search_result.raw_data
             search_result_hover_texts = search_result.cell_hover_texts
 
             # Validate column configurations
             column_names_set = set(self._manager.get_column_names())
             num_columns = len(column_names_set)
+            row_header_names_set = {name for name, _ in row_headers}
             _validate_frozen_columns(
-                freeze_columns_left, freeze_columns_right, column_names_set
+                freeze_columns_left,
+                freeze_columns_right,
+                column_names_set,
+                row_header_names_set,
+            )
+            _validate_column_visibility(
+                hidden_columns,
+                visible_columns,
+                column_names_set,
+                row_header_names_set,
             )
             _validate_column_formatting(
                 text_justify_columns, wrapped_columns, column_names_set
             )
+            _validate_column_widths(column_widths, column_names_set)
             _validate_header_tooltip(header_tooltip, column_names_set)
 
             field_types = self._manager.get_field_types()
+
+        hidden_columns_list: list[str] = []
+        if hidden_columns:
+            hidden_columns_list = list(
+                dict.fromkeys(hidden_columns)
+            )  # Remove duplicates while preserving order
+        elif visible_columns:
+            visible_columns_set = set(visible_columns)
+            hidden_columns_list = [
+                col
+                for col in self._manager.get_column_names()
+                if col not in visible_columns_set
+            ]
 
         super().__init__(
             component_name=table._name,
@@ -703,6 +877,7 @@ class table(
             initial_value=initial_value,
             args={
                 "data": search_result_data,
+                "raw-data": search_result_raw_data,
                 "total-rows": total_rows,
                 "total-columns": num_columns,
                 "max-columns": max_columns_arg,
@@ -716,16 +891,19 @@ class table(
                 "show-filters": self._manager.supports_filters(),
                 "show-download": show_download
                 and self._manager.supports_download(),
+                "show-search": show_search,
                 "show-column-summaries": show_column_summaries,
                 "show-data-types": show_data_types,
                 "show-page-size-selector": show_page_size_selector,
                 "show-column-explorer": show_column_explorer,
                 "show-chart-builder": show_chart_builder,
-                "row-headers": self._manager.get_row_headers(),
+                "row-headers": row_headers,
                 "freeze-columns-left": freeze_columns_left,
                 "freeze-columns-right": freeze_columns_right,
+                "hidden-columns": hidden_columns_list,
                 "text-justify-columns": text_justify_columns,
                 "wrapped-columns": wrapped_columns,
+                "column-widths": column_widths,
                 "header-tooltip": header_tooltip,
                 "has-stable-row-id": self._has_stable_row_id,
                 "cell-styles": search_result_styles,
@@ -736,7 +914,6 @@ class table(
                 "max-height": int(max_height)
                 if max_height is not None
                 else None,
-                "download-file-name": download_file_name,
             },
             on_change=on_change,
             functions=(
@@ -775,6 +952,11 @@ class table(
                     arg_cls=PreviewColumnArgs,
                     function=self._preview_column,
                 ),
+                Function(
+                    name="get_size_bytes",
+                    arg_cls=EmptyArgs,
+                    function=self._get_size_bytes,
+                ),
             ),
         )
 
@@ -800,8 +982,8 @@ class table(
         return ""
 
     def _convert_value(
-        self, value: Union[list[int], list[str], list[dict[str, Any]]]
-    ) -> Union[list[JSONType], IntoDataFrame, list[TableCell]]:
+        self, value: list[int] | list[str] | list[dict[str, Any]]
+    ) -> list[JSONType] | IntoDataFrame | list[TableCell]:
         if self._selection is None:
             return cast(list[JSONType], None)
 
@@ -814,11 +996,7 @@ class table(
             self._has_any_selection = len(coordinates) > 0
             return self._searched_manager.select_cells(coordinates)  # type: ignore
         else:
-            indices = [
-                int(v)
-                for v in value
-                if isinstance(v, int) or isinstance(v, str)
-            ]
+            indices = [int(v) for v in value if isinstance(v, (int, str))]
             self._has_any_selection = len(indices) > 0
             if self._has_stable_row_id:
                 # Search across the original data
@@ -831,7 +1009,12 @@ class table(
                 )
             return unwrap_narwhals_dataframe(self._selected_manager.data)  # type: ignore[no-any-return]
 
-    def _download_as(self, args: DownloadAsArgs) -> str:
+    def _get_size_bytes(self, args: EmptyArgs) -> GetSizeBytesResponse:
+        del args
+        manager = self._searched_manager or self._manager
+        return GetSizeBytesResponse(size_bytes=manager.estimate_size_bytes())
+
+    def _download_as(self, args: DownloadAsArgs) -> DownloadAsResponse:
         """Download the table data in the specified format.
 
         For cell-selection modes ("single-cell"/"multi-cell"), selection is
@@ -840,20 +1023,56 @@ class table(
         current searched/filtered view. Raw data is downloaded without any
         formatting applied.
 
+        When a requested format requires a package that isn't installed
+        (e.g., Parquet without pyarrow/pandas/polars), returns a
+        `DownloadAsResponse` with `error` and `missing_packages`
+        populated instead of raising. The frontend uses this to prompt the
+        user to install the dependency and retry.
+
         Args:
-            args (DownloadAsArgs): Arguments specifying the download format.
-                format must be one of 'csv' or 'json'.
+            args (DownloadAsArgs): The requested download format. Must be
+                one of `'csv'`, `'tsv'`, `'json'`, or `'parquet'`.
 
         Returns:
-            str: URL to download the data file.
+            DownloadAsResponse: Either a success response with `url` and
+                `filename` populated, or a missing-packages response with
+                `error` and `missing_packages` populated when the
+                format's dependencies are not available.
 
         Raises:
-            ValueError: If format is not 'csv' or 'json'.
+            NotImplementedError: If the current selection resolves to
+                something other than a `TableManager` (e.g., a raw list
+                of `TableCell` from cell-selection modes).
         """
+        # Short-circuit Parquet when no parquet-capable lib is importable.
+        if args.format == "parquet":
+            has_polars = DependencyManager.polars.has()
+            has_pandas = DependencyManager.pandas.has()
+            has_pyarrow = DependencyManager.pyarrow.has()
+
+            if not (has_polars or (has_pandas and has_pyarrow)):
+                # if pandas is installed and pyarrow is not, prompt to install pyarrow
+                if has_pandas:
+                    return DownloadAsResponse(
+                        error=(
+                            "Parquet export requires pyarrow. "
+                            "Please install pyarrow to enable parquet export."
+                        ),
+                        missing_packages=["pyarrow"],
+                    )
+                else:  # else prompt polars
+                    return DownloadAsResponse(
+                        error=(
+                            "Parquet export requires a DataFrame library. "
+                            "We recommend polars."
+                        ),
+                        missing_packages=["polars"],
+                    )
+
         # For cell-selection modes, ignore selection and download from the
         # searched/filtered view. For row-selection modes, preserve existing
         # behavior: download selected rows if any, otherwise the searched view.
-        manager_candidate: Union[TableManager[Any], list[TableCell]]
+        manager_candidate: TableManager[Any] | list[TableCell]
         if self._selection in ["single-cell", "multi-cell"]:
             LOGGER.info(
                 "Cell selection downloads aren't supported; downloading all data."
@@ -866,11 +1085,16 @@ class table(
                 else self._searched_manager
             )
 
-        # Remove the selection column before downloading
         if isinstance(manager_candidate, TableManager):
-            return download_as(
-                manager_candidate, args.format, drop_marimo_index=True
+            bound_filename = get_bound_name(self._id)
+
+            url, filename = download_as(
+                manager_candidate,
+                args.format,
+                drop_marimo_index=True,
+                filename=bound_filename,
             )
+            return DownloadAsResponse(url=url, filename=filename)
         else:
             raise NotImplementedError(
                 "Download is not supported for this table format."
@@ -1157,40 +1381,37 @@ class table(
     @functools.lru_cache(maxsize=1)  # noqa: B019
     def _apply_filters_query_sort_cached(
         self,
-        filters: Optional[tuple[Condition, ...]],
-        query: Optional[str],
-        sort: Optional[tuple[SortArgs, ...]],
+        filters: FilterGroup | None,
+        query: str | None,
+        sort: tuple[SortArgs, ...] | None,
     ) -> TableManager[Any]:
         """Cached version that expects hashable arguments."""
         return self._apply_filters_query_sort(
-            list(filters) if filters else None,
+            filters,
             query,
             list(sort) if sort else None,
         )
 
     def _apply_filters_query_sort(
         self,
-        filters: Optional[list[Condition]],
-        query: Optional[str],
-        sort: Optional[list[SortArgs]],
+        filters: FilterGroup | None,
+        query: str | None,
+        sort: list[SortArgs] | None,
     ) -> TableManager[Any]:
         result = self._manager
 
-        if filters:
-            # Filter out conditions for columns that don't exist
-            existing_columns = set(result.get_column_names())
-            valid_filters = [
-                condition
-                for condition in filters
-                if condition.column_id in existing_columns
-            ]
+        if filters and filters.children:
+            column_dtypes = {
+                name: dtype for name, (dtype, _) in result.get_field_types()
+            }
+            valid_group = _filter_valid_columns(filters, column_dtypes)
 
-            if valid_filters:
+            if valid_group.children:
                 data = apply_transforms_to_df(
                     result.data,
                     FilterRowsTransform(
                         type=TransformType.FILTER_ROWS,
-                        where=valid_filters,
+                        where=valid_group,
                         operation="keep_rows",
                     ),
                 )
@@ -1210,12 +1431,29 @@ class table(
     def _calculate_top_k_rows(
         self, args: CalculateTopKRowsArgs
     ) -> CalculateTopKRowsResponse:
-        """Calculate the top k rows in the table, grouped by column.
-        Returns a table of the top k rows, grouped by column with the count.
+        """Calculate the top k values for a column, with counts.
+
+        If the active filter set targets this column, those conditions are
+        stripped before computing top-K so the picker can surface values the
+        user's current filter would otherwise hide. Filters on other columns
+        and the search query still apply.
         """
         column, k = args.column, args.k
         try:
-            data = self._searched_manager.calculate_top_k_rows(column, k)
+            manager = self._searched_manager
+            current_filters = self._current_filters
+            if (
+                current_filters is not None
+                and current_filters.children
+                and _filters_reference_column(current_filters, column)
+            ):
+                stripped = _strip_filters_for_column(current_filters, column)
+                manager = self._apply_filters_query_sort(
+                    stripped if stripped.children else None,
+                    self._current_query,
+                    None,
+                )
+            data = manager.calculate_top_k_rows(column, k)
             return CalculateTopKRowsResponse(data=data)
         # Some libs will panic like Polars, which are only caught with BaseException
         except BaseException as e:
@@ -1232,97 +1470,173 @@ class table(
         )
         return column_preview
 
+    def _get_page_row_ids(
+        self,
+        skip: int,
+        take: int,
+        response: GetRowIdsResponse,
+    ) -> list[int] | range:
+        """Get the row IDs for a page of data.
+
+        When all rows are present (no filter applied, e.g. sort-only),
+        this reads actual `_marimo_row_id` values from the searched
+        manager so that style/hover dict keys match what the frontend
+        uses for lookup -- regardless of sort column or direction.
+
+        For tables without stable row IDs (list/dict data), positional
+        indices are returned since both the backend and frontend use
+        positional indexing.
+        """
+        # If there was an error computing row IDs (e.g. lazy/unknown-row-count),
+        # fall back to positional indexing without attempting to read from data.
+        if response.error:
+            return range(skip, skip + take)
+
+        if response.all_rows:
+            if self._has_stable_row_id:
+                try:
+                    # Slice to the requested page via take(), then read
+                    # the index column. This avoids materializing the full
+                    # index column and handles lazy backends (polars
+                    # LazyFrame, duckdb, ibis) that do not support direct
+                    # slice indexing on the data attribute.
+                    page_manager = self._searched_manager.take(take, skip)
+                    page_frame = getattr(page_manager, "as_frame", None)
+                    if page_frame is not None:
+                        page_data = page_frame()
+                    else:
+                        page_data = page_manager.data
+                    return cast(
+                        list[int],
+                        page_data[INDEX_COLUMN_NAME].to_list(),
+                    )
+                except Exception:
+                    LOGGER.warning(
+                        "Failed to read %s from searched manager; "
+                        "falling back to positional indices",
+                        INDEX_COLUMN_NAME,
+                    )
+                    return range(skip, skip + take)
+            return range(skip, skip + take)
+        return response.row_ids[skip : skip + take]
+
+    def _get_page_cell_values(
+        self,
+        skip: int,
+        take: int,
+        total_rows: int | Literal["too_many"],
+    ) -> tuple[list[str], list[int] | range, dict[str, dict[str, Any]]]:
+        """Get column names, row IDs, and a {row_id: {col: value}} lookup
+        for the requested page. Takes the page slice once so callers
+        avoid per-cell full-DataFrame scans."""
+        columns = self._searched_manager.get_column_names()
+        response = self._get_row_ids(EmptyArgs())
+
+        if total_rows != "too_many" and skip + take > total_rows:
+            take = total_rows - skip
+
+        if take <= 0:
+            return columns, [], {}
+
+        row_ids: list[int] | range = self._get_page_row_ids(
+            skip, take, response
+        )
+
+        page_manager = self._searched_manager.take(take, skip)
+
+        if self._has_stable_row_id:
+            cell_row_ids = [str(rid) for rid in row_ids]
+        else:
+            cell_row_ids = [str(i) for i in range(take)]
+
+        all_cells = [
+            TableCoordinate(row_id=rid, column_name=col)
+            for rid in cell_row_ids
+            for col in columns
+        ]
+        selected = page_manager.select_cells(all_cells)
+
+        cell_to_orig: dict[str, str] = {
+            cid: str(rid)
+            for cid, rid in zip(cell_row_ids, row_ids, strict=False)
+        }
+        lookup: dict[str, dict[str, Any]] = {}
+        for cell in selected:
+            row_str = cell_to_orig.get(str(cell.row), str(cell.row))
+            if row_str not in lookup:
+                lookup[row_str] = {}
+            lookup[row_str][cell.column] = cell.value
+
+        return columns, row_ids, lookup
+
     def _style_cells(
         self,
         skip: int,
         take: int,
-        total_rows: Union[int, Literal["too_many"]],
-        descending: bool = False,
-    ) -> Optional[CellStyles]:
+        total_rows: int | Literal["too_many"],
+    ) -> CellStyles | None:
         """Calculate the styling of the cells in the table."""
         if self._style_cell is None:
             return None
 
-        def do_style_cell(row: str, col: str) -> dict[str, Any]:
-            selected_cells = self._searched_manager.select_cells(
-                [TableCoordinate(row_id=row, column_name=col)]
-            )
-            if not selected_cells or self._style_cell is None:
-                return {}
-            return self._style_cell(row, col, selected_cells[0].value)
+        columns, row_ids, lookup = self._get_page_cell_values(
+            skip, take, total_rows
+        )
 
-        columns = self._searched_manager.get_column_names()
-        response = self._get_row_ids(EmptyArgs())
-
-        # Clamp the take to the total number of rows
-        if total_rows != "too_many" and skip + take > total_rows:
-            take = total_rows - skip
-
-        # Determine row range
-        row_ids: Union[list[int], range]
-        if response.all_rows or response.error:
-            row_ids = range(skip, skip + take)
-            if descending and total_rows != "too_many":
-                row_ids = range(
-                    total_rows - 1 - skip, total_rows - 1 - skip - take, -1
-                )
-        else:
-            row_ids = response.row_ids[skip : skip + take]
-
-        return {
-            str(row): {col: do_style_cell(str(row), col) for col in columns}
-            for row in row_ids
-        }
+        result: CellStyles = {}
+        for row in row_ids:
+            row_str = str(row)
+            row_values = lookup.get(row_str, {})
+            row_styles: dict[str, dict[str, Any]] = {}
+            for col in columns:
+                try:
+                    row_styles[col] = self._style_cell(
+                        row_str, col, row_values.get(col)
+                    )
+                except BaseException as e:
+                    LOGGER.warning(
+                        "Failed to compute style for %s:%s: %s",
+                        row_str,
+                        col,
+                        e,
+                    )
+                    row_styles[col] = {}
+            result[row_str] = row_styles
+        return result
 
     def _hover_cells(
         self,
         skip: int,
         take: int,
-        total_rows: Union[int, Literal["too_many"]],
-        descending: bool = False,
-    ) -> Optional[dict[RowId, dict[ColumnName, Optional[str]]]]:
+        total_rows: int | Literal["too_many"],
+    ) -> dict[RowId, dict[ColumnName, str | None]] | None:
         """Calculate hover text for cells in the table (plain strings or None)."""
         if self._hover_cell is None:
             return None
 
-        def do_hover_cell(row: str, col: str) -> Optional[str]:
-            selected_cells = self._searched_manager.select_cells(
-                [TableCoordinate(row_id=row, column_name=col)]
-            )
-            if not selected_cells or self._hover_cell is None:
-                return None
-            try:
-                value = selected_cells[0].value
-                result = self._hover_cell(row, col, value)
-                return str(result) if result is not None else None
-            except BaseException as e:
-                LOGGER.warning(
-                    "Failed to compute hover text for %s:%s: %s", row, col, e
-                )
-                return None
+        columns, row_ids, lookup = self._get_page_cell_values(
+            skip, take, total_rows
+        )
 
-        columns = self._searched_manager.get_column_names()
-        response = self._get_row_ids(EmptyArgs())
-
-        # Clamp the take to the total number of rows
-        if total_rows != "too_many" and skip + take > total_rows:
-            take = total_rows - skip
-
-        # Determine row range
-        row_ids: Union[list[int], range]
-        if response.all_rows or response.error:
-            row_ids = range(skip, skip + take)
-            if descending and total_rows != "too_many":
-                row_ids = range(
-                    total_rows - 1 - skip, total_rows - 1 - skip - take, -1
-                )
-        else:
-            row_ids = response.row_ids[skip : skip + take]
-
-        return {
-            str(row): {col: do_hover_cell(str(row), col) for col in columns}
-            for row in row_ids
-        }
+        result: dict[RowId, dict[ColumnName, str | None]] = {}
+        for row in row_ids:
+            row_str = str(row)
+            row_values = lookup.get(row_str, {})
+            row_hovers: dict[ColumnName, str | None] = {}
+            for col in columns:
+                try:
+                    hover = self._hover_cell(row_str, col, row_values.get(col))
+                    row_hovers[col] = str(hover) if hover is not None else None
+                except BaseException as e:
+                    LOGGER.warning(
+                        "Failed to compute hover text for %s:%s: %s",
+                        row_str,
+                        col,
+                        e,
+                    )
+                    row_hovers[col] = None
+            result[row_str] = row_hovers
+        return result
 
     def _search(self, args: SearchTableArgs) -> SearchTableResponse:
         """Search and filter the table data.
@@ -1353,7 +1667,12 @@ class table(
         if max_columns == MAX_COLUMNS_NOT_PROVIDED:
             max_columns = self._max_columns
 
-        def clamp_rows_and_columns(manager: TableManager[Any]) -> str:
+        self._current_filters = args.filters
+        self._current_query = args.query
+
+        def clamp_rows_and_columns(
+            manager: TableManager[Any],
+        ) -> tuple[str, str | None]:
             # Limit to page and column clamping for the frontend
             data = manager.take(args.page_size, offset)
             column_names = data.get_column_names()
@@ -1369,7 +1688,9 @@ class table(
                 data = data.select_columns(columns_to_select)
 
             try:
-                return data.to_json_str(self._format_mapping)
+                formatted = data.to_json_str(self._format_mapping)
+                raw = data.to_json_str() if self._format_mapping else None
+                return formatted, raw
             except BaseException as e:
                 # Catch and re-raise the error as a non-BaseException
                 # to avoid crashing the kernel
@@ -1377,7 +1698,7 @@ class table(
 
         # If no query or sort, return nothing
         # The frontend will just show the original data
-        total_rows: Union[int, Literal["too_many"]]
+        total_rows: int | Literal["too_many"]
         if not args.query and not args.sort and not args.filters:
             self._searched_manager = self._manager
             if self._lazy:
@@ -1385,8 +1706,9 @@ class table(
             else:
                 total_rows = self._manager.get_num_rows(force=True) or 0
 
+            formatted_data, raw_data = clamp_rows_and_columns(self._manager)
             return SearchTableResponse(
-                data=clamp_rows_and_columns(self._manager),
+                data=formatted_data,
                 total_rows=total_rows,
                 cell_styles=self._style_cells(
                     offset, args.page_size, total_rows
@@ -1394,6 +1716,7 @@ class table(
                 cell_hover_texts=self._hover_cells(
                     offset, args.page_size, total_rows
                 ),
+                raw_data=raw_data,
             )
 
         filter_function = (
@@ -1402,7 +1725,7 @@ class table(
             else self._apply_filters_query_sort
         )
         result = filter_function(
-            tuple(args.filters) if args.filters else None,  # type: ignore
+            args.filters,
             args.query,
             tuple(args.sort) if args.sort else None,  # type: ignore
         )
@@ -1410,27 +1733,20 @@ class table(
         # Save the manager to be used for selection
         self._searched_manager = result
 
-        descending = False
-
         if self._lazy:
             total_rows = "too_many"
         else:
             total_rows = result.get_num_rows(force=True) or 0
 
-        if args.sort and (self._style_cell or self._hover_cell):
-            for element in args.sort:
-                if element.descending:
-                    descending = True
-
+        formatted_data, raw_data = clamp_rows_and_columns(result)
         return SearchTableResponse(
-            data=clamp_rows_and_columns(result),
+            data=formatted_data,
             total_rows=total_rows,
-            cell_styles=self._style_cells(
-                offset, args.page_size, total_rows, descending
-            ),
+            cell_styles=self._style_cells(offset, args.page_size, total_rows),
             cell_hover_texts=self._hover_cells(
-                offset, args.page_size, total_rows, descending
+                offset, args.page_size, total_rows
             ),
+            raw_data=raw_data,
         )
 
     def _get_row_ids(self, args: EmptyArgs) -> GetRowIdsResponse:
@@ -1468,7 +1784,7 @@ class table(
             )
 
         # For dictionary or list data, return sequential indices
-        if isinstance(self.data, dict) or isinstance(self.data, list):
+        if isinstance(self.data, (dict, list)):
             return GetRowIdsResponse(
                 row_ids=list(range(num_rows_searched)),
                 all_rows=False,
@@ -1482,7 +1798,7 @@ class table(
             return GetRowIdsResponse(
                 row_ids=[],
                 all_rows=False,
-                error=f"Failed to get row IDs: {str(e)}",
+                error=f"Failed to get row IDs: {e!s}",
             )
 
     # Override _mime_ to return a plain HTML representation in non-interactive environments
@@ -1506,15 +1822,19 @@ class table(
 
 
 def _validate_frozen_columns(
-    freeze_columns_left: Optional[Sequence[str]],
-    freeze_columns_right: Optional[Sequence[str]],
+    freeze_columns_left: Sequence[str] | None,
+    freeze_columns_right: Sequence[str] | None,
     column_names_set: set[str],
+    row_header_names_set: set[str],
 ) -> None:
     """Validate frozen column configurations.
 
     Validates that:
     1. The same column is not frozen on both sides
-    2. All frozen columns exist in the table
+    2. All left-frozen columns exist as table columns or row-header names
+    3. Right-frozen columns exist as table columns; row-header names are
+       rejected with a friendly error since row headers always render on
+       the left
     """
 
     freeze_columns_left_set = (
@@ -1524,20 +1844,37 @@ def _validate_frozen_columns(
         set(freeze_columns_right) if freeze_columns_right else None
     )
 
-    # Convert sequences to sets for O(1) lookups
     if freeze_columns_left_set and freeze_columns_right_set:
         if not freeze_columns_left_set.isdisjoint(freeze_columns_right_set):
             raise ValueError("The same column cannot be frozen on both sides.")
 
-    # Check all frozen columns exist
     if freeze_columns_left_set:
-        invalid = freeze_columns_left_set - column_names_set
+        # Unnamed row headers (e.g. a default pandas index) have no stable
+        # client-side id, so we can't freeze them. Surface this directly
+        # rather than letting the frontend silently no-op.
+        if "" in freeze_columns_left_set and "" in row_header_names_set:
+            raise ValueError(
+                "Cannot freeze an unnamed row index. "
+                "Set `df.index.name = '...'` (or `df.index.names = [...]` "
+                "for a MultiIndex) and pass that name to freeze_columns_left."
+            )
+        invalid = (
+            freeze_columns_left_set - column_names_set - row_header_names_set
+        )
         if invalid:
             raise ValueError(
                 f"Column '{next(iter(invalid))}' not found in table."
             )
 
     if freeze_columns_right_set:
+        row_header_on_right = freeze_columns_right_set & row_header_names_set
+        if row_header_on_right:
+            name = next(iter(row_header_on_right))
+            raise ValueError(
+                f"Row index '{name}' cannot be frozen on the right; "
+                "row headers always render on the left. "
+                "Use freeze_columns_left instead."
+            )
         invalid = freeze_columns_right_set - column_names_set
         if invalid:
             raise ValueError(
@@ -1545,11 +1882,49 @@ def _validate_frozen_columns(
             )
 
 
+def _validate_column_visibility(
+    hidden_columns: Sequence[str] | None,
+    visible_columns: Sequence[str] | None,
+    column_names_set: set[str],
+    row_header_names_set: set[str],
+) -> None:
+    """Validate column visibility configurations.
+
+    Validates that:
+    1. Only one of visible_columns and hidden_columns is specified
+    2. All specified columns exist in the table
+    3. Row header columns (indexes) cannot be hidden
+    """
+    if visible_columns is not None and hidden_columns is not None:
+        raise ValueError(
+            "hidden_columns and visible_columns are mutually exclusive."
+        )
+
+    visible_columns_set = set(visible_columns) if visible_columns else None
+    hidden_columns_set = set(hidden_columns) if hidden_columns else None
+
+    for columns_set in [visible_columns_set, hidden_columns_set]:
+        if not columns_set:
+            continue
+
+        row_header_overlap = columns_set & row_header_names_set
+        if row_header_overlap:
+            name = next(iter(row_header_overlap))
+            raise ValueError(
+                f"Cannot control visibility for row index '{name}'; "
+                "Row indices are always visible."
+            )
+
+        invalid_columns = columns_set - column_names_set
+        if invalid_columns:
+            raise ValueError(
+                f"Column '{next(iter(invalid_columns))}' not found in table."
+            )
+
+
 def _validate_column_formatting(
-    text_justify_columns: Optional[
-        dict[str, Literal["left", "center", "right"]]
-    ],
-    wrapped_columns: Optional[list[str]],
+    text_justify_columns: dict[str, Literal["left", "center", "right"]] | None,
+    wrapped_columns: list[str] | None,
     column_names_set: set[str],
 ) -> None:
     """Validate text justification and wrapped column configurations.
@@ -1579,8 +1954,28 @@ def _validate_column_formatting(
             )
 
 
+def _validate_column_widths(
+    column_widths: dict[str, int] | None,
+    column_names_set: set[str],
+) -> None:
+    """Validate column width mapping.
+
+    Ensures all specified columns exist in the table and widths are positive integers.
+    """
+    if not column_widths:
+        return
+
+    for column, width in column_widths.items():
+        if column not in column_names_set:
+            raise ValueError(f"Column '{column}' not found in table.")
+        if not isinstance(width, int) or isinstance(width, bool) or width <= 0:
+            raise ValueError(
+                f"Width for column '{column}' must be a positive integer, got {width}."
+            )
+
+
 def _validate_header_tooltip(
-    header_tooltip: Optional[dict[str, str]],
+    header_tooltip: dict[str, str] | None,
     column_names_set: set[str],
 ) -> None:
     """Validate header tooltip mapping.

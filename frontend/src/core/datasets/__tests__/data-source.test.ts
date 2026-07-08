@@ -1,9 +1,13 @@
 /* Copyright 2026 Marimo. All rights reserved. */
 import { beforeEach, describe, expect, it } from "vitest";
-import type { DataTable } from "@/core/kernel/messages";
+import { variableName } from "@/__tests__/branded";
+import type { DatabaseSchema, DataTable } from "@/core/kernel/messages";
+import { store } from "@/core/state/jotai";
 import type { VariableName } from "@/core/variables/types";
 import {
+  allTablesAtom,
   type DataSourceConnection,
+  dataSourceConnectionsAtom,
   type DataSourceState,
   exportedForTesting,
   type SQLTableContext,
@@ -182,7 +186,7 @@ describe("filtering data sources", () => {
   });
 
   it("keeps matching variables and internal engines", () => {
-    const filtered = filterDataSources(["conn1" as unknown as VariableName]);
+    const filtered = filterDataSources([variableName("conn1")]);
     expect(filtered.connectionsMap.size).toBe(defaultConnSize + 1);
     expect(filtered.connectionsMap.has("conn1" as ConnectionName)).toBe(true);
     for (const engine of INTERNAL_SQL_ENGINES) {
@@ -191,22 +195,107 @@ describe("filtering data sources", () => {
   });
 
   it("filters out non-matching variables", () => {
-    const filtered = filterDataSources([
-      "non_existent" as unknown as VariableName,
-    ]);
+    const filtered = filterDataSources([variableName("non_existent")]);
     expect(filtered.connectionsMap.size).toBe(defaultConnSize);
   });
 
   it("handles mix of matching and non-matching variables", () => {
     const filtered = filterDataSources([
-      "conn1" as unknown as VariableName,
-      "non_existent" as unknown as VariableName,
+      variableName("conn1"),
+      variableName("non_existent"),
     ]);
     expect(filtered.connectionsMap.size).toBe(defaultConnSize + 1);
     expect(filtered.connectionsMap.has("conn1" as ConnectionName)).toBe(true);
     for (const engine of INTERNAL_SQL_ENGINES) {
       expect(filtered.connectionsMap.has(engine)).toBe(true);
     }
+  });
+});
+
+describe("add schema list", () => {
+  const connections: DataSourceConnection[] = [
+    {
+      name: "conn1" as ConnectionName,
+      source: "sqlite",
+      display_name: "SQLite DB",
+      dialect: "sqlite",
+      databases: [
+        {
+          name: "db1",
+          schemas: [],
+          dialect: "sqlite",
+        },
+      ],
+    },
+  ];
+
+  // Helper function to add schema list
+  const addSchemaList = (
+    schemas: DatabaseSchema[],
+    engine: string,
+    database: string,
+  ) => {
+    return reducer(baseState, {
+      type: "addSchemaList",
+      payload: {
+        schemas,
+        sqlSchemaContext: { engine, database },
+      },
+    });
+  };
+
+  let baseState: DataSourceState;
+
+  beforeEach(() => {
+    baseState = addConnection(connections, baseState);
+    expect(baseState.connectionsMap.size).toBe(defaultConnSize + 1);
+  });
+
+  it("adds schema list to a specific database", () => {
+    const schemaList: DatabaseSchema[] = [
+      { name: "public", tables: [] },
+      { name: "analytics", tables: [] },
+    ];
+    const newState = addSchemaList(schemaList, "conn1", "db1");
+
+    const conn1 = newState.connectionsMap.get("conn1" as ConnectionName);
+    const db1 = conn1?.databases.find((db) => db.name === "db1");
+    expect(db1?.schemas).toEqual(schemaList);
+  });
+
+  it("updates schema list for a database", () => {
+    const schemaList: DatabaseSchema[] = [
+      { name: "public", tables: [] },
+      { name: "analytics", tables: [] },
+    ];
+    const newState = addSchemaList(schemaList, "conn1", "db1");
+
+    const conn1 = newState.connectionsMap.get("conn1" as ConnectionName);
+    const db1 = conn1?.databases.find((db) => db.name === "db1");
+    expect(db1?.schemas).toEqual(schemaList);
+
+    // update with new schema list
+    const newSchemaList: DatabaseSchema[] = [
+      { name: "public", tables: [] },
+      { name: "sales", tables: [] },
+    ];
+    const updatedState = addSchemaList(newSchemaList, "conn1", "db1");
+
+    const newConn = updatedState.connectionsMap.get("conn1" as ConnectionName);
+    const newDb1 = newConn?.databases.find((db) => db.name === "db1");
+    expect(newDb1?.schemas).toEqual(newSchemaList);
+  });
+
+  it("does not add schema list if database does not exist", () => {
+    const schemaList: DatabaseSchema[] = [
+      { name: "public", tables: [] },
+      { name: "analytics", tables: [] },
+    ];
+    const newState = addSchemaList(schemaList, "conn1", "non_existent_db");
+
+    const conn1 = newState.connectionsMap.get("conn1" as ConnectionName);
+    const db1 = conn1?.databases.find((db) => db.name === "db1");
+    expect(db1?.schemas.length).toBe(0);
   });
 });
 
@@ -487,5 +576,228 @@ describe("add table", () => {
     const conn1 = newState.connectionsMap.get("conn1" as ConnectionName);
     const db1 = conn1?.databases.find((db) => db.name === "db1");
     expect(db1?.schemas.length).toBe(1);
+  });
+});
+
+describe("nested namespaces", () => {
+  // Iceberg-style: database "top" with a schemaless schema and a nested
+  // namespace "nested" that has a deferred child namespace "deep".
+  const nestedConnections: DataSourceConnection[] = [
+    {
+      name: "ice" as ConnectionName,
+      source: "iceberg",
+      display_name: "Iceberg",
+      dialect: "iceberg",
+      databases: [
+        {
+          name: "top",
+          dialect: "iceberg",
+          schemas_resolved: true,
+          schemas: [
+            { name: "", tables: [], tables_resolved: true },
+            {
+              name: "nested",
+              tables: [],
+              tables_resolved: false,
+              child_schemas: [],
+              child_schemas_resolved: false,
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  let baseState: DataSourceState;
+
+  beforeEach(() => {
+    baseState = addConnection(nestedConnections, initialState());
+  });
+
+  const findSchema = (
+    state: DataSourceState,
+    path: string[],
+  ): DatabaseSchema | undefined => {
+    const conn = state.connectionsMap.get("ice" as ConnectionName);
+    const db = conn?.databases.find((d) => d.name === "top");
+    let schemas = db?.schemas ?? [];
+    let found: DatabaseSchema | undefined;
+    for (const segment of path) {
+      found = schemas.find((s) => s.name === segment);
+      schemas = found?.child_schemas ?? [];
+    }
+    return found;
+  };
+
+  it("sets child namespaces at a nested path", () => {
+    const children: DatabaseSchema[] = [
+      { name: "deep", tables: [], tables_resolved: false },
+    ];
+    const newState = reducer(baseState, {
+      type: "addSchemaList",
+      payload: {
+        schemas: children,
+        sqlSchemaContext: {
+          engine: "ice",
+          database: "top",
+          schemaPath: ["nested"],
+        },
+      },
+    });
+
+    const nested = findSchema(newState, ["nested"]);
+    expect(nested?.child_schemas_resolved).toBe(true);
+    expect(nested?.child_schemas?.map((s) => s.name)).toEqual(["deep"]);
+    // The schemaless sibling is untouched.
+    expect(findSchema(newState, [""])?.name).toBe("");
+  });
+
+  it("sets tables at a nested path", () => {
+    const tables: DataTable[] = [
+      {
+        name: "table4",
+        columns: [],
+        num_columns: 0,
+        num_rows: 0,
+        variable_name: null,
+        source: "iceberg",
+        source_type: "catalog",
+        type: "table",
+      },
+    ];
+    const newState = reducer(baseState, {
+      type: "addTableList",
+      payload: {
+        tables,
+        sqlTableContext: {
+          engine: "ice",
+          database: "top",
+          schema: "nested",
+          dialect: "iceberg",
+          schemaPath: ["nested"],
+        },
+      },
+    });
+
+    const nested = findSchema(newState, ["nested"]);
+    expect(nested?.tables_resolved).toBe(true);
+    expect(nested?.tables.map((t) => t.name)).toEqual(["table4"]);
+  });
+
+  it("replaces a single table at a nested path", () => {
+    const makeTable = (numRows: number): DataTable => ({
+      name: "table4",
+      columns: [],
+      num_columns: 0,
+      num_rows: numRows,
+      variable_name: null,
+      source: "iceberg",
+      source_type: "catalog",
+      type: "table",
+    });
+    const context = {
+      engine: "ice",
+      database: "top",
+      schema: "nested",
+      dialect: "iceberg",
+      schemaPath: ["nested"],
+    };
+    let state = reducer(baseState, {
+      type: "addTableList",
+      payload: { tables: [makeTable(1)], sqlTableContext: context },
+    });
+    state = reducer(state, {
+      type: "addTable",
+      payload: { table: makeTable(42), sqlTableContext: context },
+    });
+
+    const nested = findSchema(state, ["nested"]);
+    expect(nested?.tables).toHaveLength(1);
+    expect(nested?.tables[0].num_rows).toBe(42);
+  });
+
+  it("does not change anything for a missing nested path", () => {
+    const newState = reducer(baseState, {
+      type: "addSchemaList",
+      payload: {
+        schemas: [{ name: "deep", tables: [] }],
+        sqlSchemaContext: {
+          engine: "ice",
+          database: "top",
+          schemaPath: ["does_not_exist"],
+        },
+      },
+    });
+    // The result is unchanged: nested namespace stays unresolved and the
+    // database keeps its two schemas (schemaless + nested).
+    const newDb = newState.connectionsMap
+      .get("ice" as ConnectionName)
+      ?.databases.find((d) => d.name === "top");
+    expect(findSchema(newState, ["nested"])?.child_schemas_resolved).toBe(
+      false,
+    );
+    expect(newDb?.schemas.length).toBe(2);
+  });
+});
+
+describe("allTablesAtom with nested namespaces", () => {
+  it("enumerates tables from nested namespaces", () => {
+    const table = (name: string): DataTable => ({
+      name,
+      columns: [],
+      num_columns: 0,
+      num_rows: 0,
+      variable_name: null,
+      source: "iceberg",
+      source_type: "catalog",
+      type: "table",
+    });
+
+    const state = addConnection(
+      [
+        {
+          name: "ice" as ConnectionName,
+          source: "iceberg",
+          display_name: "Iceberg",
+          dialect: "iceberg",
+          databases: [
+            {
+              name: "top",
+              dialect: "iceberg",
+              schemas_resolved: true,
+              schemas: [
+                {
+                  name: "",
+                  tables: [table("toptable")],
+                  tables_resolved: true,
+                },
+                {
+                  name: "nested",
+                  tables: [table("nestedtable")],
+                  tables_resolved: true,
+                  child_schemas_resolved: true,
+                  child_schemas: [
+                    {
+                      name: "deep",
+                      tables: [table("deeptable")],
+                      tables_resolved: true,
+                      child_schemas: [],
+                      child_schemas_resolved: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      initialState(),
+    );
+
+    store.set(dataSourceConnectionsAtom, state);
+    const names = [...store.get(allTablesAtom).values()].map((t) => t.name);
+    expect(names).toContain("toptable");
+    expect(names).toContain("nestedtable");
+    expect(names).toContain("deeptable");
   });
 });

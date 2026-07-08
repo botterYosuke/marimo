@@ -3,7 +3,7 @@
 import { EditorState, type Extension } from "@codemirror/state";
 import { keymap } from "@codemirror/view";
 import { describe, expect, test, vi } from "vitest";
-import type { CellId } from "@/core/cells/ids";
+import { cellId } from "@/__tests__/branded";
 import { OverridingHotkeyProvider } from "@/core/hotkeys/hotkeys";
 import { Objects } from "@/utils/objects";
 import type { CodemirrorCellActions } from "../cells/state";
@@ -35,7 +35,7 @@ function namedFunction(name: string) {
 
 function getOpts() {
   return {
-    cellId: "0" as CellId,
+    cellId: cellId("0"),
     showPlaceholder: false,
     enableAI: false,
     cellActions: {
@@ -45,6 +45,7 @@ function getOpts() {
       onRun: namedFunction("onRun"),
       deleteCell: namedFunction("deleteCell"),
       afterToggleMarkdown: namedFunction("afterToggleMarkdown"),
+      afterToggleSQL: namedFunction("afterToggleSQL"),
     } as unknown as CodemirrorCellActions,
     completionConfig: {
       activate_on_typing: false,
@@ -131,6 +132,35 @@ describe("snapshot all duplicate keymaps", () => {
     expect(Object.values(duplicates).flat().length).toMatchInlineSnapshot("18");
     expect(duplicates).toMatchSnapshot();
   });
+});
+
+test("auto_close_pairs: false removes closeBrackets keymaps", () => {
+  const withAutoClose = EditorState.create({
+    extensions: setup(),
+  });
+  const withoutAutoClose = EditorState.create({
+    extensions: setup({
+      completionConfig: {
+        ...getOpts().completionConfig,
+        auto_close_pairs: false,
+      },
+    }),
+  });
+
+  const keysWith = withAutoClose.facet(keymap).flat();
+  const keysWithout = withoutAutoClose.facet(keymap).flat();
+
+  // closeBracketsKeymap contributes Backspace and Enter handlers
+  expect(keysWith.length).toBeGreaterThan(keysWithout.length);
+
+  const hasBracketPairHandler = (state: EditorState) =>
+    state
+      .facet(keymap)
+      .flat()
+      .some((k) => k.run?.name === "deleteBracketPair");
+
+  expect(hasBracketPairHandler(withAutoClose)).toBe(true);
+  expect(hasBracketPairHandler(withoutAutoClose)).toBe(false);
 });
 
 test("placeholder adds another extension", () => {

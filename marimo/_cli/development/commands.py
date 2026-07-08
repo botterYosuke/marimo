@@ -24,36 +24,228 @@ if TYPE_CHECKING:
     import psutil
 
 
+def _enrich_branded_types(
+    component_schemas: dict[str, Any],
+    models: list[object],
+) -> None:
+    """Post-process schemas to replace NewType string fields with $ref
+    branded types.
+
+    msgspec.json.schema_components() strips NewType wrappers, emitting plain
+    `{type: string}` for fields like `CellId_t`. This function:
+
+    1. Adds named schemas for each branded type (e.g. `CellId: {type: string}`).
+    2. Walks every model struct's type hints and replaces inline schemas with
+       `$ref` pointers wherever a field's annotation is (or contains) a
+       registered NewType.
+    """
+    import types as _types
+    import typing
+    from typing import Union
+
+    import msgspec
+
+    from marimo._types.ids import (
+        CellId_t,
+        RequestId,
+        SessionId,
+        UIElementId,
+        VariableName,
+        WidgetModelId,
+    )
+
+    branded: dict[Any, tuple[str, str]] = {
+        CellId_t: ("CellId", "cell-id"),
+        UIElementId: ("UIElementId", "ui-element-id"),
+        SessionId: ("SessionId", "session-id"),
+        VariableName: ("VariableName", "variable-name"),
+        RequestId: ("RequestId", "request-id"),
+        WidgetModelId: ("WidgetModelId", "widget-model-id"),
+    }
+
+    # Step 1 — add named schemas for each branded type
+    for schema_name, format_value in branded.values():
+        component_schemas[schema_name] = {
+            "type": "string",
+            "format": format_value,
+        }
+
+    def make_ref(name: str) -> dict[str, str]:
+        return {"$ref": f"#/components/schemas/{name}"}
+
+    def _is_union(origin: Any) -> bool:
+        return origin is Union or origin is getattr(_types, "UnionType", None)
+
+    def resolve(ty: Any) -> dict[str, Any] | None:
+        """Produce a branded schema for *ty*, or `None`."""
+        if ty in branded:
+            return make_ref(branded[ty][0])
+
+        origin = typing.get_origin(ty)
+        args = typing.get_args(ty)
+
+        # Union / Optional
+        if _is_union(origin):
+            non_none = [a for a in args if a is not type(None)]
+            has_none = len(non_none) < len(args)
+            if len(non_none) == 1:
+                inner = resolve(non_none[0])
+                if inner is not None:
+                    if has_none:
+                        return {"anyOf": [inner, {"type": "null"}]}
+                    return inner
+            return None
+
+        # list[T]
+        if origin is list:
+            if args:
+                inner = resolve(args[0])
+                if inner is not None:
+                    return {"type": "array", "items": inner}
+            return None
+
+        # tuple[T, ...]
+        if origin is tuple:
+            if len(args) == 2 and args[1] is Ellipsis:
+                inner = resolve(args[0])
+                if inner is not None:
+                    return {"type": "array", "items": inner}
+            return None
+
+        # dict[K, V] — brand the value type (keys are always strings in JSON)
+        if origin is dict and len(args) == 2:
+            val = resolve(args[1])
+            if val is not None:
+                return {"type": "object", "additionalProperties": val}
+
+        return None
+
+    # Step 2 — collect *all* reachable struct types (not just MODELS,
+    # since msgspec pulls in transitively-referenced structs too).
+    all_structs: dict[str, type] = {}
+
+    def _visit_type(ty: Any) -> None:
+        if isinstance(ty, type) and issubclass(ty, msgspec.Struct):
+            if ty.__name__ in all_structs:
+                return
+            all_structs[ty.__name__] = ty
+            try:
+                for hint in typing.get_type_hints(ty).values():
+                    _visit_annotation(hint)
+            except Exception:
+                pass
+
+    def _visit_annotation(ty: Any) -> None:
+        if isinstance(ty, type):
+            _visit_type(ty)
+            return
+        for arg in typing.get_args(ty):
+            if arg is not Ellipsis and arg is not type(None):
+                _visit_annotation(arg)
+
+    for model in models:
+        _visit_type(model)
+
+    # Step 3 — walk collected structs and replace inline schemas with $refs.
+    # Use msgspec.structs.fields() to map Python names → schema keys,
+    # which accounts for rename="camel" and other rename strategies.
+    for schema_name, struct_cls in all_structs.items():
+        schema = component_schemas.get(schema_name)
+        if schema is None:
+            continue
+
+        properties = schema.get("properties", {})
+
+        try:
+            hints = typing.get_type_hints(struct_cls)
+        except Exception:
+            continue
+
+        field_to_schema_key: dict[str, str] = {}
+        try:
+            for fi in msgspec.structs.fields(struct_cls):
+                field_to_schema_key[fi.name] = fi.encode_name
+        except Exception:
+            field_to_schema_key = {name: name for name in hints}
+
+        for field_name, field_type in hints.items():
+            schema_key = field_to_schema_key.get(field_name, field_name)
+            if schema_key not in properties:
+                continue
+
+            replacement = resolve(field_type)
+            if replacement is not None:
+                # Preserve default value from the original schema
+                existing = properties[schema_key]
+                if isinstance(existing, dict) and "default" in existing:
+                    replacement["default"] = existing["default"]
+                properties[schema_key] = replacement
+
+    # Step 4 — replace inline {type: string, contentEncoding: base64}
+    # with a named $ref. msgspec already emits contentEncoding for
+    # bytes fields; we just need to give it a name so the TS codegen
+    # can brand it.
+    component_schemas["Base64String"] = {
+        "type": "string",
+        "format": "base64",
+        "contentEncoding": "base64",
+    }
+
+    def _make_base64_ref() -> dict[str, str]:
+        # Fresh dict each time to avoid YAML anchor deduplication
+        return {"$ref": "#/components/schemas/Base64String"}
+
+    def _replace_base64(obj: Any) -> Any:
+        if isinstance(obj, dict):
+            if (
+                obj.get("type") == "string"
+                and obj.get("contentEncoding") == "base64"
+            ):
+                return _make_base64_ref()
+            return {k: _replace_base64(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [_replace_base64(item) for item in obj]
+        return obj
+
+    for schema_name in list(component_schemas):
+        if schema_name == "Base64String":
+            continue
+        component_schemas[schema_name] = _replace_base64(
+            component_schemas[schema_name]
+        )
+
+
 def _generate_server_api_schema() -> dict[str, Any]:
     import msgspec
     import msgspec.json
     from starlette.schemas import SchemaGenerator
 
-    import marimo._config.config as config
     import marimo._data._external_storage.models as storage
     import marimo._data.models as data
-    import marimo._messaging.errors as errors
     import marimo._messaging.notification as notifications
-    import marimo._metadata.opengraph as opengraph
-    import marimo._runtime.commands as commands
     import marimo._secrets.models as secrets_models
-    import marimo._server.models.completion as completion
-    import marimo._server.models.export as export
-    import marimo._server.models.files as files
-    import marimo._server.models.home as home
-    import marimo._server.models.lsp as lsp
-    import marimo._server.models.models as models
-    import marimo._server.models.packages as packages
-    import marimo._server.models.secrets as secrets
-    import marimo._snippets.snippets as snippets
     from marimo._ai._types import ChatMessage
     from marimo._ast.cell import CellConfig, RuntimeStateType
+    from marimo._config import config
+    from marimo._messaging import errors
     from marimo._messaging.cell_output import CellChannel, CellOutput
     from marimo._messaging.mimetypes import KnownMimeType
+    from marimo._metadata import opengraph
+    from marimo._runtime import commands
     from marimo._runtime.packages.package_manager import PackageDescription
     from marimo._server.ai.tools.types import ToolDefinition
     from marimo._server.api.router import build_routes
-    from marimo._version import __version__
+    from marimo._server.models import (
+        completion,
+        export,
+        files,
+        home,
+        lsp,
+        models,
+        packages,
+        secrets,
+    )
+    from marimo._snippets import snippets
 
     MODELS = [
         # Base
@@ -125,6 +317,7 @@ def _generate_server_api_schema() -> dict[str, Any]:
         notifications.DataColumnPreviewNotification,
         notifications.SQLTablePreviewNotification,
         notifications.SQLTableListPreviewNotification,
+        notifications.SQLSchemaListPreviewNotification,
         notifications.DataSourceConnectionsNotification,
         notifications.StorageNamespacesNotification,
         notifications.SecretKeysResultNotification,
@@ -134,9 +327,8 @@ def _generate_server_api_schema() -> dict[str, Any]:
         notifications.QueryParamsAppendNotification,
         notifications.QueryParamsDeleteNotification,
         notifications.QueryParamsClearNotification,
-        notifications.UpdateCellCodesNotification,
-        notifications.UpdateCellIdsNotification,
         notifications.FocusCellNotification,
+        notifications.ConsumerCapabilitiesNotification,
         notifications.NotificationMessage,
         # ai
         ChatMessage,
@@ -164,6 +356,7 @@ def _generate_server_api_schema() -> dict[str, Any]:
         export.ExportAsIPYNBRequest,
         export.ExportAsPDFRequest,
         export.UpdateCellOutputsRequest,
+        files.FileCreateMultipartRequest,
         files.FileCreateRequest,
         files.FileCreateResponse,
         files.FileDeleteRequest,
@@ -176,6 +369,8 @@ def _generate_server_api_schema() -> dict[str, Any]:
         files.FileSearchResponse,
         files.FileMoveRequest,
         files.FileMoveResponse,
+        files.FileCopyRequest,
+        files.FileCopyResponse,
         files.FileOpenRequest,
         files.FileUpdateRequest,
         files.FileUpdateResponse,
@@ -212,6 +407,7 @@ def _generate_server_api_schema() -> dict[str, Any]:
         commands.ListDataSourceConnectionCommand,
         commands.ListSecretKeysCommand,
         commands.ListSQLTablesCommand,
+        commands.ListSQLSchemasCommand,
         commands.ModelMessage,
         commands.PreviewDatasetColumnCommand,
         commands.PreviewSQLTableCommand,
@@ -236,9 +432,11 @@ def _generate_server_api_schema() -> dict[str, Any]:
         models.InvokeAiToolRequest,
         models.InvokeAiToolResponse,
         models.InvokeFunctionRequest,
+        models.KernelStatusResponse,
         models.ListDataSourceConnectionRequest,
         models.ListSecretKeysRequest,
         models.ListSQLTablesRequest,
+        models.ListSQLSchemasRequest,
         models.MCPRefreshResponse,
         models.MCPStatusResponse,
         models.PreviewDatasetColumnRequest,
@@ -255,7 +453,8 @@ def _generate_server_api_schema() -> dict[str, Any]:
         models.SuccessResponse,
         models.SuccessResponse,
         models.UpdateCellConfigRequest,
-        models.UpdateCellIdsRequest,
+        models.NotebookDocumentTransactionRequest,
+        models.FocusCellRequest,
         models.UpdateUIElementValuesRequest,
         models.UpdateUIElementRequest,
         models.UpdateUserConfigRequest,
@@ -275,10 +474,12 @@ def _generate_server_api_schema() -> dict[str, Any]:
         ref_template="#/components/schemas/{name}",
     )
 
+    _enrich_branded_types(component_schemas, MODELS)
+
     schemas_generator = SchemaGenerator(
         {
             "openapi": "3.1.0",
-            "info": {"title": "marimo API", "version": __version__},
+            "info": {"title": "marimo API"},
             "components": {
                 "schemas": component_schemas,
             },
@@ -442,9 +643,8 @@ def inline_packages(name: Path) -> None:
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     imported_modules.add(alias.name.split(".")[0])
-            elif isinstance(node, ast.ImportFrom):
-                if node.module:
-                    imported_modules.add(node.module.split(".")[0])
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                imported_modules.add(node.module.split(".")[0])
 
         pypi_names = [
             package_names.get(mod, mod.replace("_", "-"))
@@ -561,20 +761,16 @@ def preview(file_path: Path, port: int, host: str, headless: bool) -> None:
         # Run the notebook to get actual outputs
         click.echo(f"Running notebook {file_path.name}...")
         from marimo._server.export import run_app_until_completion
-        from marimo._server.file_router import AppFileRouter
         from marimo._server.utils import asyncio_run
+        from marimo._session.notebook import load_notebook
         from marimo._session.state.serialize import (
             serialize_notebook,
             serialize_session_view,
         )
         from marimo._utils.code import hash_code
-        from marimo._utils.marimo_path import MarimoPath
 
         # Create file manager for the notebook
-        file_router = AppFileRouter.from_filename(MarimoPath(file_path))
-        file_key = file_router.get_unique_file_key()
-        assert file_key is not None
-        file_manager = file_router.get_file_manager(file_key)
+        file_manager = load_notebook(file_path)
 
         # Run the notebook to completion and get session view
         session_view, did_error = asyncio_run(
@@ -593,6 +789,7 @@ def preview(file_path: Path, port: int, host: str, headless: bool) -> None:
         session_snapshot = serialize_session_view(
             session_view,
             cell_ids=list(file_manager.app.cell_manager.cell_ids()),
+            drop_virtual_file_outputs=False,
         )
 
         # Get notebook snapshot from file manager

@@ -1,11 +1,17 @@
 # Copyright 2026 Marimo. All rights reserved.
+# ruff: noqa: E402
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
+
+from marimo._runtime._wasm import ensure_wasm_runtime_bootstrapped
+
+ensure_wasm_runtime_bootstrapped()
 
 from marimo._config.config import merge_config
 from marimo._messaging.notification import (
+    ConsumerCapabilities,
     KernelCapabilitiesNotification,
     KernelReadyNotification,
 )
@@ -20,6 +26,7 @@ from marimo._runtime.commands import (
     SerializedQueryParams,
     UpdateUIElementCommand,
 )
+from marimo._runtime.patches import extract_docstring_from_header
 from marimo._server.app_defaults import AppDefaults
 from marimo._server.models.models import SaveNotebookRequest
 from marimo._session.model import SessionMode
@@ -27,6 +34,8 @@ from marimo._session.notebook import AppFileManager
 from marimo._utils.parse_dataclass import parse_raw
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from marimo._config.config import MarimoConfig
     from marimo._messaging.types import KernelMessage
     from marimo._pyodide.pyodide_session import PyodideBridge, PyodideSession
@@ -54,6 +63,7 @@ def instantiate(
     session.put_control_request(
         CreateNotebookCommand(
             execution_requests=execution_requests,
+            cell_ids=tuple(app.cell_manager.cell_ids()),
             set_ui_element_value_request=UpdateUIElementCommand(
                 object_ids=[], values=[], request=None
             ),
@@ -83,6 +93,7 @@ def create_session(
 
     This function is called by the WebAssembly frontend.
     """
+    ensure_wasm_runtime_bootstrapped()
 
     def write_kernel_message(notification: KernelMessage) -> None:
         data_json_str = notification.decode("utf-8")
@@ -128,6 +139,9 @@ def create_session(
                 app_config=app.config,
                 kiosk=False,
                 capabilities=KernelCapabilitiesNotification(),
+                consumer_capabilities=ConsumerCapabilities(
+                    edit=True, interact=True
+                ),
             )
         ),
     )
@@ -144,6 +158,9 @@ def create_session(
             cli_args={},
             argv=[],
             app_config=app.config,
+            docstring=extract_docstring_from_header(
+                app_file_manager.app._app._header
+            ),
         ),
         user_config,
     )
